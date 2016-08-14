@@ -7,7 +7,7 @@ minimon.run: minimon.o
 	m68k-elf-objcopy -I coff-m68k -O srec minimon.o minimon.run
 
 monitor.o: monitor.s
-	m68k-elf-as --mri -m68000 -a=monitor.lst -o monitor.o monitor.s
+	m68k-elf-as -m68000 -a=monitor.lst -o monitor.o monitor.s
 
 monitor.run: monitor.o
 	m68k-elf-objcopy -I coff-m68k -O srec monitor.o monitor.run
