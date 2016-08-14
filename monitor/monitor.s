@@ -1,22 +1,22 @@
 *        TSBUG2 - 68000 monitor - version of 23 July 1986
 *                                   Symbol equates
          .org     0x00000000
-BS       =        $08               | Back_space
-CR       =        $0D               | Carriage_return
-LF       =        $0A               | Line_feed
-SPACE    =        $20               | Space
+BS       =        0x08              | Back_space
+CR       =        0x0D              | Carriage_return
+LF       =        0x0A              | Line_feed
+SPACE    =        0x20              | Space
 WAIT     =        'W'               | Wait character (to suspend output)
-ESC      =        $1B               | ASCII escape character (used by TM)
-CTRL_A   =        $01               | Control_A forces return to monitor
+ESC      =        0x1B              | ASCII escape character (used by TM)
+CTRL_A   =        0x01              | Control_A forces return to monitor
 *                                   | Device addresses
-STACK    =        $00000800         | Stack_pointer
-ACIA_1   =        $00010040         | Console ACIA control
+STACK    =        0x00000800        | Stack_pointer
+ACIA_1   =        0x00010040         | Console ACIA control
 ACIA_2   =        ACIA_1+1          | Auxilary ACIA control
-X_BASE   =        $08               | Start of exception vector table
-TRAP_14  =        $4E4E             | Code for TRAP #14
+X_BASE   =        0x08              | Start of exception vector table
+TRAP_14  =        0x4E4E            | Code for TRAP #14
 MAXCHR   =        64                | Length of input line buffer
 *
-DATA     =        $00000C00         | Data origin
+DATA     =        0x00000C00        | Data origin
          .lcomm LNBUFF,MAXCHR       | Input line buffer
 BUFFEND  =        LNBUFF+MAXCHR-1   | End of line buffer
          .lcomm BUFFPT,4            | Pointer to line buffer
@@ -42,7 +42,7 @@ BUFFEND  =        LNBUFF+MAXCHR-1   | End of line buffer
          .long    STACK             | Reset stack pointer
          .long    RESET             | Reset vector
 RESET:                              | Cold entry point for monitor
-         LEA.L    DATA,%A6          | A6 points to data area
+         LEA      DATA,%A6          | A6 points to data area
          CLR.L    UTAB(%A6)         | Reset pointer to user extension table
          CLR.B    ECHO(%A6)         | Set automatic character echo
          CLR.B    U_CASE(%A6)       | Clear case conversion flag (UC<-LC)
@@ -51,7 +51,7 @@ RESET:                              | Cold entry point for monitor
          BSR      SET_DCB           | Setup DCB table in RAM
          LEA.L    BANNER(%PC),%A4   | Point to banner
          BSR.S    HEADING           | and print heading
-         MOVE.L   #$0000C000,%A0    | A0 points to extension ROM
+         MOVE.L   #0x0000C000,%A0   | A0 points to extension ROM
          MOVE.L   (%A0),%D0         | Read first longword in extension ROM
          CMP.L    #"ROM2",%D0       | If extension begins with 'ROM2' then
          BNE.S    NO_EXT            | call the subroutine at EXT_ROM+8
@@ -63,7 +63,7 @@ WARM:    CLR.L    %D7               | Warm entry point - clear error flag
          BSR.S    GETLINE           | Get a command line
          BSR      TIDY              | Tidy up input buffer contents
          BSR      EXECUTE           | Interpret command
-         BRA      WARM              | Repeat indefinitely
+         BRA.S    WARM              | Repeat indefinitely
 *
 *************************************************************************
 *
@@ -71,10 +71,10 @@ WARM:    CLR.L    %D7               | Warm entry point - clear error flag
 *
 SETACIA:                            | Setup ACIA parameters
          LEA.L    ACIA_1,%A0        | A0 points to console ACIA
-         MOVE.B   #$03,(%A0)        | Reset ACIA1
-         MOVE.B   #$03,1(%A0)       | Reset ACIA2
-         MOVE.B   #$15,(%A0)        | Set up ACIA1 constants (no IRQ,
-         MOVE.B   #$15,1(%A0)       | RTS* low, 8 bit, no parity, 1 stop)
+         MOVE.B   #0x03,(%A0)       | Reset ACIA1
+         MOVE.B   #0x03,1(%A0)      | Reset ACIA2
+         MOVE.B   #0x15,(%A0)       | Set up ACIA1 constants (no IRQ,
+         MOVE.B   #0x15,1(%A0)      | RTS* low, 8 bit, no parity, 1 stop)
          RTS                        | Return
 *
 NEWLINE:                            | Move cursor to start of newline
@@ -203,7 +203,7 @@ SRCH4:   MOVE.B   (%A3)+,%D2        | Now match a pair of characters
 SRCH6:   LEA.L    -4(%A4),%A3       | Calculate address of command entry
          OR.B     #1,CCR            | point. Mark carry flag as success
          RTS                        | and return
-SRCH7:   AND.B    #$FE,CCR          | Fail - clear carry to indicate
+SRCH7:   AND.B    #0xFE,CCR         | Fail - clear carry to indicate
          RTS                        | command not found and return
 *
 *************************************************************************
@@ -217,12 +217,12 @@ SRCH7:   AND.B    #$FE,CCR          | Fail - clear carry to indicate
 *  Bit 0 of D7 is set to indicate a hexadecimal input error
 *
 HEX:     BSR      GETCHAR           | Get a character from input device
-         SUB.B    #$30,%D0          | Convert to binary
+         SUB.B    #0x30,%D0         | Convert to binary
          BMI.S    NOT_HEX           | If less than $30 then exit with error
-         CMP.B    #$09,%D0          | Else test for number (0 to 9)
+         CMP.B    #0x09,%D0         | Else test for number (0 to 9)
          BLE.S    HEX_OK            | If number then exit - success
-         SUB.B    #$07,%D0          | Else convert letter to hex
-         CMP.B    #$0F,%D0          | If character in range "A" to "F"
+         SUB.B    #0x07,%D0         | Else convert letter to hex
+         CMP.B    #0x0F,%D0         | If character in range "A" to "F"
          BLE.S    HEX_OK            | then exit successfully
 NOT_HEX: OR.B     #1,%D7            | Else set error flag
 HEX_OK:  RTS                        | and return
@@ -256,12 +256,12 @@ PARAM1:  MOVE.B   (%A0)+,%D0        | Read character from line buffer
          CMP.B    #CR,%D0           | space or a carriage return
          BEQ.S    PARAM4            | Exit on either space or C/R
          ASL.L    #4,%D1            | Shift accumulated result 4 bits left
-         SUB.B    #$30,%D0          | Convert new character to hex
+         SUB.B    #0x30,%D0         | Convert new character to hex
          BMI.S    PARAM5            | If less than $30 then not-hex
-         CMP.B    #$09,%D0          | If less than 10
+         CMP.B    #0x09,%D0         | If less than 10
          BLE.S    PARAM3            | then continue
-         SUB.B    #$07,%D0          | Else assume $A - $F
-         CMP.B    #$0F,%D0          | If more than $F
+         SUB.B    #0x07,%D0         | Else assume $A - $F
+         CMP.B    #0x0F,%D0         | If more than $F
          BGT.S    PARAM5            | then exit to error on not-hex
 PARAM3:  ADD.B    %D0,%D1           | Add latest nybble to total in D1
          BRA      PARAM1            | Repeat until delimiter found
@@ -283,11 +283,11 @@ PARAM6:  MOVE.L   (%A7)+,%D1        | Restore working register
 *  In each case, the data to be printed is in D0
 *
 OUT1X:   MOVE.W   %D0,-(%A7)        | Save D0
-         AND.B    #$0F,%D0          | Mask off MS nybble
-         ADD.B    #$30,%D0          | Convert to ASCII
-         CMP.B    #$39,%D0          | ASCII = HEX + $30
+         AND.B    #0x0F,%D0         | Mask off MS nybble
+         ADD.B    #0x30,%D0         | Convert to ASCII
+         CMP.B    #0x39,%D0         | ASCII = HEX + $30
          BLS.S    OUT1X1            | If ASCII <= $39 then print and exit
-         ADD.B    #$07,%D0          | Else ASCII := HEX + 7
+         ADD.B    #0x07,%D0         | Else ASCII := HEX + 7
 OUT1X1:  BSR      PUTCHAR           | Print the character
          MOVE.W   (%A7)+,%D0        | Restore D0
          RTS
@@ -517,7 +517,7 @@ RANGE:                                | Get the range of addresses to be
 *
 DELAY:                                | Provide a time delay for the host
          MOVEM.L   %D0/%A4,-(%A7)     | to settle. Save working registers
-         MOVE.L    #$4000,%D0         | Set up delay constant
+         MOVE.L    #0x4000,%D0        | Set up delay constant
 DELAY1:  SUB.L     #1,%D0             | Count down         (8 clk cycles)
          BNE       DELAY1             | Repeat until zero  (10 clk cycles)
          MOVEM.L   (%A7)+,%D0/%A4     | Restore working registers
@@ -529,7 +529,7 @@ DELAY1:  SUB.L     #1,%D0             | Count down         (8 clk cycles)
 *  the host processor until escape sequence entered). End sequence
 *  = ESC, E. A newline is sent to the host to "clear it down".
 *
-TM:      MOVE.B    #$55,ACIA_1         | Force RTS* high to re-route data
+TM:      MOVE.B    #0x55,ACIA_1        | Force RTS* high to re-route data
          ADD.B     #1,ECHO(%A6)        | Turn off character echo
 TM1:     BSR       GETCHAR             | Get character
          CMP.B     #ESC,%D0            | Test for end of TM mode
@@ -542,7 +542,7 @@ TM1:     BSR       GETCHAR             | Get character
          BSR       NEWLINE             | Send newline to host to clear it
          MOVE.L    (%A7)+,CN_OVEC(%A6) | Restore output device port name
          CLR.B     ECHO(%A6)           | Restore echo mode
-         MOVE.B    #$15,ACIA_1         | Restore normal ACIA mode (RTS* low)
+         MOVE.B    #0x15,ACIA_1        | Restore normal ACIA mode (RTS* low)
          RTS
 *
 *************************************************************************
@@ -661,7 +661,7 @@ GETCHAR: MOVE.L  %A0,-(%A7)       | Save working register
          BTST.B  #3,%D7           | D7(3) set if open error
          BNE.S   GETCH3           | If error then exit now
          BSR     IO_REQ           | Else execute I/O transaction
-         AND.B   #$7F,%D0         | Strip msb of input
+         AND.B   #0x7F,%D0        | Strip msb of input
          TST.B   U_CASE(%A6)      | Test for upper -> lower case conversion
          BNE.S   GETCH2           | If flag not zero do not convert case
          BTST.B  #6,%D0           | Test input for lower case
@@ -959,7 +959,7 @@ GO:      BSR     PARAM               | Get entry address (if any)
 GO1:     TST.L   %D0                 | If no address entered then get
          BEQ.S   GO2                 | address from display frame
          MOVE.L  %D0,TSK_T+70(%A6)   | Else save address in display frame
-         MOVE.W  #$2700,TSK_T+68(%A6) | Store dummy status in frame
+         MOVE.W  #0x2700,TSK_T+68(%A6) | Store dummy status in frame
 GO2:     BRA.S   RESTORE             | Restore volatile environment and go
 *
 GB:      BSR     BR_SET              | Same as go but presets breakpoints
@@ -1123,8 +1123,8 @@ X_UN:                             | Uninitialized exception vector routine
 *  All strings and other fixed parameters here
 *
 BANNER:  .ascii   "TSBUG 2 Version 23.07.86\0\0"
-CRLF:    DC.B     CR,LF,'?',0
-HEADER:  DC.B     CR,LF,'S','1',0,0
+CRLF:    .byte    CR,LF,'?',0
+HEADER:  .byte    CR,LF,'S','1',0,0
 TAIL:    .ascii   "S9  \0\0"
 MES1:    .asciz   " SR  =  "
 MES2:    .asciz   " PC  =  "

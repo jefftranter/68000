@@ -3,18 +3,18 @@
 *        Version of 3 October 1996
 *                                   Symbol equates
          .org     0x00000000
-BS       =        $08               | Back_space
-CR       =        $0D               | Carriage_return
-LF       =        $0A               | Line_feed
-SPACE    =        $20               | Space
+BS       =        0x08              | Back_space
+CR       =        0x0D              | Carriage_return
+LF       =        0x0A              | Line_feed
+SPACE    =        0x20              | Space
 WAIT     =        'W'               | Wait character (to suspend output)
-CTRL_A   =        $01               | Control_A forces return to monitor
+CTRL_A   =        0x01              | Control_A forces return to monitor
 *                                   | Device addresses
-X_BASE   =        $08               | Start of exception vector table
-TRAP_14  =        $4E4E             | Code for TRAP #14
+X_BASE   =        0x08              | Start of exception vector table
+TRAP_14  =        0x4E4E            | Code for TRAP #14
 MAXCHR   =        64                | Length of input line buffer
 *
-DATA     =        $00000400         | Data origin
+DATA     =        0x00000400        | Data origin
          .lcomm LNBUFF,MAXCHR       | Input line buffer
 BUFFEND  =        LNBUFF+MAXCHR-1   | End of line buffer
          .lcomm BUFFPT,4            | Pointer to line buffer
@@ -116,7 +116,7 @@ EXEC2:   MOVE.L   (%A3),%A3         |   Get the relative command address
 *        JMP      (%A3)             |  command address. Then execute it.
          LEA      LNBUFF,%A2
 E3:      MOVE.B   (%A2)+,%D0
-         CMP.B    #$20,%D0
+         CMP.B    #0x20,%D0
          BNE      E3
          MOVE.L   %A2,BUFFPT(%A6)
          JMP      (%A3)
@@ -144,7 +144,7 @@ SRCH4:   MOVE.B   (%A3)+,%D2         |  Now match a pair of characters
 SRCH6:   LEA.L    -4(%A4),%A3       |   Calculate address of command entry
          OR.B     #1,CCR            | point. Mark carry flag as success
          RTS                        | and return
-SRCH7:   AND.B    #$FE,CCR          | Fail - clear carry to indicate
+SRCH7:   AND.B    #0xFE,CCR         | Fail - clear carry to indicate
          RTS                        | command not found and return
 *
 *************************************************************************
@@ -158,12 +158,12 @@ SRCH7:   AND.B    #$FE,CCR          | Fail - clear carry to indicate
 *  Bit 0 of D7 is set to indicate a hexadecimal input error
 *
 HEX:     BSR      GETCHAR           | Get a character from input device
-         SUB.B    #$30,%D0          |  Convert to binary
+         SUB.B    #0x30,%D0         |  Convert to binary
          BMI.S    NOT_HEX           | If less than $30 then exit with error
-         CMP.B    #$09,%D0          |  Else test for number (0 to 9)
+         CMP.B    #0x09,%D0         |  Else test for number (0 to 9)
          BLE.S    HEX_OK            | If number then exit - success
-         SUB.B    #$07,%D0          |  Else convert letter to hex
-         CMP.B    #$0F,%D0          |  If character in range "A" to "F"
+         SUB.B    #0x07,%D0         |  Else convert letter to hex
+         CMP.B    #0x0F,%D0         |  If character in range "A" to "F"
          BLE.S    HEX_OK            | then exit successfully
 NOT_HEX: OR.B     #1,%D7            | Else set error flag
 HEX_OK:  RTS                        | and return
@@ -197,12 +197,12 @@ PARAM1:  MOVE.B   (%A0)+,%D0        |  Read character from line buffer
          CMP.B    #CR,%D0           |  space or a carriage return
          BEQ.S    PARAM4            | Exit on either space or C/R
          ASL.L    #4,%D1            | Shift accumulated result 4 bits left
-         SUB.B    #$30,%D0          |  Convert new character to hex
+         SUB.B    #0x30,%D0         |  Convert new character to hex
          BMI.S    PARAM5            | If less than $30 then not-hex
-         CMP.B    #$09,%D0          |  If less than 10
+         CMP.B    #0x09,%D0         |  If less than 10
          BLE.S    PARAM3            | then continue
-         SUB.B    #$07,%D0          |  Else assume $A - $F
-         CMP.B    #$0F,%D0          |  If more than $F
+         SUB.B    #0x07,%D0         |  Else assume $A - $F
+         CMP.B    #0x0F,%D0         |  If more than $F
          BGT.S    PARAM5            | then exit to error on not-hex
 PARAM3:  ADD.B    %D0,%D1           |  Add latest nybble to total in D1
          BRA      PARAM1            | Repeat until delimiter found
@@ -224,11 +224,11 @@ PARAM6:  MOVE.L   (%A7)+,%D1        |  Restore working register
 *  In each case, the data to be printed is in D0
 *
 OUT1X:   MOVE.W   %D0,-(%A7)        |   Save D0
-         AND.B    #$0F,%D0          |  Mask off MS nybble
-         ADD.B    #$30,%D0          |  Convert to ASCII
-         CMP.B    #$39,%D0          |  ASCII = HEX + $30
+         AND.B    #0x0F,%D0         |  Mask off MS nybble
+         ADD.B    #0x30,%D0         |  Convert to ASCII
+         CMP.B    #0x39,%D0         |  ASCII = HEX + $30
          BLS.S    OUT1X1            | If ASCII <= $39 then print and exit
-         ADD.B    #$07,%D0          |  Else ASCII := HEX + 7
+         ADD.B    #0x07,%D0         |  Else ASCII := HEX + 7
 OUT1X1:  BSR      PUTCHAR           | Print the character
          MOVE.W   (%A7)+,%D0        |   Restore D0
          RTS
@@ -446,7 +446,7 @@ GETCHAR: MOVE.B  %D0,%D1
          MOVE.B  #5,%D0
          TRAP    #15
          MOVE.B  %D1,%D0
-         AND.B   #$7F,%D0        |  Strip msb of input
+         AND.B   #0x7F,%D0       |  Strip msb of input
          TST.B   U_CASE(%A6)     |  Test for upper -> lower case conversion
          BNE.S   GETCH2          | If flag not zero do not convert case
          BTST.B  #6,%D0          |  Test input for lower case
@@ -627,7 +627,7 @@ GO:      BSR     PARAM               | Get entry address (if any)
 GO1:     TST.L   %D0                 |  If no address entered then get
          BEQ.S   GO2                 | address from display frame
          MOVE.L  %D0,TSK_T+70(%A6)   |   Else save address in display frame
-         MOVE.W  #$2700,TSK_T+68(%A6) |  Store dummy status in frame
+         MOVE.W  #0x2700,TSK_T+68(%A6) |  Store dummy status in frame
 GO2:     BRA.S   RESTORE             | Restore volatile environment and go
 *
 GB:      BSR     BR_SET              | Same as go but presets breakpoints
