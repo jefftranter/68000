@@ -15,14 +15,14 @@ TRAP_14  =        $4E4E             | Code for TRAP #14
 MAXCHR   =        64                | Length of input line buffer  
 * 
 DATA     =        $00000400         | Data origin 
-LNBUFF:  .byte    MAXCHR            | Input line buffer
+         .lcomm LNBUFF,MAXCHR       | Input line buffer
 BUFFEND  =        LNBUFF+MAXCHR-1   | End of line buffer 
-BUFFPT:  .word    1                 | Pointer to line buffer 
-PARAMTR: .long    1                 | Last parameter from line buffer 
-ECHO:    .byte    1                 | When clear this enable input echo 
-U_CASE:  .byte    1                 | Flag for upper case conversion 
-TSK_T:   .word    37                | Frame for D0-D7, A0-A6, USP, SSP, SW, PC 
-BP_TAB:  .word    24                | Breakpoint table 
+         .lcomm BUFFPT,4            | Pointer to line buffer 
+         .lcomm PARAMTR,4           | Last parameter from line buffer 
+         .lcomm ECHO,1              | When clear this enable input echo 
+         .lcomm U_CASE,1            | Flag for upper case conversion 
+         .lcomm TSK_T,37*2          | Frame for D0-D7, A0-A6, USP, SSP, SW, PC 
+         .lcomm BP_TAB,24*2         | Breakpoint table 
 * 
 ************************************************************************* 
 * 
