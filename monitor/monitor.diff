@@ -1,0 +1,46 @@
+--- ../CD-ROM/68k/monitor.x68	1996-10-01 09:33:20.000000000 -0400
++++ monitor.s	2016-08-12 23:25:24.944853129 -0400
+@@ -37,7 +37,7 @@
+ *  it with a command in the user table or the built-in table COMTAB 
+ *  All variables are specified with respect to A6 
+ * 
+-         ORG      $00008000         Monitor origin 
++.        EQU      $00008000         Monitor origin 
+          DC.L     STACK             Reset stack pointer 
+          DC.L     RESET             Reset vector 
+ RESET    EQU      *                 Cold entry point for monitor 
+@@ -173,7 +173,7 @@
+          BSR.S    SEARCH            Look for command in built-in table 
+          BCS.S    EXEC2             If found then execute command 
+          LEA.L    ERMES2(PC),A4     Else print "invalid command" 
+-         BRA.L    PSTRING           and return 
++         BRA.W    PSTRING           and return 
+ EXEC2    MOVE.L   (A3),A3           Get the relative command address 
+          LEA.L    COMTAB(PC),A4     pointed at by A3 and add it to 
+          ADD.L    A4,A3             the PC to generate the actual 
+@@ -844,7 +844,7 @@
+         MOVE.L  (A5),D0           Get data register to be displayed 
+         BSR     OUT8X             from the frame and print it 
+         LEA.L   MES4(PC),A4       Print string of spaces 
+-        BSR.L   PSTRING           between data and address registers 
++        BSR.W   PSTRING           between data and address registers 
+         MOVE.L  32(A5),D0         Get address register to be displayed 
+         BSR     OUT8X             which is 32 bytes on from data reg 
+         BSR     NEWLINE 
+@@ -1236,15 +1236,6 @@
+ *              |---------------------| --- 
+ *    18+S ->   | Pointer to next DCB | 
+ * 
+-         END $8000 
++         END
+  
+ +++
+- 
+-
+-
+-
+- 
+-
+- 
+-
+-
