@@ -10,26 +10,26 @@ ESC      =        0x1B              | ASCII escape character (used by TM)
 CTRL_A   =        0x01              | Control_A forces return to monitor
 *                                   | Device addresses
 STACK    =        0x00000800        | Stack_pointer
-ACIA_1   =        0x00010040         | Console ACIA control
+ACIA_1   =        0x00010040        | Console ACIA control
 ACIA_2   =        ACIA_1+1          | Auxilary ACIA control
 X_BASE   =        0x08              | Start of exception vector table
 TRAP_14  =        0x4E4E            | Code for TRAP #14
 MAXCHR   =        64                | Length of input line buffer
 *
 DATA     =        0x00000C00        | Data origin
-         .lcomm LNBUFF,MAXCHR       | Input line buffer
+LNBUFF   =        0x00000000        | Input line buffer (MAXCHR bytes)
 BUFFEND  =        LNBUFF+MAXCHR-1   | End of line buffer
-         .lcomm BUFFPT,4            | Pointer to line buffer
-         .lcomm PARAMTR,4           | Last parameter from line buffer
-         .lcomm ECHO,1              | When clear this enable input echo
-         .lcomm U_CASE,1            | Flag for upper case conversion
-         .lcomm UTAB,4              | Pointer to user command table
-         .lcomm CN_IVEC,4           | Pointer to console input DCB
-         .lcomm CN_OVEC,4           | Pointer to console output DCB
-         .lcomm TSK_T,37*2          | Frame for D0-D7, A0-A6, USP, SSP, SW, PC
-         .lcomm BP_TAB,24*2         | Breakpoint table
-         .lcomm FIRST,512*2         | DCB area
-         .lcomm BUFFER,256*2        | 256 bytes for I/O buffer
+BUFFPT   =        0x00000040        | Pointer to line buffer (4 bytes)
+PARAMTR  =        0x00000044        | Last parameter from line buffer (4 bytes)
+ECHO     =        0x00000048        | When clear this enable input echo (1 byte)
+U_CASE   =        0x00000049        | Flag for upper case conversion (1 byte)
+UTAB     =        0x0000004A        | Pointer to user command table (4 bytes)
+CN_IVEC  =        0x0000004E        | Pointer to console input DCB (4 bytes)
+CN_OVEC  =        0x00000052        | Pointer to console output DCB (4 bytes)
+TSK_T    =        0x00000056        | Frame for D0-D7, A0-A6, USP, SSP, SW, PC (37*2 bytes)
+BP_TAB   =        0x000000A0        | Breakpoint table (24*2 bytes)
+FIRST    =        0x000000D0        | DCB area (512*2 bytes)
+BUFFER   =        0x000002D0        | 256 bytes for I/O buffer (256*2 bytes)
 *
 *************************************************************************
 *
@@ -40,6 +40,7 @@ BUFFEND  =        LNBUFF+MAXCHR-1   | End of line buffer
 *
          .org     0x00008000        | Monitor origin
          .long    STACK             | Reset stack pointer
+         RESET = 0x00008008
          .long    RESET             | Reset vector
 RESET:                              | Cold entry point for monitor
          LEA      DATA,%A6          | A6 points to data area
@@ -53,7 +54,7 @@ RESET:                              | Cold entry point for monitor
          BSR.S    HEADING           | and print heading
          MOVE.L   #0x0000C000,%A0   | A0 points to extension ROM
          MOVE.L   (%A0),%D0         | Read first longword in extension ROM
-         CMP.L    #"ROM2",%D0       | If extension begins with 'ROM2' then
+         CMP.L    #0x524F4D32,%D0   | If extension begins with 'ROM2' then
          BNE.S    NO_EXT            | call the subroutine at EXT_ROM+8
          JSR      8(%A0)            | else continue
 NO_EXT:  NOP                        | Two NOPs to allow for a future
@@ -89,13 +90,13 @@ PSTRING:                            | Display the string pointed at by A4
 PS1:     MOVE.B   (%A4)+,%D0        | Get character to be printed
          BEQ.S    PS2               | If null then return
          BSR      PUTCHAR           | Else print it
-         BRA      PS1               | Continue
+         BRA.S    PS1               | Continue
 PS2:     MOVE.L   (%A7)+,%D0        | Restore D0 and exit
          RTS
 *
-HEADING: BSR      NEWLINE           | Same as PSTRING but with newline
-         BSR      PSTRING
-         BRA      NEWLINE
+HEADING: BSR.S    NEWLINE           | Same as PSTRING but with newline
+         BSR.S    PSTRING
+         BRA.S    NEWLINE
 *
 *************************************************************************
 *
@@ -201,9 +202,9 @@ SRCH4:   MOVE.B   (%A3)+,%D2        | Now match a pair of characters
          SUB.B    #1,%D1            | Else decrement match counter and
          BNE      SRCH4             | repeat until no chars left to match
 SRCH6:   LEA.L    -4(%A4),%A3       | Calculate address of command entry
-         OR.B     #1,CCR            | point. Mark carry flag as success
+         OR.B     #1,%CCR           | point. Mark carry flag as success
          RTS                        | and return
-SRCH7:   AND.B    #0xFE,CCR         | Fail - clear carry to indicate
+SRCH7:   AND.B    #0xFE,%CCR        | Fail - clear carry to indicate
          RTS                        | command not found and return
 *
 *************************************************************************
@@ -850,7 +851,7 @@ EX_D1:  MOVE.B  %D5,%D0           | Put current register number in D0
         BSR     OUT8X             | which is 32 bytes on from data reg
         BSR     NEWLINE
         LEA.L   4(%A5),%A5        | Point to next pair (ie Di, Ai)
-        DBRA    %D6,EX_%D1        | Repeat until all displayed
+        DBRA    %D6,EX_D1         | Repeat until all displayed
         LEA.L   32(%A5),%A5       | Adjust pointer by 8 longwords
         BSR     NEWLINE           | to point to SSP
         LEA.L   MES2A(%PC),%A4    | Point to "SS ="
@@ -935,7 +936,7 @@ GROUP2:                           | Deal with group 2 exceptions
         LEA.L   TSK_T(%A6),%A0    | the stack to the display frame
 GROUP2A:MOVE.L  (%A7)+,(%A0)+     | Move a register from stack to frame
         DBRA    %D0,GROUP2A       | and repeat until D0-D7/A0-A6 moved
-        MOVE.L  USP,%A2           | Get the user stack pointer and put it
+        MOVE.L  %USP,%A2          | Get the user stack pointer and put it
         MOVE.L  %A2,(%A0)+        | in the A7 position in the frame
         MOVE.L  (%A7)+,%D0        | Now transfer the SSP to the frame,
         SUB.L   #10,%D0           | remembering to account for the
@@ -1122,19 +1123,19 @@ X_UN:                             | Uninitialized exception vector routine
 *
 *  All strings and other fixed parameters here
 *
-BANNER:  .ascii   "TSBUG 2 Version 23.07.86\0\0"
+BANNER:  .asciz   "TSBUG 2 Version 23.07.86\0"
 CRLF:    .byte    CR,LF,'?',0
 HEADER:  .byte    CR,LF,'S','1',0,0
-TAIL:    .ascii   "S9  \0\0"
+TAIL:    .asciz   "S9  \0"
 MES1:    .asciz   " SR  =  "
 MES2:    .asciz   " PC  =  "
 MES2A:   .asciz   " SS  =  "
-MES3:    .ascii   "  Data reg       Address reg\0\0"
-MES4:    .ascii   "        \0\0"
-MES8:    .ascii   "Bus error   \0\0"
-MES9:    .ascii   "Address error   \0\0"
-MES10:   .ascii   "Illegal instruction \0\0"
-MES11:   .ascii   "Breakpoint  \0\0"
+MES3:    .asciz   "  Data reg       Address reg\0"
+MES4:    .asciz   "        \0"
+MES8:    .asciz   "Bus error   \0"
+MES9:    .asciz   "Address error   \0"
+MES10:   .asciz   "Illegal instruction \0"
+MES11:   .asciz   "Breakpoint  \0"
 MES12:   .asciz   "Trace   "
 REGNAME: .ascii   "D0D1D2D3D4D5D6D7"
          .ascii   "A0A1A2A3A4A5A6A7"
@@ -1143,9 +1144,9 @@ REGNAME: .ascii   "D0D1D2D3D4D5D6D7"
 ERMES1:  .asciz   "Non-valid hexadecimal input  "
 ERMES2:  .asciz   "Invalid command  "
 ERMES3:  .asciz   "Loading error"
-ERMES4:  .ascii   "Table full  \0\0"
-ERMES5:  .ascii   "Breakpoint not active   \0\0"
-ERMES6:  .ascii   "Uninitialized exception \0\0"
+ERMES4:  .asciz   "Table full  \0"
+ERMES5:  .asciz   "Breakpoint not active   \0"
+ERMES6:  .asciz   "Uninitialized exception \0"
 ERMES7:  .asciz   " Range error"
 *
 *  COMTAB is the built-in command table. All entries are made up of

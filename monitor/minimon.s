@@ -15,14 +15,14 @@ TRAP_14  =        0x4E4E            | Code for TRAP #14
 MAXCHR   =        64                | Length of input line buffer
 *
 DATA     =        0x00000400        | Data origin
-         .lcomm LNBUFF,MAXCHR       | Input line buffer
+LNBUFF   =        0x00000000        | Input line buffer (MAXCHR bytes)
 BUFFEND  =        LNBUFF+MAXCHR-1   | End of line buffer
-         .lcomm BUFFPT,4            | Pointer to line buffer
-         .lcomm PARAMTR,4           | Last parameter from line buffer
-         .lcomm ECHO,1              | When clear this enable input echo
-         .lcomm U_CASE,1            | Flag for upper case conversion
-         .lcomm TSK_T,37*2          | Frame for D0-D7, A0-A6, USP, SSP, SW, PC
-         .lcomm BP_TAB,24*2         | Breakpoint table
+BUFFPT   =        0x00000040        | Pointer to line buffer (4 bytes)
+PARAMTR  =        0x00000044        | Last parameter from line buffer (4 bytes)
+ECHO     =        0x00000048        | When clear this enable input echo (1 byte)
+U_CASE   =        0x00000049        | Flag for upper case conversion (1 byte)
+TSK_T    =        0x00000056        | Frame for D0-D7, A0-A6, USP, SSP, SW, PC (37*2 bytes)
+BP_TAB   =        0x000000A0        | Breakpoint table (24*2 bytes)
 *
 *************************************************************************
 *
@@ -142,9 +142,9 @@ SRCH4:   MOVE.B   (%A3)+,%D2         |  Now match a pair of characters
          SUB.B    #1,%D1            | Else decrement match counter and
          BNE      SRCH4             | repeat until no chars left to match
 SRCH6:   LEA.L    -4(%A4),%A3       |   Calculate address of command entry
-         OR.B     #1,CCR            | point. Mark carry flag as success
+         OR.B     #1,%CCR           | point. Mark carry flag as success
          RTS                        | and return
-SRCH7:   AND.B    #0xFE,CCR         | Fail - clear carry to indicate
+SRCH7:   AND.B    #0xFE,%CCR        | Fail - clear carry to indicate
          RTS                        | command not found and return
 *
 *************************************************************************
@@ -603,7 +603,7 @@ GROUP2:                           | Deal with group 2 exceptions
         LEA.L   TSK_T(%A6),%A0    |   the stack to the display frame
 GROUP2A:MOVE.L  (%A7)+,(%A0)+     |   Move a register from stack to frame
         DBRA    %D0,GROUP2A       |  and repeat until D0-D7/A0-A6 moved
-        MOVE.L  USP,%A2           |  Get the user stack pointer and put it
+        MOVE.L  %USP,%A2          |  Get the user stack pointer and put it
         MOVE.L  %A2,(%A0)+        |   in the A7 position in the frame
         MOVE.L  (%A7)+,%D0        |   Now transfer the SSP to the frame,
         SUB.L   #10,%D0           |  remembering to account for the
@@ -790,31 +790,31 @@ X_UN:                             | Uninitialized exception vector routine
 *
 *  All strings and other fixed parameters here
 *
-BANNER:  .byte    "TSBUG  Version 3.10.96",0,0
+BANNER:  .asciz   "TSBUG  Version 3.10.96\0"
 CRLF:    .BYTE    CR,LF,'?',0
 HEADER:  .BYTE    CR,LF,'S','1',0,0
-TAIL:    .BYTE    "S9  ",0,0
-MES1:    .BYTE    " SR  =  ",0
-MES2:    .BYTE    " PC  =  ",0
-MES2A:   .BYTE    " SS  =  ",0
-MES3:    .BYTE    "  Data reg       Address reg",0,0
-MES4:    .BYTE    "        ",0,0
-MES8:    .BYTE    "Bus error   ",0,0
-MES9:    .BYTE    "Address error   ",0,0
-MES10:   .BYTE    "Illegal instruction ",0,0
-MES11:   .BYTE    "Breakpoint  ",0,0
-MES12:   .BYTE    "Trace   ",0
-REGNAME: .BYTE    "D0D1D2D3D4D5D6D7"
-         .BYTE    "A0A1A2A3A4A5A6A7"
-         .BYTE    "SSSR"
-         .BYTE    "PC  ",0
-ERMES1:  .BYTE    "Non-valid hexadecimal input  ",0
-ERMES2:  .BYTE    "Invalid command  ",0
-ERMES3:  .BYTE    "Loading error",0
-ERMES4:  .BYTE    "Table full  ",0,0
-ERMES5:  .BYTE    "Breakpoint not active   ",0,0
-ERMES6:  .BYTE    "Uninitialized exception ",0,0
-ERMES7:  .BYTE    " Range error",0
+TAIL:    .asciz   "S9  \0"
+MES1:    .asciz   " SR  =  "
+MES2:    .asciz   " PC  =  "
+MES2A:   .asciz   " SS  =  "
+MES3:    .asciz   "  Data reg       Address reg\0"
+MES4:    .asciz   "        \0"
+MES8:    .asciz   "Bus error   \0"
+MES9:    .asciz   "Address error   \0"
+MES10:   .asciz   "Illegal instruction \0"
+MES11:   .asciz   "Breakpoint  \0"
+MES12:   .asciz   "Trace   "
+REGNAME: .ascii   "D0D1D2D3D4D5D6D7"
+         .ascii   "A0A1A2A3A4A5A6A7"
+         .ascii   "SSSR"
+         .asciz   "PC  "
+ERMES1:  .asciz   "Non-valid hexadecimal input  "
+ERMES2:  .asciz   "Invalid command  "
+ERMES3:  .asciz   "Loading error"
+ERMES4:  .asciz   "Table full  \0"
+ERMES5:  .asciz   "Breakpoint not active   \0"
+ERMES6:  .asciz   "Uninitialized exception \0"
+ERMES7:  .asciz   " Range error"
 *
 *  COMTAB is the built-in command table. All entries are made up of
 *         a string length + number of characters to match + the string
