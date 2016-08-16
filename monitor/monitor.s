@@ -106,26 +106,26 @@ HEADING: BSR.S    NEWLINE           | Same as PSTRING but with newline
 *           A1 points to start of buffer
 *           D0 holds character to be stored
 *
-GETLINE: LEA.L    LNBUFF(%A6),%A1   | A1 points to start of line buffer
+GETLINE: LEA.L    LNBUFF.W(%A6),%A1 | A1 points to start of line buffer
          LEA.L    (%A1),%A3         | A3 points to start (initially)
-         LEA.L    MAXCHR(%A1),%A2   | A2 points to end of buffer
+         LEA.L    MAXCHR.W(%A1),%A2 | A2 points to end of buffer
 GETLN2:  BSR      GETCHAR           | Get a character
          CMP.B    #CTRL_A,%D0       | If control_A then reject this line
          BEQ.S    GETLN5            | and get another line
          CMP.B    #BS,%D0           | If back_space then move back pointer
          BNE.S    GETLN3            | Else skip past wind-back routine
          CMP.L    %A1,%A3           | First check for empty buffer
-         BEQ      GETLN2            | If buffer empty then continue
+         BEQ.S    GETLN2            | If buffer empty then continue
          LEA      -1(%A3),%A3       | Else decrement buffer pointer
-         BRA      GETLN2            | and continue with next character
+         BRA.S    GETLN2            | and continue with next character
 GETLN3:  MOVE.B   %D0,(%A3)+        | Store character and update pointer
          CMP.B    #CR,%D0           | Test for command terminator
          BNE.S    GETLN4            | If not CR then skip past exit
-         BRA      NEWLINE           | Else new line before next operation
+         BRA.S    NEWLINE           | Else new line before next operation
 GETLN4:  CMP.L    %A2,%A3           | Test for buffer overflow
-         BNE      GETLN2            | If buffer not full then continue
-GETLN5:  BSR      NEWLINE           | Else move to next line and
-         BRA      GETLINE           | repeat this routine
+         BNE.S    GETLN2            | If buffer not full then continue
+GETLN5:  BSR.S    NEWLINE           | Else move to next line and
+         BRA.S    GETLINE           | repeat this routine
 *
 *************************************************************************
 *
@@ -134,26 +134,26 @@ GETLN5:  BSR      NEWLINE           | Else move to next line and
 *       the first parameter following the command.
 *       A0 = pointer to line buffer. A1 = pointer to cleaned up buffer
 *
-TIDY:    LEA.L    LNBUFF(%A6),%A0   | A0 points to line buffer
+TIDY:    LEA.L    LNBUFF.L(%A6),%A0 | A0 points to line buffer
          LEA.L    (%A0),%A1         | A1 points to start of line buffer
 TIDY1:   MOVE.B   (%A0)+,%D0        | Read character from line buffer
          CMP.B    #SPACE,%D0        | Repeat until the first non-space
-         BEQ      TIDY1             | character is found
+         BEQ.S    TIDY1             | character is found
          LEA.L    -1(%A0),%A0       | Move pointer back to first char
 TIDY2:   MOVE.B   (%A0)+,%D0        | Move the string left to remove
          MOVE.B   %D0,(%A1)+        | any leading spaces
          CMP.B    #SPACE,%D0        | Test for embedded space
          BNE.S    TIDY4             | If not space then test for EOL
 TIDY3:   CMP.B    #SPACE,(%A0)+     | If space skip multiple embedded
-         BEQ      TIDY3             | spaces
+         BEQ.s    TIDY3             | spaces
          LEA.L    -1(%A0),%A0       | Move back pointer
 TIDY4:   CMP.B    #CR,%D0           | Test for end_of_line (EOL)
-         BNE      TIDY2             | If not EOL then read next char
-         LEA.L    LNBUFF(%A6),%A0   | Restore buffer pointer
+         BNE.s    TIDY2             | If not EOL then read next char
+         LEA.L    LNBUFF.w(%A6),%A0 | Restore buffer pointer
 TIDY5:   CMP.B    #CR,(%A0)         | Test for EOL
          BEQ.S    TIDY6             | If EOL then exit
          CMP.B    #SPACE,(%A0)+     | Test for delimiter
-         BNE      TIDY5             | Repeat until delimiter or EOL
+         BNE.S    TIDY5             | Repeat until delimiter or EOL
 TIDY6:   MOVE.L   %A0,BUFFPT(%A6)   | Update buffer pointer
          RTS
 *
@@ -187,20 +187,20 @@ SEARCH:                             | Match the command in the line buffer
          BEQ.S    SRCH7             | current entry. If zero then exit
          LEA.L    6(%A3,%D0.W),%A4  | Else calculate address of next entry
          MOVE.B   1(%A3),%D1        | Get number of characters to match
-         LEA.L    LNBUFF(%A6),%A5   | A5 points to command in line buffer
+         LEA.L    LNBUFF.L(%A6),%A5 | A5 points to command in line buffer
          MOVE.B   2(%A3),%D2        | Get first character in this entry
          CMP.B    (%A5)+,%D2        | from the table and match with buffer
          BEQ.S    SRCH3             | If match then try rest of string
 SRCH2:   MOVE.L   %A4,%A3           | Else get address of next entry
-         BRA      SEARCH            | and try the next entry in the table
+         BRA.S    SEARCH            | and try the next entry in the table
 SRCH3:   SUB.B    #1,%D1            | One less character to match
          BEQ.S    SRCH6             | If match counter zero then all done
          LEA.L    3(%A3),%A3        | Else point to next character in table
 SRCH4:   MOVE.B   (%A3)+,%D2        | Now match a pair of characters
          CMP.B    (%A5)+,%D2
-         BNE      SRCH2             | If no match then try next entry
+         BNE.S    SRCH2             | If no match then try next entry
          SUB.B    #1,%D1            | Else decrement match counter and
-         BNE      SRCH4             | repeat until no chars left to match
+         BNE.S    SRCH4             | repeat until no chars left to match
 SRCH6:   LEA.L    -4(%A4),%A3       | Calculate address of command entry
          OR.B     #1,%CCR           | point. Mark carry flag as success
          RTS                        | and return
@@ -229,21 +229,21 @@ NOT_HEX: OR.B     #1,%D7            | Else set error flag
 HEX_OK:  RTS                        | and return
 *
 BYTE:    MOVE.L   %D1,-(%A7)        | Save D1
-         BSR      HEX               | Get first hex character
+         BSR.S    HEX               | Get first hex character
          ASL.B    #4,%D0            | Move it to MS nybble position
          MOVE.B   %D0,%D1           | Save MS nybble in D1
-         BSR      HEX               | Get second hex character
+         BSR.S    HEX               | Get second hex character
          ADD.B    %D1,%D0           | Merge MS and LS nybbles
          MOVE.L   (%A7)+,%D1        | Restore D1
          RTS
 *
-WORD:    BSR      BYTE              | Get upper order byte
+WORD:    BSR.S    BYTE              | Get upper order byte
          ASL.W    #8,%D0            | Move it to MS position
-         BRA      BYTE              | Get LS byte and return
+         BRA.S    BYTE              | Get LS byte and return
 *
-LONGWD:  BSR      WORD              | Get upper order word
+LONGWD:  BSR.S    WORD              | Get upper order word
          SWAP     %D0               | Move it to MS position
-         BRA      WORD              | Get lower order word and return
+         BRA.S    WORD              | Get lower order word and return
 *
 *  PARAM reads a parameter from the line buffer and puts it in both
 *  PARAMTR(A6) and D0. Bit 1 of D7 is set on error.
@@ -265,7 +265,7 @@ PARAM1:  MOVE.B   (%A0)+,%D0        | Read character from line buffer
          CMP.B    #0x0F,%D0         | If more than $F
          BGT.S    PARAM5            | then exit to error on not-hex
 PARAM3:  ADD.B    %D0,%D1           | Add latest nybble to total in D1
-         BRA      PARAM1            | Repeat until delimiter found
+         BRA.S    PARAM1            | Repeat until delimiter found
 PARAM4:  MOVE.L   %A0,BUFFPT(%A6)   | Save pointer in memory
          MOVE.L   %D1,PARAMTR(%A6)  | Save parameter in memory
          MOVE.L   %D1,%D0           | Put parameter in D0 for return
@@ -294,25 +294,25 @@ OUT1X1:  BSR      PUTCHAR           | Print the character
          RTS
 *
 OUT2X:   ROR.B    #4,%D0            | Get MS nybble in LS position
-         BSR      OUT1X             | Print MS nybble
+         BSR.S    OUT1X             | Print MS nybble
          ROL.B    #4,%D0            | Restore LS nybble
-         BRA      OUT1X             | Print LS nybble and return
+         BRA.S    OUT1X             | Print LS nybble and return
 *
 OUT4X:   ROR.W    #8,%D0            | Get MS byte in LS position
-         BSR      OUT2X             | Print MS byte
+         BSR.S    OUT2X             | Print MS byte
          ROL.W    #8,%D0            | Restore LS byte
-         BRA      OUT2X             | Print LS byte and return
+         BRA.S    OUT2X             | Print LS byte and return
 *
 OUT8X:   SWAP     %D0               | Get MS word in LS position
-         BSR      OUT4X             | Print MS word
+         BSR.S    OUT4X             | Print MS word
          SWAP     %D0               | Restore LS word
-         BRA      OUT4X             | Print LS word and return
+         BRA.S    OUT4X             | Print LS word and return
 *
 *************************************************************************
 *
 * JUMP causes execution to begin at the address in the line buffer
 *
-JUMP:    BSR     PARAM              | Get address from buffer
+JUMP:    BSR.S   PARAM              | Get address from buffer
          TST.B   %D7                | Test for input error
          BNE.S   JUMP1              | If error flag not zero then exit
          TST.L   %D0                | Else test for missing address
@@ -339,22 +339,22 @@ MEM1:    BSR      NEWLINE
          CMP.B    #'-',%D0          | If "-" then move back
          BNE.S    MEM2              | Else skip wind-back procedure
          LEA.L    -4(%A3),%A3       | Move pointer back 2+2
-         BRA      MEM1              | Repeat until carriage return
+         BRA.S    MEM1              | Repeat until carriage return
 MEM2:    CMP.B    #SPACE,%D0        | Test for space (= new entry)
          BNE.S    MEM1              | If not space then repeat
          BSR      WORD              | Else get new word to store
          TST.B    %D7               | Test for input error
          BNE.S    MEM3              | If error then exit
          MOVE.W   %D0,-2(%A3)       | Store new word
-         BRA      MEM1              | Repeat until carriage return
+         BRA.S    MEM1              | Repeat until carriage return
 MEM3:    RTS
 *
 ADR_DAT: MOVE.L   %D0,-(%A7)        | Print the contents of A3 and the
          MOVE.L   %A3,%D0           | word pointed at by A3.
-         BSR      OUT8X             |  and print current address
+         BSR.S    OUT8X             |  and print current address
          BSR.S    PSPACE            | Insert delimiter
          MOVE.W   (%A3),%D0         | Get data at this address in D0
-         BSR      OUT4X             |  and print it
+         BSR.S    OUT4X             |  and print it
          LEA.L    2(%A3),%A3        | Point to next address to display
          MOVE.L   (%A7)+,%D0        | Restore D0
          RTS
@@ -383,7 +383,7 @@ LOAD:    MOVE.L   CN_OVEC(%A6),-(%A7) | Save current output device name
 LOAD1:   MOVE.B   (%A4)+,%D0          | transmitted to the host computer
          BSR      PUTCHAR             | before the loading begins
          CMP.B    #CR,%D0             | Read from the buffer until EOL
-         BNE      LOAD1
+         BNE.S    LOAD1
          BSR      NEWLINE             | Send newline before loading
 LOAD2:   BSR      GETCHAR             | Records from the host must begin
          CMP.B    #'S',%D0            | with S1/S2 (data) or S9/S8 (term)
@@ -435,12 +435,12 @@ LOAD6A:  CLR.B    %D3                 | S1 record found - clear checksum
 LOAD7:   BSR.S    LOAD8               | Get byte of data for loading
          MOVE.B   %D0,(%A2)+          | Store it
          SUB.B    #1,%D2              | Decrement byte counter
-         BNE      LOAD7               | Repeat until count = 0
+         BNE.S    LOAD7               | Repeat until count = 0
          BSR.S    LOAD8               | Read checksum
          ADD.B    #1,%D3              | Add 1 to total checksum
          BEQ      LOAD2               | If zero then start next record
          OR.B     #0b00001000,%D7      | Else set checksum error bit,
-         BRA      LOAD3               | restore I/O devices and return
+         BRA.S    LOAD3               | restore I/O devices and return
 *
 LOAD8:   BSR     BYTE                 | Get a byte
          ADD.B   %D0,%D3              | Update checksum
@@ -465,12 +465,12 @@ DUMP1:   CMP.L    %A3,%D0             | Compare start and end addresses
 DUMP2:   MOVE.L   CN_OVEC(%A6),-(%A7) | Save name of current output device
          MOVE.L   #DCB4,CN_OVEC(%A6)  | Set up Port 2 as output device
          BSR      NEWLINE             | Send newline to host and wait
-         BSR      DELAY
+         BSR.S    DELAY
          MOVE.L   BUFFPT(%A6),%A4     | Before dumping, send any string
 DUMP3:   MOVE.B   (%A4)+,%D0          | in the input buffer to the host
          BSR      PUTCHAR             | Repeat
          CMP.B    #CR,%D0             | Transmit char from buffer to host
-         BNE      DUMP3               | Until char = C/R
+         BNE.S    DUMP3               | Until char = C/R
          BSR      NEWLINE
          BSR.S    DELAY               | Allow time for host to settle
          ADDQ.L   #1,%A2              | A2 contains length of record + 1
@@ -493,13 +493,13 @@ DUMP5:   LEA.L    HEADER(%PC),%A4     | Point to record header
 DUMP6:   MOVE.B   (%A3)+,%D0          | Get data byte to be printed
          BSR.S    DUMP7               | Print it
          SUB.B    #1,%D2              | Decrement byte count
-         BNE      DUMP6               | Repeat until all this record printed
+         BNE.S    DUMP6               | Repeat until all this record printed
          NOT.B    %D1                 | Complement checksum
          MOVE.B   %D1,%D0             | Move to output register
          BSR.S    DUMP7               | Print checksum
          BSR      NEWLINE
          CMP.L    %A2,%A3             | Have all records been printed?
-         BNE      DUMP4               | Repeat until all done
+         BNE.S    DUMP4               | Repeat until all done
          LEA.L    TAIL(%PC),%A4       | Point to message tail (S9 record)
          BSR      PSTRING             | Print it
          MOVE.L   (%A7)+,CN_OVEC(%A6) | Restore name of output device
@@ -520,7 +520,7 @@ DELAY:                                | Provide a time delay for the host
          MOVEM.L   %D0/%A4,-(%A7)     | to settle. Save working registers
          MOVE.L    #0x4000,%D0        | Set up delay constant
 DELAY1:  SUB.L     #1,%D0             | Count down         (8 clk cycles)
-         BNE       DELAY1             | Repeat until zero  (10 clk cycles)
+         BNE.S     DELAY1             | Repeat until zero  (10 clk cycles)
          MOVEM.L   (%A7)+,%D0/%A4     | Restore working registers
          RTS
 *
@@ -534,10 +534,10 @@ TM:      MOVE.B    #0x55,ACIA_1        | Force RTS* high to re-route data
          ADD.B     #1,ECHO(%A6)        | Turn off character echo
 TM1:     BSR       GETCHAR             | Get character
          CMP.B     #ESC,%D0            | Test for end of TM mode
-         BNE       TM1                 | Repeat until first escape character
+         BNE.S     TM1                 | Repeat until first escape character
          BSR       GETCHAR             | Get second character
          CMP.B     #'E',%D0            | If second char = E then exit TM
-         BNE       TM1                 | Else continue
+         BNE.S     TM1                 | Else continue
          MOVE.L    CN_OVEC(%A6),-(%A7) |  Save output port device name
          MOVE.L    #DCB4,CN_OVEC(%A6)  |  Get name of host port (aux port)
          BSR       NEWLINE             | Send newline to host to clear it
@@ -596,7 +596,7 @@ CON_IN:  MOVEM.L %D1/%A1,-(%A7)  | Save working registers
          CLR.B   19(%A0)         | Clear logical error in DCB
 CON_I1:  MOVE.B  (%A1),%D1       | Read ACIA status
          BTST.B  #0,%D1          | Test RDRF
-         BEQ     CON_I1          | Repeat until RDRF true
+         BEQ.S   CON_I1          | Repeat until RDRF true
          MOVE.B  %D1,18(%A0)     | Store physical status in DCB
          AND.B   #0b011110100,%D1 | Mask to input error bits
          BEQ.S   CON_I2          | If no error then skip update
@@ -623,9 +623,9 @@ CON_OT1: MOVE.B  (%A1),%D1          | Read ACIA status
          BNE.S   CON_OT3            | If not wait then ignore and test O/P
 CON_OT2: MOVE.B  (%A1),%D2          | Else read ACIA status register
          BTST.B  #0,%D2             | and poll ACIA until next char received
-         BEQ     CON_OT2
+         BEQ.S   CON_OT2
 CON_OT3: BTST.B  #1,%D1             | Repeat
-         BEQ     CON_OT1            |  until ACIA Tx ready
+         BEQ.S   CON_OT1            |  until ACIA Tx ready
          MOVE.B  %D1,18(%A0)        | Store status in DCB physical error
          MOVE.B  %D0,2(%A1)         | Transmit output
          MOVEM.L (%A7)+,%A1/%D1-%D2 | Restore working registers
@@ -639,14 +639,14 @@ CON_OT3: BTST.B  #1,%D1             | Repeat
 AUX_IN:  LEA.L   12(%A0),%A1     | Get pointer to aux ACIA from DCB
          MOVE.L  (%A1),%A1       | Get address of aux ACIA
 AUX_IN1: BTST.B  #0,(%A1)        | Test for data ready
-         BEQ     AUX_IN1         | Repeat until ready
+         BEQ.S   AUX_IN1         | Repeat until ready
          MOVE.B  2(%A1),%D0      | Read input
          RTS
 *
 AUX_OUT: LEA.L   12(%A0),%A1     | Get pointer to aux ACIA from DCB
          MOVE.L  (%A1),%A1       | Get address of aux ACIA
 AUX_OT1: BTST.B  #1,(%A1)        | Test for ready to transmit
-         BEQ     AUX_OT1         | Repeat until transmitter ready
+         BEQ.S   AUX_OT1         | Repeat until transmitter ready
          MOVE.B  %D0,2(%A1)      | Transmit data
          RTS
 *
@@ -726,7 +726,7 @@ OPEN3:                             | Fail - calculate address of next DCB
          LEA.L    18(%A1,%D1.W),%A1 | A1 points to pointer to next DCB
          MOVE.L   (%A1),%A1        | A1 now points to next DCB
          CMP.L    #0,%A1           | Test for end of DCB chain
-         BNE      OPEN1            | If not end of chain then try next DCB
+         BNE.S    OPEN1            | If not end of chain then try next DCB
          OR.B     #8,%D7           | Else set error flag and return
 OPEN4:   MOVEM.L  (%A7)+,%A1-%A3/%D0-%D4 | Restore working registers
          RTS
@@ -1087,7 +1087,7 @@ REG_MD1: CMP.W   (%A0)+,%D1          | Compare a char pair with input
          BEQ.S   REG_MD2             | If match then exit loop
          ADD.L   #1,%D2              | Else increment match counter
          CMP.L   #19,%D2             | Test for end of loop
-         BNE     REG_MD1             | Continue until all pairs matched
+         BNE.S   REG_MD1             | Continue until all pairs matched
          LEA.L   ERMES1(%PC),%A4     | If here then error
          BRA     PSTRING             | Display error and return
 REG_MD2: LEA.L   TSK_T(%A6),%A1      | A1 points to display frame
