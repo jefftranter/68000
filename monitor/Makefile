@@ -1,4 +1,4 @@
-all:	minimon.run monitor.run
+all:	minimon.run monitor.run minimon.bin monitor.bin
 
 minimon.o: minimon.s
 	m68k-elf-as -m68000 -a=minimon.lst -o minimon.o minimon.s
@@ -6,11 +6,18 @@ minimon.o: minimon.s
 minimon.run: minimon.o
 	m68k-elf-objcopy -I coff-m68k -O srec minimon.o minimon.run
 
+minimon.bin: minimon.o
+	m68k-elf-objcopy -I coff-m68k -O binary minimon.o minimon.bin
+
 monitor.o: monitor.s
 	m68k-elf-as -m68000 -a=monitor.lst -o monitor.o monitor.s
 
 monitor.run: monitor.o
 	m68k-elf-objcopy -I coff-m68k -O srec monitor.o monitor.run
 
+monitor.bin: monitor.o
+	m68k-elf-objcopy -I coff-m68k -O binary monitor.o monitor.bin
+
 clean:
-	$(RM) minimon.lst minimon.o minimon.run monitor.lst monitor.o monitor.run
+	$(RM) minimon.lst minimon.o minimon.run minimon.bin
+	$(RM) monitor.lst monitor.o monitor.run monitor.bin

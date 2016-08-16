@@ -373,7 +373,9 @@ PSPACE:  MOVE.B   %D0,-(%A7)        | Print a single space
 *
 LOAD:    MOVE.L   CN_OVEC(%A6),-(%A7) | Save current output device name
          MOVE.L   CN_IVEC(%A6),-(%A7) | Save current input device name
+         DCB4 = 0x00008c22            | Works around GNU assembler issue
          MOVE.L   #DCB4,CN_OVEC(%A6)  | Set up aux ACIA as output
+         DCB3 = 0x00008c10            | Works around GNU assembler issue
          MOVE.L   #DCB3,CN_IVEC(%A6)  | Set up aux ACIA as input
          ADD.B    #1,ECHO(%A6)        | Turn off character echo
          BSR      NEWLINE             | Send newline to host
@@ -568,7 +570,9 @@ ST_DCB2: MOVE.B  (%A1)+,(%A0)+     | Move the 16 bytes of a DCB header
          DBRA    %D0,ST_DCB1       | Repeat until all DCBs set up
          LEA.L   -4(%A3),%A3       | Adjust A3 to point to last DCB pointer
          CLR.L   (%A3)             | and force last pointer to zero
+         DCB1 = 0x00008bec         | Works around GNU assembler issue
          MOVE.L  #DCB1,CN_IVEC(%A6) | Set up vector to console input DCB
+         DCB2 = 0x00008bfe         | Works around GNU assembler issue
          MOVE.L  #DCB2,CN_OVEC(%A6) | Set up vector to console output DCB
          MOVEM.L (%A7)+,%A0-%A3/%D0-%D3 | Restore registers
          RTS
@@ -738,16 +742,24 @@ OPEN4:   MOVEM.L  (%A7)+,%A1-%A3/%D0-%D4 | Restore working registers
 *
 X_SET:  LEA.L   X_BASE,%A0         | Point to base of exception table
         MOVE.W  #253,%D0           | Number of vectors -  3
+        X_UN = 0x000089e4          | Works around GNU assembler issue
 X_SET1: MOVE.L  #X_UN,(%A0)+       | Store uninitialized exception vector
         DBRA    %D0,X_SET1         | Repeat until all entries preset
         SUB.L   %A0,%A0            | Clear A0 (points to vector table)
+        BUS_ER = 0x000087b4        | Works around GNU assembler issue
         MOVE.L  #BUS_ER,8(%A0)     | Setup bus error vector
+        ADD_ER = 0x000087c2        | Works around GNU assembler issue
         MOVE.L  #ADD_ER,12(%A0)    | Setup address error vector
+        IL_ER = 0x0000879e         | Works around GNU assembler issue
         MOVE.L  #IL_ER,16(%A0)     | Setup illegal instruction error vect
+        TRACE = 0x00008898         | Works around GNU assembler issue
         MOVE.L  #TRACE,36(%A0)     | Setup trace exception vector
+        TRAP_0 = 0x00008652        | Works around GNU assembler issue
         MOVE.L  #TRAP_0,128(%A0)   | Setup TRAP #0 exception vector
+        BRKPT = 0x000087d0         | Works around GNU assembler issue
         MOVE.L  #BRKPT,184(%A0)    | Setup TRAP #14 vector = breakpoint
-        MOVE.L  #WARM,188(%A0)     | Setup TRAP #15 exception vector
+        AWARM = 0x00008040         | Works around GNU assembler issue
+        MOVE.L  #AWARM,188(%A0)    | Setup TRAP #15 exception vector
         MOVE.W  #7,%D0             | Now clear the breakpoint table
         LEA.L   BP_TAB(%A6),%A0    | Point to table
 X_SET2: CLR.L   (%A0)+             | Clear an address entry
@@ -1095,7 +1107,7 @@ REG_MD2: LEA.L   TSK_T(%A6),%A1      | A1 points to display frame
          CMP.L   #72,%D2             | Test for address of PC
          BNE.S   REG_MD3             | If not PC then all is OK
          SUB.L   #2,%D2              | else dec PC pointer as Sr is a word
-REG_MD3: LEA.L   (%A1,%D2),%A2       | Calculate address of entry in disptable
+REG_MD3: LEA.L   (%A1,%D2.W),%A2     | Calculate address of entry in disptable
          MOVE.L  (%A2),%D0           | Get old contents
          BSR     OUT8X               | Display them
          BSR     NEWLINE
@@ -1200,22 +1212,28 @@ COMTAB:  DC.B     4,4              | JUMP <address> causes execution to
 *
 DCB_LST:
 DCB1:    .ascii  "CON_IN  "          | Device name (8 bytes)
-         DC.L    CON_IN,ACIA_1       | Address of driver routine, device
+         SCON_IN = 0x000084ca        | Works around GNU assembler issue
+         DC.L    SCON_IN,ACIA_1      | Address of driver routine, device
          DC.W    2                   | Number of words in parameter field
 DCB2:    .ascii  "CON_OUT "
-         DC.L    CON_OUT,ACIA_1
+         SCON_OUT = 0x000084fa       | Works around GNU assembler issue
+         DC.L    SCON_OUT,ACIA_1
          DC.W    2
 DCB3:    .ascii  "AUX_IN  "
-         DC.L    AUX_IN,ACIA_2
+         SAUX_IN = 0x0000853a        | Works around GNU assembler issue
+         DC.L    SAUX_IN,ACIA_2
          DC.W    2
 DCB4:    .ascii  "AUX_OUT "
-         DC.L    AUX_OUT,ACIA_2
+         SAUX_OUT = 0x0000854c       | Works around GNU assembler issue
+         DC.L    SAUX_OUT,ACIA_2
          DC.W    2
 DCB5:    .ascii  "BUFF_IN "
-         DC.L    BUFF_IN,BUFFER
+         SBUFF_IN = 0x000085a0       | Works around GNU assembler issue
+         DC.L    SBUFF_IN,BUFFER
          DC.W    2
 DCB6:    .ascii  "BUFF_OUT"
-         DC.L    BUFF_OT,BUFFER
+         SBUFF_OT = 0x000085ac       | Works around GNU assembler issue
+         DC.L    SBUFF_OT,BUFFER
          DC.W    2
 *
 *************************************************************************
