@@ -441,7 +441,7 @@ LOAD7:   BSR.S    LOAD8               | Get byte of data for loading
          BSR.S    LOAD8               | Read checksum
          ADD.B    #1,%D3              | Add 1 to total checksum
          BEQ      LOAD2               | If zero then start next record
-         OR.B     #0b00001000,%D7      | Else set checksum error bit,
+         OR.B     #0b00001000,%D7     | Else set checksum error bit,
          BRA.S    LOAD3               | restore I/O devices and return
 *
 LOAD8:   BSR     BYTE                 | Get a byte
@@ -594,19 +594,19 @@ IO_REQ:  MOVEM.L %A0-%A1,-(%A7)   | Save working registers
 *  CON_IN handles input from the console device
 *  This is the device driver used by DCB1. Exit with input in D0
 *
-CON_IN:  MOVEM.L %D1/%A1,-(%A7)  | Save working registers
-         LEA.L   12(%A0),%A1     | Get pointer to ACIA from DCB
-         MOVE.L  (%A1),%A1       | Get address of ACIA in A1
-         CLR.B   19(%A0)         | Clear logical error in DCB
-CON_I1:  MOVE.B  (%A1),%D1       | Read ACIA status
-         BTST.B  #0,%D1          | Test RDRF
-         BEQ.S   CON_I1          | Repeat until RDRF true
-         MOVE.B  %D1,18(%A0)     | Store physical status in DCB
+CON_IN:  MOVEM.L %D1/%A1,-(%A7)   | Save working registers
+         LEA.L   12(%A0),%A1      | Get pointer to ACIA from DCB
+         MOVE.L  (%A1),%A1        | Get address of ACIA in A1
+         CLR.B   19(%A0)          | Clear logical error in DCB
+CON_I1:  MOVE.B  (%A1),%D1        | Read ACIA status
+         BTST.B  #0,%D1           | Test RDRF
+         BEQ.S   CON_I1           | Repeat until RDRF true
+         MOVE.B  %D1,18(%A0)      | Store physical status in DCB
          AND.B   #0b011110100,%D1 | Mask to input error bits
-         BEQ.S   CON_I2          | If no error then skip update
-         MOVE.B  #1,19(%A0)      | Else update logical error
-CON_I2:  MOVE.B  2(%A1),%D0      | Read input from ACIA
-         MOVEM.L (%A7)+,%A1/%D1  | Restore working registers
+         BEQ.S   CON_I2           | If no error then skip update
+         MOVE.B  #1,19(%A0)       | Else update logical error
+CON_I2:  MOVE.B  2(%A1),%D0       | Read input from ACIA
+         MOVEM.L (%A7)+,%A1/%D1   | Restore working registers
          RTS
 *
 *************************************************************************
@@ -622,7 +622,7 @@ CON_OT1: MOVE.B  (%A1),%D1          | Read ACIA status
          BTST.B  #0,%D1             | Test RDRF bit (any input?)
          BEQ.S   CON_OT3            | If no input then test output status
          MOVE.B  2(%A1),%D2         | Else read the input
-         AND.B   #0b01011111,%D2     | Strip parity and bit 5
+         AND.B   #0b01011111,%D2    | Strip parity and bit 5
          CMP.B   #WAIT,%D2          | and test for a wait condition
          BNE.S   CON_OT3            | If not wait then ignore and test O/P
 CON_OT2: MOVE.B  (%A1),%D2          | Else read ACIA status register
@@ -671,7 +671,7 @@ GETCHAR: MOVE.L  %A0,-(%A7)       | Save working register
          BNE.S   GETCH2           | If flag not zero do not convert case
          BTST.B  #6,%D0           | Test input for lower case
          BEQ.S   GETCH2           | If upper case then skip conversion
-         AND.B   #0b11011111,%D0   | Else clear bit 5 for upper case conv
+         AND.B   #0b11011111,%D0  | Else clear bit 5 for upper case conv
 GETCH2:  TST.B   ECHO(%A6)        | Do we need to echo the input?
          BNE.S   GETCH3           | If ECHO not zero then no echo
          BSR.S   PUTCHAR          | Else echo the input
