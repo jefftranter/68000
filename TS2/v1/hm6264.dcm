@@ -1,0 +1,8 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP HM6264
+D RAM 8Kb
+K RAM 8KB
+$ENDCMP
+#
+#End Doc Library
