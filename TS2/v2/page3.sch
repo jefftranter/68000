@@ -15,11 +15,11 @@ EELAYER 25 0
 EELAYER END
 $Descr A 11000 8500
 encoding utf-8
-Sheet 3 8
+Sheet 4 8
 Title "TS2 68000 Single Board Computer"
 Date "2016-09-03"
 Rev "2.0"
-Comp ""
+Comp "Jeff Tranter"
 Comment1 "RAM and ROM Address Select"
 Comment2 ""
 Comment3 ""

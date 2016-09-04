@@ -1,17 +1,7 @@
-update=Fri 02 Sep 2016 09:29:43 PM EDT
+update=Sun 04 Sep 2016 10:06:12 AM EDT
 last_client=kicad
 [general]
 version=1
-[schematic_editor]
-version=1
-PageLayoutDescrFile=
-PlotDirectoryName=/home/tranter/
-SubpartIdSeparator=0
-SubpartFirstId=65
-NetFmtName=
-SpiceForceRefPrefix=0
-SpiceUseNetNumbers=0
-LabSize=60
 [eeschema]
 version=1
 LibDir=
@@ -27,3 +17,13 @@ LibName8=cmos4000
 LibName9=adc-dac
 LibName10=memory
 LibName11=xilinx
+[schematic_editor]
+version=1
+PageLayoutDescrFile=
+PlotDirectoryName=/home/tranter/
+SubpartIdSeparator=0
+SubpartFirstId=65
+NetFmtName=
+SpiceForceRefPrefix=0
+SpiceUseNetNumbers=0
+LabSize=60
