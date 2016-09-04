@@ -15,7 +15,7 @@ EELAYER 25 0
 EELAYER END
 $Descr A 11000 8500
 encoding utf-8
-Sheet 4 8
+Sheet 5 8
 Title "TS2 68000 Single Board Computer"
 Date "2016-09-03"
 Rev "2.0"
