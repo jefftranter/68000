@@ -565,8 +565,6 @@ Connection ~ 4200 4900
 Wire Wire Line
 	3150 1850 3250 1850
 Wire Wire Line
-	3150 1850 3150 2050
-Wire Wire Line
 	3250 1350 3250 2250
 Connection ~ 3250 1850
 Wire Wire Line
@@ -883,4 +881,7 @@ Wire Wire Line
 Connection ~ 7300 3400
 Connection ~ 7550 3750
 Connection ~ 7500 900 
+Wire Wire Line
+	3150 2050 3250 2050
+Connection ~ 3250 2050
 $EndSCHEMATC
