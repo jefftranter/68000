@@ -62,19 +62,13 @@ RESET:
 
 # Send a character out the first serial port
 
-ACIA_1   =        0x00010040        | Console ACIA control
-ACIA_2   =        ACIA_1+1          | Auxilary ACIA control
-
-SETACIA:                            | Setup ACIA parameters
-         LEA.L    ACIA_1,%A0        | A0 points to console ACIA
-         MOVE.B   #0x03,(%A0)       | Reset ACIA1
-         MOVE.B   #0x03,1(%A0)      | Reset ACIA2
-         MOVE.B   #0x15,(%A0)       | Set up ACIA1 constants (no IRQ,
-         MOVE.B   #0x15,1(%A0)      | RTS* low, 8 bit, no parity, 1 stop)
-         RTS                        | Return
-*
+ACIA     =        0x00010040       | Console ACIA control
+                                   | Setup ACIA parameters
+        lea.l    ACIA,%a0          | A0 points to console ACIA
+        move.b   #0x03,(%a0)       | Reset ACIA
+        move.b   #0x15,(%a0)       | Set up ACIA constants (no IRQ, RTS* low, 8 bit, no parity, 1 stop)
+        move.b   #'A',2(%a0)       | Send character A out ACIA
 
         bra     RESET
 
         .end
-
