@@ -26,28 +26,6 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L 2764 U12
-U 1 1 57C37A1F
-P 4350 5100
-F 0 "U12" H 4100 6100 50  0000 C CNN
-F 1 "2764" H 4350 5100 50  0000 C CNN
-F 2 "" H 4350 5100 50  0000 C CNN
-F 3 "" H 4350 5100 50  0000 C CNN
-	1    4350 5100
-	1    0    0    -1  
-$EndComp
-$Comp
-L 2764 U14
-U 1 1 57C37AB5
-P 7600 5100
-F 0 "U14" H 7350 6100 50  0000 C CNN
-F 1 "2764" H 7650 5100 50  0000 C CNN
-F 2 "" H 7600 5100 50  0000 C CNN
-F 3 "" H 7600 5100 50  0000 C CNN
-	1    7600 5100
-	1    0    0    -1  
-$EndComp
-$Comp
 L HM6264 U11
 U 1 1 57CAE143
 P 4350 2450
@@ -283,10 +261,6 @@ F 3 "" H 4350 4150 50  0000 C CNN
 $EndComp
 Wire Wire Line
 	3300 5600 3650 5600
-Wire Wire Line
-	3650 5700 3550 5700
-Wire Wire Line
-	3550 5700 3550 5600
 $Comp
 L VCC #PWR037
 U 1 1 57C5238F
@@ -324,7 +298,6 @@ Wire Wire Line
 	3450 6000 3650 6000
 Wire Wire Line
 	2300 5900 3650 5900
-NoConn ~ 3650 5500
 Wire Wire Line
 	3650 5400 2300 5400
 Wire Wire Line
@@ -347,7 +320,6 @@ Wire Wire Line
 	2300 4500 3650 4500
 Wire Wire Line
 	2300 4400 3650 4400
-Connection ~ 3550 5600
 Text GLabel 5350 4200 2    60   BiDi ~ 0
 D00
 Wire Wire Line
@@ -547,7 +519,6 @@ F 3 "" H 7600 6050 50  0000 C CNN
 	1    7600 6050
 	1    0    0    -1  
 $EndComp
-NoConn ~ 6900 5500
 Text GLabel 6450 4300 0    60   BiDi ~ 0
 A02
 Text GLabel 6450 4400 0    60   BiDi ~ 0
@@ -574,10 +545,6 @@ Text GLabel 6450 5400 0    60   BiDi ~ 0
 A13
 Wire Wire Line
 	6500 5600 6900 5600
-Wire Wire Line
-	6800 5600 6800 5700
-Wire Wire Line
-	6800 5700 6900 5700
 Connection ~ 6800 5600
 $Comp
 L VCC #PWR042
@@ -633,4 +600,37 @@ Wire Wire Line
 Wire Wire Line
 	2400 3750 3450 3750
 Connection ~ 3450 3950
+$Comp
+L 28C64 U12
+U 1 1 57D4E8EE
+P 4350 5100
+F 0 "U12" H 4100 6100 50  0000 C CNN
+F 1 "28C64" H 4350 4100 50  0000 C CNN
+F 2 "" H 4350 5100 50  0000 C CNN
+F 3 "" H 4350 5100 50  0000 C CNN
+	1    4350 5100
+	1    0    0    -1  
+$EndComp
+NoConn ~ 3650 5700
+Wire Wire Line
+	3650 5500 3600 5500
+Wire Wire Line
+	3600 5500 3600 5600
+Connection ~ 3600 5600
+$Comp
+L 28C64 U14
+U 1 1 57D4F506
+P 7600 5100
+F 0 "U14" H 7350 6100 50  0000 C CNN
+F 1 "28C64" H 7600 4100 50  0000 C CNN
+F 2 "" H 7600 5100 50  0000 C CNN
+F 3 "" H 7600 5100 50  0000 C CNN
+	1    7600 5100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6900 5500 6800 5500
+NoConn ~ 6900 5700
+Wire Wire Line
+	6800 5500 6800 5600
 $EndSCHEMATC
