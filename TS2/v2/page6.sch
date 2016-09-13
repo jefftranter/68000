@@ -37,17 +37,6 @@ F 3 "" H 2200 1800 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L 74LS161 U22
-U 1 1 57C4D9FF
-P 4400 1800
-F 0 "U22" H 4450 1900 50  0000 C CNN
-F 1 "74LS161" H 4500 1600 50  0000 C CNN
-F 2 "" H 4400 1800 50  0000 C CNN
-F 3 "" H 4400 1800 50  0000 C CNN
-	1    4400 1800
-	1    0    0    -1  
-$EndComp
-$Comp
 L 74LS74 U20
 U 1 1 57CB85BB
 P 2800 3550
@@ -135,7 +124,7 @@ F 3 "" H 6750 5550 50  0000 C CNN
 	5    6750 5550
 	-1   0    0    1   
 $EndComp
-Text GLabel 3300 2100 0    60   Input ~ 0
+Text GLabel 3100 2100 0    60   Input ~ 0
 CLK
 $Comp
 L 74LS06 U4
@@ -255,23 +244,23 @@ $EndComp
 $Comp
 L VCC #PWR062
 U 1 1 57CB85CC
-P 3500 1200
-F 0 "#PWR062" H 3500 1050 50  0001 C CNN
-F 1 "VCC" H 3500 1350 50  0000 C CNN
-F 2 "" H 3500 1200 50  0000 C CNN
-F 3 "" H 3500 1200 50  0000 C CNN
-	1    3500 1200
+P 3500 2000
+F 0 "#PWR062" H 3500 1850 50  0001 C CNN
+F 1 "VCC" H 3500 2150 50  0000 C CNN
+F 2 "" H 3500 2000 50  0000 C CNN
+F 3 "" H 3500 2000 50  0000 C CNN
+	1    3500 2000
 	1    0    0    -1  
 $EndComp
 $Comp
 L GND #PWR063
 U 1 1 57CB85CD
-P 3400 2350
-F 0 "#PWR063" H 3400 2100 50  0001 C CNN
-F 1 "GND" H 3400 2200 50  0000 C CNN
-F 2 "" H 3400 2350 50  0000 C CNN
-F 3 "" H 3400 2350 50  0000 C CNN
-	1    3400 2350
+P 2850 1600
+F 0 "#PWR063" H 2850 1350 50  0001 C CNN
+F 1 "GND" H 2850 1450 50  0000 C CNN
+F 2 "" H 2850 1600 50  0000 C CNN
+F 3 "" H 2850 1600 50  0000 C CNN
+	1    2850 1600
 	1    0    0    -1  
 $EndComp
 NoConn ~ 5100 1500
@@ -389,25 +378,10 @@ Wire Wire Line
 Wire Wire Line
 	3500 2000 3700 2000
 Wire Wire Line
-	3500 1200 3500 2300
-Wire Wire Line
 	3500 2300 3700 2300
-Wire Wire Line
-	3500 1400 3700 1400
 Connection ~ 3500 2000
 Wire Wire Line
-	3500 1300 3700 1300
-Connection ~ 3500 1400
-Connection ~ 3500 1300
-Wire Wire Line
-	3700 1500 3400 1500
-Wire Wire Line
-	3400 1500 3400 2350
-Wire Wire Line
-	3700 1600 3400 1600
-Connection ~ 3400 1600
-Wire Wire Line
-	3300 2100 3700 2100
+	3100 2100 3700 2100
 Wire Wire Line
 	5100 1600 5750 1600
 Wire Wire Line
@@ -681,4 +655,164 @@ F 3 "" H 7650 3200 50  0000 C CNN
 	1    7650 3200
 	1    0    0    -1  
 $EndComp
+$Comp
+L Jumper_NC_Small JP1
+U 1 1 57D82D4E
+P 3050 1600
+F 0 "JP1" H 3050 1680 50  0000 C CNN
+F 1 "Jumper_NC_Small" H 3060 1540 50  0001 C CNN
+F 2 "" H 3050 1600 50  0000 C CNN
+F 3 "" H 3050 1600 50  0000 C CNN
+	1    3050 1600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Jumper_NO_Small JP3
+U 1 1 57D82D8D
+P 3050 1400
+F 0 "JP3" H 3050 1480 50  0000 C CNN
+F 1 "Jumper_NO_Small" H 3060 1340 50  0001 C CNN
+F 2 "" H 3050 1400 50  0000 C CNN
+F 3 "" H 3050 1400 50  0000 C CNN
+	1    3050 1400
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3500 2000 3500 2300
+Wire Wire Line
+	3150 1300 3700 1300
+Wire Wire Line
+	3150 1400 3700 1400
+Wire Wire Line
+	3150 1500 3700 1500
+Wire Wire Line
+	3150 1600 3700 1600
+$Comp
+L R R24
+U 1 1 57D834D0
+P 3700 1050
+F 0 "R24" V 3780 1050 50  0000 C CNN
+F 1 "4700" V 3700 1050 50  0000 C CNN
+F 2 "" V 3630 1050 50  0000 C CNN
+F 3 "" H 3700 1050 50  0000 C CNN
+	1    3700 1050
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R23
+U 1 1 57D8361D
+P 3550 1050
+F 0 "R23" V 3630 1050 50  0000 C CNN
+F 1 "4700" V 3550 1050 50  0000 C CNN
+F 2 "" V 3480 1050 50  0000 C CNN
+F 3 "" H 3550 1050 50  0000 C CNN
+	1    3550 1050
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R22
+U 1 1 57D8366F
+P 3400 1050
+F 0 "R22" V 3480 1050 50  0000 C CNN
+F 1 "4700" V 3400 1050 50  0000 C CNN
+F 2 "" V 3330 1050 50  0000 C CNN
+F 3 "" H 3400 1050 50  0000 C CNN
+	1    3400 1050
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R21
+U 1 1 57D8398D
+P 3250 1050
+F 0 "R21" V 3330 1050 50  0000 C CNN
+F 1 "4700" V 3250 1050 50  0000 C CNN
+F 2 "" V 3180 1050 50  0000 C CNN
+F 3 "" H 3250 1050 50  0000 C CNN
+	1    3250 1050
+	1    0    0    -1  
+$EndComp
+$Comp
+L Jumper_NO_Small JP4
+U 1 1 57D842DD
+P 3050 1300
+F 0 "JP4" H 3050 1380 50  0000 C CNN
+F 1 "Jumper_NO_Small" H 3060 1240 50  0001 C CNN
+F 2 "" H 3050 1300 50  0000 C CNN
+F 3 "" H 3050 1300 50  0000 C CNN
+	1    3050 1300
+	1    0    0    -1  
+$EndComp
+$Comp
+L Jumper_NC_Small JP2
+U 1 1 57D84338
+P 3050 1500
+F 0 "JP2" H 3050 1580 50  0000 C CNN
+F 1 "Jumper_NC_Small" H 3060 1440 50  0001 C CNN
+F 2 "" H 3050 1500 50  0000 C CNN
+F 3 "" H 3050 1500 50  0000 C CNN
+	1    3050 1500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2950 1600 2850 1600
+Wire Wire Line
+	2950 1300 2950 1600
+Connection ~ 2950 1500
+Connection ~ 2950 1400
+Wire Wire Line
+	3250 1200 3250 1600
+Connection ~ 3250 1600
+Wire Wire Line
+	3400 1200 3400 1500
+Connection ~ 3400 1500
+Wire Wire Line
+	3550 1200 3550 1400
+Connection ~ 3550 1400
+Wire Wire Line
+	3700 1400 3700 1200
+Connection ~ 3700 1400
+Connection ~ 2950 1600
+Wire Wire Line
+	3250 900  3700 900 
+Connection ~ 3550 900 
+Connection ~ 3400 900 
+Wire Wire Line
+	3250 800  3250 900 
+$Comp
+L VCC #PWR079
+U 1 1 57D85188
+P 3250 800
+F 0 "#PWR079" H 3250 650 50  0001 C CNN
+F 1 "VCC" H 3250 950 50  0000 C CNN
+F 2 "" H 3250 800 50  0000 C CNN
+F 3 "" H 3250 800 50  0000 C CNN
+	1    3250 800 
+	1    0    0    -1  
+$EndComp
+Connection ~ 3250 900 
+Text Notes 2150 1300 0    60   ~ 0
+Select DTACK*\ndelay as desired
+$Comp
+L 74LS161 U22
+U 1 1 57C4D9FF
+P 4400 1800
+F 0 "U22" H 4450 1900 50  0000 C CNN
+F 1 "74LS161" H 4500 1600 50  0000 C CNN
+F 2 "" H 4400 1800 50  0000 C CNN
+F 3 "" H 4400 1800 50  0000 C CNN
+	1    4400 1800
+	1    0    0    -1  
+$EndComp
+Text Notes 3550 7400 0    60   ~ 0
+Watchdog timer
+Text Notes 5350 5000 0    60   ~ 0
+DTACK* generated in single step mode
+Text Notes 650  5900 0    60   ~ 0
+A single bus cycle\nis executed each\ntime the STEP switch\nis pushed
+Text Notes 5350 3650 0    60   ~ 0
+Single step control
+Text Notes 700  2300 0    60   ~ 0
+Local memory\nselect signals
+Text Notes 4350 900  0    60   ~ 0
+DTACK* generator for local memory
 $EndSCHEMATC
