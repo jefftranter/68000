@@ -355,9 +355,9 @@ Text GLabel 5900 2050 2    60   Output ~ 0
 RESET*
 Text GLabel 5900 2650 2    60   Output ~ 0
 HALT*
-Text GLabel 7450 4900 0    60   BiDi ~ 0
+Text GLabel 6800 4900 0    60   BiDi ~ 0
 HALT*
-Text GLabel 7450 5000 0    60   BiDi ~ 0
+Text GLabel 6800 5000 0    60   BiDi ~ 0
 RESET*
 $Comp
 L R R12
@@ -614,25 +614,25 @@ Wire Wire Line
 	5800 2650 5800 5500
 Connection ~ 5800 2650
 Wire Wire Line
-	7900 4900 7450 4900
+	6800 4900 7900 4900
 Wire Wire Line
-	7900 5000 7450 5000
+	6800 5000 7900 5000
 Wire Wire Line
-	7450 4450 7900 4450
+	6800 4450 7900 4450
 Wire Wire Line
-	7450 4250 7900 4250
+	6800 4250 7900 4250
 Wire Wire Line
 	7750 4250 7750 4150
 Wire Wire Line
 	7550 4150 7550 4450
 Wire Wire Line
-	7750 3850 7750 3750
+	7750 3750 7750 3850
 Wire Wire Line
 	7550 3850 7550 3750
 Wire Wire Line
 	6800 3400 7900 3400
 Wire Wire Line
-	7550 3750 7750 3750
+	7150 3750 7750 3750
 Wire Wire Line
 	9900 1800 10000 1800
 Wire Wire Line
@@ -693,10 +693,10 @@ Wire Wire Line
 	9900 2700 10000 2700
 Wire Wire Line
 	6800 3300 7900 3300
-Text GLabel 7450 4250 0    60   Input ~ 0
+Text GLabel 6800 4250 0    60   Input ~ 0
 BERR*
 Connection ~ 7750 4250
-Text GLabel 7450 4450 0    60   Input ~ 0
+Text GLabel 6800 4450 0    60   Input ~ 0
 DTACK*
 Connection ~ 7550 4450
 $Comp
@@ -885,4 +885,37 @@ Wire Wire Line
 	3150 2050 3250 2050
 Connection ~ 3250 2050
 Connection ~ 1900 3300
+$Comp
+L R R26
+U 1 1 58362FB7
+P 7350 4000
+F 0 "R26" V 7430 4000 50  0000 C CNN
+F 1 "4.7K" V 7350 4000 50  0000 C CNN
+F 2 "" V 7280 4000 50  0000 C CNN
+F 3 "" H 7350 4000 50  0000 C CNN
+	1    7350 4000
+	1    0    0    -1  
+$EndComp
+$Comp
+L R R27
+U 1 1 5836302F
+P 7150 4000
+F 0 "R27" V 7230 4000 50  0000 C CNN
+F 1 "4.7K" V 7150 4000 50  0000 C CNN
+F 2 "" V 7080 4000 50  0000 C CNN
+F 3 "" H 7150 4000 50  0000 C CNN
+	1    7150 4000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7150 3750 7150 3850
+Wire Wire Line
+	7350 3850 7350 3750
+Connection ~ 7350 3750
+Wire Wire Line
+	7350 4150 7350 4900
+Connection ~ 7350 4900
+Wire Wire Line
+	7150 4150 7150 5000
+Connection ~ 7150 5000
 $EndSCHEMATC
