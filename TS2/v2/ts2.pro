@@ -1,4 +1,4 @@
-update=Wed 23 Nov 2016 06:03:43 PM EST
+update=Sun 27 Nov 2016 10:27:40 AM EST
 last_client=kicad
 [general]
 version=1
@@ -20,7 +20,7 @@ LibName11=xilinx
 [schematic_editor]
 version=1
 PageLayoutDescrFile=
-PlotDirectoryName=/home/tranter/
+PlotDirectoryName=/home/tranter/git/68000/TS2/v2/
 SubpartIdSeparator=0
 SubpartFirstId=65
 NetFmtName=

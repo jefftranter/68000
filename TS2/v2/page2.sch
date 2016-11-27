@@ -17,7 +17,7 @@ $Descr A 11000 8500
 encoding utf-8
 Sheet 3 8
 Title "TS2 68000 Single Board Computer"
-Date "2016-09-03"
+Date "2016-11-27"
 Rev "2.0"
 Comp "Jeff Tranter"
 Comment1 "Address Decoding"
@@ -180,8 +180,6 @@ A03
 Text GLabel 1150 6200 0    60   Output ~ 0
 VPA*
 Wire Wire Line
-	1150 6200 7850 6200
-Wire Wire Line
 	8500 1400 9300 1400
 Text GLabel 9300 1400 2    60   Output ~ 0
 SEL0*
@@ -261,31 +259,6 @@ F 3 "" H 7900 3650 50  0000 C CNN
 $EndComp
 Wire Wire Line
 	7850 6200 7850 4850
-$Comp
-L R R19
-U 1 1 57C1D3CA
-P 3600 5950
-F 0 "R19" V 3680 5950 50  0000 C CNN
-F 1 "4.7K" V 3600 5950 50  0000 C CNN
-F 2 "" V 3530 5950 50  0000 C CNN
-F 3 "" H 3600 5950 50  0000 C CNN
-	1    3600 5950
-	1    0    0    -1  
-$EndComp
-$Comp
-L VCC #PWR029
-U 1 1 57C1D3F9
-P 3600 5800
-F 0 "#PWR029" H 3600 5650 50  0001 C CNN
-F 1 "VCC" H 3600 5950 50  0000 C CNN
-F 2 "" H 3600 5800 50  0000 C CNN
-F 3 "" H 3600 5800 50  0000 C CNN
-	1    3600 5800
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	3600 6100 3600 6200
-Connection ~ 3600 6200
 Wire Wire Line
 	7100 5350 9300 5350
 Text GLabel 9300 5350 2    60   Output ~ 0
@@ -361,10 +334,10 @@ Wire Wire Line
 Wire Wire Line
 	7200 3900 7200 3700
 $Comp
-L VCC #PWR030
+L VCC #PWR029
 U 1 1 57C1EB1C
 P 7200 3700
-F 0 "#PWR030" H 7200 3550 50  0001 C CNN
+F 0 "#PWR029" H 7200 3550 50  0001 C CNN
 F 1 "VCC" H 7200 3850 50  0000 C CNN
 F 2 "" H 7200 3700 50  0000 C CNN
 F 3 "" H 7200 3700 50  0000 C CNN
@@ -495,4 +468,6 @@ Wire Wire Line
 	8900 1800 8500 1800
 NoConn ~ 8500 3850
 NoConn ~ 8500 3950
+Wire Wire Line
+	7850 6200 1150 6200
 $EndSCHEMATC
