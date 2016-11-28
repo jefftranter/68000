@@ -13,6 +13,7 @@ the version that runs on the the TS2 hardware.
 I have not tested it, other than getting it to assemble and confirming
 that the assembled output matches the original.
 
+<pre>
 Teesside TS2 Monitor (TSBUG2) Commands
 ======================================
 
@@ -41,3 +42,4 @@ KILL               Removes breakpoints from the code.
 GB <address>       Sets breakpoints and then calls GO.
 
 REG <reg> <value>  Loads <value> into <reg> in TASK_T. Used to preset registers before a GO or GB.
+</pre>
