@@ -12,6 +12,6 @@ Specifically, removed was:
 
 - line drivers and receivers for serial ports (FTDI USB to serial
   adaptors are used instead) and support for host/terminal transparent
-  mode. This also removes the need to +12V/-12V power supplies.
+  mode. This also removes the need for +12V/-12V power supplies.
 
 I have not built or tested the circuit but I plan to do so.
