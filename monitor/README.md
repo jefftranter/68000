@@ -17,21 +17,21 @@ that the assembled output matches the original.
 Teesside TS2 Monitor (TSBUG2) Commands
 ======================================
 
-JUMP <address>     Begin at <address>.
+JUMP &lt;address&gt;     Begin at &lt;address&gt;.
 
-MEMORY <address>   Examines contents of <address> and allows them to be changed.
+MEMORY &lt;address&gt;   Examines contents of &lt;address&gt; and allows them to be changed.
 
-LOAD <string>      Loads S1/S2 records from the host. <string> is sent to host.
+LOAD &lt;string&gt;      Loads S1/S2 records from the host. &lt;string&gt; is sent to host.
 
-DUMP <string>      Sends S1 records to the host and is preceeded by <string>.
+DUMP &lt;string&gt;      Sends S1 records to the host and is preceeded by &lt;string&gt;.
 
 TRAN               Enters the transparent mode. Exited by ESC, E.
 
-NOBR <address>     Removes the breakpoint at <address> from the BP table. If no address is given all BPs are removed.
+NOBR &lt;address&gt;     Removes the breakpoint at &lt;address&gt; from the BP table. If no address is given all BPs are removed.
 
 DISP               Displays the contents of the pseudo registers in TSK_T.
 
-GO <address>       Starts program execution at <address> and loads regs from TSK_T.
+GO &lt;address&gt;       Starts program execution at &lt;address&gt; and loads regs from TSK_T.
 
 BRGT               Puts a breakpoint in the BP table, but not in the code.
 
@@ -39,7 +39,7 @@ PLAN               Puts the breakpoints in the code.
 
 KILL               Removes breakpoints from the code.
 
-GB <address>       Sets breakpoints and then calls GO.
+GB &lt;address&gt;       Sets breakpoints and then calls GO.
 
-REG <reg> <value>  Loads <value> into <reg> in TASK_T. Used to preset registers before a GO or GB.
+REG &lt;reg&gt; &lt;value&gt;  Loads &lt;value&gt; into &lt;reg&gt; in TASK_T. Used to preset registers before a GO or GB.
 </pre>
