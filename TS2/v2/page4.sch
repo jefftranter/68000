@@ -61,11 +61,7 @@ $EndComp
 Wire Wire Line
 	2550 3650 2550 3950
 Wire Wire Line
-	2300 3650 2550 3650
-Wire Wire Line
-	2550 3650 3650 3650
-Wire Wire Line
-	3650 3650 6900 3650
+	2300 3650 6900 3650
 Wire Wire Line
 	3650 3650 3650 3300
 Connection ~ 2550 3650
@@ -76,9 +72,7 @@ Wire Wire Line
 Text GLabel 2300 3150 0    60   Input ~ 0
 CS_RAM1L*
 Wire Wire Line
-	3450 3750 3450 3950
-Wire Wire Line
-	3450 3950 3450 6000
+	3450 3750 3450 6000
 Wire Wire Line
 	2300 1550 3650 1550
 Wire Wire Line
@@ -266,9 +260,7 @@ F 3 "" H 4350 4150 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3300 5600 3550 5600
-Wire Wire Line
-	3550 5600 3650 5600
+	3300 5600 3650 5600
 $Comp
 L VCC #PWR038
 U 1 1 57C5238F
@@ -552,9 +544,7 @@ A12
 Text GLabel 6450 5400 0    60   BiDi ~ 0
 A13
 Wire Wire Line
-	6500 5600 6800 5600
-Wire Wire Line
-	6800 5600 6900 5600
+	6500 5600 6900 5600
 Connection ~ 6800 5600
 $Comp
 L VCC #PWR043
