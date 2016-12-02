@@ -613,4 +613,12 @@ Wire Wire Line
 Wire Wire Line
 	6800 5500 6800 5600
 NoConn ~ 6900 5700
+Text Notes 3850 1150 0    60   ~ 0
+RAM2 $4000 - $7FFF (ODD)
+Text Notes 7100 1150 0    60   ~ 0
+RAM2 $4000 - $7FFF (EVEN)
+Text Notes 3800 6400 0    60   ~ 0
+ROM2 $C000 - $FFFF (ODD)
+Text Notes 7100 6400 0    60   ~ 0
+ROM2 $C000 - $FFFF (EVEN)
 $EndSCHEMATC

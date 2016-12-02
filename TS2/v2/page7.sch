@@ -533,4 +533,8 @@ Wire Wire Line
 	4500 4700 4500 4600
 Wire Wire Line
 	8050 800  5100 800 
+Text Notes 9450 2250 0    60   ~ 0
+FTDI
+Text Notes 9400 5100 0    60   ~ 0
+FTDI
 $EndSCHEMATC
