@@ -14,4 +14,5 @@ Specifically, removed was:
   adaptors are used instead) and support for host/terminal transparent
   mode. This also removes the need for +12V/-12V power supplies.
 
-I have not built or tested the circuit but I plan to do so.
+I am in the process of building and testing the circuit.
+See more details on my blog at http://jefftranter.blogspot.ca/
