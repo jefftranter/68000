@@ -17,7 +17,7 @@ $Descr A 11000 8500
 encoding utf-8
 Sheet 2 8
 Title "TS2 68000 Single Board Computer"
-Date "2016-11-27"
+Date "2016-12-04"
 Rev "2.0"
 Comp "Jeff Tranter"
 Comment1 "Reset, Halt, and Clock Control Circuits"
