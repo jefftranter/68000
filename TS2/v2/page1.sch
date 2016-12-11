@@ -936,4 +936,5 @@ Text GLabel 7450 2000 0    60   Input ~ 0
 IPL2*
 Connection ~ 7650 1900
 Connection ~ 7800 2000
+Connection ~ 5700 2050
 $EndSCHEMATC
