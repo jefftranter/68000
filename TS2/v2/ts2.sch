@@ -15,9 +15,9 @@ EELAYER 25 0
 EELAYER END
 $Descr A 11000 8500
 encoding utf-8
-Sheet 1 8
+Sheet 1 9
 Title "TS2 68000 Single Board Computer"
-Date "2016-12-04"
+Date "2016-12-11"
 Rev "2.0"
 Comp "Jeff Tranter"
 Comment1 "Top Level Schematic"
@@ -368,4 +368,12 @@ F 3 "" H 7200 5400 50  0000 C CNN
 	1    7200 5400
 	1    0    0    -1  
 $EndComp
+$Sheet
+S 6000 3250 950  600 
+U 584DB98F
+F0 "page8" 60
+F1 "page8.sch" 60
+$EndSheet
+Text Notes 6350 3700 0    250  ~ 0
+8
 $EndSCHEMATC

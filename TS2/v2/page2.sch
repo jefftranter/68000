@@ -15,9 +15,9 @@ EELAYER 25 0
 EELAYER END
 $Descr A 11000 8500
 encoding utf-8
-Sheet 3 8
+Sheet 3 9
 Title "TS2 68000 Single Board Computer"
-Date "2016-12-04"
+Date "2016-12-11"
 Rev "2.0"
 Comp "Jeff Tranter"
 Comment1 "Address Decoding"
