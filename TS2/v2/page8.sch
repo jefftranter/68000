@@ -20,7 +20,7 @@ Title "TS2 68000 Single Board Computer"
 Date "2016-12-11"
 Rev "2.0"
 Comp "Jeff Tranter"
-Comment1 "Interrupt Control Circuitry"
+Comment1 "Interrupt Control Circuitry (optional)"
 Comment2 ""
 Comment3 ""
 Comment4 ""
@@ -409,8 +409,6 @@ Text Label 8550 4550 2    60   ~ 0
 IACK5*
 Text Label 8550 4650 2    60   ~ 0
 IACK6*
-Text Notes 8550 4750 2    60   ~ 0
-IACK7*
 NoConn ~ 8550 4750
 NoConn ~ 8550 4650
 NoConn ~ 8550 4550
@@ -418,4 +416,6 @@ NoConn ~ 8550 4450
 NoConn ~ 8550 4350
 NoConn ~ 8550 4250
 NoConn ~ 8550 4150
+Text Label 8550 4750 2    60   ~ 0
+IACK7*
 $EndSCHEMATC

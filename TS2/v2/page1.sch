@@ -937,4 +937,6 @@ IPL2*
 Connection ~ 7650 1900
 Connection ~ 7800 2000
 Connection ~ 5700 2050
+Text Notes 6200 1200 0    60   ~ 0
+Pullups can be omitted if\noptional interrupt circuitry\non page 9 is present.
 $EndSCHEMATC
