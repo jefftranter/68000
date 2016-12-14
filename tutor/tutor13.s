@@ -5094,7 +5094,7 @@ EA31:    CMPI.B  #'(',%D0
 
          MOVE.B  (%A5)+,%D0
          CMPI.B  #',',%D0
-         BEQ     EA5116         | MODE = (A@,R@)  ;IMPLIED %D5 = 0 DATA
+         BEQ     EA5116         | MODE = (A@,R@)  ;IMPLIED D5 = 0 DATA
 
          CMPI.B  #')',%D0       | LOOK FOR CLOSING )
          BNE.S   ER3
@@ -5353,19 +5353,19 @@ EA16BITC:MOVE.L  #0x7FFF,%D1    | D1  <--  2^16-1.
 EA8BIT:
          BSR.S   EA8BITC        | CHECK RANGE -128 TO 127.  IF INVALID,
          MOVE.L  %D5,%D1        | CHECK WHETHER THE HIGH 24 BITS ARE
-         LSR.L   #8,%D1         | 0 (WHICH IMPLIES THAT %D5 <= 255).
+         LSR.L   #8,%D1         | 0 (WHICH IMPLIES THAT D5 <= 255).
          RTS
 
 EA8BITS:
-         BSR.S   EA8BITC        |JUST CHECK FOR -127 <= %D5 <= 128.
+         BSR.S   EA8BITC        |JUST CHECK FOR -127 <= D5 <= 128.
          RTS                    | (BSR PUTS NEEDED ADDRESS ON STACK!)
 
 EA8BITC: MOVEQ   #0x7F,%D1      | D1  <--  2^8 - 1.
 
 *                  *** NOTE: THIS ROUTINE PLAYS WITH THE STACK ***
-EAS:     CMP.L   %D1,%D5        | IF %D5 > 2^N-1, RETURN WITH <NE> (INVAL).
+EAS:     CMP.L   %D1,%D5        | IF D5 > 2^N-1, RETURN WITH <NE> (INVAL).
          BGT.S   EASEX
-         NOT.L   %D1            | IF %D5 < -2^N,  RETURN WITH <NE> (INVAL).
+         NOT.L   %D1            | IF D5 < -2^N,  RETURN WITH <NE> (INVAL).
          CMP.L   %D1,%D5
          BLT.S   EASEX
 
@@ -5682,7 +5682,7 @@ M432:
          MOVE.B  (%A0)+,%D2
          LSL.W   #8,%D2
          MOVE.B  (%A0)+,%D2     | D2 = FIRST WORD MASK
-         MOVE.W  %D2,(%A1)      | *D2,TDATA(%A1)
+         MOVE.W  %D2,(%A1)      | *D2,TDATA(A1)
 
 * INSURE .S .W MATCH OP-CODE
 
@@ -5759,11 +5759,11 @@ CMMD2:   CMPI.B  #BLANK,(%A5)
          BNE     ER             | OPERAND DID NOT END WITH SPACE
 
 MCMMD2:  .align  2              | NO OPERAND SEQUENCE
-         MOVE.W  %D2,(%A1)      | *D2,TDATA(%A1)
+         MOVE.W  %D2,(%A1)      | *D2,TDATA(A1)
 
          MOVE.B  TNB(%A1),%D3   | FORMAT DATA
          MOVE.L  %D3,%D6        | D7 = NUMBER OF BYTES
-         LEA     (%A1),%A2      | A2 = PTR TO HEX DATA  *TDATA(%A1),%A2
+         LEA     (%A1),%A2      | A2 = PTR TO HEX DATA  *TDATA(A1),A2
          MOVE.L  %A3,%A6        | D3 = NUMBER OF BYTES
          ADD.L   #FDATA,%A6     | A6 = STORE PTR
 FPR315:  MOVE.B  (%A2)+,%D0
@@ -5773,7 +5773,7 @@ FPR315:  MOVE.B  (%A2)+,%D0
 
          CLR.L   %D7            | RESET ERROR FLAG
 
-CMMD35:  MOVEM.L (%A1),%D0-%D2  | D0-D2 = DATA   *TDATA(%A1),%D0-D2
+CMMD35:  MOVEM.L (%A1),%D0-%D2  | D0-D2 = DATA   *TDATA(A1),D0-D2
 
          MOVE.L  PTRBUFE(%A1),%A6 | A6 = POINTER TO END OF BUFFER
 
@@ -6055,7 +6055,7 @@ MAND:    BSR     FSIZE          | (INDEX 6)
          CMPI.B  #"#",(%A5)
          BEQ.S   MAND90
 
-         BSR     A5TODEST       | MOVE %A5 TO DESTINATION
+         BSR     A5TODEST       | MOVE A5 TO DESTINATION
 
          MOVE.B  (%A5),%D0      | D0 = 1ST CHAR OF DESTINATION
          MOVE.L  PTROP(%A1),%A5 | A5 = POINTER TO OPERAND
@@ -7283,7 +7283,7 @@ SCHR:    MOVE.B  %D0,(%A6)+     | OUTPUT STRING
 * MOVE FROM SR  (STATUS REGISTER)
 *
                                 | LONG
-IMVFSR:  MOVE.L  #";SR\0",%D0   | SR,
+IMVFSR:  MOVE.L  #"\x2CRS\0",%D0   | SR,
 
          BSR     SCHR
          BSR     EEA            | DATA ALTERABLE
@@ -7292,7 +7292,7 @@ IMVFSR:  MOVE.L  #";SR\0",%D0   | SR,
 * MOVE FROM USP (USER STACK POINTER)
 *
                                 | LONG
-IMVFUSP: MOVE.L  #";PSU",%D0    | USP,
+IMVFUSP: MOVE.L  #"\x2cPSU",%D0    | USP,
          BSR     SCHR
          BSR     FORMREGA
          BRA     CS11           | COMMON
@@ -7302,7 +7302,7 @@ IMVFUSP: MOVE.L  #";PSU",%D0    | USP,
                                 | LONG
 IMVTSR:  MOVE.W  #0xFFD,%D7     | DATA ADDRESSING
          BSR     EEA
-         MOVE.L  #"RS;\0",%D0   | ,SR
+         MOVE.L  #"RS\2c\0",%D0   | ,SR
 IMVT44:  BSR     SCHR
          BRA     CS11           | COMMON
 
@@ -7310,7 +7310,7 @@ IMVT44:  BSR     SCHR
 *
                                 | LONG
 IMVTUSP: BSR     FORMREGA
-         MOVE.L  #"PSU;",%D0    | ,USP
+         MOVE.L  #"PSU\x2c",%D0    | ,USP
          BRA     IMVT44
 
 *  MOVE TO CCR (CONDITION CODE REGISTER)
@@ -7318,7 +7318,7 @@ IMVTUSP: BSR     FORMREGA
                                 | LONG
 IMVTCCR: MOVE.W  #0xFFD,%D7     | DATA ADDRESSING
          BSR     EEA
-         MOVE.L  #"RCC;",%D0    | ,CCR
+         MOVE.L  #"RCC\X2C",%D0    | ,CCR
          BRA     IMVT44
 
 *  BIT   5432109876543210
@@ -7528,22 +7528,22 @@ ICCCC:   MOVEQ   #0x0F,%D0      | APPEND CONDITION CODE
          MOVE.B  %D1,(%A5)+
 ICCCC9:  RTS
 
-BRTBL:   DC.B    " T",     "T " | BRA ACCEPTED
-         DC.B    " F",    "F "
-         DC.B    "IH",     "HI"
-         DC.B    "SL",     "LS"
-         DC.B    "CC",     "CC"
-         DC.B    "SC",     "CS"
-         DC.B    "EN",     "NE"
-         DC.B    "QE",     "EQ"
-         DC.B    "CV",     "VC"
-         DC.B    "SV",     "VS"
-         DC.B    "LP",     "PL"
-         DC.B    "IM",     "MI"
-         DC.B    "EG",     "GE"
-         DC.B    "TL",     "LT"
-         DC.B    "TG",     "GT"
-         DC.B    "EL",     "LE"
+BRTBL:   DC.W    " T"           | "T " BRA ACCEPTED
+         DC.W    " F"           | "F "
+         DC.W    "IH"           | "HI"
+         DC.W    "SL"           | "LS"
+         DC.W    "CC"           | "CC"
+         DC.B    "SC"           | "CS"
+         DC.B    "EN"           | "NE"
+         DC.B    "QE"           | "EQ"
+         DC.B    "CV"           | "VC"
+         DC.B    "SV"           | "VS"
+         DC.B    "LP"           | "PL"
+         DC.B    "IM"           | "MI"
+         DC.B    "EG"           | "GE"
+         DC.B    "TL"           | "LT"
+         DC.B    "TG"           | "GT"
+         DC.B    "EL"           | "LE"
 
 *   BIT  5432109876543210
 *        ....RRRMMM......    DESTINATION REGISTER MODE
@@ -7786,13 +7786,13 @@ EA1113:  CMPI.B  #2,%D4
 FE11:    BRA     FERROR         | THIS MODE NOT ALLOWED
 EA1113A:
 
-         MOVE.W  (%A4,%D3),%D0  | 111010;  PC + DISPLACEMENT  DESTINATION(%PC)
+         MOVE.W  (%A4,%D3),%D0  | 111010;  PC + DISPLACEMENT  DESTINATION(PC)
          EXT.L   %D0
          ADD.L   HISPC(%A1),%D0
          ADDQ.L  #2,%D0
          MOVE.B  #'$',(%A6)+    | HEX "$"
          BSR     PNT8HX         | DESTINATION
-         MOVE.L  #")CP(",%D0    | (PC)
+         MOVE.L  #"\X29CP\X28",%D0    | (PC)
          BSR     SCHR           | STORE WORD
          ADDQ.L  #2,%D3         | SIZE
          RTS
@@ -7827,7 +7827,7 @@ EA1114:  CMPI.B  #3,%D4
          MOVE.B  #"$",(%A6)+    | HEX "$"
          BSR     PNT8HX         | DESTINATION
 
-         MOVE.L  #",CP(",%D0
+         MOVE.L  #"\X2CCP\X28",%D0
          BSR     SCHR           | DES(PC,
 
          MOVE.W  (%A4,%D3),%D4
@@ -7848,7 +7848,7 @@ EAF27:
          LSR.W   #8,%D0
 EAF35:   MOVE.B  %D0,(%A6)+     | DES(PC,R@.X
 
-         MOVE.B  #")",(%A6)+    | DES(PC,R@.X)
+         MOVE.B  #')',(%A6)+    | DES(PC,R@.X)
          ADDQ.L  #2,%D3
          RTS
 
@@ -8047,12 +8047,12 @@ DEC537:  MOVE.B  %D0,(%A5)+
 
          JMP     (%A0)
 *
-*  %A4 = POINTER TO DATA IN FRAME CREATED BY "LINK %A1,..."
-*  %A5 = POINTER STORE OP-CODE
-*  %A6 = POINTER STORE OPERAND
-*  %D3 = SIZE = 2 BYTES
-*  %D4 = FIRST WORD
-*  %D7 = ADDRESS MODES ALLOWED ($1FD) DATA ALTERABLE
+*  A4 = POINTER TO DATA IN FRAME CREATED BY "LINK A1,..."
+*  A5 = POINTER STORE OP-CODE
+*  A6 = POINTER STORE OPERAND
+*  D3 = SIZE = 2 BYTES
+*  D4 = FIRST WORD
+*  D7 = ADDRESS MODES ALLOWED ($1FD) DATA ALTERABLE
 
 COMMON4: ADDQ.L  #2,%D3         | SIZE = 4
 
@@ -8065,7 +8065,7 @@ COMMON:  MOVE.L  %D3,%D6        | D6 = SIZE
 
 COMMON35:MOVE.W  (%A4)+,%D0     | GET NEXT WORD OF DATA.
          ADDQ.L  #2,HISPC(%A1)  | ADJUST PROG COUNTER.
-         BSR     PNT4HX         | FORMAT DATA. (%A6)+
+         BSR     PNT4HX         | FORMAT DATA. (A6)+
          SUBQ.B  #2,%D3
          BNE     COMMON35
 
@@ -8143,144 +8143,144 @@ TBL:     .align  2
          C68     F000,B000,FORM10EX,6          | CMP
          C68     F0C0,90C0,FORM10EX,44         | SUB       <EA>,A@
          C68     F130,9100,FORM12,45           | SUBX
-         C68     F000,9000,FORM10EX,44           SUB
-         C68     F1F0,8100,FORM12,43           SBCD
-         C68     F1C0,81C0,FORM6D,42           DIVS
-         C68     F1C0,80C0,FORM6D,41           DIVU
-         C68     F000,8000,FORM10,40           OR
-         C68     F100,7000,IMOVEQ,39           MOVEQ
-         C68     FF00,6100,IBSR,51             BSR
-         C68     FF00,6000,IBSR,65             BRA
-         C68     F000,6000,ICC,38              B
-         C68     F0F8,50C8,IDBCC,37              DB
-         C68     F0C0,50C0,ISCC,36             S
-         C68     F100,5100,IQUICK,35           SUBQ
-         C68     F100,5000,IQUICK,34           ADDQ
-         C68     F1C0,41C0,FORM6A,33           LEA
-         C68     F1C0,4180,FORM6D,32           CHK
-         C68     FFC0,4EC0,FORM11SL,31         JMP
-         C68     FFC0,4E80,FORM11SL,30         JSR
-         C68     FFFF,4E77,SCOMMON,29           RTR
-         C68     FFFF,4E76,SCOMMON,28           TRAPV
-         C68     FFFF,4E75,SCOMMON,27           RTS
-         C68     FFFF,4E73,SCOMMON,26           RTE
-         C68     FFFF,4E72,ISTOP,25             STOP
-         C68     FFFF,4E71,SCOMMON,24           NOP
-         C68     FFFF,4E70,SCOMMON,23           RESET
-         C68     FFF8,4E68,IMVFUSP,60          MOVE FROM USP
-         C68     FFF8,4E60,IMVTUSP,60          MOVE TO USP
-         C68     FFF8,4E58,FORM5,22            UNLINK
-         C68     FFF8,4E50,ILINK,21            LINK
-         C68     FFF0,4E40,FORM4,20            TRAP
-         C68     FF80,4C80,IMOVEMTR,15         MOVEM FROM REGISTERS
-         C68     FFC0,4AC0,FORM1A,19           TAS
-         C68     FF00,4A00,FORM1,18            TST
-         C68     FFF8,48C0,FORM3,17            EXT.L
-         C68     FFF8,4880,FORM3,16            EXT.W
-         C68     FF80,4880,IMOVEMFR,15         MOVEA TO REGISTERS
-         C68     FFF8,4840,FORM3,14            SWAP
-         C68     FFC0,4840,FORM11,13           PEA
-         C68     FFC0,4800,FORM1A,12           NBCD
-         C68     FFC0,46C0,IMVTSR,59           MOVE TO SR
-         C68     FF00,4600,FORM1,11            NOT
-         C68     FFC0,44C0,IMVTCCR,59          MOVE TO CCR
-         C68     FF00,4400,FORM1,10            NEG
-         C68     FF00,4200,FORM1,9             CLR
-         C68     FFC0,40C0,IMVFSR,59           MOVE.W  FROM  SR
-         C68     FF00,4000,FORM1,8             NEGX
-         C68     F000,3000,IMOVE,59            MOVE.W
-         C68     F000,2000,IMOVE,60            MOVE.L
-         C68     F000,1000,IMOVE,58            MOVE.B
-         C68     FF00,0C00,IMMED,6             CMP       #
-         C68     FF00,0A00,IMMED,5             EOR       #
-         C68     FF00,0600,IMMED,4             ADD       #
-         C68     FF00,0400,IMMED,3             SUB       #
-         C68     FF00,0200,IMMED,2             AND       #
-         C68     FF00,0000,IMMED,1             OR        #
-         C68     F138,0108,IMOVEP,0            MOVEP
-         C68     FFC0,08C0,ISETS,64            BSET
-         C68     FFC0,0880,ISETS,63            BCLR
-         C68     FFC0,0840,ISETS,62            BCHG
-         C68     FFC0,0800,ISETS,61            BTST
-         C68     F1C0,01C0,ISETD,64            BSET
-         C68     F1C0,0180,ISETD,63            BCLR
-         C68     F1C0,0140,ISETD,62            BCHG
-         C68     F1C0,0100,ISETD,61            BTST
+         C68     F000,9000,FORM10EX,44         | SUB
+         C68     F1F0,8100,FORM12,43           | SBCD
+         C68     F1C0,81C0,FORM6D,42           | DIVS
+         C68     F1C0,80C0,FORM6D,41           | DIVU
+         C68     F000,8000,FORM10,40           | OR
+         C68     F100,7000,IMOVEQ,39           | MOVEQ
+         C68     FF00,6100,IBSR,51             | BSR
+         C68     FF00,6000,IBSR,65             | BRA
+         C68     F000,6000,ICC,38              | B
+         C68     F0F8,50C8,IDBCC,37            | DB
+         C68     F0C0,50C0,ISCC,36             | S
+         C68     F100,5100,IQUICK,35           | SUBQ
+         C68     F100,5000,IQUICK,34           | ADDQ
+         C68     F1C0,41C0,FORM6A,33           | LEA
+         C68     F1C0,4180,FORM6D,32           | CHK
+         C68     FFC0,4EC0,FORM11SL,31         | JMP
+         C68     FFC0,4E80,FORM11SL,30         | JSR
+         C68     FFFF,4E77,SCOMMON,29          | RTR
+         C68     FFFF,4E76,SCOMMON,28          | TRAPV
+         C68     FFFF,4E75,SCOMMON,27          | RTS
+         C68     FFFF,4E73,SCOMMON,26          | RTE
+         C68     FFFF,4E72,ISTOP,25            | STOP
+         C68     FFFF,4E71,SCOMMON,24          | NOP
+         C68     FFFF,4E70,SCOMMON,23          | RESET
+         C68     FFF8,4E68,IMVFUSP,60          | MOVE FROM USP
+         C68     FFF8,4E60,IMVTUSP,60          | MOVE TO USP
+         C68     FFF8,4E58,FORM5,22            | UNLINK
+         C68     FFF8,4E50,ILINK,21            | LINK
+         C68     FFF0,4E40,FORM4,20            | TRAP
+         C68     FF80,4C80,IMOVEMTR,15         | MOVEM FROM REGISTERS
+         C68     FFC0,4AC0,FORM1A,19           | TAS
+         C68     FF00,4A00,FORM1,18            | TST
+         C68     FFF8,48C0,FORM3,17            | EXT.L
+         C68     FFF8,4880,FORM3,16            | EXT.W
+         C68     FF80,4880,IMOVEMFR,15         | MOVEA TO REGISTERS
+         C68     FFF8,4840,FORM3,14            | SWAP
+         C68     FFC0,4840,FORM11,13           | PEA
+         C68     FFC0,4800,FORM1A,12           | NBCD
+         C68     FFC0,46C0,IMVTSR,59           | MOVE TO SR
+         C68     FF00,4600,FORM1,11            | NOT
+         C68     FFC0,44C0,IMVTCCR,59          | MOVE TO CCR
+         C68     FF00,4400,FORM1,10            | NEG
+         C68     FF00,4200,FORM1,9             | CLR
+         C68     FFC0,40C0,IMVFSR,59           | MOVE.W  FROM  SR
+         C68     FF00,4000,FORM1,8             | NEGX
+         C68     F000,3000,IMOVE,59            | MOVE.W
+         C68     F000,2000,IMOVE,60            | MOVE.L
+         C68     F000,1000,IMOVE,58            | MOVE.B
+         C68     FF00,0C00,IMMED,6             | CMP       #
+         C68     FF00,0A00,IMMED,5             | EOR       #
+         C68     FF00,0600,IMMED,4             | ADD       #
+         C68     FF00,0400,IMMED,3             | SUB       #
+         C68     FF00,0200,IMMED,2             | AND       #
+         C68     FF00,0000,IMMED,1             | OR        #
+         C68     F138,0108,IMOVEP,0            | MOVEP
+         C68     FFC0,08C0,ISETS,64            | BSET
+         C68     FFC0,0880,ISETS,63            | BCLR
+         C68     FFC0,0840,ISETS,62            | BCHG
+         C68     FFC0,0800,ISETS,61            | BTST
+         C68     F1C0,01C0,ISETD,64            | BSET
+         C68     F1C0,0180,ISETD,63            | BCLR
+         C68     F1C0,0140,ISETD,62            | BCHG
+         C68     F1C0,0100,ISETD,61            | BTST
 TBLE:    .align  2
 
-N68:     .MACRO
-         DC.B    "\1",128+"\2"        \1\2
+N68:     .MACRO a1,a2
+         DC.B    "\a1",128+"\a2"               | \a1\aa2
          .ENDM
 
 OPCTBL:  .align  2
-         N68     MOVE,P    0
-         N68     O,R       1
-         N68     AN,D      2
-         N68     SU,B      3
-         N68     AD,D      4
-         N68     EO,R      5
-         N68     CM,P      6
-         N68     MOV,E     7
-         N68     NEG,X     8
-         N68     CL,R      9
-         N68     NE,G      10
-         N68     NO,T      11
-         N68     NBC,D     12
-         N68     PEA.,L    13
-         N68     SWAP.,W   14
-         N68     MOVE,M    15
-         N68     EXT.,W    16
-         N68     EXT.,L    17
-         N68     TS,T      18
-         N68     TAS.,B    19
-         N68     TRA,P     20
-         N68     LIN,K     21
-         N68     UNL,K     22
-         N68     RESE,T    23
-         N68     NO,P      24
-         N68     STO,P     25
-         N68     RT,E      26
-         N68     RT,S      27
-         N68     TRAP,V    28
-         N68     RT,R      29
-         N68     JS,R      30
-         N68     JM,P      31
-         N68     CHK.,W    32
-         N68     LEA.,L    33
-         N68     ADD,Q     34
-         N68     SUB,Q     35
-         DC.B    128+"S"   36
-         N68     D,B       37
-         DC.B    128+"B"   38
-         N68     MOVEQ.,L  .....39
-         N68     O,R       40
-         N68     DIVU.,W   41
-         N68     DIVS.,W   42
-         N68     SBC,D     43
-         N68     SU,B      44
-         N68     SUB,X     45
-         N68     CMP,M     46
-         N68     MULU.,W   47
-         N68     MULS.,W   48
-         N68     ABC,D    49
-         N68     EX,G      50
-         N68     BS,R      .....51
-         N68     NUL,L     .....52
-         N68     ADD,X     53
-         N68     A,S       54
-         N68     L,S       55
-         N68     R,O       56
-         N68     RO,X      57
-         N68     MOVE.,B   58
-         N68     MOVE.,W   59
-         N68     MOVE.,L   60
-         N68     BTS,T     61
-         N68     BCH,G     62
-         N68     BCL,R     63
-         N68     BSE,T     64
-         N68     BR,A      65
+         N68     MOVE,P    | 0
+         N68     O,R       | 1
+         N68     AN,D      | 2
+         N68     SU,B      | 3
+         N68     AD,D      | 4
+         N68     EO,R      | 5
+         N68     CM,P      | 6
+         N68     MOV,E     | 7
+         N68     NEG,X     | 8
+         N68     CL,R      | 9
+         N68     NE,G      | 10
+         N68     NO,T      | 11
+         N68     NBC,D     | 12
+         N68     PEA.,L    | 13
+         N68     SWAP.,W   | 14
+         N68     MOVE,M    | 15
+         N68     EXT.,W    | 16
+         N68     EXT.,L    | 17
+         N68     TS,T      | 18
+         N68     TAS.,B    | 19
+         N68     TRA,P     | 20
+         N68     LIN,K     | 21
+         N68     UNL,K     | 22
+         N68     RESE,T    | 23
+         N68     NO,P      | 24
+         N68     STO,P     | 25
+         N68     RT,E      | 26
+         N68     RT,S      | 27
+         N68     TRAP,V    | 28
+         N68     RT,R      | 29
+         N68     JS,R      | 30
+         N68     JM,P      | 31
+         N68     CHK.,W    | 32
+         N68     LEA.,L    | 33
+         N68     ADD,Q     | 34
+         N68     SUB,Q     | 35
+         DC.B    128+"S"   | 36
+         N68     D,B       | 37
+         DC.B    128+"B"   | 38
+         N68     MOVEQ.,L  | .....39
+         N68     O,R       | 40
+         N68     DIVU.,W   | 41
+         N68     DIVS.,W   | 42
+         N68     SBC,D     | 43
+         N68     SU,B      | 44
+         N68     SUB,X     | 45
+         N68     CMP,M     | 46
+         N68     MULU.,W   | 47
+         N68     MULS.,W   | 48
+         N68     ABC,D     | 49
+         N68     EX,G      | 50
+         N68     BS,R      | .....51
+         N68     NUL,L     | .....52
+         N68     ADD,X     | 53
+         N68     A,S       | 54
+         N68     L,S       | 55
+         N68     R,O       | 56
+         N68     RO,X      | 57
+         N68     MOVE.,B   | 58
+         N68     MOVE.,W   | 59
+         N68     MOVE.,L   | 60
+         N68     BTS,T     | 61
+         N68     BCH,G     | 62
+         N68     BCL,R     | 63
+         N68     BSE,T     | 64
+         N68     BR,A      | 65
 
-         DC.B    0              PAD BYTE
+         DC.B    0         | PAD BYTE
 
 
 
@@ -8291,29 +8291,29 @@ OPCTBL:  .align  2
 *                  %D7 = XXXXXXFF   WHERE "FF" IF FUNCTION NUMBER
 *                  TRAP      #14
 
-TRAP14
+TRAP14:
          MOVEM.L %D1/%D7/%A1-%A2,-(%A7)
 
          MOVE.L  CTLINK,%A1
-T100:    MOVE.B  (%A1),%D1        %D1 = FUNCTION FROM TABLE
+T100:    MOVE.B  (%A1),%D1      | D1 = FUNCTION FROM TABLE
          CMPI.B  #0xFF,%D1
-         BEQ.S   T500           END OF TABLE
+         BEQ.S   T500           | END OF TABLE
 
          CMPI.B  #0xFE,%D1
-         BEQ.S   T600           LINK IN LIST
+         BEQ.S   T600           | LINK IN LIST
 
          CMP.B   %D7,%D1
-         BEQ.S   T400           FOUND MATCH
+         BEQ.S   T400           | FOUND MATCH
 
          ADDQ.L  #4,%A1
          BRA     T100
 
-T400:    MOVE.L  (%A1),%D1        FFAAAAAA
-         ASL.L   #8,%D1          AAAAAA..
-         LSR.L   #8,%D1          00AAAAAA  GO TO ADDRESS
+T400:    MOVE.L  (%A1),%D1      | FFAAAAAA
+         ASL.L   #8,%D1         | AAAAAA..
+         LSR.L   #8,%D1         | 00AAAAAA  GO TO ADDRESS
 
          BTST.B  #5,16(%A7)
-         BEQ.S   T450           CALL FROM USER MODE
+         BEQ.S   T450           | CALL FROM USER MODE
 
 *  CALL FROM SUPERVISOR MODE
 * STACK (WORDS)
@@ -8329,10 +8329,10 @@ T400:    MOVE.L  (%A1),%D1        FFAAAAAA
 *   +18  RETURN HIGH        RETURN HIGH
 *   +20  RETURN LOW         RETURN LOW
 *
-         MOVE.L  16(%A7),12(%A7)  SR
-         MOVE.L  %D1,14(%A7)      GOTO ADDRESS
-         MOVEM.L (%A7)+,%D1/%D7/%A1 RESTORE REGISTERS
-         RTE                    GOTO (AND TRIM STACK)
+         MOVE.L  16(%A7),12(%A7) | SR
+         MOVE.L  %D1,14(%A7)    | GOTO ADDRESS
+         MOVEM.L (%A7)+,%D1/%D7/%A1 | RESTORE REGISTERS
+         RTE                    | GOTO (AND TRIM STACK)
 
 * STACK (WORDS)
 *   +0   %D1 HIGH
@@ -8348,11 +8348,11 @@ T400:    MOVE.L  (%A1),%D1        FFAAAAAA
 *   +20  RETURN LOW         GOTO LOW             RETURN LOW
 *
 * CALL FROM USER MODE
-T450:    MOVE.L  18(%A7),%D7      RETURN PC
-         MOVE.L  %D1,18(%A7)      GOTO ADDRESS
-         MOVE.L  USP,%A1         POINTER TO USER STACK
-         MOVE.L  %D7,-(%A1)       RETURN PC TO USER STACK
-         MOVE.L  %A1,USP         UPDATED USER STACK POINTER
+T450:    MOVE.L  18(%A7),%D7    | RETURN PC
+         MOVE.L  %D1,18(%A7)    | GOTO ADDRESS
+         MOVE.L  %USP,%A1       | POINTER TO USER STACK
+         MOVE.L  %D7,-(%A1)     | RETURN PC TO USER STACK
+         MOVE.L  %A1,%USP       | UPDATED USER STACK POINTER
          MOVEM.L (%A7)+,%D1/%D7/%A1/%A2
          RTE
 
@@ -8373,12 +8373,12 @@ MSGT14:  DC.B    "UNDEFINED TRAP 14",EOT
 T600:    MOVE.L  (%A1),%A1
          BRA     T100
 
-T700:    .align  2              253 APPEND NEW TABLE
-         MOVE.L  %A0,%D1          ..AAAAAA
-         MOVE.L  CTLINK,%A0      %A0 = LINK TO BE RETURNED
-         ROL.L   #8,%D1          AAAAAA..
-         MOVE.B  #0xFE,%D1        AAAAAAFE
-         ROR.L   #8,%D1          FEAAAAAA
+T700:    .align  2              | 253 APPEND NEW TABLE
+         MOVE.L  %A0,%D1        |  ..AAAAAA
+         MOVE.L  CTLINK,%A0     | A0 = LINK TO BE RETURNED
+         ROL.L   #8,%D1         | AAAAAA..
+         MOVE.B  #0xFE,%D1      | AAAAAAFE
+         ROR.L   #8,%D1         | FEAAAAAA
          MOVE.L  %D1,CTLINK
          RTS
 
@@ -8388,70 +8388,70 @@ T700:    .align  2              253 APPEND NEW TABLE
 *    FF......      FUNCTION NUMBER
 *    ..AAAAAA      ADDRESS OF FUNCTION
 
-FADDR:   .MACRO   \1,\2
-         DC.L    (\1<<24)+\2
+FADDR:   .MACRO   a1,a2
+         DC.L    (\a1<<24)+\a2
          .ENDM
 
 
-CT:      FADDR   253,T700       APPEND NEW TABLE
-         FADDR   252,FIXDADD    APPEND DATA (%A5) TO BUFFER (%A6)+
-         FADDR   251,FIXBUF     SET %A5 & %A6 AS POINTERS TO BUFFER
-         FADDR   250,FIXDATA    MOVE DATA (%A5) TO BUFFER; A5=BUFFER A6
+CT:      FADDR   253,T700       | APPEND NEW TABLE
+         FADDR   252,FIXDADD    | APPEND DATA (A5) TO BUFFER (A6)+
+         FADDR   251,FIXBUF     | SET A5 & A6 AS POINTERS TO BUFFER
+         FADDR   250,FIXDATA    | MOVE DATA (A5) TO BUFFER; A5=BUFFER A6
          FADDR   249,FIXDCRLF
-         FADDR   248,F100       OUTPUT CHAR PORT1  D0=CHAR
-         FADDR   247,F110       INPUT CHAR PORT1  D0=CHAR
-         FADDR   244,CHRPRINT   OUTPUT CHAR PORT3 D0=CHAR
-         FADDR   243,OUTPUT     OUTPUT STRING PORT1 (%A5) (%A6)
-         FADDR   242,OUTPUT21   OUTPUT STRING PORT2 (%A5) (%A6)
-         FADDR   241,PORTIN1    INPUT STRING PORT1  (%A5) (%A6)
-         FADDR   240,PORTIN20   INPUT STRING PORT2  (%A5) (%A6)
-         FADDR   239,TAPEOUT    OUTPUT STRING TO PORT4 (%A5) (%A6)
-         FADDR   238,TAPEIN     INPUT STRING FROM PORT4 (%A5) (%A6)
-         FADDR   237,PRCRLF     OUTPUT STRING TO PORT3 (%A5) (%A6)
-         FADDR   236,HEX2DEC    CONVERT HEX %D0 TO DECIMAL (%A6)+
-         FADDR   235,GETHEX     GET HEX CHAR INTO %D0 FROM (%A5)+
-         FADDR   234,PUTHEX     FORMAT HEX CHAR FROM %D0 TO (%A6)+
-         FADDR   233,PNT2HX     FORMAT 2 HEX CHAR FROM %D0 TO (%A6)+
-         FADDR   232,PNT4HX     FORMAT 4 HEX CHAR FROM %D0 TO (%A6)+
-         FADDR   231,PNT6HX     FORMAT 6 HEX CHAR FROM %D0 TO (%A6)+
-         FADDR   230,PNT8HX     FORMAT 8 HEX CHAR FROM %D0 TO (%A6)+
-         FADDR   229,START      RESTART TUTOR INITIALIZE EVERYTHING
-         FADDR   228,MACSBUG    GOTO TUTOR;   PRINT PROMPT
-         FADDR   227,F120       OUTPUT STRING,CR,LF PORT1 (%A5) (%A6)
-         FADDR   226,GETNUMA    GET HEX NUMBER (%A5)+ INTO D0
-         FADDR   225,GETNUMD    GET DECIMAL NUMBER (%A5)+ INTO D0
-         FADDR   224,PORTIN1N   INPUT STRING PORT1 (NO AUTO LF)
+         FADDR   248,F100       | OUTPUT CHAR PORT1  D0=CHAR
+         FADDR   247,F110       | INPUT CHAR PORT1  D0=CHAR
+         FADDR   244,CHRPRINT   | OUTPUT CHAR PORT3 D0=CHAR
+         FADDR   243,OUTPUT     | OUTPUT STRING PORT1 (A5) (A6)
+         FADDR   242,OUTPUT21   | OUTPUT STRING PORT2 (A5) (A6)
+         FADDR   241,PORTIN1    | INPUT STRING PORT1  (A5) (A6)
+         FADDR   240,PORTIN20   | INPUT STRING PORT2  (A5) (A6)
+         FADDR   239,TAPEOUT    | OUTPUT STRING TO PORT4 (A5) (A6)
+         FADDR   238,TAPEIN     | INPUT STRING FROM PORT4 (A5) (A6)
+         FADDR   237,PRCRLF     | OUTPUT STRING TO PORT3 (A5) (A6)
+         FADDR   236,HEX2DEC    | CONVERT HEX D0 TO DECIMAL (A6)+
+         FADDR   235,GETHEX     | GET HEX CHAR INTO D0 FROM (A5)+
+         FADDR   234,PUTHEX     | FORMAT HEX CHAR FROM D0 TO (A6)+
+         FADDR   233,PNT2HX     | FORMAT 2 HEX CHAR FROM D0 TO (A6)+
+         FADDR   232,PNT4HX     | FORMAT 4 HEX CHAR FROM D0 TO (A6)+
+         FADDR   231,PNT6HX     | FORMAT 6 HEX CHAR FROM D0 TO (A6)+
+         FADDR   230,PNT8HX     | FORMAT 8 HEX CHAR FROM D0 TO (A6)+
+         FADDR   229,START      | RESTART TUTOR INITIALIZE EVERYTHING
+         FADDR   228,MACSBUG    | GOTO TUTOR;   PRINT PROMPT
+         FADDR   227,F120       | OUTPUT STRING,CR,LF PORT1 (A5) (A6)
+         FADDR   226,GETNUMA    | GET HEX NUMBER (A5)+ INTO D0
+         FADDR   225,GETNUMD    | GET DECIMAL NUMBER (A5)+ INTO D0
+         FADDR   224,PORTIN1N   | INPUT STRING PORT1 (NO AUTO LF)
 
-         FADDR   255,0xFFFFFF    END KEY
+         FADDR   255,0xFFFFFF   | END KEY
 
-F100:    BSR     GETSER1        %A0 = PORT1 ADDRESS
+F100:    BSR     GETSER1        | A0 = PORT1 ADDRESS
          BRA     OUTCH
 
-F110:    BSR     GETSER1        %A0 = PORT1 ADDRESS
+F110:    BSR     GETSER1        | A0 = PORT1 ADDRESS
          BRA     INCHNE
 
-F120:    BSR     OUTPUT         OUTPUT STRING,CR,LF PORT1 (%A5) (%A6)
+F120:    BSR     OUTPUT         | OUTPUT STRING,CR,LF PORT1 (A5) (A6)
          MOVEQ   #CR,%D0
-         BSR     F100           OUTPUT CHAR
+         BSR     F100           | OUTPUT CHAR
          MOVEQ   #LF,%D0
-         BSR     F100           OUTPUT CHAR
+         BSR     F100           | OUTPUT CHAR
          RTS
 
 
-         DCB.B   0x54,0          PAD BYTES
+         DC.B   0x54,0          | PAD BYTES
 
 
 *-------------------------------------------------------------------------
 * File YROM      Version/checksum/identification                  07/29/82
 
-VERSION: =       4         BINARY FOR VERSION 1.3
+VERSION =        4         | BINARY FOR VERSION 1.3
 *                3         .                  1.2; CKSUM= $44,$DB
 *                2         .                  1.1; CKSUM= $66,$C1
 *                1         .                  1.0
 
          DC.B    VERSION,VERSION
-         DC.B    0x2E,0xBA        CHECKSUM
-         DC.B    0x11,0x10        SOCKET I. D.
-LAST:    .align  2                LAST ADDRESS+1
+         DC.B    0x2E,0xBA       | CHECKSUM
+         DC.B    0x11,0x10       | SOCKET I. D.
+LAST:    .align  2               | LAST ADDRESS+1
 
-         END     START
+         END                     | START
