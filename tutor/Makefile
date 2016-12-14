@@ -1,7 +1,7 @@
 all:	tutor13.run tutor13.bin
 
 tutor13.o: tutor13.s
-	m68k-elf-as -m68000 -a=tutor13.lst -o tutor13.o tutor13.s
+	m68k-elf-as -m68000 -alms -a=tutor13.lst -o tutor13.o tutor13.s
 
 tutor13.run: tutor13.o
 	m68k-elf-objcopy -I coff-m68k -O srec tutor13.o temp
