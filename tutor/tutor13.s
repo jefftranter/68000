@@ -76,7 +76,7 @@ RESET    =       0x43            | MASTER RESET FOR ACIA
 
 _AV2:    DS.L    1              | 2   $02  BUS ERROR            "BUS "
 _AV3:    DS.L    1              | 3   $03  ADDRESS ERROR        "ADDR"
-AV4:     DS.L    1              | 4   $04  ILL INSTRUCTION      "OPCO"
+_AV4:    DS.L    1              | 4   $04  ILL INSTRUCTION      "OPCO"
          DS.L    1              | 5   $05  DIVIDE BY ZERO       "DIV0"
          DS.L    1              | 6   $06  CHECK TRAP           "CHCK"
          DS.L    1              | 7   $07  TRAP V               "TP V"
@@ -103,7 +103,7 @@ AV24:    DS.L    1              | 24  $18   0  AUTO VECTORS     "SPUR"
          DS.L    1              | 28  $1C   4                   "AV#4"
          DS.L    1              | 29  $1D   5                   "AV#5"
          DS.L    1              | 30  $1E   6                   "AV#6"
-AV31:    DS.L    1              | 31  $1F   7                   "AV#7   [ABORT BUTTON]
+_AV31:   DS.L    1              | 31  $1F   7                   "AV#7   [ABORT BUTTON]
          DS.L    1              | 32  $20   TRAP  0             "UT 0"
          DS.L    1              | 33  $21   TRAP  1             "UT 1"
          DS.L    1              | 34  $22   TRAP  2             "UT 2"
@@ -332,13 +332,13 @@ AV48:    DS.L    1              | 48  $30
 
 *  PSEUDO REGISTERS
 
-REGPC:   DS.L    1              | USERS PROGRAM COUNTER
-*REGSR:   DS.L    1              | USERS CONDITION CODES
+_REGPC:  DS.L    1              | USERS PROGRAM COUNTER
+_REGSR:  DS.L    1              | USERS CONDITION CODES
          DS.L    1              | USERS CONDITION CODES
 REGS:    DS.L    8              | D REGISTERS
          DS.L    7              | A0 THROUGH A6 REGISTERS
 _REGA7:  DS.L    1              | A7 REGISTER
-REGUS:   DS.L    1              | USER STACK
+_REGUS:  DS.L    1              | USER STACK
 
 
 
@@ -410,14 +410,14 @@ OUTTO:   DS.L    1              | HOLDS ADDRESS OF OUTPUT ROUTINE
 INFROM:  DS.L    1              | HOLDS ADDRESS OF INPUT ROUTINE
 ALTSER1: DS.L    1              | ALTERNATE SERIAL PORT#1
 ALTSER2: DS.L    1              | ALTERNATE SERIAL PORT#2
-INPORT1: DS.L    1              | INPUT ROUTINE ADDRESS
-OUTPORT1:DS.L    1              | ADDRESS FOR OUPUT ROUTINE
-INPORT2: DS.L    1              | ADDRESS FOR INPUT ROUTINE
-OUTPORT2:DS.L    1              | FOR OUTPURT ROUTINE
-INPORT3: DS.L    1              | THIS MIGHT BE FOR TAPE
-OUTPORT3:DS.L    1              | THIS MIGHT BE FOR PRINTER
-INPORT4: DS.L    1              | CASSETTE
-OUTPORT4:DS.L    1              | CASSETTE
+_INPORT1: DS.L   1              | INPUT ROUTINE ADDRESS
+_OUTPORT1:DS.L   1              | ADDRESS FOR OUPUT ROUTINE
+_INPORT2: DS.L   1              | ADDRESS FOR INPUT ROUTINE
+_OUTPORT2:DS.L   1              | FOR OUTPURT ROUTINE
+_INPORT3: DS.L   1              | THIS MIGHT BE FOR TAPE
+_OUTPORT3:DS.L   1              | THIS MIGHT BE FOR PRINTER
+_INPORT4: DS.L   1              | CASSETTE
+_OUTPORT4:DS.L   1              | CASSETTE
 MD1CON:  DS.W    1              | ACIA PROFILE (PORT1/PORT2)
 PDIPORT: DS.L    1              | PDIPORT ADDRESS
 CRTPNT:  DS.W    1              | OUTPUT TO PRINTER AND CRT
@@ -568,10 +568,10 @@ MSG:     BSR     OUT1CR
 * PRINT ERROR
 
 ERROR:   LEA     MSG008E(%PC),%A5
-         BRA     WHAT93
+         BRA.S   WHAT93
 
 SYNTAX:  LEA     MSG008(%PC),%A5  | 'SYNTAX ERROR'
-         BRA     WHAT93
+         BRA.S   WHAT93
 
 * FORMAT PHYSICAL ADDRESS FROM (D0)
 PPHY:    LEA     MSG019(%PC),%A5
@@ -589,7 +589,7 @@ P2PHY2:  BSR     PNT8HX         | FORMAT ADDR2
          BSR     OUT1CR         | DISPLAY IT
          RTS
 
-MSG019:  .string "PHYSICAL ADDRESS="
+MSG019:  .ascii  "PHYSICAL ADDRESS="
          DC.B    EOT
 
 
@@ -607,7 +607,7 @@ FIXDATA: LEA     BUFFER,%A6
 FIXDADD: CMPI.B  #EOT,(%A5)
          BEQ.S   FIXD2
          MOVE.B  (%A5)+,(%A6)+
-         BRA     FIXDADD
+         BRA.S   FIXDADD
 FIXD2:   LEA     BUFFER,%A5
          RTS
 
@@ -621,7 +621,7 @@ FIXD2:   LEA     BUFFER,%A5
 
 FIXDCRLF:LEA     BUFFER,%A6
          MOVE.W  #0x0D0A,(%A6)+   | CR,LF
-         BRA     FIXDADD
+         BRA.S   FIXDADD
 
 
 
@@ -648,6 +648,7 @@ INIT0:   MOVE.L  %A1,(%A0)+     | INITIALIZE VECTOR
 START1S: MOVEM.W %D0,REGSR+2     | Assure good parity.
          MOVE.W  %SR,REGSR+2     | SAVE TARGET'S STATUS REGISTER
          MOVE.L  %A7,REGA7       | SAVE TARGET'S STACK
+         REGPC = 0x0400
          MOVE.L  (%A7),REGPC     | .PROGRAM COUNTER
          LEA     REGA7,%A7
          MOVEM.L %D0-%D7/%A0-%A6,-(%A7) | .REGISTERS
@@ -672,12 +673,13 @@ START:   MOVEM.W %D0,REGSR+2    | Assure good parity
          CLR.L   %D1
          MOVE.L  %D1,REGPC      | PC = 000000
 
-         BSR     INITVECT
+         BSR.S   INITVECT
 
 
 START11: MOVE.W  #0x2700,%SR     | MASK OFF INTERRUPTS
 
-         MOVE.L  USP,%A0
+         MOVE.L  %USP,%A0
+         REGUS = 0x0448
          MOVE.L  %A0,REGUS      | USER STACK
 
          BSR     INITHRAM       | ZERO (INITIALIZE) HIGH RAM
@@ -688,25 +690,36 @@ START11: MOVE.W  #0x2700,%SR     | MASK OFF INTERRUPTS
 
 
 * H.SA
+         AV4 = 0x0010
          ADDR2MEM CHKBP,AV4     | ILLEGAL INSTRUCTION
 
 
 * TM.SA
+         TMCHARS = 0x04ea
          MOVE.W  #0x1801,TMCHARS | CNTLX,CNTL/A
 
 
 * W.SA
+         AV31 = 0x007c
          ADDR2MEM  ABORTB,AV31  | ABORT
 
 
 * Y.SA
+         OUTPORT1 = 0x0630
          ADDR2MEM  OUT1CR0,OUTPORT1 | INITIALIZE I/O ROUTINES
+         OUTPORT2 = 0x0638
          ADDR2MEM  OUTPUT20,OUTPORT2
+         OUTPORT3 = 0x0640
          ADDR2MEM  PRCRLF,OUTPORT3     | PRINTER DRIVER
+         OUTPORT4 = 0x0648
          ADDR2MEM  TAPEOUT,OUTPORT4    | CASSETTE
+         INPORT1 = 0x062c
          ADDR2MEM  PORTIN10,INPORT1
+         INPORT2 = 0x0634
          ADDR2MEM  PORTIN20,INPORT2
+         INPORT3 = 0x063c
          ADDR2MEM  PORTIN10,INPORT3
+         INPORT4 = 0x0644
          ADDR2MEM  TAPEIN,INPORT4      | CASSETTE
 
          MOVE.B  #8,TAPENULS    | NULLS FOR CASSETTE
@@ -2133,7 +2146,7 @@ SAVE:    .align  2
 
          MOVE.L  %A0,REGA7       | WHERE TARGET STACK REALLY POINTS
 
-         MOVE.L  USP,%A1         | GET USERS STACK POINTER
+         MOVE.L  %USP,%A1        | GET USERS STACK POINTER
          MOVE.L  %A1,REGUS       | SAVE IT FOR DISPLAY ETC
 
          MOVE.L  REGPC,%D0       | GET PROGRAM COUNTER
@@ -2222,7 +2235,7 @@ UNTRACE: ORI.W   #0x8000,REGSR+2 | SET UP TRACE BIT!
          ADDR2MEM TRACE,AV9     | TAKE TRACE VECTOR
 
 UNSTACK: MOVE.L  REGUS,%A1
-         MOVE.L  %A1,USP        | US = TARGET'S USER STACK
+         MOVE.L  %A1,%USP       | US = TARGET'S USER STACK
          MOVE.L  REGPC,%A2      | A2 = TARGET'S PC
 
 
