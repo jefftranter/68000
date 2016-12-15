@@ -332,10 +332,11 @@ AV48:    DS.L    1              | 48  $30
 *  PSEUDO REGISTERS
 
 REGPC:   DS.L    1              | USERS PROGRAM COUNTER
-REGSR:   DS.L    1              | USERS CONDITION CODES
+*REGSR:   DS.L    1              | USERS CONDITION CODES
+         DS.L    1              | USERS CONDITION CODES
 REGS:    DS.L    8              | D REGISTERS
          DS.L    7              | A0 THROUGH A6 REGISTERS
-REGA7:   DS.L    1              | A7 REGISTER
+_REGA7:  DS.L    1              | A7 REGISTER
 REGUS:   DS.L    1              | USER STACK
 
 
@@ -482,7 +483,9 @@ LDATA    =       0xFFFFFFC4     | DS.B    1
 
          .ORG    0x008000
 
+REGA7 =  0x444
 FIRST:   DC.L    REGA7          | SUPERVISOR STACK
+START = 0x8146
          DC.L    START          | PROGRAM COUNTER
 V2:      BRA     TRACE
 
@@ -492,11 +495,11 @@ V2:      BRA     TRACE
 **********************************
 
 INITHRAM:LEA     BEGHRAM,%A0     | START OF WORK RAM (PAST REGISTERS)
-         MOVE.L  #(ENDHRAM-BEGHRAM),D0  | BYTES TO ZERO
-         CLR.L   D1
+         MOVE.L  #(ENDHRAM-BEGHRAM),%D0 | BYTES TO ZERO
+         CLR.L   %D1
 INIT:    MOVE.B  %D1,(%A0)+     | ZERO MEMORY
-         SUBQ.L  #1,D0
-         BNE     INIT
+         SUBQ.L  #1,%D0
+         BNE.S   INIT
 
          ADDR2MEM BERRMSG,AV2   | POINT AT BUS TRAP ERROR MESSAGE ROUTINE
 
@@ -522,7 +525,7 @@ VECTBE:  MOVE.L  (%A7)+,BERRD
          SAVEREGS
          BSR     FIXBUF
          MOVE.W  #0xD0A,(%A6)+
-         MOVE.W  BERRD,D0
+         MOVE.W  BERRD,%D0
          BSR     PNT4HX         | FORMAT FUNCTION CODE
 
          MOVE.B  #BLANK,(%A6)+  | SPACE
@@ -636,7 +639,8 @@ INIT0:   MOVE.L  %A1,(%A0)+     | INITIALIZE VECTOR
 
 * SPECIAL ENTRY THAT DOES NOT CHANGE VECTORS
 
-START1S: MOVEM.W %D0,REGSR+2    | Assure good parity.
+         REGSR = 0x00000404
+START1S: MOVEM.W %D0,REGSR+2     | Assure good parity.
          MOVE.W  %SR,REGSR+2     | SAVE TARGET'S STATUS REGISTER
          MOVE.L  %A7,REGA7       | SAVE TARGET'S STACK
          MOVE.L  (%A7),REGPC     | .PROGRAM COUNTER
@@ -706,7 +710,7 @@ START11: MOVE.W  #0x2700,%SR     | MASK OFF INTERRUPTS
 
 *        INITIALIZE MC68230 PI/T
          MOVE.L  #PDI1,%A0       | BASE ADDRESS OF PI/T
-         MOVE.L  #0x0000FF00,D0
+         MOVE.L  #0x0000FF00,%D0
          MOVEP.L %D0,1(%A0)
 
 *        SELECT MODE 0
@@ -802,22 +806,22 @@ DECODE2: MOVE.B  (%A5),%D1      | GET 2 LETTERS OF COMMAND
          CLR.L   %D3            | D3 = CLEAR "NO" SWITCH
 
 DECODE21:LEA     SOLIST(%PC),%A1 | A1 = COMMAND LIST ADDRESS
-DECODE4: MOVE.W  (%A1)+,%D2      | D2 = 2 CHAR COMMAND FROM LIST
-         CLR.L   %D0             | CLEAR HIGH BITS
-         MOVE.W  (%A1)+,%D0      | D0 = OFFSET FROM START OF ROM
+DECODE4: MOVE.W  (%A1)+,%D2     | D2 = 2 CHAR COMMAND FROM LIST
+         CLR.L   %D0            | CLEAR HIGH BITS
+         MOVE.W  (%A1)+,%D0     | D0 = OFFSET FROM START OF ROM
 
          TST.L   %D3
          BEQ.S   DECODE41       | NOT A "NO"
          TST.B   %D2            | IS "NO" OPTION SUPPORTED THIS COMMAND?
          BPL     DECODE4        | NO...THEN RUN OUT OF COMMANDS
 
-DECODE41:ANDI.W  #0x7F7F,%D2     | CLEAR "INVISABLE" & "NO" BITS
-         CMPI.W  #0x7F7F,%D2     | END OF LIST?
+DECODE41:ANDI.W  #0x7F7F,%D2    | CLEAR "INVISABLE" & "NO" BITS
+         CMPI.W  #0x7F7F,%D2    | END OF LIST?
          BEQ     WHAT           | Command not found
 
          CMPI.B  #'*',%D2       | SEE IF DON'T CARE CHARACTER
          BNE.S   DECODE3
-         MOVE.B  %D1,D2          | DEFAULT
+         MOVE.B  %D1,%D2        | DEFAULT
 
 DECODE3: CMP.W   %D1,%D2        | Command from table = the input?
          BNE     DECODE4        | COMMAND NOT FOUND
@@ -1108,7 +1112,7 @@ BFCMD:   LEA     SYNTAX(%PC),%A0
 
          BSR     FNEXTF         | FIND NEXT FIELD
          BSR     GETNUMA        | D0 = VALUE
-         MOVE.L  %D0,D7
+         MOVE.L  %D0,%D7
 
          MOVE.L  %D6,%A0          | A0 = FROM BEGIN ADDRESS
          BSR     P2PHY          | DISPLAY ADDRESSES
@@ -1302,20 +1306,20 @@ BCMD00:  CMP.L   (%A0),%D0      |  SEE IF ALREADY IN TABLE
 BCMD3:   TST.L   (%A0)          | FIND AN EMPTY STOP
          BNE.S   BCMD5
          MOVE.L  %D0,(%A0)      |  PUT NEW ADDRESS IN TABLE
-BCMD33:  CLR.L   (%A2)           | CLEAR CURRENT COUNT
-         MOVE.B  (%A5),D1        | CHECK INPUT FOR COUNT
-         CMPI.B  #';',D1
+BCMD33:  CLR.L   (%A2)          | CLEAR CURRENT COUNT
+         MOVE.B  (%A5),%D1      | CHECK INPUT FOR COUNT
+         CMPI.B  #';',%D1
          BNE.S   BCMD6          | NO COUNT
          ADDQ.L  #1,A5          | BUMP THE BUFFER SCANNER
          BSR     GETNUMA        | GO GET THE COUNT
-         MOVE.L  %D0,(%A2)        | MOVE TO TABLE
+         MOVE.L  %D0,(%A2)      | MOVE TO TABLE
 
-BCMD6:   LEA     BCMD7(%PC),%A0  | WHERE TO GO IF NO MORE PARAMETERS
+BCMD6:   LEA     BCMD7(%PC),%A0 | WHERE TO GO IF NO MORE PARAMETERS
          BRA     BCMD0
 
 BCMD5:   ADDQ.L  #4,%A0         | BUMP TABLE POINTER
          ADDQ.L  #4,%A2         | BUMP POINTER TO COUNTS
-         SUBQ.L  #1,D7          | LOOP AROUND
+         SUBQ.L  #1,%D7         | LOOP AROUND
          BNE     BCMD3
 
 BCMD55:  LEA     MSG008E(%PC),%A5 | TABLE FULL; ERROR MESSAGE
@@ -1391,8 +1395,8 @@ BSCMD:   LEA     SYNTAX(%PC),%A0
          MOVE.L  %D0,%A1         | A1 = FROM END ADDRESS
 
          BSR     FNEXTF
-         MOVE.B  (%A5),D0
-         CMPI.B  #0x27,D0
+         MOVE.B  (%A5),%D0
+         CMPI.B  #0x27,%D0
          BEQ     BS311          | LITERAL STRING SEARCH
 
          BSR     GETNUMA
@@ -1804,7 +1808,7 @@ MORESP:  BSR     FIXBUF         | A5,A6=#BUFFER
          MOVE.L  %A3,%D1        | GET READY TO AND ADDRESS
          MOVEQ   #0x10,%D3      | MAXIMUM BYTES ON S REC LINE
          ADD.L   %D3,%D1        | INSURE END OF LINE ADDRESS IS MAX
-         ANDI.L  #0xFF0000,D1   | SEE IF 3 BYTE ADDRESS
+         ANDI.L  #0xFF0000,%D1  | SEE IF 3 BYTE ADDRESS
          BNE.S   S2REC          | WHERE TO GO IF 3 BYTES NEEDED
          MOVE.L  #"S1??",(%A6)+ | PUSH
          MOVE    %A3,%D0        | SET UP TO PRINT 2 BYTE ADDRESS
@@ -1831,7 +1835,7 @@ PNCA3:   CMP.L   %A4,%A3        | SEE IF AT ENDING ADDRESS
          BLE.S   A3OUT          | WHERE TO GO IF BELOW OR AT END ADDRESS
          BSR.S   PNTSRECX       | END IT BY PRINTING LAST RECORD
          BSR     FIXBUF         | A5,A6=#BUFFER
-         CLR.L   D4             | CLEAR THE CHECKSUM
+         CLR.L   %D4            | CLEAR THE CHECKSUM
          MOVE.L  #"S9??",(%A6)+ | MOVE TO PRINT BUFFER
          MOVE.L  #"0000",(%A6)+ | MOVE "0000" TO PRIT BUFFER
          MOVEQ   #2,%D6         | BYTE COUNT
@@ -1968,7 +1972,7 @@ GAP113:  .align  2
 
 * NONE OF ABOVE ASSUME NUMERIC VALUE
          SUBQ.L  #1,%A5         | ADJUST (A5) TO FIRST CHAR
-         CLR.L   D0
+         CLR.L   %D0
          BSR     GETNUMA
 
          CMPI.B  #'-',%D6       | (GAPMS)
@@ -2535,7 +2539,7 @@ READ021: CMPI.B  #'-',%D0       |SEE IF MINUS SIGN
 READS1:  CLR.L   %D6            | D6 = TYPE "S1"
          SUBQ.L  #4,%D3         | BYTE COUNT
 
-         CLR.L   D0
+         CLR.L   %D0
          BSR     READHEX4       | FORM ADDRESS
          BRA.S   READS202
 
@@ -2565,7 +2569,7 @@ READ005: CMPI.B  #'S',%D0       | SEE IF IT IS AN S
          MOVE.L  %D0,%D6
 
          BSR     READHEX        | GET CHAR COUNT
-         CLR.L   D3
+         CLR.L   %D3
          MOVE.B  %D0,%D3
 
          CMPI.B  #'0',%D6       | "S0"???
@@ -3279,7 +3283,7 @@ PERCMD:  LSL.W   #8,%D1
          SUBQ.L  #1,%A5          | A5 = POINTER TO 2ND CHAR  (1ST REAL CHARACTER)
 
          LEA     REGTBL(%PC),%A0
-PER4:    CLR.L   D7
+PER4:    CLR.L   %D7
          MOVE.W  (%A0)+,%D7      | SAVE FIRST WORD FOR END OF TABLE TEST
          MOVE.W  (%A0)+,%D0      | GET REAL REGISTER ID INTO D0
          CMPI.W  #0xFFFF,%D7     | ARE WE AT THE END OF THE TABLE?
@@ -3967,7 +3971,7 @@ MSG018:  DC.B    "INVALID ADDRESS=",EOT
 *  NUMBER PLUS OR MINUS NUMBER....
 *
 GETEXP:  MOVE.L  %D7,-(%A7)     | SAVE D7
-         CLR.L   D7
+         CLR.L   %D7
 GETEXP21:BSR.S   GETNUMA        | GET NUMBER
          ADD.L   %D0,%D7        | D7 = NUMBER BEING BUILT
 GETEXP15:MOVE.B  (%A5)+,%D1     | D1 = TERMINATING CHAR
@@ -4014,7 +4018,7 @@ GETN20:  CLR.W   %D4            | D4 = FLAG FOR CHARACTER HIT
 
 GETN30:  CMP.L   %A6,%A5        | SEE IF AT END OF BUFFER
          BEQ     GETN90
-         CLR.L   D0
+         CLR.L   %D0
          MOVE.B  (%A5)+,%D0     | D0 = CHARACTER
 
          LEA     GETNDATA(%PC),%A0 | POINTER TO TERMINATE CHARS
@@ -4733,7 +4737,7 @@ TAPEIN:  MOVEM.L %D1-%D4/%A0-%A3,-(%A7) | SAVE WORKING REGISTERS
          MOVE.B  #2,PITCDDR     | PC0 INPUT, PC1 OUTPUT.
 
 * SYNCHRONIZE ON S CHARACTER
-         CLR.B   D1
+         CLR.B   %D1
 TAPEIN10:BSR.S   TAPEIN40       | GET TAPE
          BCS.S   TAPEIN10       | WAIT FOR LOW
 TAPEIN11:BSR.S   TAPEIN40       | GET TAPE
@@ -4866,7 +4870,7 @@ SETCRTPR:MOVE.W  %D0,CRTPNT     | SET THE "CRT" AND "PRINTER" SWITCH
 *
 EV:      .align  2
          MOVE.L  %D7,-(%A7)     | SAVE D7
-         CLR.L   D7
+         CLR.L   %D7
 EV21:    BSR.S   GETFIELD       | GET NUMBER
          ADD.L   %D0,%D7        | D7 = NUMBER BEING BUILT
 EV15:    MOVE.B  (%A5)+,%D1     | D1 = TERMINATING CHAR
@@ -4896,7 +4900,7 @@ GETF305: CMPI.B  #0x27,(%A5)
          BNE.S   GETF325        | NOT LITERAL
 
          ADDQ.L  #1,%A5
-         CLR.L   D0
+         CLR.L   %D0
 
          MOVE.W  TLENGTH(%A1),%D1 | D1 = SIZE
          BEQ.S   GETF308        | .B = 0
@@ -4936,10 +4940,10 @@ FSIZE:   OR.W    TLENGTH(%A1),%D2 | SET SIZE BITS
 
 *  %D0 = VALUE 0 - 7
 *  %D1 = 0 IF D@     = 1 IF A@
-GETREGD: CLR.L   D1
+GETREGD: CLR.L   %D1
          CMPI.B  #'D',(%A5)+
          BNE.S   ER1
-GET41:   CLR.L   D0
+GET41:   CLR.L   %D0
          MOVE.B  (%A5)+,%D0
          SUBI.B  #'0',%D0
          BMI.S   ER1
@@ -4947,7 +4951,7 @@ GET41:   CLR.L   D0
          BGT.S   ER1
          RTS
 
-GETREGA: CLR.L   D1
+GETREGA: CLR.L   %D1
          MOVE.B  #8,%D1
          CMPI.B  #'A',(%A5)+
          BNE.S   ER1
@@ -5685,7 +5689,7 @@ M430:    MOVE.B  (%A2),%D0      | MUST TERMINATE OP-CODE
          BNE     M428           | ERROR
 M432:
 
-         CLR.L   D0
+         CLR.L   %D0
          MOVE.B  (%A0)+,%D0     | D0 =  KEYS  INDEX
          MOVE.B  %D0,%D1        | D1 =  KEYS (INDEX)
          ANDI.B  #0x3F,%D0      | D0 =        INDEX
@@ -6695,7 +6699,7 @@ MM825:   ROR.L   #3,%D6         | RRR............. .............MMM
          OR.W    %D6,%D2
          BRA     CMMD2
 
-MMOVEA1: CLR.L   D3
+MMOVEA1: CLR.L   %D3
          MOVE.B  #2,TNB(%A1)
 
 MMOVEA:  .align  2              | (INDEX 32)
@@ -6915,7 +6919,7 @@ IMMED:   .align  2              | ADD  AND  CMP #  EOR  OR  SUB
          ADDQ.L  #2,%D3         | SIZE = 4
          MOVE.B  #'#',(%A6)+    | IMMEDIATE
 
-         CLR.L   D0
+         CLR.L   %D0
          MOVE.W  2(%A4),%D0     | D0 = EXTENSION WORD
          MOVE.W  (%A4),%D1
          LSR.W   #6,%D1
@@ -7461,7 +7465,7 @@ ISETS:   .align  2              | STATIC BIT
          ADDQ.L  #2,%D3         | SIZE
          MOVE.B  #'#',(%A6)+    | IMMEDIATE
 
-         CLR.L   D0
+         CLR.L   %D0
          MOVE.W  2(%A4),%D0     | GET BIT POSITION FROM 2ND WORD
          MOVE.L  %D0,%D1
          LSR.L   #5,%D1
@@ -8015,11 +8019,11 @@ DEC411:  MOVE.W  (%A4),%D0      |  FIRST WORD
          BNE     DEC411         | MORE TABLE
 FE12:    BRA     FERROR         | ILLEGAL INSTRUCTION
 
-DEC425:  CLR.L   D6
+DEC425:  CLR.L   %D6
          MOVE.B  (%A5)+,%D6     | D6 = (GOTO OFFSET)/4
          LSL.L   #2,%D6
 
-         CLR.L   D7
+         CLR.L   %D7
          MOVE.B  (%A5)+,%D7     | D7 = INDEX TO OP-CODE
 
 * MOVE OP-CODE TO BUFFER
