@@ -26,6 +26,7 @@ ADDR2MEM: .MACRO a1,a2
 
 
 SAVEREGS: .MACRO
+         TEMP = 0x04d6
          MOVE.L  %A7,REGA7        | SAVE STACK POINTER
          LEA     SV\@(%PC),%A7    | A7 = RETURN ADDRESS (FOR CALL TO SAVE)
          MOVE.L  %A7,TEMP         | TEMP = RETURN ADDRESS
@@ -73,8 +74,8 @@ RESET    =       0x43            | MASTER RESET FOR ACIA
          DS.L    1              | 1   $01  AND PC
 
 
-AV2:     DS.L    1              | 2   $02  BUS ERROR            "BUS "
-AV3:     DS.L    1              | 3   $03  ADDRESS ERROR        "ADDR"
+_AV2:    DS.L    1              | 2   $02  BUS ERROR            "BUS "
+_AV3:    DS.L    1              | 3   $03  ADDRESS ERROR        "ADDR"
 AV4:     DS.L    1              | 4   $04  ILL INSTRUCTION      "OPCO"
          DS.L    1              | 5   $05  DIVIDE BY ZERO       "DIV0"
          DS.L    1              | 6   $06  CHECK TRAP           "CHCK"
@@ -355,11 +356,11 @@ BPADD:   DS.L    8              | BREAKPOINT ADDRESSES
 BPTILL:  DS.L    1              | TEMPORARY BREAKPOINT
 BPCNT:   DS.L    9              | BREAKPOINT COUNTS
 BPDATA:  DS.W    9              | HOLD USER WORDS REPLACED BY TRAP IN SET BP
-BERRD:   DS.L    2              | SPECIAL DATA FOR BUS AND ADDR ERROR EXCEPTIONS
+_BERRD:  DS.L    2              | SPECIAL DATA FOR BUS AND ADDR ERROR EXCEPTIONS
 SAVEAV4: DS.L    1              | HOLDS USER'S AV4 VECTOR (WE USE FOR BP)
-TEMP:    DS.L    1              | TEMP
+_TEMP:   DS.L    1              | TEMP
 TRACECNT:DS.L    1              | TRACE COUNTER (-1=TRACE 1 & RUN)
-TRACEON: DS.W    1              | FLAG FOR TRACE ON
+_TRACEON: DS.W   1              | FLAG FOR TRACE ON
 BPSTATUS:DS.W    1              | 1=PB ARE IN  0=ARE OUT OF MEMORY
 ECHOPT1: DS.L    1              | ECHO FLAG TO PORT ONE
 
@@ -483,9 +484,9 @@ LDATA    =       0xFFFFFFC4     | DS.B    1
 
          .ORG    0x008000
 
-REGA7 =  0x444
+         REGA7 =  0x444
 FIRST:   DC.L    REGA7          | SUPERVISOR STACK
-START = 0x8146
+         START = 0x8146
          DC.L    START          | PROGRAM COUNTER
 V2:      BRA     TRACE
 
@@ -501,8 +502,10 @@ INIT:    MOVE.B  %D1,(%A0)+     | ZERO MEMORY
          SUBQ.L  #1,%D0
          BNE.S   INIT
 
+         AV2 = 0x0008
          ADDR2MEM BERRMSG,AV2   | POINT AT BUS TRAP ERROR MESSAGE ROUTINE
 
+         AV3 = 0x000c
          ADDR2MEM ADDRMSG,AV3   | POINT AT ADDRESS TRAP ERROR MESSAGE ROUTINE
 
          RTS
@@ -512,13 +515,14 @@ INIT:    MOVE.B  %D1,(%A0)+     | ZERO MEMORY
 * SPECIAL HANDLING FOR BUS ERROR AND ADDRESS ERROR *
 ****************************************************
 
-BERRMSG: MOVE.L  #"BUS ",0x30
+BERRMSG: MOVE.L  #0x42555320,0x30 | "BUS "
 
          BRA.S   VECTBE
 
-ADDRMSG: MOVE.L  #"ADDR",0x30
+ADDRMSG: MOVE.L  #0x41444452,0x30 | "ADDR"
 
 
+         BERRD = 0x04ca
 VECTBE:  MOVE.L  (%A7)+,BERRD
          MOVE.L  (%A7)+,BERRD+4
 
@@ -539,9 +543,9 @@ VECTBE:  MOVE.L  (%A7)+,BERRD
          BSR     OUTPUT
          BRA     EVECT2         | GO DISPLAY REGISTERS & PROMPT
 
-MSG008:  DC.B    "SYNTAX "
+MSG008:  .ascii "SYNTAX "
 
-MSG008E: DC.B    "ERROR "
+MSG008E: .ascii "ERROR "
 
 MSGEOT:  DC.B    EOT
 
@@ -555,6 +559,7 @@ MSG021:  .ascii "WHAT"
          .align  2
 WHAT:    LEA     MSG021(%PC),%A5 | PRINT 'WHAT' AND ENTER MACSBUG
 WHAT93:  BSR.S   FIXDATA
+         TRACEON = 0x04de
          CLR.W   TRACEON
 MSG:     BSR     OUT1CR
          BRA     MACSBUG
@@ -584,8 +589,8 @@ P2PHY2:  BSR     PNT8HX         | FORMAT ADDR2
          BSR     OUT1CR         | DISPLAY IT
          RTS
 
-MSG019:  DC.B    "PHYSICAL ADDRESS=",EOT
-
+MSG019:  .string "PHYSICAL ADDRESS="
+         DC.B    EOT
 
 
 
