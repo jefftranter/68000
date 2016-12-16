@@ -118,7 +118,7 @@ _AV31:   DS.L    1              | 31  $1F   7                   "AV#7   [ABORT B
          DS.L    1              | 43  $2B   TRAP 11             "UT B"
          DS.L    1              | 44  $2C   TRAP 12             "UT C"
          DS.L    1              | 45  $2D   TRAP 13             "UT D"
-AV46:    DS.L    1              | 46  $2E   TRAP 14             "UT E"
+_AV46:   DS.L    1              | 46  $2E   TRAP 14             "UT E"
 AV47:    DS.L    1              | 47  $2F   TRAP 15             "UT F"
 AV48:    DS.L    1              | 48  $30
          DS.L    1              | 49  $31
@@ -334,7 +334,7 @@ AV48:    DS.L    1              | 48  $30
 
 _REGPC:  DS.L    1              | USERS PROGRAM COUNTER
 _REGSR:  DS.L    1              | USERS CONDITION CODES
-         DS.L    1              | USERS CONDITION CODES
+
 REGS:    DS.L    8              | D REGISTERS
          DS.L    7              | A0 THROUGH A6 REGISTERS
 _REGA7:  DS.L    1              | A7 REGISTER
@@ -353,7 +353,7 @@ BEGHRAM: .align 4               | INITIALIZE STARTS HERE
 OFFSET:  DS.L    8              | ASSUMED OFFSETS (VIA "R@" FORMAT)
 MEMSIZE: DS.L    1              | MEMORY SIZE IN BYTES
 BPADD:   DS.L    8              | BREAKPOINT ADDRESSES
-BPTILL:  DS.L    1              | TEMPORARY BREAKPOINT
+_BPTILL: DS.L    1              | TEMPORARY BREAKPOINT
 BPCNT:   DS.L    9              | BREAKPOINT COUNTS
 BPDATA:  DS.W    9              | HOLD USER WORDS REPLACED BY TRAP IN SET BP
 _BERRD:  DS.L    2              | SPECIAL DATA FOR BUS AND ADDR ERROR EXCEPTIONS
@@ -362,7 +362,7 @@ _TEMP:   DS.L    1              | TEMP
 TRACECNT:DS.L    1              | TRACE COUNTER (-1=TRACE 1 & RUN)
 _TRACEON: DS.W   1              | FLAG FOR TRACE ON
 BPSTATUS:DS.W    1              | 1=PB ARE IN  0=ARE OUT OF MEMORY
-ECHOPT1: DS.L    1              | ECHO FLAG TO PORT ONE
+_ECHOPT1:DS.L    1              | ECHO FLAG TO PORT ONE
 
 
 
@@ -376,7 +376,7 @@ OPTIONS: .align  2              | FORCE WORD BOUNDRY
          DS.B    1              | SHORT FORM REGISTER DISPLAY
          DS.B    1              | TM  trailing character
          DS.B    1              | TM  exit character
-XONOFF   =       OPTIONS
+_XONOFF  =       OPTIONS
 TMCHARS  =       OPTIONS+4
 
 * END of as is section
@@ -406,8 +406,8 @@ SCREEN2: DS.L    1              | PRINT THIS AFTER TRACE DISPLAY
 NULLPADS:DS.B    2              | CHARACTER NULL PADS
 CRPADS:  DS.B    2              | CARRIAGE RETURN NULL PADS
 
-OUTTO:   DS.L    1              | HOLDS ADDRESS OF OUTPUT ROUTINE
-INFROM:  DS.L    1              | HOLDS ADDRESS OF INPUT ROUTINE
+_OUTTO:  DS.L    1              | HOLDS ADDRESS OF OUTPUT ROUTINE
+_INFROM: DS.L    1              | HOLDS ADDRESS OF INPUT ROUTINE
 ALTSER1: DS.L    1              | ALTERNATE SERIAL PORT#1
 ALTSER2: DS.L    1              | ALTERNATE SERIAL PORT#2
 _INPORT1: DS.L   1              | INPUT ROUTINE ADDRESS
@@ -418,14 +418,14 @@ _INPORT3: DS.L   1              | THIS MIGHT BE FOR TAPE
 _OUTPORT3:DS.L   1              | THIS MIGHT BE FOR PRINTER
 _INPORT4: DS.L   1              | CASSETTE
 _OUTPORT4:DS.L   1              | CASSETTE
-MD1CON:  DS.W    1              | ACIA PROFILE (PORT1/PORT2)
-PDIPORT: DS.L    1              | PDIPORT ADDRESS
+_MD1CON:  DS.W   1              | ACIA PROFILE (PORT1/PORT2)
+_PDIPORT: DS.L   1              | PDIPORT ADDRESS
 CRTPNT:  DS.W    1              | OUTPUT TO PRINTER AND CRT
-TAPENULS:DS.B    1              | NULLS FOR CASSETTE
+_TAPENULS:DS.B   1              | NULLS FOR CASSETTE
 
          DS.B    1              | PAD BYTE
 
-CTLINK:  DS.L    1              | POINTER TO FIRST TABLE
+_CTLINK: DS.L    1              | POINTER TO FIRST TABLE
 
 
 
@@ -722,7 +722,9 @@ START11: MOVE.W  #0x2700,%SR     | MASK OFF INTERRUPTS
          INPORT4 = 0x0644
          ADDR2MEM  TAPEIN,INPORT4      | CASSETTE
 
+         TAPENULS = 0x0654
          MOVE.B  #8,TAPENULS    | NULLS FOR CASSETTE
+         PDIPORT = 0x064E
          MOVE.L  #PDI1,PDIPORT  | PRINTER
 
 
@@ -746,18 +748,22 @@ START11: MOVE.W  #0x2700,%SR     | MASK OFF INTERRUPTS
 
 * INITIALIZE THE PDI'S
 
+         MD1CON = 0x064c
          MOVE.W  #0x1515,MD1CON
          BSR     INITSER        | RESET & PROGRAM PDI
 
 * INITIALIZE XON/XOFF (READER ON / READER OFF)
 *            AUTO-LINE FEED OVERRIDE
 
+         XONOFF = 0x04e6
          MOVE.L  #0x00000000,XONOFF
 
 
 
 * TRAP14.SA
+         AV46 = 0x00b8
          ADDR2MEM  TRAP14,AV46
+         CTLINK = 0x0656
          MOVE.L  #(254<<24)+CT,CTLINK
 
 
@@ -772,9 +778,13 @@ MACSBUG: MOVE.W  #0x2700,%SR    | MASK OFF INTERRUPTS
          LEA     SYSTACK,%A7    | RESTORE SYSTEM STACK
          BSR     SWAPOUT        | GET BP OUT OF USER MEMORY
 
+         BPTILL = 0x0490
          CLR.L   BPTILL         | GET RID OF 'TILL' BREAKPOINT
+         OUTTO = 0x061c
          CLR.L   OUTTO          | INITIALIZE I/O TO DEFAULT
+         INFROM = 0x0620
          CLR.L   INFROM         | INITIALIZE I/O TO DEFAULT
+         ECHOPT1 = 0x04e2
          CLR.B   ECHOPT1        | NO ECHO TO PORT1
 
          LEA     MSG001(%PC),%A5 | > (Prompt)
@@ -811,9 +821,9 @@ DECODE1: CMP.L   %A6,%A5        | SEE IF AT END OF BUFFER
          BNE.S   DECODE10
          ADDQ.L  #1,%A5         | GET PAST PHOENY PROMPT
          BSR     OUTPUT2        | SEND LINE+CR (NO LF) TO PORT2
-         BRA     MACSBUG        | REENTER COMMAND MODE
+         BRA.S   MACSBUG        | REENTER COMMAND MODE
 
-DECODE10:CMPI.B  #0x20,%D0       | IGNORE LEADING SPACES
+DECODE10:CMPI.B  #0x20,%D0      | IGNORE LEADING SPACES
          BNE.S   DECODE2        | WHERE TO GO IF NOT A SPACE
          ADDQ.L  #1,%A5         | BUMP START OF BUFFER
          BRA.S   DECODE1        | TRY NEXT CHARACTER
@@ -831,7 +841,7 @@ DECODE4: MOVE.W  (%A1)+,%D2     | D2 = 2 CHAR COMMAND FROM LIST
          TST.L   %D3
          BEQ.S   DECODE41       | NOT A "NO"
          TST.B   %D2            | IS "NO" OPTION SUPPORTED THIS COMMAND?
-         BPL     DECODE4        | NO...THEN RUN OUT OF COMMANDS
+         BPL.S   DECODE4        | NO...THEN RUN OUT OF COMMANDS
 
 DECODE41:ANDI.W  #0x7F7F,%D2    | CLEAR "INVISABLE" & "NO" BITS
          CMPI.W  #0x7F7F,%D2    | END OF LIST?
@@ -842,7 +852,7 @@ DECODE41:ANDI.W  #0x7F7F,%D2    | CLEAR "INVISABLE" & "NO" BITS
          MOVE.B  %D1,%D2        | DEFAULT
 
 DECODE3: CMP.W   %D1,%D2        | Command from table = the input?
-         BNE     DECODE4        | COMMAND NOT FOUND
+         BNE.S   DECODE4        | COMMAND NOT FOUND
 
          CLR.W   TRACEON        | TURN OFF TRACE MODE
 
@@ -863,14 +873,16 @@ NOCMD:   MOVEQ   #-4,%D3        | SET "NO" SWITCH
          MOVE.B  (%A5),%D1      | MOVE CHAR #3
          ASL.W   #8,%D1         | MOVE OVER 1 CHAR
          MOVE.B  1(%A5),%D1     | MOVE CHAR #4
-         BRA     DECODE21       | WHICH "NO" COMMAND?
+         BRA.S   DECODE21       | WHICH "NO" COMMAND?
 
 
 *-------------------------------------------------------------------------
 * File COMMANDS  Command list                                     06/20/82
 
 
-MSG001:  DC.B    CR,LF,"TUTOR  1.3 ",EOT | "PROMPT"
+MSG001:  DC.B    CR,LF
+         .ascii  "TUTOR  1.3 "
+         DC.B    EOT            | "PROMPT"
 
 
 
@@ -894,19 +906,19 @@ FLAG     =       FLAG+0x80       | "NO\1".Command
          .IFC    "\a3","NORTN=YES"
 FLAG     =       FLAG+0x80       | "NO\1".Command
          .ENDIF
-        .IFC    "\a1","PER"    | Check for the "PER" command
+         .IFC    "\a1","PER"    | Check for the "PER" command
          DC.W    ".*"+FLAG      | Reg commands (.A2 .D6 .PC .R0 etc.)
-*         DC.W    \a1CMD-FIRST   |*************************************
-        .ENDIF
-        .IFNC   "\a1","PER"     | If not PERCMD...
-*        .IFEQ   "\a1"&(0xFF00)   | If 1 digit code, 2nd will be a blank.
-*        DC.W    "\a1 "+FLAG     | "\1"....Command  -  -  (Single Digit)
-*        .ENDIF
-*        .IFNE   "\a1"&(0xFF00)   | If 2 digit code, leave as is.
-*        DC.W    "\a1"+FLAG      | "\1"...Command
-*        .ENDIF
-*         DC.W    \a1CMD-FIRST    |************************************
-        .ENDIF
+         DC.W    PERCMD-FIRST   |*************************************
+         .ENDIF
+         .IFNC   "\a1","PER"     | If not PERCMD...
+         .IFEQ   "\a1"&(0xFF00)   | If 1 digit code, 2nd will be a blank.
+         DC.W    "\a1 "+FLAG     | "\1"....Command  -  -  (Single Digit)
+         .ENDIF
+         .IFNE   "\a1"&(0xFF00)   | If 2 digit code, leave as is.
+         DC.W    "\a1"+FLAG      | "\1"...Command
+         .ENDIF
+         DC.W    \a1\()CMD-FIRST    |************************************
+         .ENDIF
          .ENDM
 
 
