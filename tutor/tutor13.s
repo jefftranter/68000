@@ -83,7 +83,7 @@ _AV4:    DS.L    1              | 4   $04  ILL INSTRUCTION      "OPCO"
 AV8:     DS.L    1              | 8   $08  PRIVILEDGE VIOLATION "PRIV"
 AV9:     DS.L    1              | 9   $09  TRACE
          DS.L    1              | 10  $0A  1010 LINE EMULATION  "1010"
-AV11:    DS.L    1              | 11  $0B  1111 LINE EMULATION  "1111"
+_AV11:   DS.L    1              | 11  $0B  1111 LINE EMULATION  "1111"
 AV12:    DS.L    1              | 12  $0C  USED AS TEMPORARY STORAGE FOR VECTOR MSGS.
          DS.L    1              | 13  $0D  NOT USED
          DS.L    1              | 14  $0E
@@ -96,7 +96,7 @@ AV12:    DS.L    1              | 12  $0C  USED AS TEMPORARY STORAGE FOR VECTOR 
          DS.L    1              | 21  $15
          DS.L    1              | 22  $16
          DS.L    1              | 23  $17
-AV24:    DS.L    1              | 24  $18   0  AUTO VECTORS     "SPUR"
+_AV24:   DS.L    1              | 24  $18   0  AUTO VECTORS     "SPUR"
          DS.L    1              | 25  $19   1                   "AV#1"
          DS.L    1              | 26  $1A   2                   "AV#2"   TEST BUTTON
          DS.L    1              | 27  $1B   3                   "AV#3"
@@ -889,7 +889,7 @@ MSG001:  DC.B    CR,LF
 
 *******************************************************
 * C O P Y R I G H T . 1 9 8 1 . B Y . M O T O R O L A *
-*******************************************************
+******************************************************
 
 * VERSAbug command generation macro
 CMD:     .MACRO a1,a2,a3,a4
@@ -907,91 +907,80 @@ FLAG     =       FLAG+0x80       | "NO\1".Command
 FLAG     =       FLAG+0x80       | "NO\1".Command
          .ENDIF
          .IFC    "\a1","PER"    | Check for the "PER" command
-         DC.W    ".*"+FLAG      | Reg commands (.A2 .D6 .PC .R0 etc.)
+         .ascii  ".*" | +FLAG      | Reg commands (.A2 .D6 .PC .R0 etc.)
          DC.W    PERCMD-FIRST   |*************************************
          .ENDIF
          .IFNC   "\a1","PER"     | If not PERCMD...
          .IFEQ   "\a1"&(0xFF00)   | If 1 digit code, 2nd will be a blank.
-         DC.W    "\a1 "+FLAG     | "\1"....Command  -  -  (Single Digit)
+         .ascii  "\a1 "  | +FLAG     | "\1"....Command  -  -  (Single Digit)
          .ENDIF
          .IFNE   "\a1"&(0xFF00)   | If 2 digit code, leave as is.
-         DC.W    "\a1"+FLAG      | "\1"...Command
+         .ascii  "\a1"  | +FLAG      | "\1"...Command
          .ENDIF
          DC.W    \a1\()CMD-FIRST    |************************************
          .ENDIF
          .ENDM
 
+SOLIST:  .align  2               | Start Of LIST
 
-SOLIST:  .align   2               | Start Of LIST
-
-         CMD     PER,"HELP=NO",X,X
-
-         CMD     NO,"HELP=NO",X,X
-
-         CMD     BF,X,X
-
-         CMD     BM,X,X
-
-
-
-         CMD     BR,"NORTN=YES",X,X
-
-         CMD     BS,X,X
-
-         CMD     BT,X,X
-
-         CMD     DC,X,X
-
-         CMD     DF,X,X
-
-         CMD     DU,X,X
-
-
-
-         CMD     G,X,X
-
-         CMD     GD,X,X
-
-         CMD     GO,X,X
-
-         CMD     GT,X,X
-
-         CMD     HE,X,X
-
-         CMD     LO,X,X
-
-         CMD     M,X,X
-
-
-
-         CMD     MD,X,X
-
-         CMD     MM,X,X
-
-         CMD     MS,X,X
-
-         CMD     OF,X,X
-
-         CMD     PA,"NORTN=YES",X,X
-
-         CMD     PF,X,X
-
-
-
-         CMD     T,X,X
-
-         CMD     TM,X,X
-
-         CMD     TR,X,X
-
-         CMD     TT,X,X
-
-         CMD     VE,X,X
+*        CMD     PER,"HELP=NO",X,X
+         DC.B    0xAE, 0x2A, 0x15, 0x8C
+*        CMD     NO,"HELP=NO",X,X
+         DC.B    0xCE, 0x4F, 0x02, 0xEE
+*        CMD     BF,X,X
+         DC.B    0x42, 0x46, 0x04, 0xE4
+*        CMD     BM,X,X
+         DC.B    0x42, 0x4D, 0x05, 0x36
+*        CMD     BR,"NORTN=YES",X,X
+         DC.B    0x42, 0xD2, 0x06, 0x52
+*        CMD     BS,X,X
+         DC.B    0x42, 0x53, 0x07, 0x18
+*        CMD     BT,X,X
+         DC.B    0x42, 0x54, 0x08, 0x52
+*        CMD     DC,X,X
+         DC.B    0x44, 0x43, 0x08, 0xA4
+*        CMD     DF,X,X
+         DC.B    0x44, 0x46, 0x09, 0x02
+*        CMD     DU,X,X
+         DC.B    0x44, 0x55, 0x0A, 0x20
+*        CMD     G,X,X
+         DC.B    0x47, 0x20, 0x06, 0x24
+*        CMD     GD,X,X
+         DC.B    0x47, 0x44, 0x06, 0x32
+*        CMD     GO,X,X
+         DC.B    0x47, 0x4F, 0x06, 0x24
+*        CMD     GT,X,X
+         DC.B    0x47, 0x54, 0x05, 0xD8
+*        CMD     HE,X,X
+         DC.B    0x48, 0x45, 0x0E, 0x82
+*        CMD     LO,X,X
+         DC.B    0x4C, 0x4F, 0x0F, 0xC6
+*        CMD     M,X,X
+         DC.B    0x4D, 0x20, 0x13, 0x14
+*        CMD     MD,X,X
+         DC.B    0x4D, 0x44, 0x11, 0x64
+*        CMD     MM,X,X
+         DC.B    0x4D, 0x4D, 0x13, 0x14
+*        CMD     MS,X,X
+         DC.B    0x4D, 0x53, 0x14, 0x98
+*        CMD     OF,X,X
+         DC.B    0x4F, 0x46, 0x16, 0xBC
+*        CMD     PA,"NORTN=YES",X,X
+         DC.B    0x50, 0xC1, 0x21, 0xBC
+*        CMD     PF,X,X
+         DC.B    0x50, 0x46, 0x17, 0x3A
+*        CMD     T,X,X
+         DC.B    0x54, 0x20, 0x05, 0x88
+*        CMD     TM,X,X
+         DC.B    0x54, 0x4D, 0x18, 0x70
+*        CMD     TR,X,X
+         DC.B    0x54, 0x52, 0x05, 0x88
+*        CMD     TT,X,X
+         DC.B    0x54, 0x54, 0x05, 0xA4
+*        CMD     VE,X,X
+         DC.B    0x56, 0x45, 0x0F, 0xC0
 
          DC.W    0xFFFF     | End of list indicator
-
-
-
 
 *-------------------------------------------------------------------------
 * File VECTMSG   Messages for vectors                             05/29/82
@@ -1005,14 +994,16 @@ INITVMSG:LEA     VECT(%PC),%A0  | A0 = START OF VECTOR TABLE
          MOVEQ   #10,%D0        | D0 = COUNT
 VECTI:   MOVE.L  %A0,(%A1)+     | MOVE ADDRESS TO VECTOR
          ADD.L   %D0,%A0        | BUMP ADDRESS
+         AV11    = 0x002C
          CMPA.L  #AV11+4,%A1
-         BNE     VECTI
+         BNE.S   VECTI
 
+         AV24    = 0x0060
          LEA     AV24,%A1       | A1 = NEXT VECTOR TO INITIALIZE
 VECTI2:  MOVE.L  %A0,(%A1)+     | MOVE ADDRESS TO VECTOR
          ADD.L   %D0,%A0        | BUMP ADDRESS
          CMPA.L  #AV48,%A1
-         BNE     VECTI2
+         BNE.S   VECTI2
          RTS
 
 
