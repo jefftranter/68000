@@ -335,7 +335,7 @@ AV48:    DS.L    1              | 48  $30
 _REGPC:  DS.L    1              | USERS PROGRAM COUNTER
 _REGSR:  DS.L    1              | USERS CONDITION CODES
 
-REGS:    DS.L    8              | D REGISTERS
+_REGS:   DS.L    8              | D REGISTERS
          DS.L    7              | A0 THROUGH A6 REGISTERS
 _REGA7:  DS.L    1              | A7 REGISTER
 _REGUS:  DS.L    1              | USER STACK
@@ -396,12 +396,12 @@ SSA7:    DS.L    1
 * I/O BUFFER *
 **************
 
-BUFFER:  DS.B    BUFFSIZE
+_BUFFER:  DS.B   BUFFSIZE
 
-DUMPTEMP:DS.B    80             | HEADER TEMP BUFFER
+_DUMPTEMP:DS.B   80             | HEADER TEMP BUFFER
 
-SCREEN1: DS.L    1              | PRINT THIS BEFORE TRACE DISPLAY
-SCREEN2: DS.L    1              | PRINT THIS AFTER TRACE DISPLAY
+_SCREEN1: DS.L   1              | PRINT THIS BEFORE TRACE DISPLAY
+_SCREEN2: DS.L   1              | PRINT THIS AFTER TRACE DISPLAY
 
 NULLPADS:DS.B    2              | CHARACTER NULL PADS
 CRPADS:  DS.B    2              | CARRIAGE RETURN NULL PADS
@@ -603,6 +603,7 @@ MSG019:  .ascii  "PHYSICAL ADDRESS="
 *                          POINTS AT END.                   *
 *************************************************************
 
+         BUFFER = 0x0540
 FIXDATA: LEA     BUFFER,%A6
 FIXDADD: CMPI.B  #EOT,(%A5)
          BEQ.S   FIXD2
@@ -1431,7 +1432,7 @@ BS91:    CMP.L   %A6,%A0
 
          MOVE.B  (%A0)+,%D0
          CMPI.B  #';',%D0
-         BNE     BS91           | NOT SEMICOLON
+         BNE.S   BS91           | NOT SEMICOLON
 
          MOVE.L  %A0,%A6
          SUBQ.L  #1,%A6          | ADJUST END OF BUFFER POINTER
@@ -1490,31 +1491,32 @@ BS200:   CMP.L   %A1,%A3
 BS213:   BSR     OUT1CR
 
 BS215:   ADD.L   %D6,%A3          | BUMP FETCH ADDRESS  (D6 = SIZE)
-         BRA     BS200
+         BRA.S   BS200
 
 BS219:   MOVEQ   #2,%D6          | SIZE = WORD
          MOVE.W  (%A3),%D0
          AND.W   %D4,%D0
          CMP.W   %D7,%D0
-         BNE     BS215
+         BNE.S   BS215
 
          MOVE.W  (%A3),%D0
          BSR     PNT4HX         | DISPLAY
-         BRA     BS213
+         BRA.S   BS213
 
 BS225:   MOVEQ   #1,%D6          | SIZE = BYTE
          MOVE.B  (%A3),%D0
          AND.B   %D4,%D0
          CMP.B   %D7,%D0
-         BNE     BS215
+         BNE.S   BS215
 
          MOVE.B  (%A3),%D0
          BSR     PNT2HX         | DISPLAY
-         BRA     BS213
+         BRA.S   BS213
 
 * LITERAL STRING SEARCH
 *   SAVE STRING
 
+         DUMPTEMP = 0x05c0
 BS311:   LEA     DUMPTEMP,%A2
 BS313:   ADDQ.L  #1,%A5
          CMP.L   %A6,%A5
@@ -1522,7 +1524,7 @@ BS313:   ADDQ.L  #1,%A5
          MOVE.B  (%A5),(%A2)+
          MOVE.B  (%A5),%D0
          CMPI.B  #0x27,%D0
-         BNE     BS313
+         BNE.S   BS313
          SUBQ.L  #1,%A2         | A2 = END OF STRING + 1
 
          MOVE.L  %A3,%A0
@@ -1544,7 +1546,7 @@ BS325:   MOVE.B  (%A0),%D0
 
          ADDQ.L  #1,%A0
          CMP.L   %A2,%A4
-         BCS     BS325          | MORE STRING TO CHECK
+         BCS.S   BS325          | MORE STRING TO CHECK
 
          BSR     FIXBUF         | HAVE MATCH
          MOVE.L  %A3,%D0        | FORMAT ADDRESS
@@ -1555,14 +1557,14 @@ BS325:   MOVE.B  (%A0),%D0
          LEA     DUMPTEMP,%A4    | MOVE STRING TO BUFFER
 BS355:   MOVE.B  (%A4)+,(%A6)+
          CMP.L   %A4,%A2
-         BCC     BS355
+         BCC.S   BS355
 
          BSR     OUT1CR         | DISPLAY
 
 BS365:   ADDQ.L  #1,%A3
          CMP.L   %A3,%A1
          BCS     MACSBUG        | DONE
-         BRA     BS323
+         BRA.S   BS323
 
 
 
@@ -1656,6 +1658,7 @@ TDISPLY: BSR     FIXBUF         | PRINT TRACE DISPLAY SUBROUTINE
 
 TD07:    BSR     FIXBUF         | PRINT PRELUDE
          CLR.L   OUTTO          | FORCE DISPLAY TO OPERATORS CONSOLE
+         SCREEN1 = 0x0610
          MOVE.L  SCREEN1,(%A6)+
          BEQ.S   TD09           | SKIP PRELUDE
          BSR     OUTPUT
@@ -1672,6 +1675,7 @@ TD1:     MOVE.W  (%A4)+,%D0     | GET REG NAME
          BSR     OUT1CR         | PRINT BUFFER
 
          MOVE.B  #'D',%D7       | CLASS=DATA
+         REGS = 0x0408
          LEA     REGS,%A3       | OFFSET
          BSR     PNTCLS         | GO PRINT THE BLOCK
 
@@ -1683,7 +1687,7 @@ TD1:     MOVE.W  (%A4)+,%D0     | GET REG NAME
          MOVEQ   #20,%D1        | LOOP COUNTER
 TD27:    MOVE.B  #'-',(%A6)+    | FILL BUFFER WITH BOARDER
          SUBQ.L  #1,%D1
-         BNE TD27
+         BNE.S   TD27
 
 TD25:    MOVE.L  REGPC,%A4      | DISASSEMBLE
          MOVEM.L (%A4),%D0-%D2
@@ -1694,6 +1698,7 @@ TD25:    MOVE.L  REGPC,%A4      | DISASSEMBLE
          BSR     OUT1CR         | PRINT
 
          BSR     FIXBUF         | PRINT END STUFF FOR SCREEN CONTROL
+         SCREEN2 = 0x0614
          MOVE.L  SCREEN2,(%A6)+
          BEQ.S   TD39           | SKIP END STUFF
          BSR     OUTPUT
@@ -1745,7 +1750,7 @@ TDCC:    MOVE.W  %D0,%D3        | SAVE FOR A MOMENT
          BSR.S   TDCC9
          MOVE.L  #0x10043,%D7    | C BIT
          BSR.S   TDCC9
-         BRA     TD9
+         BRA.S   TD9
 *
 TDCC9:   MOVE.L  %D7,%D6        | DUPLICATE STUFF
          SWAP    %D6            | GET BIT POSITION
@@ -1789,7 +1794,7 @@ PUNCH5:  .align  2
 PUM11:   CMP.L   %A5,%A6
          BEQ.S   PUM13
          MOVE.B  (%A5)+,(%A2)+    | MOVE
-         BRA     PUM11
+         BRA.S   PUM11
 PUM13:   EXG     %A2,%D5         | D5 = END OF TEXT +1
 
 * DISPLAY ADDRESSES
@@ -1818,7 +1823,7 @@ MORES0:  CMP.L   %D5,%A2        | SEE IF AT END OF TEXT
 
          ADD.L   %D0,%D4        | FOR CHECKSUM
          BSR     PNT2HX         | PUT IT IN BUFFER
-         BRA     MORES0
+         BRA.S   MORES0
 ENDS0:   .align  2
 
          BSR     PNTSREC        | GO PRINT THE "S" RECORD
@@ -1871,9 +1876,9 @@ A3OUT:   MOVE.B  (%A3)+,%D0     | GRAB THE BYTE FROM MEMORY
          ADDQ.L  #1,%A1         | ADD TO COUNT OF BYTES PROCESSED
          BSR     PNT2HX         | PUT THE HEX IN THE PRINT BUFFER
          SUBQ.L  #1,%D3         | COUNT DOWN CHAR TO GO IN LINE
-         BNE     PNCA3
+         BNE.S   PNCA3
          BSR.S   PNTSREC        | END OF LINE-PUNCH IT
-         BRA     MORESP         | GO FIX UP NEXT LINE
+         BRA.S   MORESP         | GO FIX UP NEXT LINE
 
 * FIX UP & PRINT THE "S" RECORD/LINE
 
@@ -1985,7 +1990,7 @@ GAP113:  .align  2
          BEQ     GAP191         | TERMINATE
 
          TST.W   %D6            | (GANPM)
-         BMI     GAE            | NEEDS PLUS OR MINUS
+         BMI.S   GAE            | NEEDS PLUS OR MINUS
 
          CMPI.B  #'R',%D0
          BEQ     GAP171         | RELATIVE OFFSET
@@ -2008,7 +2013,7 @@ GAP118:  SUB.L   %D0,%D4
 
 GAP119:  CLR.B   %D6            | (GAPMS)  RESET PLUS MINUS FLAG
          ORI.W   #0x8000,%D6     | (GANPM)  SET NEED PLUS MINUS
-GAP111S: BRA     GAP111
+GAP111S: BRA.S   GAP111
 
 * (*) (-) SET ARITHMETIC OPERATOR
 
@@ -2016,7 +2021,7 @@ GAP121:  TST.B   %D6            | (GAPMS)
          BNE.S   GAE            | MULTI OPERATORS
          MOVE.B  %D0,%D6        |  (GAPMS)
          ANDI.W  #0x00FF,%D6     | RESET (GANPM) NEED PLUS MINUS
-         BRA     GAP111S
+         BRA.S   GAP111S
 
 *  ]  CLOSE INDIRECT
 
