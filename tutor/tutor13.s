@@ -3620,7 +3620,7 @@ MSG031:  DC.B    CR,LF
 RAMTEST: .align  2
          MOVE.L  %A0,%D3        | D3 = BEGINNING ADDRESS
          MOVE.L  %D3,%A2        | USE A2 AS POINTER IN MEMORY
-WALK3:   MOVE    #0xFE,%D0      | PREPARE FOR "WALKING BIT" TEST
+WALK3:   MOVEQ   #-2,%D0        | PREPARE FOR "WALKING BIT" TEST
 WALK0:
          MOVE.W  %D0,(%A2)      | STORE D0 INTO MEMORY
          MOVE.W  (%A2),%D1      | D1 CONTAINS RAM DATA
@@ -3650,7 +3650,7 @@ MTCLR:
          CMP.L   %A1,%A2        | DONE?
          BNE.S   MTCLR          | NO... ZERO ALL OF MEMORY
 
-         MOVE    #0xFF,%D2      | SET D2 = FFFF
+         MOVEQ   #-1,%D2        | SET D2 = FFFF
 MTSTOR1:
          MOVE.W  -(%A2),%D1     | FIRST READ BACK MEMORY
          CMP.W   %D0,%D1        | CHK AGAINST WHAT WAS WRITTEN
@@ -3749,7 +3749,7 @@ MSG006:  .ascii  "*TRANSPARENT* EXIT=$"
 *
 *   HANDLE THE ABORT BUTTON
 *
-ABORTB:  MOVE.W  #0x2700,SR
+ABORTB:  MOVE.W  #0x2700,%SR
          SAVEREGS
          BSR     FAULTSER       | RESET SERIAL PORTS
          LEA     MSG012(%PC),%A5 | "SOFTWARE ABORT"
@@ -3760,10 +3760,9 @@ EVECT4:  BSR     OUTPUT         | MSG TO PORT1
 ABORT335:BSR     TDISPLY        | DISPLAY REGISTERS
          BRA     MACSBUG
 
-MSG012:  DC.B    LF,LF,"SOFTWARE ABORT",CR,LF,EOT
-
-
-
+MSG012:  DC.B    LF,LF
+         .ascii  "SOFTWARE ABORT"
+         DC.B    CR,LF,EOT
 
          DC.B    0              | PAD BYTE
          .align  2
@@ -3852,7 +3851,7 @@ FREL15:  ADDQ.L  #4,%A0
 
          TST.L   %D7
          BMI.S   FREL25         | NO FIT
-         TST     D6
+         TST     %D6
          BNE.S   FREL20
          TST.L   OFFSET
          BEQ.S   FREL25         | R0 = 000000; NO FIT
@@ -5413,7 +5412,6 @@ TBLKEYS: .align  2              | INDEX
          ADR     PEA            | 36  PEA
          ADR     DC             | 37  DC.W
 
-
 * \1,\2 = MNEUMONIC (\2 SIGN BIT SET AS LAST CHARACTER)
 * \3    = INDEX TO TABLKEYS
 * \4,\5 = FIRST WORD MASK
@@ -5421,7 +5419,7 @@ TBLKEYS: .align  2              | INDEX
 * \7    = .S ALLOWED (.W NOT ALLOWED)
 OPC:     .MACRO a1,a2,a3,a4,a5,a6,a7
          .ascii  "\a1"
-*         DC.B    '\a2'+128
+         DC.B    \a2
          DC.B    \a3 + \a6 + \a7
          DC.B    0x\a4
          DC.B    0x\a5
@@ -5430,125 +5428,125 @@ OPC:     .MACRO a1,a2,a3,a4,a5,a6,a7
 NOC      =       0x80           | (BIT 7 SET) NO OPERAND
 NW       =       0x40           | (BIT 6 SET) .W NOT ALLOWED
 
-TBLOPC:  OPC     ABC,D,0,C1,00,0,0     | ABCD
-         OPC     ADD,A,2,D0,C0,0,0     | ADDA
-         OPC     ADD,I,3,06,00,0,0     | ADDI
-         OPC     ADD,Q,4,50,00,0,0     | ADDQ
-         OPC     ADD,X,5,D1,00,0,0     | ADDX
-         OPC     AD,D,1,D0,00,0,0      | ADD
-         OPC     AND,I,28,02,00,0,0    | ANDI
-         OPC     AN,D,6,C0,00,0,0      | AND
-         OPC     AS,L,7,E1,00,0,0      | ASL
-         OPC     AS,R,07,E0,00,0,0     | ASR
-         OPC     BR,A,10,60,00,0,NW    | BRA
-         OPC     BH,I,10,62,00,0,NW    | BHI
-         OPC     BL,S,10,63,00,0,NW    | BLS
-         OPC     BC,C,10,64,00,0,NW    | BCC
-         OPC     BC,S,10,65,00,0,NW    | BCS
-         OPC     BN,E,10,66,00,0,NW    | BNE
-         OPC     BE,Q,10,67,00,0,NW    | BEQ
-         OPC     BV,C,10,68,00,0,NW    | BVC
-         OPC     BV,S,10,69,00,0,NW    | BVS
-         OPC     BP,L,10,6A,00,0,NW    | BPL
-         OPC     BM,I,10,6B,00,0,NW    | BMI
-         OPC     BG,E,10,6C,00,0,NW    | BGE
-         OPC     BL,T,10,6D,00,0,NW    | BLT
-         OPC     BG,T,10,6E,00,0,NW    | BGT
-         OPC     BL,E,10,6F,00,0,NW    | BLE
-         OPC     BCH,G,9,01,40,0,0     | BCHG
-         OPC     BCL,R,30,01,80,0,0    | BCLR      DYNAMIC
-         OPC     BSE,T,11,01,C0,0,0    | BSET
-         OPC     BS,R,10,61,00,0,NW    | BSR
-         OPC     BTS,T,31,01,00,0,0    | BTST
-         OPC     B,T,10,60,00,0,NW     | BT
-         OPC     CH,K,12,41,80,0,0     | CHK
-         OPC     CL,R,13,42,00,0,0     | CLR
-         OPC     CMP,A,2,B0,C0,0,0     | CMPA
-         OPC     CMP,I,3,0C,00,0,0     | CMPI
-         OPC     CMP,M,14,B1,08,0,0    | CMPM
-         OPC     CM,P,34,B0,00,0,0     | CMP
-         OPC     DB,T,8,50,C8,0,NW     | DBT
-         OPC     DB,F,8,51,C8,0,NW     | DBF
-         OPC     DBR,A,8,51,C8,0,NW    | DBRA
-         OPC     DBH,I,8,52,C8,0,NW    | DBHI
-         OPC     DBL,S,8,53,C8,0,NW    | DBLS
-         OPC     DBC,C,8,54,C8,0,NW    | DBCC
-         OPC     DBC,S,8,55,C8,0,NW    | DBCS
-         OPC     DBN,E,8,56,C8,0,NW    | DBNE
-         OPC     DBE,Q,8,57,C8,0,NW    | DBEQ
-         OPC     DBV,C,8,58,C8,0,NW    | DBVC
-         OPC     DBV,S,8,59,C8,0,NW    | DBVS
-         OPC     DBP,L,8,5A,C8,0,NW    | DBPL
-         OPC     DBM,I,8,5B,C8,0,NW    | DBMI
-         OPC     DBG,E,8,5C,C8,0,NW    | DBGE
-         OPC     DBL,T,8,5D,C8,0,NW    | DBLT
-         OPC     DBG,T,8,5E,C8,0,NW    | DBGT
-         OPC     DBL,E,8,5F,C8,0,NW    | DBLE
-         OPC     DC.,W,37,00,00,0,0    | DC.W  (WORD ONLY)
-         OPC     DIV,S,12,81,C0,0,0    | DIVS
-         OPC     DIV,U,12,80,C0,0,0    | DIVU
-         OPC     EOR,I,28,0A,00,0,0    | EORI
-         OPC     EO,R,35,B1,00,0,0     | EOR
-         OPC     EX,G,16,C1,00,0,0     | EXG
-         OPC     EX,T,17,48,00,0,0     | EXT
-         OPC     JM,P,18,4E,C0,0,NW    | JMP
-         OPC     JS,R,18,4E,80,0,NW    | JSR
-         OPC     LE,A,19,41,C0,0,0     | LEA
-         OPC     LIN,K,20,4E,50,0,0    | LINK
-         OPC     LS,L,7,E3,08,0,0      | LSL
-         OPC     LS,R,07,E2,08,0,0     | LSR
-         OPC     MOVE,A,32,00,04,0,0   | MOVEA
-         OPC     MOVE,M,27,48,80,0,0   | MOVEM
-         OPC     MOVE,P,33,01,08,0,0   | MOVEP
-         OPC     MOVE,Q,15,70,00,0,0   | MOVEQ
-         OPC     MOV,E,21,00,00,0,0    | MOVE
-         OPC     MUL,S,12,C1,C0,0,0    | MULS
-         OPC     MUL,U,12,C0,C0,0,0    | MULU
-         OPC     NBC,D,29,48,0,0,0     | NBCD
-         OPC     NEG,X,13,40,00,0,0    | NEGX
-         OPC     NE,G,13,44,00,0,0     | NEG
-         OPC     NO,P,22,4E,71,NOC,0   | NOP
-         OPC     NO,T,13,46,00,0,0     | NOT
-         OPC     OR,I,28,00,00,0,0     | ORI
-         OPC     O,R,6,80,00,0,0       | OR
-         OPC     PE,A,36,48,40,0,0     | PEA
-         OPC     RESE,T,22,4E,70,NOC,0 | RESET
-         OPC     RO,L,7,E7,18,0,0      | ROL
-         OPC     RO,R,07,E6,18,0,0     | ROR
-         OPC     ROX,L,7,E5,10,0,0     | ROXL
-         OPC     ROX,R,07,E4,10,0,0    | ROXR
-         OPC     RT,E,22,4E,73,NOC,0   | RTE
-         OPC     RT,R,22,4E,77,NOC,0   | RTR
-         OPC     RT,S,22,4E,75,NOC,0   | RTS
-         OPC     SBC,D,0,81,00,0,0     | SBCD
-         OPC     S,F,29,51,C0,0,0      | SF
-         OPC     SH,I,29,52,C0,0,0     | SHI
-         OPC     SL,S,29,53,C0,0,0     | SLS
-         OPC     SC,C,29,54,C0,0,0     | SCC
-         OPC     SC,S,29,55,C0,0,0     | SCS
-         OPC     SN,E,29,56,C0,0,0     | SNE
-         OPC     SE,Q,29,57,C0,0,0     | SEQ
-         OPC     SV,C,29,58,C0,0,0     | SVC
-         OPC     SV,S,29,59,C0,0,0     | SVS
-         OPC     SP,L,29,5A,C0,0,0     | SPL
-         OPC     SM,I,29,5B,C0,0,0     | SMI
-         OPC     SG,E,29,5C,C0,0,0     | SGE
-         OPC     SL,T,29,5D,C0,0,0     | SLT
-         OPC     SG,T,29,5E,C0,0,0     | SGT
-         OPC     SL,E,29,5F,C0,0,0     | SLE
-         OPC     STO,P,23,4E,72,0,0    | STOP
-         OPC     S,T,29,50,C0,0,0      | ST
-         OPC     SUB,A,2,90,C0,0,0     | SUBA
-         OPC     SUB,I,3,04,00,0,0     | SUBI
-         OPC     SUB,Q,4,51,00,0,0     | SUBQ
-         OPC     SUB,X,5,91,00,0,0     | SUBX
-         OPC     SU,B,1,90,00,0,0      | SUB
-         OPC     SWA,P,24,48,40,0,0    | SWAP
-         OPC     TA,S,29,4A,C0,0,0     | TAS
-         OPC     TRAP,V,22,4E,76,NOC,0 | TRAPV
-         OPC     TRA,P,25,4E,40,0,0    | TRAP
-         OPC     TS,T,13,4A,00,0,0     | TST
-         OPC     UNL,K,26,4E,58,0,0    | UNLK
+TBLOPC:  OPC     ABC,0xc4,0,C1,00,0,0  | ABCD
+         OPC     ADD,0xc1,2,D0,C0,0,0  | ADDA
+         OPC     ADD,0xc9,3,06,00,0,0  | ADDI
+         OPC     ADD,0xd1,4,50,00,0,0  | ADDQ
+         OPC     ADD,0xd8,5,D1,00,0,0  | ADDX
+         OPC     AD,0xc4,1,D0,00,0,0   | ADD
+         OPC     AND,0xc9,28,02,00,0,0 | ANDI
+         OPC     AN,0xc4,6,C0,00,0,0   | AND
+         OPC     AS,0xcc,7,E1,00,0,0   | ASL
+         OPC     AS,0xc2,07,E0,00,0,0  | ASR
+         OPC     BR,0xc1,10,60,00,0,NW | BRA
+         OPC     BH,0xc9,10,62,00,0,NW | BHI
+         OPC     BL,0xd3,10,63,00,0,NW | BLS
+         OPC     BC,0xc3,10,64,00,0,NW | BCC
+         OPC     BC,0xd3,10,65,00,0,NW | BCS
+         OPC     BN,0xc5,10,66,00,0,NW | BNE
+         OPC     BE,0xd1,10,67,00,0,NW | BEQ
+         OPC     BV,0xc3,10,68,00,0,NW | BVC
+         OPC     BV,0xd3,10,69,00,0,NW | BVS
+         OPC     BP,0xcc,10,6A,00,0,NW | BPL
+         OPC     BM,0xc9,10,6B,00,0,NW | BMI
+         OPC     BG,0xc5,10,6C,00,0,NW | BGE
+         OPC     BL,0xd4,10,6D,00,0,NW | BLT
+         OPC     BG,0xd4,10,6E,00,0,NW | BGT
+         OPC     BL,0xc5,10,6F,00,0,NW | BLE
+         OPC     BCH,0xc7,9,01,40,0,0  | BCHG
+         OPC     BCL,0xc2,30,01,80,0,0 | BCLR      DYNAMIC
+         OPC     BSE,0xd4,11,01,C0,0,0 | BSET
+         OPC     BS,0xc2,10,61,00,0,NW | BSR
+         OPC     BTS,0xd4,31,01,00,0,0 | BTST
+         OPC     B,0xd4,10,60,00,0,NW  | BT
+         OPC     CH,0xcb,12,41,80,0,0  | CHK
+         OPC     CL,0xc2,13,42,00,0,0  | CLR
+         OPC     CMP,0xc1,2,B0,C0,0,0  | CMPA
+         OPC     CMP,0xc9,3,0C,00,0,0  | CMPI
+         OPC     CMP,0xcd,14,B1,08,0,0 | CMPM
+         OPC     CM,0xd0,34,B0,00,0,0  | CMP
+         OPC     DB,0xd4,8,50,C8,0,NW  | DBT
+         OPC     DB,0xc5,8,51,C8,0,NW  | DBF
+         OPC     DBR,0xc1,8,51,C8,0,NW | DBRA
+         OPC     DBH,0xc9,8,52,C8,0,NW | DBHI
+         OPC     DBL,0xd3,8,53,C8,0,NW | DBLS
+         OPC     DBC,0xc3,8,54,C8,0,NW | DBCC
+         OPC     DBC,0xd3,8,55,C8,0,NW | DBCS
+         OPC     DBN,0xc5,8,56,C8,0,NW | DBNE
+         OPC     DBE,0xd1,8,57,C8,0,NW | DBEQ
+         OPC     DBV,0xc3,8,58,C8,0,NW | DBVC
+         OPC     DBV,0xd3,8,59,C8,0,NW | DBVS
+         OPC     DBP,0xcc,8,5A,C8,0,NW | DBPL
+         OPC     DBM,0xc9,8,5B,C8,0,NW | DBMI
+         OPC     DBG,0xc5,8,5C,C8,0,NW | DBGE
+         OPC     DBL,0xd4,8,5D,C8,0,NW | DBLT
+         OPC     DBG,0xd4,8,5E,C8,0,NW | DBGT
+         OPC     DBL,0xc5,8,5F,C8,0,NW | DBLE
+         OPC     DC.,0xd7,37,00,00,0,0 | DC.W  (WORD ONLY)
+         OPC     DIV,0xd3,12,81,C0,0,0 | DIVS
+         OPC     DIV,0xd5,12,80,C0,0,0 | DIVU
+         OPC     EOR,0xc9,28,0A,00,0,0 | EORI
+         OPC     EO,0xc2,35,B1,00,0,0  | EOR
+         OPC     EX,0xc7,16,C1,00,0,0  | EXG
+         OPC     EX,0xd4,17,48,00,0,0  | EXT
+         OPC     JM,0xd0,18,4E,C0,0,NW | JMP
+         OPC     JS,0xc2,18,4E,80,0,NW | JSR
+         OPC     LE,0xc1,19,41,C0,0,0  | LEA
+         OPC     LIN,0xcb,20,4E,50,0,0 | LINK
+         OPC     LS,0xcc,7,E3,08,0,0   | LSL
+         OPC     LS,0xc2,07,E2,08,0,0  | LSR
+         OPC     MOVE,0xc1,32,00,04,0,0| MOVEA
+         OPC     MOVE,0xcd,27,48,80,0,0| MOVEM
+         OPC     MOVE,0xd0,33,01,08,0,0| MOVEP
+         OPC     MOVE,0xd1,15,70,00,0,0| MOVEQ
+         OPC     MOV,0xc5,21,00,00,0,0 | MOVE
+         OPC     MUL,0xd3,12,C1,C0,0,0 | MULS
+         OPC     MUL,0xd5,12,C0,C0,0,0 | MULU
+         OPC     NBC,0xc4,29,48,0,0,0  | NBCD
+         OPC     NEG,0xd8,13,40,00,0,0 | NEGX
+         OPC     NE,0xc7,13,44,00,0,0  | NEG
+         OPC     NO,0xd0,22,4E,71,NOC,0| NOP
+         OPC     NO,0xd4,13,46,00,0,0  | NOT
+         OPC     OR,0xc9,28,00,00,0,0  | ORI
+         OPC     O,0xc2,6,80,00,0,0    | OR
+         OPC     PE,0xc1,36,48,40,0,0  | PEA
+         OPC     RESE,0xd4,22,4E,70,NOC,0 | RESET
+         OPC     RO,0xcc,7,E7,18,0,0   | ROL
+         OPC     RO,0xc2,07,E6,18,0,0  | ROR
+         OPC     ROX,0xcc,7,E5,10,0,0  | ROXL
+         OPC     ROX,0xc2,07,E4,10,0,0 | ROXR
+         OPC     RT,0xc5,22,4E,73,NOC,0| RTE
+         OPC     RT,0xc2,22,4E,77,NOC,0| RTR
+         OPC     RT,0xd3,22,4E,75,NOC,0| RTS
+         OPC     SBC,0xc4,0,81,00,0,0  | SBCD
+         OPC     S,0xc5,29,51,C0,0,0   | SF
+         OPC     SH,0xc9,29,52,C0,0,0  | SHI
+         OPC     SL,0xd3,29,53,C0,0,0  | SLS
+         OPC     SC,0xc3,29,54,C0,0,0  | SCC
+         OPC     SC,0xd3,29,55,C0,0,0  | SCS
+         OPC     SN,0xc5,29,56,C0,0,0  | SNE
+         OPC     SE,0xd1,29,57,C0,0,0  | SEQ
+         OPC     SV,0xc3,29,58,C0,0,0  | SVC
+         OPC     SV,0xd3,29,59,C0,0,0  | SVS
+         OPC     SP,0xcc,29,5A,C0,0,0  | SPL
+         OPC     SM,0xc9,29,5B,C0,0,0  | SMI
+         OPC     SG,0xc5,29,5C,C0,0,0  | SGE
+         OPC     SL,0xd4,29,5D,C0,0,0  | SLT
+         OPC     SG,0xd4,29,5E,C0,0,0  | SGT
+         OPC     SL,0xc5,29,5F,C0,0,0  | SLE
+         OPC     STO,0xd0,23,4E,72,0,0 | STOP
+         OPC     S,0xd4,29,50,C0,0,0   | ST
+         OPC     SUB,0xc1,2,90,C0,0,0  | SUBA
+         OPC     SUB,0xc9,3,04,00,0,0  | SUBI
+         OPC     SUB,0xd1,4,51,00,0,0  | SUBQ
+         OPC     SUB,0xd8,5,91,00,0,0  | SUBX
+         OPC     SU,0xc2,1,90,00,0,0   | SUB
+         OPC     SWA,0xd0,24,48,40,0,0 | SWAP
+         OPC     TA,0xd3,29,4A,C0,0,0  | TAS
+         OPC     TRAP,0xd6,22,4E,76,NOC,0 | TRAPV
+         OPC     TRA,0xd0,25,4E,40,0,0 | TRAP
+         OPC     TS,0xd4,13,4A,00,0,0  | TST
+         OPC     UNL,0xcb,26,4E,58,0,0 | UNLK
 
          DC.B    0              | PAD BYTE
 
@@ -6118,7 +6116,7 @@ A5305:   CMPI.B  #')',%D0
          BEQ.S   A5TODEST
          CMPI.B  #',',%D0
          BNE.S   A5300
-         TST     D1
+         TST     %D1
          BNE.S   A5300
          RTS
 
@@ -8012,7 +8010,7 @@ DEC425:  CLR.L   %D6
 * MOVE OP-CODE TO BUFFER
 *
          LEA     OPCTBL(%PC),%A0
-DEC510:  TST     D7
+DEC510:  TST     %D7
          BEQ.S   DEC530         | AT INDEX
 DEC515:  TST.B   (%A0)+
          BPL.S   DEC515         | MOVE THROUGH FIELD
