@@ -18,12 +18,10 @@
 
 * MACROS
 
-
 ADDR2MEM: .MACRO a1,a2
          PEA     \a1(%PC)         | MOVE ADDRESS TO MEMORY; POSITION
          MOVE.L  (%A7)+,\a2       | INDEPENDANT = TO "MOVE.L #\1,\2"
          .ENDM
-
 
 SAVEREGS: .MACRO
          TEMP = 0x04d6
@@ -33,9 +31,6 @@ SAVEREGS: .MACRO
          JRA     SAVE             | BSR WITHOUT USING STACK
 SV\@:
          .ENDM
-
-
-
 
 *-------------------------------------------------------------------------
 
@@ -58,8 +53,6 @@ LF       =       0x0A
 LOCVARSZ =       16
 RESET    =       0x43            | MASTER RESET FOR ACIA
 
-
-
 *-------------------------------------------------------------------------
 * File ARAM      DATA VARIABLES                                   05/10/82
 
@@ -72,7 +65,6 @@ RESET    =       0x43            | MASTER RESET FOR ACIA
 *                                 DEC HEX  DESCRIPTION
          DS.L    1              | 0   $00  AREA OVERLAID BY ROM SR
          DS.L    1              | 1   $01  AND PC
-
 
 _AV2:    DS.L    1              | 2   $02  BUS ERROR            "BUS "
 _AV3:    DS.L    1              | 3   $03  ADDRESS ERROR        "ADDR"
@@ -387,8 +379,6 @@ _TMCHARS  =      OPTIONS+4
 
          DS.L    20
 SSA7:    DS.L    1
-
-
 
 **************
 * I/O BUFFER *
@@ -5411,7 +5401,7 @@ TBLKEYS: .align  2              | INDEX
          ADR     PEA            | 36  PEA
          ADR     DC             | 37  DC.W
 
-* \1,\2 = MNEUMONIC (\2 SIGN BIT SET AS LAST CHARACTER)
+* \1,\2 = MNEMONIC (\2 SIGN BIT SET AS LAST CHARACTER)
 * \3    = INDEX TO TABLKEYS
 * \4,\5 = FIRST WORD MASK
 * \6    = NO OPERAND ALLOWED IF SIGN SET
@@ -6885,7 +6875,7 @@ IMOVEMTR:BSR     MOVEMS         | SIZE
 CS16:    BRA.S   CS15           | COMMON
 
          .align 4
-         
+
 ISTOP:   .align  2
          MOVE.W  2(%A4),%D0
          MOVE.B  #'#',(%A6)+    | IMMEDIATE
@@ -7497,7 +7487,7 @@ ISETS:   .align  2              | STATIC BIT
 *        ..........1.....       SHIFT COUNT (MODULO 64) IN DATA REGISTER
 *
          .align   4
-                              
+
 ISHIFT:  .align   2             | AS-  LS-  RO-  ROX-
          MOVE.W  #0x4c52,%D0    | "LR"
          BTST    #8,%D4         | DIRECTION BIT
@@ -8426,47 +8416,47 @@ CT:
          DC.L    0xFA0080F2
 *        FADDR   249,FIXDCRLF
          DC.L    0xF9008106
-*        FADDR   248,F100       | OUTPUT CHAR PORT1  D0=CHAR         
+*        FADDR   248,F100       | OUTPUT CHAR PORT1  D0=CHAR
          DC.L    0xF800BF88
 *        FADDR   247,F110       | INPUT CHAR PORT1  D0=CHAR
          DC.L    0xF700BF90
 *        FADDR   244,CHRPRINT   | OUTPUT CHAR PORT3 D0=CHAR
          DC.L    0xF4009D7A
-*        FADDR   243,OUTPUT     | OUTPUT STRING PORT1 (A5) (A6)         
+*        FADDR   243,OUTPUT     | OUTPUT STRING PORT1 (A5) (A6)
          DC.L    0xF3009C0A
-*        FADDR   242,OUTPUT21   | OUTPUT STRING PORT2 (A5) (A6)         
+*        FADDR   242,OUTPUT21   | OUTPUT STRING PORT2 (A5) (A6)
          DC.L    0xF2009C2A
-*        FADDR   241,PORTIN1    | INPUT STRING PORT1  (A5) (A6)         
+*        FADDR   241,PORTIN1    | INPUT STRING PORT1  (A5) (A6)
          DC.L    0xF1009C9E
-*        FADDR   240,PORTIN20   | INPUT STRING PORT2  (A5) (A6)         
+*        FADDR   240,PORTIN20   | INPUT STRING PORT2  (A5) (A6)
          DC.L    0xF0009FD4
-*        FADDR   239,TAPEOUT    | OUTPUT STRING TO PORT4 (A5) (A6)         
+*        FADDR   239,TAPEOUT    | OUTPUT STRING TO PORT4 (A5) (A6)
          DC.L    0xEF009E9C
-*        FADDR   238,TAPEIN     | INPUT STRING FROM PORT4 (A5) (A6)         
+*        FADDR   238,TAPEIN     | INPUT STRING FROM PORT4 (A5) (A6)
          DC.L    0xEE00A09C
-*        FADDR   237,PRCRLF     | OUTPUT STRING TO PORT3 (A5) (A6)         
+*        FADDR   237,PRCRLF     | OUTPUT STRING TO PORT3 (A5) (A6)
          DC.L    0xED009D66
-*        FADDR   236,HEX2DEC    | CONVERT HEX D0 TO DECIMAL (A6)+         
+*        FADDR   236,HEX2DEC    | CONVERT HEX D0 TO DECIMAL (A6)+
          DC.L    0xEC008F5C
-*        FADDR   235,GETHEX     | GET HEX CHAR INTO D0 FROM (A5)+         
+*        FADDR   235,GETHEX     | GET HEX CHAR INTO D0 FROM (A5)+
          DC.L    0xEB009BA6
-*        FADDR   234,PUTHEX     | FORMAT HEX CHAR FROM D0 TO (A6)+         
+*        FADDR   234,PUTHEX     | FORMAT HEX CHAR FROM D0 TO (A6)+
          DC.L    0xEA0099C0
-*        FADDR   233,PNT2HX     | FORMAT 2 HEX CHAR FROM D0 TO (A6)+         
+*        FADDR   233,PNT2HX     | FORMAT 2 HEX CHAR FROM D0 TO (A6)+
          DC.L    0xE90099B8
-*        FADDR   232,PNT4HX     | FORMAT 4 HEX CHAR FROM D0 TO (A6)+         
+*        FADDR   232,PNT4HX     | FORMAT 4 HEX CHAR FROM D0 TO (A6)+
          DC.L    0xE80099B0
-*        FADDR   231,PNT6HX     | FORMAT 6 HEX CHAR FROM D0 TO (A6)+         
+*        FADDR   231,PNT6HX     | FORMAT 6 HEX CHAR FROM D0 TO (A6)+
          DC.L    0xE70099AA
-*        FADDR   230,PNT8HX     | FORMAT 8 HEX CHAR FROM D0 TO (A6)+         
+*        FADDR   230,PNT8HX     | FORMAT 8 HEX CHAR FROM D0 TO (A6)+
          DC.L    0xE60099A2
-*        FADDR   229,START      | RESTART TUTOR INITIALIZE EVERYTHING         
+*        FADDR   229,START      | RESTART TUTOR INITIALIZE EVERYTHING
          DC.L    0xE5008146
-*        FADDR   228,MACSBUG    | GOTO TUTOR;   PRINT PROMPT         
+*        FADDR   228,MACSBUG    | GOTO TUTOR;   PRINT PROMPT
          DC.L    0xE4008232
 *        FADDR   227,F120       | OUTPUT STRING,CR,LF PORT1 (A5) (A6)
          DC.L    0xE300BF98
-*        FADDR   226,GETNUMA    | GET HEX NUMBER (A5)+ INTO D0     
+*        FADDR   226,GETNUMA    | GET HEX NUMBER (A5)+ INTO D0
          DC.L    0xE2009AF6
 *        FADDR   225,GETNUMD    | GET DECIMAL NUMBER (A5)+ INTO D0
          DC.L    0xE1009AEE
