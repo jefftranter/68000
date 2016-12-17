@@ -348,7 +348,7 @@ _REGUS:  DS.L    1              | USER STACK
 *        FROM "BEGHRAM" THROUGH "ENDHRAM" WHEN IT IS EXECUTED  *
 ****************************************************************
 
-BEGHRAM: .align 4               | INITIALIZE STARTS HERE
+_BEGHRAM: .align 4              | INITIALIZE STARTS HERE
 
 _OFFSET: DS.L    8              | ASSUMED OFFSETS (VIA "R@" FORMAT)
 MEMSIZE: DS.L    1              | MEMORY SIZE IN BYTES
@@ -427,7 +427,7 @@ _CTLINK: DS.L    1              | POINTER TO FIRST TABLE
 
 
 
-ENDHRAM: .align  2              | MUST START ON WORD BOUNDRY
+_ENDHRAM: .align 2              | MUST START ON WORD BOUNDRY
 
 
 
@@ -493,6 +493,8 @@ V2:      BRA     TRACE
 * INITIALIZE HIGH RAM SUBROUTINE *
 **********************************
 
+        BEGHRAM = 0x044c
+        ENDHRAM = 0x065a
 INITHRAM:LEA     BEGHRAM,%A0     | START OF WORK RAM (PAST REGISTERS)
          MOVE.L  #(ENDHRAM-BEGHRAM),%D0 | BYTES TO ZERO
          CLR.L   %D1
@@ -756,17 +758,12 @@ START11: MOVE.W  #0x2700,%SR     | MASK OFF INTERRUPTS
          XONOFF = 0x04e6
          MOVE.L  #0x00000000,XONOFF
 
-
-
 * TRAP14.SA
          AV46 = 0x00b8
          ADDR2MEM  TRAP14,AV46
          CTLINK = 0x0656
-         MOVE.L  #(254<<24)+CT,CTLINK
-
-
-
-
+*        MOVE.L  #(254<<24)+CT,CTLINK
+         MOVE.L  #0xfe00bf14,CTLINK
 
 ************************************************************************
 *                    V E R S I O N   N U M B E R   A N D   P R O M P T *
@@ -1034,7 +1031,7 @@ VECT:    MOVE.L  #0x4f50434f,0x30 | "OPCO" MOVE TO $30, USE SHORT BRANCHES AND P
          MOVE.L  #0x31313131,0x30 | "1111" MOVE TO $30, USE SHORT BRANCHES AND PRINT IT
 
          BRA.S   EVECT5
-         MOVE.L  #0x53595552,0x30 | "SPUR" MOVE TO $30, USE SHORT BRANCHES AND PRINT IT
+         MOVE.L  #0x53505552,0x30 | "SPUR" MOVE TO $30, USE SHORT BRANCHES AND PRINT IT
 
 EVECT5:  BRA.S   EVECT6
          MOVE.L  #0x41562331,0x30 | "AV#1" MOVE TO $30, USE SHORT BRANCHES AND PRINT IT
@@ -1061,7 +1058,7 @@ EVECT6:  BRA.S   EVECT7
          MOVE.L  #0x55542030,0x30 | "UT 0" MOVE TO $30, USE SHORT BRANCHES AND PRINT IT
 
          BRA.S   EVECT7
-         MOVE.L  #0x55542021,0x30 | "UT 1" MOVE TO $30, USE SHORT BRANCHES AND PRINT IT
+         MOVE.L  #0x55542031,0x30 | "UT 1" MOVE TO $30, USE SHORT BRANCHES AND PRINT IT
 
          BRA.S   EVECT7
          MOVE.L  #0x55542032,0x30 | "UT 2" MOVE TO $30, USE SHORT BRANCHES AND PRINT IT
@@ -1642,9 +1639,9 @@ NUMCON3: MOVE.B  #'&',(%A6)+
 *-------------------------------------------------------------------------
 * File DFDI      DF (Display registers) WITH disassembler         05/27/82
 
-REGNAMES:DC.L    "PCSR"         | TABLE OF NAMES OF REGISTERS
-         DC.L    "USSS"
-         DC.W    "??"           | END OF TABLE
+REGNAMES:.ascii  "PCSR"         | TABLE OF NAMES OF REGISTERS
+         .ascii  "USSS"
+         .ascii  "??"           | END OF TABLE
 
 DFCMD:   .align  2              | DF COMMAND  ENTRY
          BRA.S   TD07
@@ -2129,7 +2126,7 @@ GASRGN:  CLR.L   %D0
          CMPI.B  #7,%D0
          BHI.S   GAE            | NOT 0 - 7
          MULU    #4,%D0         | 4 * OFFSET
-         MOVE.L  (%A0,%D0),%D1
+         MOVE.L  (%A0,%D0.W),%D1
          RTS
 
 
@@ -2180,7 +2177,8 @@ TRACE:   MOVE.W  #0x2700,%SR     | MASK OFF INTERRUPTS
 * IF PC POINTS TO "TRACE"; DOUBLE EVENT OCCURED
 *  CLEAR LAST EVENT BY IGNORING
 
-         CMPI.L  #V2,REGPC
+         CMPI.L  #0x8008,REGPC
+*        CMPI.L  #V2,REGPC
 
          BNE.S   TRACE16
 
@@ -3193,9 +3191,9 @@ SETM1:   LEA     MACSBUG(%PC),%A0 | IF NO PARAMTER
          ADDQ.L  #1,%D1         | WHOLE NUMBER OF BYTES
 SETM3:   MOVE.L  %D1,%D2        | D1 SCANS DOWN
          SUBQ.L  #1,%D2         | KNOCK IT DOWN TO INDEX
-         MOVE.B  %D0,0(%A3,%D2)  | INDEXED BECAUSE BACKWARD
+         MOVE.B  %D0,0(%A3,%D2.W) | INDEXED BECAUSE BACKWARD
 
-         MOVE.B  0(%A3,%D2),%D3  | REREAD TO CHECK IF STORED OK
+         MOVE.B  0(%A3,%D2.W),%D3 | REREAD TO CHECK IF STORED OK
 
          CMP.B   %D0,%D3        | ARE SAME?
          BNE.S   SETME          | "DATA DID NOT STORE"
