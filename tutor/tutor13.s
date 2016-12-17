@@ -8235,80 +8235,78 @@ TBLE:    .align  2
 
 N68:     .MACRO a1,a2
          .ascii  "\a1"
-         .ascii  "\a2"
+         dc.b    \a2
          .ENDM
 
 OPCTBL:  .align  2
-         N68     MOVE,P    | 0
-         N68     O,R       | 1
-         N68     AN,D      | 2
-         N68     SU,B      | 3
-         N68     AD,D      | 4
-         N68     EO,R      | 5
-         N68     CM,P      | 6
-         N68     MOV,E     | 7
-         N68     NEG,X     | 8
-         N68     CL,R      | 9
-         N68     NE,G      | 10
-         N68     NO,T      | 11
-         N68     NBC,D     | 12
-         N68     PEA.,L    | 13
-         N68     SWAP.,W   | 14
-         N68     MOVE,M    | 15
-         N68     EXT.,W    | 16
-         N68     EXT.,L    | 17
-         N68     TS,T      | 18
-         N68     TAS.,B    | 19
-         N68     TRA,P     | 20
-         N68     LIN,K     | 21
-         N68     UNL,K     | 22
-         N68     RESE,T    | 23
-         N68     NO,P      | 24
-         N68     STO,P     | 25
-         N68     RT,E      | 26
-         N68     RT,S      | 27
-         N68     TRAP,V    | 28
-         N68     RT,R      | 29
-         N68     JS,R      | 30
-         N68     JM,P      | 31
-         N68     CHK.,W    | 32
-         N68     LEA.,L    | 33
-         N68     ADD,Q     | 34
-         N68     SUB,Q     | 35
-         DC.B    128+'S'   | 36
-         N68     D,B       | 37
-         DC.B    128+'B'   | 38
-         N68     MOVEQ.,L  | .....39
-         N68     O,R       | 40
-         N68     DIVU.,W   | 41
-         N68     DIVS.,W   | 42
-         N68     SBC,D     | 43
-         N68     SU,B      | 44
-         N68     SUB,X     | 45
-         N68     CMP,M     | 46
-         N68     MULU.,W   | 47
-         N68     MULS.,W   | 48
-         N68     ABC,D     | 49
-         N68     EX,G      | 50
-         N68     BS,R      | .....51
-         N68     NUL,L     | .....52
-         N68     ADD,X     | 53
-         N68     A,S       | 54
-         N68     L,S       | 55
-         N68     R,O       | 56
-         N68     RO,X      | 57
-         N68     MOVE.,B   | 58
-         N68     MOVE.,W   | 59
-         N68     MOVE.,L   | 60
-         N68     BTS,T     | 61
-         N68     BCH,G     | 62
-         N68     BCL,R     | 63
-         N68     BSE,T     | 64
-         N68     BR,A      | 65
+         N68     MOVE,0xd0    | 0
+         N68     O,0xd2       | 1
+         N68     AN,0xc4      | 2
+         N68     SU,0xc2      | 3
+         N68     AD,0xc4      | 4
+         N68     EO,0xd2      | 5
+         N68     CM,0xd0      | 6
+         N68     MOV,0xc5     | 7
+         N68     NEG,0xd8     | 8
+         N68     CL,0xd2      | 9
+         N68     NE,0Xc7      | 10
+         N68     NO,0xd4      | 11
+         N68     NBC,0xc4     | 12
+         N68     PEA.,0xcc    | 13
+         N68     SWAP.,0xd7   | 14
+         N68     MOVE,0xcd    | 15
+         N68     EXT.,0xd7    | 16
+         N68     EXT.,0xcc    | 17
+         N68     TS,0xd4      | 18
+         N68     TAS.,0xc2    | 19
+         N68     TRA,0xd0     | 20
+         N68     LIN,0xcb     | 21
+         N68     UNL,0xcb     | 22
+         N68     RESE,0xd4    | 23
+         N68     NO,0xd0      | 24
+         N68     STO,0xd0     | 25
+         N68     RT,0xc5      | 26
+         N68     RT,0xd3      | 27
+         N68     TRAP,0xd6    | 28
+         N68     RT,0xd2      | 29
+         N68     JS,0xd2      | 30
+         N68     JM,0xd0      | 31
+         N68     CHK.,0xd7    | 32
+         N68     LEA.,0xcc    | 33
+         N68     ADD,0xd1     | 34
+         N68     SUB,0xd1     | 35
+         DC.B    0xd3         | 36
+         N68     D,0xc2       | 37
+         DC.B    0xc2         | 38
+         N68     MOVEQ.,0xcc  | .....39
+         N68     O,0xd2       | 40
+         N68     DIVU.,0xd7   | 41
+         N68     DIVS.,0xd7   | 42
+         N68     SBC,0xc4     | 43
+         N68     SU,0xc2      | 44
+         N68     SUB,0xd8     | 45
+         N68     CMP,0xcd     | 46
+         N68     MULU.,0xd7   | 47
+         N68     MULS.,0xd7   | 48
+         N68     ABC,0xc4     | 49
+         N68     EX,0Xc7      | 50
+         N68     BS,0xd2      | .....51
+         N68     NUL,0xcc     | .....52
+         N68     ADD,0xd8     | 53
+         N68     A,0xd3       | 54
+         N68     L,0xd3       | 55
+         N68     R,0xcf       | 56
+         N68     RO,0xd8      | 57
+         N68     MOVE.,0xc2   | 58
+         N68     MOVE.,0xd7   | 59
+         N68     MOVE.,0xcc   | 60
+         N68     BTS,0xd4     | 61
+         N68     BCH,0Xc7     | 62
+         N68     BCL,0xd2     | 63
+         N68     BSE,0xd4     | 64
+         N68     BR,0xc1      | 65
 
          DC.B    0         | PAD BYTE
-
-
 
 *-------------------------------------------------------------------------
 * File TRAP14    Trap 14 handler of "TUTOR"                       06/25/82
@@ -8412,40 +8410,70 @@ T700:    .align  2              | 253 APPEND NEW TABLE
 *    ..AAAAAA      ADDRESS OF FUNCTION
 
 FADDR:   .MACRO   a1,a2
-         DC.L    (\a1<<24)+\a2
+         DC.B     \a1
+         DC.B     0
+         DC.W     \a2
          .ENDM
 
-
-CT:      FADDR   253,T700       | APPEND NEW TABLE
-         FADDR   252,FIXDADD    | APPEND DATA (A5) TO BUFFER (A6)+
-         FADDR   251,FIXBUF     | SET A5 & A6 AS POINTERS TO BUFFER
-         FADDR   250,FIXDATA    | MOVE DATA (A5) TO BUFFER; A5=BUFFER A6
-         FADDR   249,FIXDCRLF
-         FADDR   248,F100       | OUTPUT CHAR PORT1  D0=CHAR
-         FADDR   247,F110       | INPUT CHAR PORT1  D0=CHAR
-         FADDR   244,CHRPRINT   | OUTPUT CHAR PORT3 D0=CHAR
-         FADDR   243,OUTPUT     | OUTPUT STRING PORT1 (A5) (A6)
-         FADDR   242,OUTPUT21   | OUTPUT STRING PORT2 (A5) (A6)
-         FADDR   241,PORTIN1    | INPUT STRING PORT1  (A5) (A6)
-         FADDR   240,PORTIN20   | INPUT STRING PORT2  (A5) (A6)
-         FADDR   239,TAPEOUT    | OUTPUT STRING TO PORT4 (A5) (A6)
-         FADDR   238,TAPEIN     | INPUT STRING FROM PORT4 (A5) (A6)
-         FADDR   237,PRCRLF     | OUTPUT STRING TO PORT3 (A5) (A6)
-         FADDR   236,HEX2DEC    | CONVERT HEX D0 TO DECIMAL (A6)+
-         FADDR   235,GETHEX     | GET HEX CHAR INTO D0 FROM (A5)+
-         FADDR   234,PUTHEX     | FORMAT HEX CHAR FROM D0 TO (A6)+
-         FADDR   233,PNT2HX     | FORMAT 2 HEX CHAR FROM D0 TO (A6)+
-         FADDR   232,PNT4HX     | FORMAT 4 HEX CHAR FROM D0 TO (A6)+
-         FADDR   231,PNT6HX     | FORMAT 6 HEX CHAR FROM D0 TO (A6)+
-         FADDR   230,PNT8HX     | FORMAT 8 HEX CHAR FROM D0 TO (A6)+
-         FADDR   229,START      | RESTART TUTOR INITIALIZE EVERYTHING
-         FADDR   228,MACSBUG    | GOTO TUTOR;   PRINT PROMPT
-         FADDR   227,F120       | OUTPUT STRING,CR,LF PORT1 (A5) (A6)
-         FADDR   226,GETNUMA    | GET HEX NUMBER (A5)+ INTO D0
-         FADDR   225,GETNUMD    | GET DECIMAL NUMBER (A5)+ INTO D0
-         FADDR   224,PORTIN1N   | INPUT STRING PORT1 (NO AUTO LF)
-
-         FADDR   255,0xFFFFFF   | END KEY
+CT:
+*        FADDR   253,T700       | APPEND NEW TABLE
+         DC.L    0xFD00BF00
+*        FADDR   252,FIXDADD    | APPEND DATA (A5) TO BUFFER (A6)+
+         DC.L    0xFC0080F6
+*        FADDR   251,FIXBUF     | SET A5 & A6 AS POINTERS TO BUFFER
+         DC.L    0xFB009C96
+*        FADDR   250,FIXDATA    | MOVE DATA (A5) TO BUFFER; A5=BUFFER A6
+         DC.L    0xFA0080F2
+*        FADDR   249,FIXDCRLF
+         DC.L    0xF9008106
+*        FADDR   248,F100       | OUTPUT CHAR PORT1  D0=CHAR         
+         DC.L    0xF800BF88
+*        FADDR   247,F110       | INPUT CHAR PORT1  D0=CHAR
+         DC.L    0xF700BF90
+*        FADDR   244,CHRPRINT   | OUTPUT CHAR PORT3 D0=CHAR
+         DC.L    0xF4009D7A
+*        FADDR   243,OUTPUT     | OUTPUT STRING PORT1 (A5) (A6)         
+         DC.L    0xF3009C0A
+*        FADDR   242,OUTPUT21   | OUTPUT STRING PORT2 (A5) (A6)         
+         DC.L    0xF2009C2A
+*        FADDR   241,PORTIN1    | INPUT STRING PORT1  (A5) (A6)         
+         DC.L    0xF1009C9E
+*        FADDR   240,PORTIN20   | INPUT STRING PORT2  (A5) (A6)         
+         DC.L    0xF0009FD4
+*        FADDR   239,TAPEOUT    | OUTPUT STRING TO PORT4 (A5) (A6)         
+         DC.L    0xEF009E9C
+*        FADDR   238,TAPEIN     | INPUT STRING FROM PORT4 (A5) (A6)         
+         DC.L    0xEE00A09C
+*        FADDR   237,PRCRLF     | OUTPUT STRING TO PORT3 (A5) (A6)         
+         DC.L    0xED009D66
+*        FADDR   236,HEX2DEC    | CONVERT HEX D0 TO DECIMAL (A6)+         
+         DC.L    0xEC008F5C
+*        FADDR   235,GETHEX     | GET HEX CHAR INTO D0 FROM (A5)+         
+         DC.L    0xEB009BA6
+*        FADDR   234,PUTHEX     | FORMAT HEX CHAR FROM D0 TO (A6)+         
+         DC.L    0xEA0099C0
+*        FADDR   233,PNT2HX     | FORMAT 2 HEX CHAR FROM D0 TO (A6)+         
+         DC.L    0xE90099B8
+*        FADDR   232,PNT4HX     | FORMAT 4 HEX CHAR FROM D0 TO (A6)+         
+         DC.L    0xE80099B0
+*        FADDR   231,PNT6HX     | FORMAT 6 HEX CHAR FROM D0 TO (A6)+         
+         DC.L    0xE70099AA
+*        FADDR   230,PNT8HX     | FORMAT 8 HEX CHAR FROM D0 TO (A6)+         
+         DC.L    0xE60099A2
+*        FADDR   229,START      | RESTART TUTOR INITIALIZE EVERYTHING         
+         DC.L    0xE5008146
+*        FADDR   228,MACSBUG    | GOTO TUTOR;   PRINT PROMPT         
+         DC.L    0xE4008232
+*        FADDR   227,F120       | OUTPUT STRING,CR,LF PORT1 (A5) (A6)
+         DC.L    0xE300BF98
+*        FADDR   226,GETNUMA    | GET HEX NUMBER (A5)+ INTO D0     
+         DC.L    0xE2009AF6
+*        FADDR   225,GETNUMD    | GET DECIMAL NUMBER (A5)+ INTO D0
+         DC.L    0xE1009AEE
+*        FADDR   224,PORTIN1N   | INPUT STRING PORT1 (NO AUTO LF)
+         DC.L    0xE0009CB0
+*        FADDR   255,0xFFFFFF   | END KEY
+         DC.L    0xFFFFFFFF
 
 F100:    BSR     GETSER1        | A0 = PORT1 ADDRESS
          BRA     OUTCH
@@ -8460,9 +8488,7 @@ F120:    BSR     OUTPUT         | OUTPUT STRING,CR,LF PORT1 (A5) (A6)
          BSR.S   F100           | OUTPUT CHAR
          RTS
 
-
          .fill   0x54,1,0       | PAD BYTES
-
 
 *-------------------------------------------------------------------------
 * File YROM      Version/checksum/identification                  07/29/82
