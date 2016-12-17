@@ -369,7 +369,7 @@ _ECHOPT1:DS.L    1              | ECHO FLAG TO PORT ONE
 * THE FOLLOWING MUST REMAIN AS IS
 *  User docomentation DEPENDS upon it!
 *
-OPTIONS: .align  2              | FORCE WORD BOUNDRY
+_OPTIONS: .align 2              | FORCE WORD BOUNDRY
          DS.B    1              | X-ON CHARACTER
          DS.B    1              | X-OFF CHARACTER
          DS.B    1              | NO NO-AUTO LINEFEED
@@ -3315,34 +3315,34 @@ REGTBL:
 ***************
 
          DC.W    SETA7-FIRST    | Stack Register Routine
-         DC.W    "A7"
+         .ascii  "A7"
 
          DC.W    SETPC-FIRST    | Program Counter Routine
-         DC.W    "PC"
+         .ascii  "PC"
 
          DC.W    SETSR-FIRST    | Status Register Routine
-         DC.W    "SR"
+         .ascii  "SR"
 
          DC.W    SETUS-FIRST    | User Stack Routine
-         DC.W    "US"
+         .ascii  "US"
 
          DC.W    SETSS-FIRST    | System Stack Routine
-         DC.W    "SS"
+         .ascii  "SS"
 
          DC.W    SETD-FIRST     | Data Register Routine
-         DC.W    "D@"
+         .ascii  "D@"
 
          DC.W    SETA-FIRST     | Address Register Routine
-         DC.W    "A@"
+         .ascii  "A@"
 
          DC.W    PNTCLSA-FIRST  | All Address Registers Routine
-         DC.W    "A "
+         .ascii  "A "
 
          DC.W    PNTCLSD-FIRST  | All Data Registers Routine
-         DC.W    "D "
+         .ascii  "D "
 
          DC.W    SETRN-FIRST    | All Registers Routine
-         DC.W    "R@"
+         .ascii  "R@"
 
          DC.W    0xFFFF         | END OF TABLE
 
@@ -3540,6 +3540,7 @@ PFCMD:   MOVE.B  (%A5),%D6      | D6 = PORT #
 
          LEA     MSG031(%PC),%A5 | TELL WHERE XONOFF IS
          BSR     FIXDADD
+         OPTIONS = 0x04e6
          MOVE.L  #OPTIONS,%D0
          BSR     PNT6HX         | "OPTIONS@AAAAAA"
          BRA     MSG
@@ -5017,7 +5018,7 @@ EA:      .align  2
          BMI.S   EA0637         | .LONG
 
 EA0633:  BSR     EA16BIT        | .WORD     -32K TO +64K
-EA0634:  MOVE.W  %D5,(%A4,%D3)
+EA0634:  MOVE.W  %D5,(%A4,%D3.W)
          ADDQ.B  #2,TNB(%A1)    | BYTE COUNT
          ADDQ.L  #2,%D3         | OFFSET
          RTS
@@ -5026,7 +5027,7 @@ EA0635:  BSR     EA8BIT         | -127 TO +255
          BNE.S   ER1
          BRA.S   EA0634
 
-EA0637:  MOVE.L  %D5,(%A4,%D3)
+EA0637:  MOVE.L  %D5,(%A4,%D3.W)
          ADDQ.B  #4,TNB(%A1)
          ADDQ.L  #4,%D3
          RTS
@@ -5150,7 +5151,7 @@ EA4105:  ANDI.W  #0x8000,%D0
          BRA.S   EA4135         | SPECIAL CASE (JMP.L)
 
 EA4127:  ORI.W   #0x38,%D6      | EA = ABSOULTE SHORT
-         MOVE.W  %D5,(%A4,%D3)  | D5 = DATA
+         MOVE.W  %D5,(%A4,%D3.W) | D5 = DATA
          ADDQ.B  #2,TNB(%A1)    | BYTE COUNT
          ADDQ.L  #2,%D3
          RTS
@@ -5160,7 +5161,7 @@ EA4127:  ORI.W   #0x38,%D6      | EA = ABSOULTE SHORT
 
 *  <DATA>.L
 EA4135:  ORI.W   #0x39,%D6      | EA = ABSOLUTE LONG
-         MOVE.L  %D5,(%A4,%D3)
+         MOVE.L  %D5,(%A4,%D3.W)
          ADDQ.B  #4,TNB(%A1)    | BYTE COUNT
          ADDQ.L  #4,%D3
          BTST    #8,%D7
@@ -5195,7 +5196,7 @@ EA4120:  ADDQ.L  #1,%A5
          CMPI.L  #0x10000,%D5
          BPL     ER4
 
-         MOVE.W  %D5,(%A4,%D3)
+         MOVE.W  %D5,(%A4,%D3.W)
          ADDQ.B  #2,TNB(%A1)
          ADDQ.L  #2,%D3
          RTS
@@ -5240,7 +5241,7 @@ EA5116:  EXT.L   %D5
 EA5118:  CMPI.B  #')',(%A5)+
          BNE.S   ER4            | NO CLOSING ")"
 
-EA5119:  MOVE.W  %D5,(%A4,%D3)
+EA5119:  MOVE.W  %D5,(%A4,%D3.W)
          ADDQ.B  #2,TNB(%A1)
          ADDQ.L  #2,%D3
 EA5119E: RTS
@@ -5261,7 +5262,7 @@ EA61:    ADDQ.L  #1,%A5
          ORI.W   #0x3A,%D6      | MODE = 111010
 
          BSR.S   EA16BITS       | -32K TO +32K
-         MOVE.W  %D5,(%A4,%D3)
+         MOVE.W  %D5,(%A4,%D3.W)
          ADDQ.B  #2,TNB(%A1)
          ADDQ.L  #2,%D3
 
@@ -5306,7 +5307,7 @@ EA71:    MOVE.W  #0x003B,%D6    | MODE = 111011
 EA7113:  CMPI.B  #')',(%A5)+
          BNE.S   ER4            | NO CLOSING ")"
 
-EA7115:  MOVE.W  %D5,(%A4,%D3)
+EA7115:  MOVE.W  %D5,(%A4,%D3.W)
          ADDQ.B  #2,TNB(%A1)
          ADDQ.L  #2,%D3
          RTS
@@ -5435,7 +5436,7 @@ TBLOPC:  OPC     ABC,0xc4,0,C1,00,0,0  | ABCD
          OPC     AND,0xc9,28,02,00,0,0 | ANDI
          OPC     AN,0xc4,6,C0,00,0,0   | AND
          OPC     AS,0xcc,7,E1,00,0,0   | ASL
-         OPC     AS,0xc2,07,E0,00,0,0  | ASR
+         OPC     AS,0xd2,07,E0,00,0,0  | ASR
          OPC     BR,0xc1,10,60,00,0,NW | BRA
          OPC     BH,0xc9,10,62,00,0,NW | BHI
          OPC     BL,0xd3,10,63,00,0,NW | BLS
@@ -5452,19 +5453,19 @@ TBLOPC:  OPC     ABC,0xc4,0,C1,00,0,0  | ABCD
          OPC     BG,0xd4,10,6E,00,0,NW | BGT
          OPC     BL,0xc5,10,6F,00,0,NW | BLE
          OPC     BCH,0xc7,9,01,40,0,0  | BCHG
-         OPC     BCL,0xc2,30,01,80,0,0 | BCLR      DYNAMIC
+         OPC     BCL,0xd2,30,01,80,0,0 | BCLR      DYNAMIC
          OPC     BSE,0xd4,11,01,C0,0,0 | BSET
-         OPC     BS,0xc2,10,61,00,0,NW | BSR
+         OPC     BS,0xd2,10,61,00,0,NW | BSR
          OPC     BTS,0xd4,31,01,00,0,0 | BTST
          OPC     B,0xd4,10,60,00,0,NW  | BT
          OPC     CH,0xcb,12,41,80,0,0  | CHK
-         OPC     CL,0xc2,13,42,00,0,0  | CLR
+         OPC     CL,0xd2,13,42,00,0,0  | CLR
          OPC     CMP,0xc1,2,B0,C0,0,0  | CMPA
          OPC     CMP,0xc9,3,0C,00,0,0  | CMPI
          OPC     CMP,0xcd,14,B1,08,0,0 | CMPM
          OPC     CM,0xd0,34,B0,00,0,0  | CMP
          OPC     DB,0xd4,8,50,C8,0,NW  | DBT
-         OPC     DB,0xc5,8,51,C8,0,NW  | DBF
+         OPC     DB,0xc6,8,51,C8,0,NW  | DBF
          OPC     DBR,0xc1,8,51,C8,0,NW | DBRA
          OPC     DBH,0xc9,8,52,C8,0,NW | DBHI
          OPC     DBL,0xd3,8,53,C8,0,NW | DBLS
@@ -5484,15 +5485,15 @@ TBLOPC:  OPC     ABC,0xc4,0,C1,00,0,0  | ABCD
          OPC     DIV,0xd3,12,81,C0,0,0 | DIVS
          OPC     DIV,0xd5,12,80,C0,0,0 | DIVU
          OPC     EOR,0xc9,28,0A,00,0,0 | EORI
-         OPC     EO,0xc2,35,B1,00,0,0  | EOR
+         OPC     EO,0xd2,35,B1,00,0,0  | EOR
          OPC     EX,0xc7,16,C1,00,0,0  | EXG
          OPC     EX,0xd4,17,48,00,0,0  | EXT
          OPC     JM,0xd0,18,4E,C0,0,NW | JMP
-         OPC     JS,0xc2,18,4E,80,0,NW | JSR
+         OPC     JS,0xd2,18,4E,80,0,NW | JSR
          OPC     LE,0xc1,19,41,C0,0,0  | LEA
          OPC     LIN,0xcb,20,4E,50,0,0 | LINK
          OPC     LS,0xcc,7,E3,08,0,0   | LSL
-         OPC     LS,0xc2,07,E2,08,0,0  | LSR
+         OPC     LS,0xd2,07,E2,08,0,0  | LSR
          OPC     MOVE,0xc1,32,00,04,0,0| MOVEA
          OPC     MOVE,0xcd,27,48,80,0,0| MOVEM
          OPC     MOVE,0xd0,33,01,08,0,0| MOVEP
@@ -5506,18 +5507,18 @@ TBLOPC:  OPC     ABC,0xc4,0,C1,00,0,0  | ABCD
          OPC     NO,0xd0,22,4E,71,NOC,0| NOP
          OPC     NO,0xd4,13,46,00,0,0  | NOT
          OPC     OR,0xc9,28,00,00,0,0  | ORI
-         OPC     O,0xc2,6,80,00,0,0    | OR
+         OPC     O,0xd2,6,80,00,0,0    | OR
          OPC     PE,0xc1,36,48,40,0,0  | PEA
          OPC     RESE,0xd4,22,4E,70,NOC,0 | RESET
          OPC     RO,0xcc,7,E7,18,0,0   | ROL
-         OPC     RO,0xc2,07,E6,18,0,0  | ROR
+         OPC     RO,0xd2,07,E6,18,0,0  | ROR
          OPC     ROX,0xcc,7,E5,10,0,0  | ROXL
-         OPC     ROX,0xc2,07,E4,10,0,0 | ROXR
+         OPC     ROX,0xd2,07,E4,10,0,0 | ROXR
          OPC     RT,0xc5,22,4E,73,NOC,0| RTE
-         OPC     RT,0xc2,22,4E,77,NOC,0| RTR
+         OPC     RT,0xd2,22,4E,77,NOC,0| RTR
          OPC     RT,0xd3,22,4E,75,NOC,0| RTS
          OPC     SBC,0xc4,0,81,00,0,0  | SBCD
-         OPC     S,0xc5,29,51,C0,0,0   | SF
+         OPC     S,0xc6,29,51,C0,0,0   | SF
          OPC     SH,0xc9,29,52,C0,0,0  | SHI
          OPC     SL,0xd3,29,53,C0,0,0  | SLS
          OPC     SC,0xc3,29,54,C0,0,0  | SCC
@@ -5697,7 +5698,7 @@ M4326:
 * CALCULATE GOTO ADDRESS
 
          LEA     TBLKEYS(%PC),%A0 | A0 = PTR TO KEYS
-         MOVE.W  (%A0,%D0),%D0    | D0 = 16 BIT OFFSET
+         MOVE.W  (%A0,%D0.W),%D0  | D0 = 16 BIT OFFSET
          LEA     XBASE(%PC),%A2   | A2 = BASE ADDRESS
          ADD.L   %D0,%A2          | A2 = COMPUTED GO TO  ADDRESS
 
@@ -6471,7 +6472,7 @@ SETBIT:  LEA     MTBL(%PC),%A0  | SET BIT IN CORRESPONDENCE MASK
          ANDI.W  #0x38,%D0
          CMPI.W  #0x20,%D0
          BNE.S   RL30           | NOT PREDECREMENT
-         MOVE.B  (%A0,%D1),%D1  | D1 = BIT  (FOR SURE)
+         MOVE.B  (%A0,%D1.W),%D1 | D1 = BIT  (FOR SURE)
 RL30:    BSET    %D1,%D6
 
          MOVE.W  %D6,TDATA+2(%A1) | SAVE CORRESPONDENCE MASK
@@ -7553,22 +7554,22 @@ ICCCC:   MOVEQ   #0x0F,%D0      | APPEND CONDITION CODE
          MOVE.B  %D1,(%A5)+
 ICCCC9:  RTS
 
-BRTBL:   .ascii  "T "           | "T " BRA ACCEPTED
-         .ascii  "F "           | "F "
-         .ascii  "HI"           | "HI"
-         .ascii  "LS"           | "LS"
+BRTBL:   .ascii  " T"           | "T " BRA ACCEPTED
+         .ascii  " F"           | "F "
+         .ascii  "IH"           | "HI"
+         .ascii  "SL"           | "LS"
          .ascii  "CC"           | "CC"
-         .ASCII  "CS"           | "CS"
-         .ASCII  "NE"           | "NE"
-         .ASCII  "EQ"           | "EQ"
-         .ASCII  "VC"           | "VC"
-         .ASCII  "VS"           | "VS"
-         .ASCII  "PL"           | "PL"
-         .ASCII  "MI"           | "MI"
-         .ASCII  "GE"           | "GE"
-         .ASCII  "LT"           | "LT"
-         .ASCII  "GT"           | "GT"
-         .ASCII  "LE"           | "LE"
+         .ASCII  "SC"           | "CS"
+         .ASCII  "EN"           | "NE"
+         .ASCII  "QE"           | "EQ"
+         .ASCII  "CV"           | "VC"
+         .ASCII  "SV"           | "VS"
+         .ASCII  "LP"           | "PL"
+         .ASCII  "IM"           | "MI"
+         .ASCII  "EG"           | "GE"
+         .ASCII  "TL"           | "LT"
+         .ASCII  "TG"           | "GT"
+         .ASCII  "EL"           | "LE"
 
 *   BIT  5432109876543210
 *        ....RRRMMM......    DESTINATION REGISTER MODE
@@ -7725,11 +7726,11 @@ EEA:     .align  2
          BTST    #6,%D7
          BEQ.S   FE10           | FERROR  THIS MODE NOT ALLOWED
 
-         MOVE.W  (%A4,%D3),%D1
+         MOVE.W  (%A4,%D3.W),%D1
          ANDI.W  #0x0700,%D1
          BNE.S   FE10           | FERROR  BITS 10-8 MUST BE ZERO
 
-         MOVE.W  (%A4,%D3),%D0  | D0 = DISPLACEMENT
+         MOVE.W  (%A4,%D3.W),%D0  | D0 = DISPLACEMENT
          EXT.W   %D0
          EXT.L   %D0
          BSR     HEX2DEC        | DECIMAL
@@ -7739,7 +7740,7 @@ EEA:     .align  2
 
          MOVE.B  #',',(%A6)+    | XX(A@,
 
-         MOVE.B  (%A4,%D3),%D4
+         MOVE.B  (%A4,%D3.W),%D4
          ASR.B   #4,%D4
          BPL.S   EA1105
          BSR     FORMREGA
@@ -7748,7 +7749,7 @@ EEA:     .align  2
 EA1105:  BSR     FORMREGD
 EA1107:  MOVE.B  #'.',(%A6)+    | XX(A@,X@.
 
-         MOVE.W  (%A4,%D3),%D4  | D4 = R@
+         MOVE.W  (%A4,%D3.W),%D4 | D4 = R@
          MOVE.B  #'W',%D0       | ..........W
          BTST    #11,%D4
          BEQ.S   EA1109
@@ -7763,7 +7764,7 @@ EA1109:  MOVE.B  %D0,(%A6)+
 EA101:   BTST    #5,%D7         | 101000;   DIS(A@)
          BEQ.S   FE11           | FERROR;  THIS MODE NOT ALLOWED
 
-         MOVE.W  (%A4,%D3),%D0
+         MOVE.W  (%A4,%D3.W),%D0
          EXT.L   %D0
          BSR     HEX2DEC        | DECIMAL
          ADDQ.L  #2,%D3         | SIZE
@@ -7782,7 +7783,7 @@ EA111:
          BTST    #7,%D7
          BEQ.S   FE11           | FERROR;  THIS MODE NOT ALLOWED
 
-         MOVE.W  (%A4,%D3),%D0  | 111000;   ABSOLUTE SHORT
+         MOVE.W  (%A4,%D3.W),%D0 | 111000;   ABSOLUTE SHORT
          EXT.L   %D0
          MOVE.B  #'$',(%A6)+
          BSR     PNT8HX         | SIGN EXTENDED VALUE
@@ -7796,7 +7797,7 @@ EA1112:  CMPI.B  #1,%D4
          BEQ.S   FE11           | FERROR;  THIS MODE NOT ALLOWED
 
          MOVE.B  #'$',(%A6)+    | HEX
-         MOVE.L  (%A4,%D3),%D0  | 111001;     ABSOLUTE LONG
+         MOVE.L  (%A4,%D3.W),%D0  | 111001;     ABSOLUTE LONG
          BSR     PNT8HX
 *-       MOVE.B  #'.',(%A6)+    | FORCE LONG FORMAT
 *-       MOVE.B  #'L',(%A6)+    | IE   .L
@@ -7811,7 +7812,7 @@ EA1113:  CMPI.B  #2,%D4
 FE11:    BRA     FERROR         | THIS MODE NOT ALLOWED
 EA1113A:
 
-         MOVE.W  (%A4,%D3),%D0  | 111010;  PC + DISPLACEMENT  DESTINATION(PC)
+         MOVE.W  (%A4,%D3.W),%D0  | 111010;  PC + DISPLACEMENT  DESTINATION(PC)
          EXT.L   %D0
          ADD.L   HISPC(%A1),%D0
          ADDQ.L  #2,%D0
@@ -7840,11 +7841,11 @@ EA1114:  CMPI.B  #3,%D4
          BTST    #10,%D7
          BEQ.S   FE11           | FERROR  THIS MODE NOT ASLLOWED
 
-         MOVE.W  (%A4,%D3),%D1
+         MOVE.W  (%A4,%D3.W),%D1
          ANDI.W  #0x0700,%D1
          BNE.S   FE11           | FERROR;  BITS 10-8 MUST BE ZERO
 
-         MOVE.B  1(%A4,%D3),%D0 | 111100;   DESTINATION(PC,R@.X)
+         MOVE.B  1(%A4,%D3.W),%D0 | 111100;   DESTINATION(PC,R@.X)
          EXT.W   %D0
          EXT.L   %D0
          ADD.L   HISPC(%A1),%D0
@@ -7855,7 +7856,7 @@ EA1114:  CMPI.B  #3,%D4
          MOVE.L  #0x2c435028,%D0
          BSR     SCHR           | DES(PC,
 
-         MOVE.W  (%A4,%D3),%D4
+         MOVE.W  (%A4,%D3.W),%D4
          ROL.W   #4,%D4
          BTST    #3,%D4
          BEQ.S   EAF25
@@ -7866,7 +7867,7 @@ EAF27:
 
          MOVE.B  #'.',(%A6)+    | DES(PC,R@.
 
-         MOVE.W  (%A4,%D3),%D4
+         MOVE.W  (%A4,%D3.W),%D4
          MOVE.W  #0x4c57,%D0    | "LW"
          BTST    #11,%D4
          BEQ.S   EAF35
@@ -7892,7 +7893,7 @@ EA1115:  CMPI.B  #4,%D4
          CMPI.B  #'L',%D1
          BEQ.S   EA11155        | LONG
 
-         MOVE.W  (%A4,%D3),%D0
+         MOVE.W  (%A4,%D3.W),%D0
 
          CMPI.B  #'B',%D1
          BNE.S   EA11153        | .WORD
@@ -7913,7 +7914,7 @@ EA11153: EXT.L   %D0
          ADDQ.L  #2,%D3
          RTS
 
-EA11155: MOVE.L  (%A4,%D3),%D0
+EA11155: MOVE.L  (%A4,%D3.W),%D0
          BSR     HEX2DEC
          ADDQ.L  #4,%D3         | SIZE
          RTS
@@ -8047,7 +8048,7 @@ DEC515:  TST.B   (%A0)+
          BRA.S   DEC510
 
 DEC530:  MOVEQ   #FOC,%D0
-         LEA.L   (%A3,%D0),%A5  | A5 = STORE POINTER  OP-CODE
+         LEA.L   (%A3,%D0.W),%A5 | A5 = STORE POINTER  OP-CODE
 DEC535:  MOVE.B  (%A0)+,%D0
          BCLR    #7,%D0
          BNE.S   DEC537         | END OF MOVE
@@ -8062,7 +8063,7 @@ DEC537:  MOVE.B  %D0,(%A5)+
          ADD.L   %D6,%A0
 
          MOVEQ   #FOP,%D0
-         LEA.L   (%A3,%D0),%A6  | A6 = POINTER FOR OPERAND
+         LEA.L   (%A3,%D0.W),%A6 | A6 = POINTER FOR OPERAND
 
          MOVE.W  (%A4),%D4      | D4 = FIRST WORD
 
@@ -8086,7 +8087,7 @@ COMMON:  MOVE.L  %D3,%D6        | D6 = SIZE
 
          MOVE.L  %A6,%A5        | SAVE END OF BUFFER POINTER
          MOVEQ   #FDATA,%D0
-         LEA.L   (%A3,%D0),%A6
+         LEA.L   (%A3,%D0.W),%A6
 
 COMMON35:MOVE.W  (%A4)+,%D0     | GET NEXT WORD OF DATA.
          ADDQ.L  #2,HISPC(%A1)  | ADJUST PROG COUNTER.
@@ -8108,7 +8109,7 @@ FERROR:  .align  2
 * ILLEGAL INSTRUCTION
 *
          MOVEQ   #FOC,%D0
-         LEA.L   (%A3,%D0),%A6
+         LEA.L   (%A3,%D0.W),%A6
          LEA     MSG111(%PC),%A5
 FERROR35:MOVE.B  (%A5)+,%D0
          CMPI.B  #EOT,%D0
@@ -8139,7 +8140,7 @@ C68:     .MACRO a1,a2,a3,a4
          DC.W    0x\a1
          DC.W    0x\a2
          DC.B    (\a3-X)>>2
-         DC.B    0x\a4
+         DC.B    \a4
          .ENDM
 
 TBL:     .align  2
@@ -8234,7 +8235,6 @@ TBLE:    .align  2
 
 N68:     .MACRO a1,a2
          .ascii  "\a1"
-*         DC.B    128+'\a2'
          .ascii  "\a2"
          .ENDM
 
