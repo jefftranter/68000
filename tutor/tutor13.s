@@ -30,7 +30,7 @@ SAVEREGS: .MACRO
          MOVE.L  %A7,REGA7        | SAVE STACK POINTER
          LEA     SV\@(%PC),%A7    | A7 = RETURN ADDRESS (FOR CALL TO SAVE)
          MOVE.L  %A7,TEMP         | TEMP = RETURN ADDRESS
-         BRA     SAVE             | BSR WITHOUT USING STACK
+         JRA     SAVE             | BSR WITHOUT USING STACK
 SV\@:
          .ENDM
 
@@ -81,7 +81,7 @@ _AV4:    DS.L    1              | 4   $04  ILL INSTRUCTION      "OPCO"
          DS.L    1              | 6   $06  CHECK TRAP           "CHCK"
          DS.L    1              | 7   $07  TRAP V               "TP V"
 AV8:     DS.L    1              | 8   $08  PRIVILEDGE VIOLATION "PRIV"
-AV9:     DS.L    1              | 9   $09  TRACE
+_AV9:    DS.L    1              | 9   $09  TRACE
          DS.L    1              | 10  $0A  1010 LINE EMULATION  "1010"
 _AV11:   DS.L    1              | 11  $0B  1111 LINE EMULATION  "1111"
 AV12:    DS.L    1              | 12  $0C  USED AS TEMPORARY STORAGE FOR VECTOR MSGS.
@@ -350,18 +350,18 @@ _REGUS:  DS.L    1              | USER STACK
 
 BEGHRAM: .align 4               | INITIALIZE STARTS HERE
 
-OFFSET:  DS.L    8              | ASSUMED OFFSETS (VIA "R@" FORMAT)
+_OFFSET: DS.L    8              | ASSUMED OFFSETS (VIA "R@" FORMAT)
 MEMSIZE: DS.L    1              | MEMORY SIZE IN BYTES
 _BPADD:  DS.L    8              | BREAKPOINT ADDRESSES
 _BPTILL: DS.L    1              | TEMPORARY BREAKPOINT
 _BPCNT:  DS.L    9              | BREAKPOINT COUNTS
-BPDATA:  DS.W    9              | HOLD USER WORDS REPLACED BY TRAP IN SET BP
+_BPDATA:  DS.W   9              | HOLD USER WORDS REPLACED BY TRAP IN SET BP
 _BERRD:  DS.L    2              | SPECIAL DATA FOR BUS AND ADDR ERROR EXCEPTIONS
-SAVEAV4: DS.L    1              | HOLDS USER'S AV4 VECTOR (WE USE FOR BP)
+_SAVEAV4: DS.L   1              | HOLDS USER'S AV4 VECTOR (WE USE FOR BP)
 _TEMP:   DS.L    1              | TEMP
 _TRACECNT:DS.L   1              | TRACE COUNTER (-1=TRACE 1 & RUN)
 _TRACEON: DS.W   1              | FLAG FOR TRACE ON
-BPSTATUS:DS.W    1              | 1=PB ARE IN  0=ARE OUT OF MEMORY
+_BPSTATUS:DS.W   1              | 1=PB ARE IN  0=ARE OUT OF MEMORY
 _ECHOPT1:DS.L    1              | ECHO FLAG TO PORT ONE
 
 
@@ -439,7 +439,7 @@ ENDHRAM: .align  2              | MUST START ON WORD BOUNDRY
 
          .align  2              | FORCE ON WORD BOUNDRY
          DS.B    300            | ROOM FOR STACK
-SYSTACK: DS.W    1              | START OF STACK (ADDRESS DECREASES)
+_SYSTACK: DS.W   1              | START OF STACK (ADDRESS DECREASES)
          DS.B    4              | STRETCHED STACK (USED BY 'SAVE')
 
          DS.B    120            | EXTENDED AREA USED IF DISASSEMBLER
@@ -653,6 +653,7 @@ START1S: MOVEM.W %D0,REGSR+2     | Assure good parity.
          MOVE.L  (%A7),REGPC     | .PROGRAM COUNTER
          LEA     REGA7,%A7
          MOVEM.L %D0-%D7/%A0-%A6,-(%A7) | .REGISTERS
+         SYSTACK = 0x0786
          LEA     SYSTACK,%A7
          BRA     START11
 
@@ -2031,6 +2032,7 @@ GAP131:  TST.W   %D5            | (GALB)
 * IF NO R@ GIVEN ADD R0
          TST.L   %D5            | (GARO)
          BMI.S   GAP135         | R@ GIVEN
+         OFFSET = 0x044c
          ADD.L   OFFSET,%D4     | NO R@ GIVEN; ADD R0
 GAP135:  .align  2
 
@@ -2053,10 +2055,10 @@ GAP141:  TST.B   %D5            | (GALP)
          CMPI.B  #'A',%D0
          BNE.S   GAE            | NOT A-REG
          LEA     REGS+32,%A0
-         BSR     GASRGN         | GET VALUE IN A@
+         BSR.S   GASRGN         | GET VALUE IN A@
          ADD.L   %D1,%D4
          ORI.L   #0x80000000,%D6 | (GAAVF) A-REG VALUE FLAG
-         BRA     GAP111S
+         BRA.S   GAP111S
 
 GAE:     BRA     SYNTAX
 
@@ -2064,30 +2066,30 @@ GAE:     BRA     SYNTAX
 *  COMMA  D-REG REQUIRED
 
 GAP161:  TST.L   %D6            | (GAAVF)
-         BPL     GAE            | NO A-REG SPECIFIED
+         BPL.S   GAE            | NO A-REG SPECIFIED
          MOVE.B  (%A5)+,%D0     | GET BYTE
          CMP.L   %A5,%A6
-         BCS     GAE
+         BCS.S   GAE
          CMPI.B  #'A',%D0
          BNE.S   GAP163
          LEA     REGS+32,%A0    | GET VALUE IN A@
          BRA.S   GAP165
 GAP163:  CMPI.B  #'D',%D0
-         BNE     GAE            | NOT D-REG
+         BNE.S   GAE            | NOT D-REG
          LEA     REGS,%A0       | GET VALUE IN D@
 GAP165:  BSR.S   GASRGN
          ADD.L   %D1,%D4
-         BRA     GAP111S
+         BRA.S   GAP111S
 
 *  R@  OFFSET
 
 GAP171:  CMPI.B  #'+',%D6       | (GAPMS)
-         BNE     GAE            | ONLY + ALLOWED
+         BNE.S   GAE            | ONLY + ALLOWED
 
 * ONLY ONE R@ ALLOWED
 
          TST.L   %D5            | (GARO)
-         BMI     GAE            | MULIT R@
+         BMI.S   GAE            | MULIT R@
          ORI.L   #0x80000000,%D5 | SET R@ GIVEN (GARO)
 
          LEA     OFFSET,%A0
@@ -2098,15 +2100,15 @@ GAP171:  CMPI.B  #'+',%D6       | (GAPMS)
 *  )  CLOSE THE WORLD
 
 GAP181:  TST.L   %D6            | (GAAVF)
-         BPL     GAE            | NO (
+         BPL.S   GAE            | NO (
          BRA.S   GAP197
 
 *  SPACE  TERMINATOR
 
 GAP191:  TST.W   %D5            | (GALB)
-         BMI     GAE            | [ WITHOUT ]
+         BMI.S   GAE            | [ WITHOUT ]
          TST.B   %D5            | (GALP)
-         BMI     GAE            | ( WITHOUT )
+         BMI.S   GAE            | ( WITHOUT )
          SUBQ.L  #1,%A5         | ADJUST CHAR POINTER
 
 * IF NO R@ GIVEN ADD R0
@@ -2126,10 +2128,10 @@ GAP199:  MOVEM.L (%A7)+,%D4-%D6/%A0
 GASRGN:  CLR.L   %D0
          MOVE.B  (%A5)+,%D0     | GET BYTE
          CMP.L   %A5,%A6
-         BCS     GAE
+         BCS.S   GAE
          SUBI.B  #'0',%D0       | ADJUST TO ZERO
          CMPI.B  #7,%D0
-         BHI     GAE            | NOT 0 - 7
+         BHI.S   GAE            | NOT 0 - 7
          MULU    #4,%D0         | 4 * OFFSET
          MOVE.L  (%A0,%D0),%D1
          RTS
@@ -2225,7 +2227,7 @@ TRACE01: CMP.L   (%A0),%D1      | SEE IF PC MATCHES ADDRESS IN TABLE
 TRACE08: ADDQ.L  #4,%A0         | BUMP TABLE POINTER
          ADDQ.L  #4,%A2         | BUMP COUNT TABLE POINTER
          SUBQ.L  #1,%D7         | LOOP AROUND
-         BNE     TRACE01
+         BNE.S   TRACE01
 
 TRACE03: BSR     TDISPLY        | DO TRACE DISPLAY
          SUBQ.L  #1,TRACECNT    | TRACE COUNT
@@ -2242,6 +2244,7 @@ TRACE39: CLR.L   TRACECNT
 
 
 UNTRACE: ORI.W   #0x8000,REGSR+2 | SET UP TRACE BIT!
+         AV9 = 0x0024
          ADDR2MEM TRACE,AV9     | TAKE TRACE VECTOR
 
 UNSTACK: MOVE.L  REGUS,%A1
@@ -2271,12 +2274,14 @@ UNSTACK: MOVE.L  REGUS,%A1
 
 SWAPIN:  BSR.S   SWAPOUT        | MAKE SURE THEY ARE ALL OUT
 
+         SAVEAV4 = 0x04d2
          MOVE.L  AV4,SAVEAV4    | SAVE VECTOR (WHOM EVER'S IT WAS)
          LEA     CHKBP(%PC),%A6
          MOVE.L  %A6,AV4        | REPLACE IT WITH THE "CHKBP" RTN
          LEA     SWAPIN1(%PC),%A6 | A6 = ROUTINE ADDRESS
          BRA.S   SWAP
 
+         BPSTATUS = 0x04e0
 SWAPOUT: TST.W   BPSTATUS        | SEE IF OUT ALREADY
          BEQ.S   SWAPEND         | YES...DONE
          MOVE.L  SAVEAV4,AV4     | NO....REPLACE THE VECTOR
@@ -2285,6 +2290,7 @@ SWAPOUT: TST.W   BPSTATUS        | SEE IF OUT ALREADY
 SWAP:    LEA     BPADD,%A0       | A0 = ADDRESS OF TABLE
          LEA     BPCNT,%A2       | A2 = ADDRESS OF COUNTS
          MOVEQ   #9,%D7          | DO 9 BP
+         BPDATA = 0x04b8
          LEA     BPDATA,%A3      | CONTENT TABLE
 
 SWAP1:   MOVE.L  (%A0),%A4       | GET POSSIBLE ADDDRESS
@@ -2308,7 +2314,7 @@ SWAPOUT1:MOVE.W  (%A3),%D0       | GET CONTENTS FROM TABLE
 SWAP99:  ADDQ.L  #4,%A0          | BUMP ADDRESS TABLE POINTER
          ADDQ.L  #2,%A3          | BUMP CONTENT TABLE POINTER
          SUBQ.L  #1,%D7
-         BNE     SWAP1
+         BNE.S   SWAP1
 SWAPEND: RTS
 
 *  ILLEGAL INSTRUCTION ENTRY POINT
@@ -2335,7 +2341,7 @@ CHKBP1:  CMP.L   (%A0),%A5       | SEE IF WE ARE THERE
          ADDQ.L  #4,%A0          | BUMP BOTH POINTERS
          ADDQ.L  #4,%A2
          SUBQ.L  #1,%D7
-         BNE     CHKBP1
+         BNE.S   CHKBP1
 
 * IS NOT A BREAKPOINT; ASSUME ILLEGAL INSTRUCTION
 CHKBP11: LEA     MSG009(%PC),%A5 | "ILLEGAL INSTRUCTION"
