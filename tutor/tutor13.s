@@ -84,7 +84,7 @@ AV8:     DS.L    1              | 8   $08  PRIVILEDGE VIOLATION "PRIV"
 _AV9:    DS.L    1              | 9   $09  TRACE
          DS.L    1              | 10  $0A  1010 LINE EMULATION  "1010"
 _AV11:   DS.L    1              | 11  $0B  1111 LINE EMULATION  "1111"
-AV12:    DS.L    1              | 12  $0C  USED AS TEMPORARY STORAGE FOR VECTOR MSGS.
+_AV12:   DS.L    1              | 12  $0C  USED AS TEMPORARY STORAGE FOR VECTOR MSGS.
          DS.L    1              | 13  $0D  NOT USED
          DS.L    1              | 14  $0E
          DS.L    1              | 15  $0F
@@ -120,7 +120,7 @@ _AV31:   DS.L    1              | 31  $1F   7                   "AV#7   [ABORT B
          DS.L    1              | 45  $2D   TRAP 13             "UT D"
 _AV46:   DS.L    1              | 46  $2E   TRAP 14             "UT E"
 AV47:    DS.L    1              | 47  $2F   TRAP 15             "UT F"
-AV48:    DS.L    1              | 48  $30
+_AV48:   DS.L    1              | 48  $30
          DS.L    1              | 49  $31
          DS.L    1              | 50  $32
          DS.L    1              | 51  $33
@@ -377,11 +377,9 @@ OPTIONS: .align  2              | FORCE WORD BOUNDRY
          DS.B    1              | TM  trailing character
          DS.B    1              | TM  exit character
 _XONOFF  =       OPTIONS
-TMCHARS  =       OPTIONS+4
+_TMCHARS  =      OPTIONS+4
 
 * END of as is section
-
-
 
 ***************************
 * TARGET SUPERVISOR STACK *
@@ -403,13 +401,13 @@ _DUMPTEMP:DS.B   80             | HEADER TEMP BUFFER
 _SCREEN1: DS.L   1              | PRINT THIS BEFORE TRACE DISPLAY
 _SCREEN2: DS.L   1              | PRINT THIS AFTER TRACE DISPLAY
 
-NULLPADS:DS.B    2              | CHARACTER NULL PADS
-CRPADS:  DS.B    2              | CARRIAGE RETURN NULL PADS
+_NULLPADS:DS.B    2             | CHARACTER NULL PADS
+_CRPADS:  DS.B    2             | CARRIAGE RETURN NULL PADS
 
 _OUTTO:  DS.L    1              | HOLDS ADDRESS OF OUTPUT ROUTINE
 _INFROM: DS.L    1              | HOLDS ADDRESS OF INPUT ROUTINE
-ALTSER1: DS.L    1              | ALTERNATE SERIAL PORT#1
-ALTSER2: DS.L    1              | ALTERNATE SERIAL PORT#2
+_ALTSER1: DS.L   1              | ALTERNATE SERIAL PORT#1
+_ALTSER2: DS.L   1              | ALTERNATE SERIAL PORT#2
 _INPORT1: DS.L   1              | INPUT ROUTINE ADDRESS
 _OUTPORT1:DS.L   1              | ADDRESS FOR OUPUT ROUTINE
 _INPORT2: DS.L   1              | ADDRESS FOR INPUT ROUTINE
@@ -420,7 +418,7 @@ _INPORT4: DS.L   1              | CASSETTE
 _OUTPORT4:DS.L   1              | CASSETTE
 _MD1CON:  DS.W   1              | ACIA PROFILE (PORT1/PORT2)
 _PDIPORT: DS.L   1              | PDIPORT ADDRESS
-CRTPNT:  DS.W    1              | OUTPUT TO PRINTER AND CRT
+_CRTPNT:  DS.W   1              | OUTPUT TO PRINTER AND CRT
 _TAPENULS:DS.B   1              | NULLS FOR CASSETTE
 
          DS.B    1              | PAD BYTE
@@ -554,7 +552,6 @@ MSG021:  .ascii "WHAT"
 
          DC.B    0              | PAD BYTE
 
-
 * PRINT WHAT
          .align  2
 WHAT:    LEA     MSG021(%PC),%A5 | PRINT 'WHAT' AND ENTER MACSBUG
@@ -563,7 +560,6 @@ WHAT93:  BSR.S   FIXDATA
          CLR.W   TRACEON
 MSG:     BSR     OUT1CR
          BRA     MACSBUG
-
 
 * PRINT ERROR
 
@@ -1004,6 +1000,7 @@ VECTI:   MOVE.L  %A0,(%A1)+     | MOVE ADDRESS TO VECTOR
          LEA     AV24,%A1       | A1 = NEXT VECTOR TO INITIALIZE
 VECTI2:  MOVE.L  %A0,(%A1)+     | MOVE ADDRESS TO VECTOR
          ADD.L   %D0,%A0        | BUMP ADDRESS
+         AV48 = 0x00c0
          CMPA.L  #AV48,%A1
          BNE.S   VECTI2
          RTS
@@ -1394,10 +1391,10 @@ NOBR3:   MOVE.L  (%A0),%D1      | GET BREAKPOINT IN TABLE
          BEQ.S   NOBR4
          ADDQ.L  #4,%A0
          SUBQ.L  #1,%D7
-         BNE     NOBR3
+         BNE.S   NOBR3
 NOBR4:   CLR.L   (%A0)           | CLEAR THIS BREAKPOINT
          LEA     BCMD7(%PC),%A0  | WHERE TO GO IF NO PARAMETER
-         BRA     NOBR1
+         BRA.S   NOBR1
 
 
 
@@ -2319,13 +2316,13 @@ SWAPEND: RTS
 *  ILLEGAL INSTRUCTION ENTRY POINT
 *   BREAKPOINT TEST
 *
-CHKBP:   MOVE.W  #0x2700,SR      | MASK OF INT.
+CHKBP:   MOVE.W  #0x2700,%SR     | MASK OF INT.
          SAVEREGS
          MOVE.L  REGPC,%D0       | GET PROGRAM COUNTER TO COMPARE
          MOVE.L  %D0,%A5         | A5 = TARGET PC
          MOVE.W  (%A5),%D1       | SEE WHAT OP CODE WAS XEQ
 
-         BSR     SWAPOUT         | TAKE BREAKPOINTS OUT
+         BSR.S   SWAPOUT         | TAKE BREAKPOINTS OUT
 
          CMPI.W  #BKPOINT,%D1    | USED FOR BP
          BNE.S   CHKBP11         | NOT AT BREAKPOINT
@@ -2391,7 +2388,7 @@ HELP4:   MOVE.W  (%A4)+,%D1      | GET 2 BYTE COMMAND
          BEQ.S   HELP6           | DONE PRINT LAST BUFFER
          ADDQ.L  #2,%A4          | BUMP POINTER UP BY 2
          TST.W   %D1             | IS THE INVISIBLE INDICATOR ON?
-         BMI     HELP4           | YES... THEN BYPASS THIS ONE
+         BMI.S   HELP4           | YES... THEN BYPASS THIS ONE
          MOVE.W  %D1,%D3         | SAVE XX FOR "XX" AND "NOXX" IN HELP
          ANDI.W  #0x7F7F,%D1      | REMOVE CONTROL BITS
          MOVE.W  %D1,(%A6)+      | NO.... MOVE THIS COMMAND TO "PRINT" LINE
@@ -2404,7 +2401,7 @@ HELP4:   MOVE.W  (%A4)+,%D1      | GET 2 BYTE COMMAND
          MOVE.W  %D3,(%A6)+      | "NOCC"   IN MSG (WHERE CC=COMMAND CODE)
          MOVE.W  #"  ",(%A6)+    | "NOCC  " IN MSG    "    "    "      "
          BSR.S   HELP81          | PRINT THE LINE IF FULL
-EOHLOOP: BRA     HELP4           | NEXT COMMAND.
+EOHLOOP: BRA.S   HELP4           | NEXT COMMAND.
 
 *        DISPLAY LINE OF COMMANDS (IF FULL)
 
@@ -2416,7 +2413,7 @@ HELP81:  SUBQ.B  #1,%D2          | D2 = COUNT OF COMMANDS PER LINE
 HELP85:  RTS
 
 HELP6:   BSR     OUT1CR          | PRINT ANY REMAINING PORTION
-*        BRA     HELP1           | SEE IF COMPLETE
+*        BRA.S   HELP1           | SEE IF COMPLETE
          BRA     MACSBUG         | HELP IS COMPLETE SO RETURN
 
 MSG002:  .ascii  ".PC .SR .US .SS"
@@ -2461,7 +2458,7 @@ HX2DC1:  MOVE.W  %D2,%D3          | D3=LOWER WORD
          SWAP    %D3              | PUT LOWER IN LOWER
          MOVE.W  %D3,%D2          | D2=UPPER & LOWER
          SUBQ.L  #1,%D1
-         BNE     HX2DC1
+         BNE.S   HX2DC1
 HX2DC2:  CLR.L   %D0              | HOLDS SUB AMT
 HX2DC22: CMP.L   %D2,%D7
          BLT.S   HX2DC3           | IF NO MORE SUB POSSIBLE
@@ -2476,7 +2473,7 @@ HX2DC4:  ADDI.B  #0x30,%D0         | BINARY TO ASCII
          MOVE.B  %D0,(%A6)+       | PUT IN BUFFER
          MOVE.B  %D0,%D4          | MARK AS NON ZERO SURPRESS
 HX2DC5:  SUBQ.L  #1,%D6           | NEXT POWER
-         BNE     HX2DC0
+         BNE.S   HX2DC0
          TST.W   %D4              | SEE IF ANYTHING PRINTED
          BNE.S   HX2DC6
 HX2DC57: MOVE.B  #'0',(%A6)+      | PRINT AT LEST A ZERO
@@ -2533,7 +2530,7 @@ READ03:  CMPI.B  #'=',%D0       | SEE IF EQUAL SIGN
          CMPI.B  #'X',%D0       | SEE IF ECHO
          BNE.S   READ021
          MOVE.B  #-1,%D5        | D5.B = ECHO TO PORT ONE
-         BRA     READ01
+         BRA.S   READ01
 
 READ021: CMPI.B  #'-',%D0       |SEE IF MINUS SIGN
          BNE.S   READ01
@@ -2541,9 +2538,9 @@ READ021: CMPI.B  #'-',%D0       |SEE IF MINUS SIGN
          BEQ.S   READ09
          MOVE.B  (%A5)+,%D0     | GRAB SECOND CHARACTER
          CMPI.B  #'C',%D0       | SEE IF LETTER C AS IN -C
-         BNE     READ03
+         BNE.S   READ03
          ORI.W   #0x8000,%D5     | MARK AS IGNORE CHECKSUM
-         BRA     READ01
+         BRA.S   READ01
 
 READS1:  CLR.L   %D6            | D6 = TYPE "S1"
          SUBQ.L  #4,%D3         | BYTE COUNT
@@ -2570,10 +2567,10 @@ READ0:   LEA     SYSTACK,%A7    | FORCE STACK (FOR ERROR RECOVERY)
          MOVE.L  %A5,%A3        | START ADDRESS OF BUFFER
 READ00:  MOVE.B  (%A3)+,%D0     | GET FIRST CHARACTER
          CMP.L   %A3,%A6
-         BCS     READ0          | END OF BUFFER WITHOUT "S"
+         BCS.S   READ0          | END OF BUFFER WITHOUT "S"
 
 READ005: CMPI.B  #'S',%D0       | SEE IF IT IS AN S
-         BNE     READ00         | GET ANOTHER CHARACTER
+         BNE.S   READ00         | GET ANOTHER CHARACTER
          BSR     GETCHR         | GET RECORD TYPE
          MOVE.L  %D0,%D6
 
@@ -2582,7 +2579,7 @@ READ005: CMPI.B  #'S',%D0       | SEE IF IT IS AN S
          MOVE.B  %D0,%D3
 
          CMPI.B  #'0',%D6       | "S0"???
-         BEQ     READ0          | JUST IGNORE
+         BEQ.S   READ0          | JUST IGNORE
          CMPI.B  #'1',%D6
          BEQ.S   READS1         | S1 RECORD TYPE (2 BYTE ADDRESS)
          CMPI.B  #'8',%D6
@@ -2600,11 +2597,11 @@ READS202:MOVE.L  %D3,CC(%A4)
          MOVE.L  %D0,ADDRESS(%A4) | ADDRESS + OFFSET
          LEA     LDATA(%A4),%A2   | A2 = STORE TO STACK POINTER
 
-READ100: BSR     READHEX        | GET DATA BYTE
+READ100: BSR.S   READHEX        | GET DATA BYTE
          MOVE.B  %D0,(%A2)+     | MOVE DATA TO STACK
          DBRA    %D3,READ100
 
-         TST.W   D5
+         TST.W   %D5
          BMI.S   READ120        | IGNORE CHECKSUM
 
          MOVE.B  %D5,%D7
@@ -2621,7 +2618,7 @@ READ120:
          MOVE.L  ADDRESS(%A4),%A3 | MEMORY STORE ADDRESS
          LEA     LDATA(%A4),%A2   | DATA ADDRESS ON STACK
 
-         TST.L   D5
+         TST.L   %D5
          BMI.S   READ400        | VERIFY
 
 READ130: MOVE.B  (%A2),(%A3)    | STORE DATA
@@ -2644,24 +2641,24 @@ READ410: CMP.B   (%A2)+,(%A3)+  | VERIFY DATA
          MOVE.B  #'-',(%A1)+
 READ420: DBRA    %D3,READ410
 
-         TST.L   D7
-         BEQ     READ135        | RECORD OK
+         TST.L   %D7
+         BEQ.S   READ135        | RECORD OK
 
          MOVE.L  %A1,%A6        | DONOT DISPLAY CHECKSUM
 READ430: BSR     OUT1CR         | DISPLAY IT
-         BRA     READ135        | READ NEXT RECORD
+         BRA.S   READ135        | READ NEXT RECORD
 
 READ440: MOVEQ   #-1,%D7        | D7 = Set miss-match flag
          MOVEQ   #-1,%D4        | D4 = Set Summary error flag
          ADDQ.L  #2,%A1
-         BRA     READ420
+         BRA.S   READ420
 
 READCKSM:MOVEQ   #-1,%D4        | D4 = Set summary error flag
          LEA     MSGLOAD2(%PC),%A5
          BSR     FIXDADD
          MOVE.L  %D7,%D0
          BSR     PNT2HX         | CALCULATED CHECKSUM
-         BRA     READ430
+         BRA.S   READ430
 
 READHEX: BSR.S   GETHEXC        | FORM BYTE
          ASL.B   #4,%D0
@@ -2673,10 +2670,10 @@ READHEX: BSR.S   GETHEXC        | FORM BYTE
 
 GETCHR:  MOVE.B  (%A3)+,%D0
          CMP.L   %A3,%A6
-         BCS     READCKSM       | OVERFLOW
+         BCS.S   READCKSM       | OVERFLOW
          RTS
 
-GETHEXC: BSR     GETCHR
+GETHEXC: BSR.S   GETCHR
          SUBI.B  #0x30,%D0       | SEE IF LESS THAN ZERO
          BLT.S   RHEX3
          CMPI.B  #0x09,%D0       | SEE IF GT 9
@@ -2689,7 +2686,7 @@ RHEX2:   RTS
 RHEX3:   LEA     MSGLOAD1(%PC),%A5 |"NOT HEX=X?"  MESSAGE
          BSR     FIXDADD
          MOVE.B  -(%A3),(%A6)+  | BAD CHARACTER
-         BRA     READ430        | GO TRY NEXT RECORD
+         BRA.S   READ430        | GO TRY NEXT RECORD
 
 MSGLOAD1:.ascii  "NOT HEX="
          DC.B    EOT
@@ -2698,15 +2695,15 @@ MSGLOAD2:.ascii  " CHKSUM="
          DC.B    EOT
 
 READHEX6:CLR.L   %D0            | FORM ADDRESS (3 BYTE)
-         BSR     READHEX
+         BSR.S   READHEX
          ASL.L   #8,%D0
-READHEX4:BSR     READHEX        | FORM ADDRESS (2 BYTE)
+READHEX4:BSR.S   READHEX        | FORM ADDRESS (2 BYTE)
          ASL.L   #8,%D0
-         BSR     READHEX
+         BSR.S   READHEX
          ADD.L   OFFSET,%D0
          RTS
 
-READS8:  BSR     READHEX6
+READS8:  BSR.S   READHEX6
 READS800:MOVE.L  %D0,REGPC      | SAVE IT IN THE USER PREG
 
          TST.L   %D4
@@ -2714,8 +2711,8 @@ READS800:MOVE.L  %D0,REGPC      | SAVE IT IN THE USER PREG
          BRA     MACSBUG        | END OF ROUTINE
 
 READS9:  CLR.L   %D0
-         BSR     READHEX4       | GET ADDRESS
-         BRA     READS800
+         BSR.S   READHEX4       | GET ADDRESS
+         BRA.S   READS800
 
 
 *-------------------------------------------------------------------------
@@ -2741,7 +2738,7 @@ MDCMD:   .align  2
 PRINT8:  CMP.L   %A2,%A6        | LOOK FOR OPTIONS
          BCS.S   PRINTDI        | NO  OPTIONS
          CMPI.B  #';',(%A2)+
-         BNE     PRINT8
+         BNE.S   PRINT8
 
          MOVE.L  %A2,%A6
          SUBQ.L  #1,%A6         | A6 = POINTER TO ;
@@ -2749,7 +2746,7 @@ PRINT8:  CMP.L   %A2,%A6        | LOOK FOR OPTIONS
          CMPI.B  #'D',(%A2)+
 PRINTMB: BNE     SYNTAX         | COMMAND SYNTAX ERROR
          CMPI.B  #'I',(%A2)+
-         BNE     PRINTMB
+         BNE.S   PRINTMB
          MOVEQ   #-1,%D7        | DISASSEMBLE OPTION
 PRINTDI:
 
@@ -2775,7 +2772,7 @@ PRINT5:  LEA     PRINT7(%PC),%A0 | WHERE TO GO IF NO PARAMETERS
          SUBQ.L  #1,%D0         | BACK OFF ONE
          MOVE.L  %D0,%A3        | A3 = END ADDRESS
 
-PRINT7:  TST.L   D7
+PRINT7:  TST.L   %D7
          BEQ.S   PUTADR         | NOT DISASSEMBLE
 
 PRINTDI5:BSR     FIXBUF         | DI OPTION
@@ -2789,13 +2786,13 @@ PRINTDI5:BSR     FIXBUF         | DI OPTION
          BEQ.S   PRINT9         | "MDS" COMMAND
 
          CMP.L   %A4,%A3        |  END CHECK
-         BCC     PRINTDI5
+         BCC.S   PRINTDI5
          BRA.S   PRINT9
 
 PRINT3:  MOVEQ   #16,%D6        | D6 = LINE BLOCK COUNT
          SUB.L   %A3,%A3
          SUBQ.L  #1,%A3         | A3 = MAX END ADDRESS
-         BRA     PRINT7
+         BRA.S   PRINT7
 
 * START A NEW  LINE
 *
@@ -2816,7 +2813,7 @@ NXTBP:   MOVE.B  (%A0)+,%D0     | GET BYTE TO PRINT
 NXTBP3:
 
          SUBQ.L  #1,%D3
-         BNE     NXTBP          | LOOP TILL D3 IS ZERO
+         BNE.S   NXTBP          | LOOP TILL D3 IS ZERO
 
          MOVE.B  #0x20,(%A6)+   | MOVE A SPACE
          MOVE.L  %A4,%A0        | RELOAD SCANNER FOR ASCII PRINTS
@@ -2832,14 +2829,14 @@ NOTCHR:  MOVE.B  #0x2E,%D0      | CHANGE UNPRINTABLE TO PERIOD
 
 PUTCHR:  MOVE.B  %D0,(%A6)+     | MOVE "EDITTED" CHARACTER TO PRINT LINE
          SUBQ.L  #1,%D3         | LOOP AROUND FOR NEXT CHAR
-         BNE     NXTCHR         | ANY LEFT?
+         BNE.S   NXTCHR         | ANY LEFT?
          BSR     OUT1CR         | NO... THEN PRINT THE COMPLETE LINE
          ADDQ.L  #0x08,%A4      | UPDATE STARTING ADDRESS OF NEXT ADDRESS
          ADDQ.L  #0x08,%A4      | ........
          CMP.L   %A4,%A3        |  DOES NEW LINE START PAST END
          BCS.S   PRINT9         | SEE IF STILL GOING
          SUBQ.L  #1,%D6         | DECR THE COUNTER
-         BNE     PUTADR         | DO ANOTHER LINE
+         BNE.S   PUTADR         | DO ANOTHER LINE
 
 PRINT9:  LEA     MSG001(%PC),%A5 | SET UP FOR PROMPT
          BSR     FIXDATA
@@ -2907,7 +2904,7 @@ MMDI31:  BSR     FIXBUF
          CMP.L   %A5,%A6
          BNE.S   MMDI34
          BSR     OUT1CR         | NOTHING INPUT; OUTPUT LINE FEED
-         BRA     MMDI23
+         BRA.S   MMDI23
 
 MMDI34:  SUB.L   %D6,%A4        | BACKUP PC
 
@@ -2935,10 +2932,10 @@ MMDI34:  SUB.L   %D6,%A4        | BACKUP PC
 MMDI26:  CMP.L   %A6,%A3
          BCS.S   MMDI27
          MOVE.B  #BLANK,(%A6)+  | SPACE FILL LINE
-         BRA     MMDI26
+         BRA.S   MMDI26
 MMDI27:  BSR     OUT1CR         | PRINT LINE JUST ENTERED
 
-         TST.B   D7
+         TST.B   %D7
          BNE.S   MMDI30         | ERROR; DON"T STORE DATA
 
          LEA     SYSTACK+4,%A2  | A2 = TEMP AREA
@@ -2952,7 +2949,7 @@ MMDI29:  MOVE.B  (%A2)+,%D0
          CMP.B   %D0,%D2
          BNE     MM90
          DBRA    %D1,MMDI29
-         BRA     MMDI22
+         BRA.S   MMDI22
 
 MMDI30:  BSR     FIXBUF
 MMDI44:  MOVE.B  #BLANK,(%A6)+  | SPACES
@@ -2961,7 +2958,7 @@ MMDI44:  MOVE.B  #BLANK,(%A6)+  | SPACES
          MOVE.B  #'X',-1(%A6)   | X UNDER ERROR
          MOVE.B  #'?',(%A6)+    | ? ALLOW REINPUT
          BSR     OUTPUT
-         BRA     MMDI31
+         BRA.S   MMDI31
 
 
 MCMD:    .align  2              | "M" Alias for "MM" Command
@@ -2979,14 +2976,14 @@ MM05:    CMP.L   %A5,%A6
 * LOOK FOR ;OPTIONS
          MOVE.B  (%A5)+,%D0
          CMPI.B  #';',%D0
-         BNE     MM05           | IGNORE NOT ;
+         BNE.S   MM05           | IGNORE NOT ;
 
          MOVE.B  (%A5)+,%D0     |  GET NEXT CHAR
          CMPI.B  #'D',%D0
          BNE.S   MM045
 
          CMPI.B  #'I',(%A5)+    | DISSAMBLY OPTION
-         BNE     MM05
+         BNE.S   MM05
          BRA     MMDI
 
 MM045:   CMPI.B  #'W',%D0
@@ -2996,12 +2993,12 @@ MM045:   CMPI.B  #'W',%D0
          BNE.S   MM054
          MOVE.B  #4,%D6         | ;L   D6=4
          CLR.B   %D5            | RESET BYTE OVERRIDE
-         BRA     MM05
+         BRA.S   MM05
 
 MM054:   CMPI.B  #'N',%D0
          BNE.S   MM056
          ORI.W   #0x8000,%D5     | ;N  D5=$8000
-         BRA     MM05
+         BRA.S   MM05
 
 MM056:   CMPI.B  #'O',%D0
          BNE.S   MM058
@@ -3016,16 +3013,16 @@ MM058:   CMPI.B  #'V',%D0
 MM060:   MOVE.L  %D0,%A4
          ORI.B   #0x80,%D5       | BYTE OVERRIDE
 MM064:   MOVE.B  #2,%D6         | SIZE = WORD (2 BYTES)
-         BRA     MM05
+         BRA.S   MM05
 
 MM065:   CLR.B   %D5            | RESET BYTE OVERRIDE
-         BRA     MM064
+         BRA.S   MM064
 
 * FORMAT ADDRESS FOR PRINTING
 MM10:    MOVE.L  %A4,%D0
          CMPI.B  #1,%D6
          BEQ.S   MM11           | "BYTE"
-         TST.B   D5
+         TST.B   %D5
          BMI.S   MM11           | BYTE OVERRIDE
          BSR     CKWADR         | CHK ALLIGNMENT
 MM11:    BSR     CKADDR
@@ -3033,11 +3030,11 @@ MM11:    BSR     CKADDR
          BSR     FRELADDR       | FORM RELATIVE ADDRESS
          MOVE.B  #BLANK,(%A6)+  | SPACE
 
-         TST.W   D5
+         TST.W   %D5
          BMI.S   MM18           | NON-VERIFY (DON"T READ MEMORY)
 
 * READ DATA FROM MEMORY & FORMAT IT
-         TST.B   D5
+         TST.B   %D5
          BMI.S   MM12           | BYTE OVERRIDE
 
          CMPI.B  #2,%D6
@@ -3086,7 +3083,7 @@ MM18:    MOVE.B  #BLANK,(%A6)+  | SPACE
 * IF = ^ OR .  TAKE ACTION
          MOVE.B  (%A5),%D0
          CMPI.B  #'=',%D0
-         BEQ     MM10
+         BEQ.S   MM10
          CMPI.B  #'.',%D0
          BEQ     MACSBUG
          CMPI.B  #'^',%D0
@@ -3159,7 +3156,7 @@ MM95:    BSR     FIXDCRLF
          BRA     MSG
 
 MM905:   LEA     MSGEOT(%PC),%A5
-         BRA     MM95
+         BRA.S   MM95
 
 
 
@@ -3206,7 +3203,7 @@ SETM3:   MOVE.L  %D1,%D2        | D1 SCANS DOWN
          ASR.L   #8,%D0         | SHIFT ONE BYTE
          ADDQ.L  #1,%A1         | BUMP ADDRESS
          SUBQ.L  #1,%D1
-         BNE     SETM3
+         BNE.S   SETM3
          BRA.S   SETM1          | GO DO NEXT DATA
 
 *  DATA IN IN ASCII STRING
@@ -3221,7 +3218,7 @@ SETM6:   CMP.L   %A6,%A5        | SEE IF END OF BUFFER
          MOVE.B  (%A1)+,%D1     | REREAD FOR CHECK
 
          CMP.B   %D1,%D0        | SEE IF SAME
-         BEQ     SETM6
+         BEQ.S   SETM6
 SETME:   LEA     MSG017(%PC),%A5 | "DATA DID NOT STORE"
          BSR     FIXDCRLF
          BRA     MSG
@@ -3298,12 +3295,12 @@ PER4:    CLR.L   %D7
 * THIRD CHAR MUST BE NUMERIC 0 - 7
          MOVE.B  %D1,%D0         | ALLEGED DIGIT
          CMPI.B  #'0',%D0
-         BMI     PER4            | NOT A DIGIT
+         BMI.S   PER4            | NOT A DIGIT
          CMPI.B  #'8',%D0
-         BPL     PER4            | NOT A DIGIT
+         BPL.S   PER4            | NOT A DIGIT
 
 PER3:    CMP.W   %D1,%D0
-         BNE     PER4            | MISS-MATCH
+         BNE.S   PER4            | MISS-MATCH
 
 *******************************************************************
 *        AT THIS TIME WE HAVE FOUND THE ENTRY IN THE "REG TABLE"  *
@@ -3407,7 +3404,7 @@ SETR4:   BSR.S   PRINTR         | FIX UP TO PRINT
          BRA     MSG            | GO PRINT MESSAGE-GO TO MACSBUG
 
 SETR5:   BSR.S   SETSR1
-         BRA     SEMACS
+         BRA.S   SEMACS
 
 SETSR1:  BSR.S   PRINTR         | FIX UP TO PRINT
          MOVE.B  #BLANK,(%A6)+  | SPACE
@@ -3422,7 +3419,7 @@ SETSR1:  BSR.S   PRINTR         | FIX UP TO PRINT
          BSR     FNEXTF         | FIND FIELD
 
          CMPI.B  #'.',%D0
-         BEQ     SEMACS         | PERIOD; GET OUT
+         BEQ.S   SEMACS         | PERIOD; GET OUT
 
          BSR     GETA           | CONVERT IT
          MOVE.L  %D0,(%A4)      | STORE NEW DATA
@@ -3482,10 +3479,10 @@ PNTCLS1: BSR.S   PNTREG         | PRINT THE REGISTER
          BNE.S   PNTCLS2
          BSR     OUT1CR
          BSR     FIXBUF
-         BRA     PNTCLS1        | DO SOME MORE
+         BRA.S   PNTCLS1        | DO SOME MORE
 
 PNTCLS2: CMPI.B  #8,%D6         | AT END?
-         BNE     PNTCLS1
+         BNE.S   PNTCLS1
          BSR     OUT1CR         | PRINT IT
          RTS
 
@@ -3532,11 +3529,13 @@ PFCMD:   MOVE.B  (%A5),%D6      | D6 = PORT #
          BSR.S   PFPT           | DISPLAY/CHANGE
          BSR     OUTPUT
 
+         NULLPADS = 0x0618
          LEA     NULLPADS,%A1
          LEA     MSG004(%PC),%A5
          BSR.S   PFPT
          BSR     OUTPUT
 
+         CRPADS = 0x061a
          LEA     CRPADS,%A1
          LEA     MSG005(%PC),%A5
          BSR.S   PFPT
@@ -3668,7 +3667,7 @@ MTSTOR0:
          BNE.S   RAMERR         | STOP ON ERROR
          MOVE.W  %D2,(%A2)+     | STORE COMPLEMENT
          CMP.L   %A1,%A2        | DONE?
-         BNE     MTSTOR0        | NO...KEEP LOOPING, YES...
+         BNE.S   MTSTOR0        | NO...KEEP LOOPING, YES...
 
 RAMERR:  MOVE.L  %D3,%A0        | RESTORE A0
          RTS                    | RETURN
@@ -3728,7 +3727,7 @@ P2CMD2:  BTST.B  #0x0,(%A0)     | READ STATUS
          MOVE.B  %D0,(%A0)
 
          ASR.W   #8,%D7
-         TST.B   D7
+         TST.B   %D7
          BEQ.S   P2CMD6
 * SPECIAL SECOND CHAR TO HOST SEQUENCE
          MOVE.L  #DELAYC1,%D0
@@ -3779,10 +3778,11 @@ EVECTL:  SAVEREGS
          BSR     FAULTSER       | RESET SERIAL PORTS
 EVECT2:  BSR     FIXBUF         | PRINT MESSAGE "XXXX TRAP ERROR"
          MOVE.W  #0x0D0A,(%A6)+
+         AV12 = 0x0030
          MOVE.L  AV12,(%A6)+    | TYPE OF ERROR
          LEA     MSG010(%PC),%A5 | "TRAP ERROR"
          BSR     FIXDADD
-         BRA     EVECT4
+         BRA.S   EVECT4
 
 MSG010:  .ascii  " TRAP ERROR"
          DC.B    CR,LF,EOT
@@ -3848,9 +3848,9 @@ FREL10:  MOVE.L  %D0,%D1
 FREL15:  ADDQ.L  #4,%A0
          ADDQ.L  #1,%D6
          CMPI.W  #8,%D6
-         BNE     FREL10         | MORE OFFSETS TO CHECK
+         BNE.S   FREL10         | MORE OFFSETS TO CHECK
 
-         TST.L   D7
+         TST.L   %D7
          BMI.S   FREL25         | NO FIT
          TST     D6
          BNE.S   FREL20
@@ -3858,13 +3858,13 @@ FREL15:  ADDQ.L  #4,%A0
          BEQ.S   FREL25         | R0 = 000000; NO FIT
 
 FREL20:  MOVE.L  %D7,%D0
-         BSR     PNT6HX         | FORMAT OFFSET
+         BSR.S   PNT6HX         | FORMAT OFFSET
          MOVE.B  #'+',(%A6)+    | +
          MOVE.B  #'R',(%A6)+    | R
          ADDI.B  #'0',%D5       | MAKE ASCII
          BRA.S   FREL30
 
-FREL25:  BSR     PNT6HX         | FORMAT ADDRESS AS IS
+FREL25:  BSR.S   PNT6HX         | FORMAT ADDRESS AS IS
          MOVE.B  #BLANK,%D5
          MOVE.B  %D5,(%A6)+     | THREE SPACES FOR ALIGNMENT
          MOVE.B  %D5,(%A6)+
@@ -3892,7 +3892,7 @@ PNTZ1:   MOVE.L  %D1,%D0        | UNSAVE IT
 PNTZ2:   ASR.L   #4,%D0         | ROTATE LRIGHT
          ANDI.L  #0xFFFFFFF,%D0 | CLEAR TOP NIBBLE
          SUBQ.L  #1,%D3
-         BNE     PNTZ2
+         BNE.S   PNTZ2
 PNTZ4:   ANDI.B  #0xF,%D0       | SAVE ONLY NIBBLE
          BNE.S   PNTZ3
          TST.B   %D4            | SEE IF STILL SURPRESSING
@@ -3900,7 +3900,7 @@ PNTZ4:   ANDI.B  #0xF,%D0       | SAVE ONLY NIBBLE
 PNTZ3:   BSR     PUTHEX         | PUT A HEX CHAR IN BUFFER
          MOVE.B  %D0,%D4        | MARK AS NON-SURPRESSING MODE
 PNTZ8:   SUBQ.L  #1,%D2         | DO ANOTHER CHAR
-         BNE     PNTZ1
+         BNE.S   PNTZ1
          TST.B   %D4            | SEE IF ANYTHING PRINTED
          BNE.S   PNTZ9
 PNTZ81:  MOVE.B  #'0',(%A6)+    | MOVE AT LEAST ONE ZERO
@@ -3919,7 +3919,7 @@ FNEXTF:  MOVE.B  (%A5),%D0      | ENTRY POINT
          CMP.L   %A6,%A5
          BCC.S   FNEXTF7        | AT END OF BUFFER
          CMPI.B  #BLANK,%D0
-         BEQ     FNEXTF1        | SPACE
+         BEQ.S   FNEXTF1        | SPACE
 
          CMPI.B  #',',%D0
          BEQ.S   FNEXTF7        | COMMA - NULL FIELD
@@ -3966,12 +3966,12 @@ GETEXP21:BSR.S   GETNUMA        | GET NUMBER
 GETEXP15:MOVE.B  (%A5)+,%D1     | D1 = TERMINATING CHAR
          CLR.L   %D0            | D0 = NEXT NUMBER (=0 1ST TIME)
          CMPI.B  #'+',%D1
-         BEQ     GETEXP21       | PLUS
+         BEQ.S   GETEXP21       | PLUS
          CMPI.B  #'-',%D1
          BNE.S   GETEXP39       | NOT MINUS
          BSR.S   GETNUMA        | GET NEXT NUMBER
          SUB.L   %D0,%D7
-         BRA     GETEXP15
+         BRA.S   GETEXP15
 
 GETEXP39:MOVE.L  %D7,%D0        | D0 = VALUE BUILT
          SUBQ.L  #1,%A5         | A5 = CHAR AFTER EXPRESSION
@@ -3991,7 +3991,7 @@ GETNUMD9:BNE     ERROR
          RTS
 
 GETNUMA: BSR.S   GETHEXNU       | GET HEX NUMBER
-         BRA     GETNUMD9
+         BRA.S   GETNUMD9
 
 GETDECNU:MOVEM.L %D1-%D5/%A0,-(%A7) | DECODE AS A DECIMAL NUMBER
          MOVEQ   #10,%D3        | D3 = BASE (DECIMAL)
@@ -4003,10 +4003,10 @@ GETHEXNU:MOVEM.L %D1-%D5/%A0,-(%A7) | DECODE AS A HEX NUMBER
 GETN20:  CLR.W   %D4            | D4 = FLAG FOR CHARACTER HIT
          CLR.L   %D1            | D1 = TEMP RESULTS
          CMPI.B  #BLANK,(%A5)
-         BEQ     GETN80         | FIRST CHAR SPACE; ERROR
+         BEQ.S   GETN80         | FIRST CHAR SPACE; ERROR
 
 GETN30:  CMP.L   %A6,%A5        | SEE IF AT END OF BUFFER
-         BEQ     GETN90
+         BEQ.S   GETN90
          CLR.L   %D0
          MOVE.B  (%A5)+,%D0     | D0 = CHARACTER
 
@@ -4015,7 +4015,7 @@ GETN40:  MOVE.B  (%A0)+,%D5     | D5 = TERMINATION CHAR
          BEQ.S   GETN50         | NOT TERM.CHAR
          CMP.B   %D5,%D0
          BEQ.S   GETN85         | FOUND TERMINATION CHAR; EXIT
-         BRA     GETN40
+         BRA.S   GETN40
 
 GETN50:  CMPI.B  #'%',%D0       | SEE IF FLAGGED AS BINARY
          BNE.S   GETN60
@@ -4024,22 +4024,22 @@ GETN55:  TST.W   %D4            | ANYTHING ENTERED
          BNE.S   GETN80         | CONFLICT
 
 GETN57:  MOVEQ   #-1,%D4        | SET DATA ENTERED FLAG
-         BRA     GETN30
+         BRA.S   GETN30
 
 GETN60:  CMPI.B  #'@',%D0       | SEE IF FLAGGED AS OCTAL
          BNE.S   GETN65
          MOVEQ   #8,%D3         | BASE IS OCTAL
-         BRA     GETN55
+         BRA.S   GETN55
 
 GETN65:  CMPI.B  #'&',%D0       | SEE IF FLAGGED AS DECIMAL
          BNE.S   GETN70
          MOVEQ   #10,%D3        | BASE IS DECIMAL
-         BRA     GETN55
+         BRA.S   GETN55
 
 GETN70:  CMPI.B  #'$',%D0       | SEE IF FLAGGED AS HEX
          BNE.S   GETN75
          MOVEQ   #16,%D3        | BASE IS 16
-         BRA     GETN55
+         BRA.S   GETN55
 
 GETN75:  SUBI.B  #0x30,%D0
          BLT.S   GETN80         | LESS THAN ZERO
@@ -4063,7 +4063,7 @@ GETN77:  CMP.W   %D3,%D0        | IS INPUT LARGER THAN BASE
          ADD.L   %D2,%D1        | PUT IT BACK TOGETHER
          BVS.S   GETN80         | OVERFLOW?
          ADD.L   %D0,%D1        | ADD IN NEW STUFF
-         BVC     GETN57
+         BVC.S   GETN57
 GETN80:  MOVEQ   #-1,%D0        | ERROR RETURN (BNE)
          BRA.S   GETN95
 
@@ -4183,7 +4183,7 @@ OUTCH2:  TST.L   %D2            | SEE IF ANY PADDS TO BE SEND
          CLR.L   %D0            | 0=NULL CHAR TO BE SEND
 OUTCH3:  BSR     OUTCH          | SEND A NULL
          SUBQ.L  #1,%D2         | LOOP AROUND
-         BNE     OUTCH3
+         BNE.S   OUTCH3
 OUTCHRTS:RTS                    | END OF OUTCH ROUTINE
 
 *
@@ -4191,6 +4191,7 @@ OUTCHRTS:RTS                    | END OF OUTCH ROUTINE
 *
 
 GETSER1: LEA     SER1,%A0       | DEFAULT
+         ALTSER1 = 0x0624
          TST.L   ALTSER1        | IF ALTERNATE IS ZERO
          BEQ.S   RETURN         | THEN RETURN
          MOVE.L  ALTSER1,%A0    | ELSE USE ALTERNATE SERIAL PORT 1
@@ -4202,8 +4203,9 @@ RETURN:  RTS                    | RETURN (USED FROM A COUPLE OF PLACES)
 *
 
 GETSER2: LEA     SER2,%A0       | DEFAULT SERIAL PORT 2
+         ALTSER2 = 0x0628
          TST.L   ALTSER2        | IF ALTERNATE IS ZERO
-         BEQ     RETURN         | THEN RETURN
+         BEQ.S   RETURN         | THEN RETURN
          MOVE.L  ALTSER2,%A0    | ELSE USE ALTERNATE SERIAL PORT 2
          RTS                    | RETURN
 *
@@ -4232,7 +4234,7 @@ PORTIN1N:MOVEM.L %D0-%D4/%D7/%A0-%A2,-(%A7)
 PORTIN10:MOVEM.L %D0-%D4/%D7/%A0-%A2,-(%A7)
 PORTIN1V:CLR.L   %D7            | "Auto Line Feed" Entry point.
 PORTIN1W:CLR.L   %D3            | FLAG AS PORT1
-         BSR     GETSER1        | MOVE ADDRESS INTO A0
+         BSR.S   GETSER1        | MOVE ADDRESS INTO A0
 
 READBUF: BSR     INCHNE         | GO GET SOME DATA  (NO ECHO)
          TST.B   %D0            | CHECK FOR NULLS
@@ -4257,20 +4259,20 @@ CHKCTLH: CMPI.B  #CTLH,%D0      | CTRL-H? (Backspace)
          CMPI.B  #DEL,%D0       | DEL?    (Also a Backspace)
          BNE.S   CHKCTLD        | No....  Then go check for CTRL D
 BKSPACE: CMP.L   %A5,%A6        | Yes...  Usually need an extra "Backspace"
-         BEQ     READBUF        | If at start of buffer, don"t back up any more.
+         BEQ.S   READBUF        | If at start of buffer, don"t back up any more.
          MOVE.B  #CTLH,%D0      | Backspace cursor.
          BSR     OUTCH1
          BRA.S   BLANKIT        | Bypass check for start of buffer
 
 BS4CTLH: .align  2              | CTL-H already backed up 1 character.
          CMP.L   %A5,%A6        | At beginning of buffer?
-         BEQ     READBUF        | Yes...  Then don"t back up any more.
+         BEQ.S   READBUF        | Yes...  Then don"t back up any more.
 BLANKIT: MOVEQ   #0x20,%D0      | Now blank out previous character.
          BSR     OUTCH1
          MOVE.B  -(%A6),%D0     | Remove last character from buffer.
          MOVE.B  #CTLH,%D0      | Backup cursor again.
          BSR     OUTCH1
-         BRA     READBUF        | Go get next character.
+         BRA.S   READBUF        | Go get next character.
 
 CHKCTLD: CMPI.B  #CTLD,%D0      | CTL D?  (REPRINT)
          BNE.S   CHKCR          | No....  Then go check if a "CR".
@@ -4281,14 +4283,14 @@ CHKCTLD: CMPI.B  #CTLD,%D0      | CTL D?  (REPRINT)
          MOVE.L  %A5,-(%A7)     | SAVE ON STACK FOR A MOMENT
          BSR     OUTPUT         | GO PRINT BUFFER
          MOVE.L  (%A7)+,%A5     | GET BACK FROM STACK
-         BRA     READBUF
+         BRA.S   READBUF
 
 CHARSAVE:MOVE.B  %D0,(%A6)+     | SAVE DATA INTO BUFFER
          MOVE.L  %A6,%D1        | CALCULATE ROOM USED
          SUB.L   %A5,%D1        | DONT USE MORE THAN "BUFFSIZE"
          CMPI.W  #BUFFSIZE,%D1
          BMI     READBUF        | We're OK, go get next character.
-         BRA     BKSPACE        | If not, handle as though a "CNTL-H"
+         BRA.S   BKSPACE        | If not, handle as though a "CNTL-H"
 
 CHKCR:   CMPI.B  #CR,%D0        | CR?  (End of command line).
          BNE.S   CHARSAVE       | No.. Then go store this character.
@@ -4339,7 +4341,7 @@ LIST:    CMP.L   %A6,%A5        | SEE IF AT END OF BUFFER
 *
 LIST1:   MOVE.B  (%A5)+,%D0     | GRAB BYTE
          BSR.S   CHRPRINT       | PRINT CHAR
-         BRA     LIST
+         BRA.S   LIST
 
 * OUTPUT CHAR IN %D0 TO PRINTER
 CHRPRINT:MOVEM.L %D0/%D1/%D7/%A0/%A5/%A6,-(%A7) | SAVE SOME REGISTERS
@@ -4373,6 +4375,7 @@ LIST3:   BSR     CHKBRK         | CHECK FOR BREAK
          ANDI.B  #3,%D0         | PAPER OUT? DESELECTED?
          SUBQ.B  #1,%D0
          BEQ.S   LIST5
+         CRTPNT = 0x0652
          MOVE.W  CRTPNT,%D7
          CLR.W   CRTPNT
          LEA     MSG007(%PC),%A5
@@ -4385,9 +4388,9 @@ LERR1:   BSR.S   CHKBRK
          MOVE.B  PBDATA(%A0),%D0
          ANDI.B  #3,%D0
          SUBQ.B  #1,%D0
-         BNE     LERR1          | PRINTER NOT READY
+         BNE.S   LERR1          | PRINTER NOT READY
          MOVE.W  %D7,CRTPNT     | RESTORE POSSIBLE "PA" SWITCH
-         BRA     LIST2          | TRY AGAIN
+         BRA.S   LIST2          | TRY AGAIN
 
 LIST5:   BTST.B  #0,PSTATUS(%A0) | ACKNOWLEDGE?
          BEQ.S   LIST3
@@ -4395,11 +4398,9 @@ LIST5:   BTST.B  #0,PSTATUS(%A0) | ACKNOWLEDGE?
          MOVEM.L (%A7)+,%D0/%D1/%D7/%A0/%A5/%A6 | RESTORE REGISTERS
          RTS
 
-MSG007:  DC.B    CR,LF,"PRINTER NOT READY",CR,LF,EOT
-
-
-
-
+MSG007:  DC.B    CR,LF
+         .ascii  "PRINTER NOT READY"
+         DC.B    CR,LF,EOT
 
          .align  2
 
@@ -4429,7 +4430,7 @@ OUTCH21: .align  2
 CTLWH:   BSR.S   CHKBRK         | CHECK FOR BREAK
          MOVE.B  (%A0),%D1      | READ STATUS
          ANDI.B  #1,%D1
-         BEQ     CTLWH          | WAIT FOR ANY CHAR TO CONTINUE
+         BEQ.S   CTLWH          | WAIT FOR ANY CHAR TO CONTINUE
 CTLW9:   RTS
 *
 *   CHECK FOR BREAK ON PORT #1
@@ -4453,10 +4454,10 @@ BREAK1:  BTST.B  #1,(%A0)       | CHECK IF "TRANSMIT READY"
          MOVE.B  2(%A0),%D0
 
          BTST.B  #4,(%A0)       | SEE IF BREAK BUTTON RELEASED
-         BNE     BREAK2         | NO... KEEP LOOPING
+         BNE.S   BREAK2         | NO... KEEP LOOPING
          RTS
 
-BREAK:   BSR     BREAK2
+BREAK:   BSR.S   BREAK2
          LEA     MSG013(%PC),%A5 | MSG:  "BREAK"
 
 BREAK79: BSR     FIXDCRLF
@@ -4520,7 +4521,7 @@ TAPEO2:  MOVEP.L %D1,0x25(%A1) | SET TIMER PRELOAD REGISTER
          BCLR.B  #1,0x19(%A1)  | SEND 0 TO TAPE
          BSET.B  #0,0x21(%A1)  | START TIMER
          ASL.B   #1,%D0        | SENT 8 BITS?
-         BNE     TAPEO1        | NO. CONTINUE
+         BNE.S   TAPEO1        | NO. CONTINUE
          RTS
 *
 * WAITS UNTIL PROGRAMMED TIME DELAY HAS ELAPSED
@@ -4543,7 +4544,7 @@ FAULTSER:MOVEM.L %D0/%A0,-(%A7) | FREE UP SOME WORKING REGISTERS
 *  LONGEST TIME FOR TWO CHARACTERS; 110 BAUD, 16MHZ NO WAIT STATES
          MOVE.L  #50000,%D0     | DELAY A WHILE
 FAULTAC4:SUBQ.L  #1,%D0         | LOOP AROUND
-         BNE     FAULTAC4
+         BNE.S   FAULTAC4
 
          BSR     GETSER1        | MOVE ADDRESS INTO A0
          MOVE.B  (%A0),%D0      | READ STATUS
@@ -4570,7 +4571,7 @@ INITSER: MOVEM.L %D0/%A0,-(%A7) | FREE UP SOME WORKING REGISTERS
 *  LONGEST TIME FOR TWO CHARACTERS; 110 BAUD, 16MHZ NO WAIT STATES
          MOVE.L  #50000,%D0     | DELAY A WHILE
 INITAC3: SUBQ.L  #1,%D0         | LOOP AROUND
-         BNE     INITAC3
+         BNE.S   INITAC3
 
          BSR     GETSER1        | MOVE ADDRESS INTO A0
          MOVE.B  #RESET,(%A0)   | MASTER RESET
@@ -4622,7 +4623,7 @@ PORT2100:BSR.S   P2READY
          BEQ.S   PORT2120       | PORT2 DATA IN NOT-READY
 
          BSR.S   RES            | READ/ECHO/STORE CHAR
-         BRA     PORT2100
+         BRA.S   PORT2100
 
 PORT2120:MOVEQ   #1,%D3         | D3 = MLS TIMER (ONE TICK)
 PORT2130:BSR.S   P2READY
@@ -4632,26 +4633,26 @@ PORT2130:BSR.S   P2READY
          BMI.S   PORT2300       | SECOND TIME OUT
 
          SUBQ.L  #1,%D3
-         BNE     PORT2130       | MLS TIMER
+         BNE.S   PORT2130       | MLS TIMER
 
 PORT2140:MOVE.B  XONOFF,%D0
          BEQ.S   PORT2150       | NULL; IGNORE READER ON
          MOVE.B  (%A3),%D1
          ANDI.B  #2,%D1
-         BEQ     PORT2120       | PORT2 DATA OUT NOT-READY
+         BEQ.S   PORT2120       | PORT2 DATA OUT NOT-READY
          MOVE.B  %D0,2(%A3)     | SEND START READER CHAR
 PORT2150:
 
          MOVE.L  #STIME,%D3     | D3 = 100 MLS @ 8MHZ
-         BRA     PORT2130
+         BRA.S   PORT2130
 
 PORT2250:BSR.S   P2READY
          BEQ.S   PORT2260      | PORT2 DATA IN NOT-READY
          BSR.S   RES           | READ/ECHO/STORE CHAR
 
 PORT2260:SUBQ.L  #1,%D3
-         BMI     PORT2140      | CHARACTER TIME OUT
-         BRA     PORT2250
+         BMI.S   PORT2140      | CHARACTER TIME OUT
+         BRA.S   PORT2250
 
 PORT2300:LEA     MSG030(%PC),%A5 | TIMEOUT ERROR
          BRA     BREAK79
@@ -4694,7 +4695,7 @@ RES150:  RTS
 
 
 RES190:  CMP.L   %A5,%A6
-         BEQ     RES150        | NULL RECORD; IGNORE
+         BEQ.S   RES150        | NULL RECORD; IGNORE
 
          ADDQ.L  #4,%A7        | TRIM STACK
 
@@ -4702,7 +4703,7 @@ RES190:  CMP.L   %A5,%A6
          BEQ.S   RES195        | XOFF = NULL CHAR; IGNORE
 RES194:  MOVE.B  (%A3),%D1
          ANDI.B  #2,%D1
-         BEQ     RES194        | PORT2 DATA OUT NOT-READY
+         BEQ.S   RES194        | PORT2 DATA OUT NOT-READY
          MOVE.B  %D0,2(%A3)    | STOP READER
 RES195:
 
@@ -4777,7 +4778,7 @@ TAPEIN53:CMPI.B  #0x20,%D1
          BPL.S   TAPEIN50       | FULL
          ADDQ.L  #1,%A6         | INCREMENT BUFFER POINTER
 
-TAPEIN50:BSR     TAPEIN20       | GET ONE CHARACTER FROM TAPE
+TAPEIN50:BSR.S   TAPEIN20       | GET ONE CHARACTER FROM TAPE
 TAPEIN51:ANDI.B  #0x7F,%D1      | DROP PARITY BIT
          TST.W   ECHOPT1        | SEE IF ECHO ON
          BEQ.S   TAPEIN52
@@ -4858,12 +4859,12 @@ EV21:    BSR.S   GETFIELD       | GET NUMBER
 EV15:    MOVE.B  (%A5)+,%D1     | D1 = TERMINATING CHAR
          CLR.L   %D0            | D0 = NEXT NUMBER (=0 1ST TIME)
          CMPI.B  #'+',%D1
-         BEQ     EV21           | PLUS
+         BEQ.S   EV21           | PLUS
          CMPI.B  #'-',%D1
          BNE.S   EV39           | NOT MINUS
          BSR.S   GETFIELD       | GET NEXT NUMBER
          SUB.L   %D0,%D7
-         BRA     EV15
+         BRA.S   EV15
 
 EV39:    MOVE.L  %D7,%D0        | D0 = VALUE BUILT
          SUBQ.L  #1,%A5         | A5 = CHAR AFTER EXPRESSION
@@ -4937,15 +4938,15 @@ GETREGA: CLR.L   %D1
          MOVE.B  #8,%D1
          CMPI.B  #'A',(%A5)+
          BNE.S   ER1
-         BRA     GET41
+         BRA.S   GET41
 
-GETREGAD:CLR     D1
+GETREGAD:CLR     %D1
          MOVE.B  (%A5)+,%D0
          CMPI.B  #'D',%D0
-         BEQ     GET41
+         BEQ.S   GET41
          MOVE.B  #8,%D1
          CMPI.B  #'A',%D0
-         BEQ     GET41
+         BEQ.S   GET41
 ER1:     BRA     ER
 
 EADA:    MOVE.W  #0x1FD,%D7     | DATA ALTERABLE ONLY
@@ -5001,7 +5002,7 @@ EA:      .align  2
 * IMMEDIATE MODE
 
          BTST    #11,%D7
-         BEQ     ER1
+         BEQ.S   ER1
 
          MOVE.B  #0x3C,%D6      | D6 = MODE  111100
          ADDQ.L  #1,%A5
@@ -5015,7 +5016,7 @@ EA:      .align  2
          MOVE.W  TLENGTH(%A1),%D0
          BEQ.S   EA0635         | .BYTE
 
-         TST.B   D0
+         TST.B   %D0
          BMI.S   EA0637         | .LONG
 
 EA0633:  BSR     EA16BIT        | .WORD     -32K TO +64K
@@ -5025,8 +5026,8 @@ EA0634:  MOVE.W  %D5,(%A4,%D3)
          RTS
 
 EA0635:  BSR     EA8BIT         | -127 TO +255
-         BNE     ER1
-         BRA     EA0634
+         BNE.S   ER1
+         BRA.S   EA0634
 
 EA0637:  MOVE.L  %D5,(%A4,%D3)
          ADDQ.B  #4,TNB(%A1)
@@ -5110,7 +5111,7 @@ EA34:    RTS
 EA35:    ORI.W   #0x10,%D6      | MODE = 010...   (A@)
 
          BTST    #2,%D7
-         BNE     EA34           | MODE ALLOWED
+         BNE.S   EA34           | MODE ALLOWED
 ER3:     BRA     ER             | MODE NOT ALLOWED
 
 * POSSIBLE
@@ -5139,16 +5140,16 @@ EA41:    BSR     EV             | EVALUATE EXPRESSION
 
 EA4102:  MOVE.L  %D5,%D0
          BPL.S   EA4105         | POSITIVE NUMBER
-         NOT.L   D0
+         NOT.L   %D0
 EA4105:  ANDI.W  #0x8000,%D0
-         TST.L   D0
+         TST.L   %D0
          BNE.S   EA4135         | .LONG
 
 *  <DATA>.W
          BTST    #7,%D7
          BNE.S   EA4127         | SHORT ALLOWED
          BTST    #15,%D7
-         BEQ     ER3            | MODE NOT ALLOWED
+         BEQ.S   ER3            | MODE NOT ALLOWED
          BRA.S   EA4135         | SPECIAL CASE (JMP.L)
 
 EA4127:  ORI.W   #0x38,%D6      | EA = ABSOULTE SHORT
@@ -5158,7 +5159,7 @@ EA4127:  ORI.W   #0x38,%D6      | EA = ABSOULTE SHORT
          RTS
 
 *EA4134  CMPI.B  #'L',%D0
-*        BNE     ER3
+*        BNE.S   ER3
 
 *  <DATA>.L
 EA4135:  ORI.W   #0x39,%D6      | EA = ABSOLUTE LONG
@@ -5166,12 +5167,12 @@ EA4135:  ORI.W   #0x39,%D6      | EA = ABSOLUTE LONG
          ADDQ.B  #4,TNB(%A1)    | BYTE COUNT
          ADDQ.L  #4,%D3
          BTST    #8,%D7
-         BEQ     ER3            | MODE NOT ALLOWED
+         BEQ.S   ER3            | MODE NOT ALLOWED
          RTS
 
 EA4120:  ADDQ.L  #1,%A5
          CMPI.B  #'(',%D0
-         BNE     ER3
+         BNE.S   ER3
 
          CMPI.B  #'P',(%A5)
          BEQ     EA61
@@ -5262,26 +5263,26 @@ EA61:    ADDQ.L  #1,%A5
 *  <DATA>(%PC)
          ORI.W   #0x3A,%D6      | MODE = 111010
 
-         BSR     EA16BITS       | -32K TO +32K
+         BSR.S   EA16BITS       | -32K TO +32K
          MOVE.W  %D5,(%A4,%D3)
          ADDQ.B  #2,TNB(%A1)
          ADDQ.L  #2,%D3
 
          BTST    #9,%D7
-         BNE     EA5119E
+         BNE.S   EA5119E
 ER4:     BRA     ER
 
 *  <DATA>(PC----          PROGRAM COUNTER WITH INDEX
 EA71:    MOVE.W  #0x003B,%D6    | MODE = 111011
 
          CMPI.B  #',',%D0
-         BNE     ER4
+         BNE.S   ER4
 
          BTST    #10,%D7
-         BEQ     ER4            | MODE NOT ALLOWED
+         BEQ.S   ER4            | MODE NOT ALLOWED
 
          BSR.S   EA8BITS        | -128 TO +127
-         BNE     ER4
+         BNE.S   ER4
 
          ANDI.W  #0x00FF,%D5    | D5 = VALUE
          BSR     GETREGAD
@@ -5295,18 +5296,18 @@ EA71:    MOVE.W  #0x003B,%D6    | MODE = 111011
          BEQ.S   EA7115         | DEFAULT  .W
 
          CMPI.B  #'.',%D0
-         BNE     ER4
+         BNE.S   ER4
 
          MOVE.B  (%A5)+,%D0
          CMPI.B  #'W',%D0
          BEQ.S   EA7113
 
          CMPI.B  #'L',%D0
-         BNE     ER4
+         BNE.S   ER4
          ORI.W   #0x0800,%D5    | EXTENSION WORD W/L = .L
 
 EA7113:  CMPI.B  #')',(%A5)+
-         BNE     ER4            | NO CLOSING ")"
+         BNE.S   ER4            | NO CLOSING ")"
 
 EA7115:  MOVE.W  %D5,(%A4,%D3)
          ADDQ.B  #2,TNB(%A1)
@@ -5383,7 +5384,7 @@ TBLKEYS: .align  2              | INDEX
          ADR     ASL            |  7  ASL  LSL ROL ROXL
          ADR     DBCC           |  8  DBCC
          ADR     BCHG           |  9  BCHG
-         ADR     BRA            | 10  BRA  BSR  BCC
+         ADR     BRA.S          | 10  BRA.SBSR.SBCC
          ADR     BSET           | 11  BSET
          ADR     CHK            | 12  CHK  DIVS DIVU MILS MULU
          ADR     CLR            | 13  CLR NEG NEGX NOT TST
@@ -5613,7 +5614,7 @@ M300:    MOVE.B  #BLANK,(%A0)+   | SPACE FILL BUFFER
 
 M340:    BSR     GETCHARF       | GET PAST SPACES
          CMPI.B  #BLANK,%D0
-         BEQ     M340
+         BEQ.S   M340
 
          SUBQ.L  #1,%A5         | FORMAT OP-CODE
 M350:    BSR     GETCHARF
@@ -5634,7 +5635,7 @@ M350:    BSR     GETCHARF
          BNE     ERF
 
 M352:    CMPI.B  #BLANK,%D0
-         BNE     M350           | NOT SPACE CONTINUE
+         BNE.S   M350           | NOT SPACE CONTINUE
 
 * SEARCH OP-CODE TABLE
          LEA     TBLOPC(%PC),%A0 | A0 = PTR TO TABLE OF CODES
@@ -5646,18 +5647,18 @@ M415:    MOVE.B  (%A0)+,%D0     |  XXXXXXDD
          ANDI.B  #0x7F,%D0
          CMP.B   (%A2)+,%D0
          BNE.S   M420           | NON-MATCH
-         TST.W   D0
-         BPL     M415           | SIGN RESET; CONTINUE
+         TST.W   %D0
+         BPL.S   M415           | SIGN RESET; CONTINUE
          BRA.S   M430           | MATCH COMPLETE
 
 M420:    TST.W   %D0            | SEQUENCE TO NEXT CODE
          BMI.S   M426
 M424:    MOVE.B  (%A0)+,%D0
-         BPL     M424           | FINISH THIS OP-CODE
+         BPL.S   M424           | FINISH THIS OP-CODE
 M426:    ADDQ.L  #3,%A0         | ADJUST PTR TO TABLE
          LEA     TBLOPCE(%PC),%A2
          CMP.L   %A0,%A2
-         BNE     M410
+         BNE.S   M410
 
 M428:    MOVEQ   #FOC,%D7       | ERROR CODE
          BRA     ERDONE
@@ -5668,7 +5669,7 @@ M430:    MOVE.B  (%A2),%D0      | MUST TERMINATE OP-CODE
          CMPI.B  #BLANK,%D0     | WITH SPACE OR PERIOD
          BEQ.S   M432
          CMPI.B  #'.',%D0
-         BNE     M428           | ERROR
+         BNE.S   M428           | ERROR
 M432:
 
          CLR.L   %D0
@@ -5688,13 +5689,13 @@ M432:
          BTST    #6,%D1
          BEQ.S   M4324          | .W ALLOWED (.S NOT ALLOWED)
          CMPI.B  #'W',%D3
-         BEQ     M428           | .W NOT ALLOWED
+         BEQ.S   M428           | .W NOT ALLOWED
          CMPI.B  #'B',%D3
-         BEQ     M428           | .B NOT ALLOWED
+         BEQ.S   M428           | .B NOT ALLOWED
          BRA.S   M4326
 
 M4324:   CMPI.B  #'S',%D3
-         BEQ     M428           | .S NOT ALLOWED
+         BEQ.S   M428           | .S NOT ALLOWED
 M4326:
 
 * CALCULATE GOTO ADDRESS
@@ -5714,12 +5715,12 @@ M4326:
          MOVE.L  %A0,PTROP(%A1) |  POINTER TO OPERAND (FORMATED)
 M435:    BSR.S   GETCHARF       | D0 = CHAR
          CMPI.B  #BLANK,%D0
-         BEQ     M435           | SKIP SPACES
+         BEQ.S   M435           | SKIP SPACES
 
 M437:    MOVE.B  %D0,(%A0)+     | MOVE REST OF SOURCE LINE
          BSR.S   GETCHARF       | D0 = CHAR
          CMP.L   %A5,%A6
-         BPL     M437
+         BPL.S   M437
          MOVE.L  %A0,PTRBUFE(%A1) | POINTER TO END FORMATED SOURCE
          MOVE.L  %A0,%A6        | A6 = POINTER TO END OF SOURCE
 M440:
@@ -5753,7 +5754,7 @@ ERDONE:  CLR.L   %D6            | D6 = (ZERO) BYTE COUNT
          BRA.S   CMMD35
 
 CMMD2:   CMPI.B  #BLANK,(%A5)
-         BNE     ER             | OPERAND DID NOT END WITH SPACE
+         BNE.S   ER             | OPERAND DID NOT END WITH SPACE
 
 MCMMD2:  .align  2              | NO OPERAND SEQUENCE
          MOVE.W  %D2,(%A1)      | *D2,TDATA(A1)
@@ -5766,7 +5767,7 @@ MCMMD2:  .align  2              | NO OPERAND SEQUENCE
 FPR315:  MOVE.B  (%A2)+,%D0
          BSR     PNT2HX
          SUBQ.L  #1,%D3
-         BNE     FPR315         | MORE BYTES
+         BNE.S   FPR315         | MORE BYTES
 
          CLR.L   %D7            | RESET ERROR FLAG
 
@@ -5792,13 +5793,13 @@ MABCD:   .align  2              | (INDEX 0) ABCD SBCD
          TST.B   TLSPEC(%A1)
          BEQ.S   MABCD9         | DEFAULT SIZE = BYTE
          CMPI.W  #0x00,TLENGTH(%A1)
-         BNE     ER             | NOT .B
+         BNE.S   ER             | NOT .B
 MABCD9:
 
          MOVE.W  #0x11,%D7
          BSR     EA
 
-         BSR     COMMA
+         BSR.S   COMMA
 
          MOVE.L  %D6,%D0
          ANDI.W  #7,%D0
@@ -5815,12 +5816,12 @@ MABCD9:
          ANDI.W  #7,%D6
          ROR.W   #7,%D6
          OR.W    %D6,%D2
-         BRA     CMMD2
+         BRA.S   CMMD2
 
 MABCD55: BSR     GETREGD        | D@,D@
          ROR.W   #7,%D0
          OR.W    %D0,%D2
-CMMD2S10:BRA     CMMD2
+CMMD2S10:BRA.S   CMMD2
 
 
 MCMP:    .align  2              | (INDEX 34)
@@ -5873,7 +5874,7 @@ MCMP56:  MOVE.W  #0x0C00,%D2    | #<DATA>,<EA>      MASK = CMPI
 
          BSR     EADA
          OR.W    %D6,%D2
-CMMD2S11:BRA     CMMD2S10
+CMMD2S11:BRA.S   CMMD2S10
 
 COMMAS20:BRA     COMMA
 
@@ -5881,7 +5882,7 @@ MADD:    .align  2              | (INDEX 1)
          BSR     EAALL
          MOVE.L  %D6,%D4        | D4 = SOURCE MODE
 
-         BSR     COMMAS20
+         BSR.S   COMMAS20
 
          CMPI.B  #'A',(%A5)
          BEQ     MADDA21        | DESTINATION = A@
@@ -5902,7 +5903,7 @@ MADD:    .align  2              | (INDEX 1)
          OR.W    %D6,%D2
 
          OR.W    %D4,%D2
-         BRA     CMMD2S11
+         BRA.S   CMMD2S11
 
 MADD46:  .align  2              | D@,<EA>
          ORI.W   #0x100,%D2
@@ -5911,7 +5912,7 @@ MADD46:  .align  2              | D@,<EA>
          OR.W    %D4,%D2        | <EA> AS DESTINATION
 
          OR.W    %D6,%D2        | D@  AS SOURCE
-         BRA     CMMD2S11
+         BRA.S   CMMD2S11
 
 MADD56:  MOVE.L  %D2,%D0        | #<DATA>,<EA>
          MOVE.W  #0x0600,%D2    | MASK = ADDI
@@ -5925,18 +5926,18 @@ MADD58:
 
          BSR     EADA           | DATA ALTERABLE ONLY
          OR.W    %D6,%D2
-         BRA     CMMD2S11
+         BRA.S   CMMD2S11
 
 MADDI:   MOVE.L  PTROP(%A1),%A5 | (INDEX 3) CMPI
          BSR     FSIZE
 
          BSR     EAZ
 
-         BSR     COMMAS20
+         BSR.S   COMMAS20
 
          BSR     EADA           | DATA ALTERABLE ONLY
          OR.W    %D6,%D2
-         BRA     CMMD2S11
+         BRA.S   CMMD2S11
 
 *  SIZE =  BYTE, WORD, LONG
 *  #<DATA>,SR
@@ -5946,7 +5947,7 @@ MANDI:   .align  2              | (INDEX 28) ANDI EORI ORI
 
          BSR     EAZ
 
-         BSR     COMMAS20
+         BSR.S   COMMAS20
 
          CMPI.B  #'S',(%A5)
          BEQ.S   MANDI23
@@ -5986,7 +5987,7 @@ MADDQ:   .align  2              | (INDEX 4)
 
          BSR     GETIMM
 
-         TST.L   D0
+         TST.L   %D0
          BEQ     ER             | DATA = ZERO
          CMPI.B  #9,%D0
          BPL     ER             | VALUE TOO BIG
@@ -6087,7 +6088,7 @@ MAND90:  ANDI.W  #0xF000,%D2
          MOVE.W  #0x0000,%D2    | CHANGE TO "ORI"
 MAND91:  BRA     MANDI
 MAND97:  MOVE.W  #0x0200,%D2    | CHANGE TO "ADDI"
-         BRA     MAND91
+         BRA.S   MAND91
 
 MEOR:    BSR     FSIZE          | (INDEX 35)
 
@@ -6114,11 +6115,11 @@ A5300:   BSR     GETCHAR
          BNE.S   A5305
          MOVE.L  %D0,%D1
 A5305:   CMPI.B  #')',%D0
-         BEQ     A5TODEST
+         BEQ.S   A5TODEST
          CMPI.B  #',',%D0
-         BNE     A5300
+         BNE.S   A5300
          TST     D1
-         BNE     A5300
+         BNE.S   A5300
          RTS
 
 MASL:    .align  2              | (INDEX 7)
@@ -6157,7 +6158,7 @@ MSL200:  .align  2              | D@,D@
          ORI.W   #0x20,%D2
          SUBQ.L  #1,%A5
          BSR     GETREGD
-         BRA     MSL150
+         BRA.S   MSL150
 
 MSL300:  .align  2              | <EA>      SHIFT MEMORY
          SUBQ.L  #1,%A5
@@ -6209,7 +6210,7 @@ MB105:   BSR     COMMA
 ER2:     BRA     ER
 
 MB145:   TST.W   TLENGTH(%A1)
-         BNE     ER2            | NOT BYTE LENGTH
+         BNE.S   ER2            | NOT BYTE LENGTH
 
 MB185:   BRA     CMMD2
 
@@ -6217,25 +6218,25 @@ MB200:   BSR     GETREGD        | DYNAMIC
          ROR.W   #7,%D0
          OR.W    %D0,%D2
 
-         BRA     MB105
+         BRA.S   MB105
 
 MBSET:   CMPI.B  #'#',(%A5)     | (INDEX 11) BCLR BSET
-         BNE     MB200
+         BNE.S   MB200
 
          MOVE.W  #0x08C0,%D2
-         BRA     MB100
+         BRA.S   MB100
 
 MBCLR:   CMPI.B  #'#',(%A5)     | (INDEX 30)
-         BNE     MB200
+         BNE.S   MB200
 
          MOVE.W  #0x0880,%D2
-         BRA     MB100
+         BRA.S   MB100
 
 MBTST:   CMPI.B  #'#',(%A5)     | (INDEX 31)
-         BNE     MB200
+         BNE.S   MB200
 
          MOVE.W  #0x0800,%D2
-         BRA     MB100
+         BRA.S   MB100
 
 MDBCC:   .align  2              | (INDEX 8)
          BSR     GETREGD
@@ -6264,7 +6265,7 @@ EVER:    BRA     ER             | ERROR HANDLER
 MBRA23:  TST.B   TLSPEC(%A1)
          BEQ.S   MBRA27
          CMPI.W  #0x0040,TLENGTH(%A1)
-         BEQ     EVER           | .S SPECIFIED
+         BEQ.S   EVER           | .S SPECIFIED
 MBRA27:
 
          MOVE.L  %D4,%D5        | RESTORE D5
@@ -6275,15 +6276,15 @@ MBRA27:
 
 EVSR:    BSR     EV
          CMPI.B  #BLANK,(%A5)
-         BNE     EVER           | DID NOT TERMINATE WITH SPACE
+         BNE.S   EVER           | DID NOT TERMINATE WITH SPACE
 
          MOVE.L  %D0,%D5
          ASR.L   #1,%D0
-         BCS     EVER           | ODD VALUE
+         BCS.S   EVER           | ODD VALUE
          MOVE.L  PCOUNTER(%A1),%D4
          ADDQ.L  #2,%D4         | D4 = PC + 2
          SUB.L   %D4,%D5
-         BEQ     EVER           | ZERO; SPECIAL CASE ERROR
+         BEQ.S   EVER           | ZERO; SPECIAL CASE ERROR
          MOVE.L  %D5,%D4
          RTS
 
@@ -6342,7 +6343,7 @@ MEXG:    .align  2              | (INDEX 16)
 
 *  DX,AY  OR  AY,DX
          ORI.W   #0x88,%D2      | MODE
-         TST.B   D1
+         TST.B   %D1
          BNE.S   MEXG25
 
          EXG     %D0,%D4        | SWAP SOURCE & DESTINATION
@@ -6353,11 +6354,11 @@ MEXG25:  OR.W    %D0,%D2        | .......MMMMMYYY
          BRA     CMMD2
 
 MEXG35:  ORI.W   #0x0040,%D2    | OP-MODE
-         TST.B   D1
-         BEQ     MEXG25         | DX,DY
+         TST.B   %D1
+         BEQ.S   MEXG25         | DX,DY
 
          ORI.W   #0x0048,%D2    | AX,AY
-         BRA     MEXG25
+         BRA.S   MEXG25
 
 
 MEXT:    .align  2              | (INDEX 17)
@@ -6405,7 +6406,7 @@ MMM44:   .align  2
 * EVALUATE DESTINATION FIRST
 MMM46:   BSR     GETCHAR
          CMPI.B  #',',%D0       | FIND COMMA
-         BNE     MMM46
+         BNE.S   MMM46
 
          MOVE.W  #0x1F4,%D7     | MODES ALLOWED
          BSR     EA
@@ -6438,7 +6439,7 @@ RL333:   BSR     GETREGAD
          OR.B    %D0,%D1        | D1 = BIT POSITION
          MOVE.B  %D1,%D5        | D5 = LAST REGISTER ENTERED
          BSR.S   SETBIT
-         BRA     RL111
+         BRA.S   RL111
 
 RL444:   CMPI.B  #'-',%D0
          BNE.S   RL666
@@ -6460,14 +6461,14 @@ RL555:   ADDQ.L  #1,%D5
          MOVE.L  %D5,%D1
          BSR.S   SETBIT
          CMP.B   %D7,%D5
-         BMI     RL555
-         BRA     RL111
+         BMI.S   RL555
+         BRA.S   RL111
 
-RL666:   TST.B   D4
+RL666:   TST.B   %D4
          BPL     ER
          MOVE.B  #'/',%D4       | CONTROL = "/"
          SUBQ.L  #1,%A5
-         BRA     RL333
+         BRA.S   RL333
 
 SETBIT:  LEA     MTBL(%PC),%A0  | SET BIT IN CORRESPONDENCE MASK
          MOVE.L  %D2,%D0
@@ -6558,13 +6559,13 @@ SIZELONG:TST.B   TLSPEC(%A1)    | MUST BE .LONG
 SI201:   RTS
 
 SIZEWORD:CMPI.W  #0x0040,TLENGTH(%A1) | MUST BE .WORD
-         BEQ     SI201          | [RTS]
+         BEQ.S   SI201          | [RTS]
 ER10:    BRA     ER
 
 SIZEBYTE:TST.B   TLSPEC(%A1)
          BEQ.S   SI222          | DEFAULT SIZE OK
          TST.W   TLENGTH(%A1)
-         BNE     ER10
+         BNE.S   ER10
 SI222:   RTS
 
 MMOVE:   .align  2              | (INDEX 21)
@@ -6573,29 +6574,29 @@ MMOVE:   .align  2              | (INDEX 21)
          MOVE.W  #0x40C0,%D2    | SR,<EA>
          ADDQ.L  #1,%A5
          CMPI.B  #'R',(%A5)+
-         BNE     ER10
+         BNE.S   ER10
 
          BSR     COMMA
 
          BSR     EADA           | DATA ALTERABLE ONLY (DESTINATION)
 
 MM315:   OR.W    %D6,%D2
-         BSR     SIZEWORD
+         BSR.S   SIZEWORD
          BRA     CMMD2
 
 MMM40:   CMPI.B  #'U',(%A5)
          BNE.S   MMM50
          ADDQ.L  #1,%A5
          CMPI.B  #'S',(%A5)+
-         BNE     ER10
+         BNE.S   ER10
          CMPI.B  #'P',(%A5)+
-         BNE     ER10
+         BNE.S   ER10
 
          BSR     COMMA
 
          MOVE.W  #0x4E68,%D2    | USP,A@
          BSR     GETREGA
-         BRA     MMQ20
+         BRA.S   MMQ20
 
 * GET EXCEPTIONS FROM DESTINATION
 MMM50:   .align  2
@@ -6606,9 +6607,9 @@ MMM50:   .align  2
          CMPI.B  #'C',%D0
          BNE.S   MMM60
          CMPI.B  #'C',(%A5)+
-         BNE     ER10
+         BNE.S   ER10
          CMPI.B  #'R',(%A5)+
-         BNE     ER10
+         BNE.S   ER10
          MOVE.W  #0x44C0,%D2    | <EA>,CCR
 
 MM508:   MOVE.L  %A5,PENDOP(%A1) | SAVE POINTER
@@ -6616,14 +6617,14 @@ MM508:   MOVE.L  %A5,PENDOP(%A1) | SAVE POINTER
 
          BSR     EADADDR        | DATA ADDRESSING ONLY (SOURCE)
          MOVE.L  PENDOP(%A1),%A5
-         BRA     MM315
+         BRA.S   MM315
 
 MMM60:   CMPI.B  #'S',%D0
          BNE.S   MM70
          MOVE.W  #0x46C0,%D2    | <EA>,SR
          CMPI.B  #'R',(%A5)+
          BNE     ER
-         BRA     MM508
+         BRA.S   MM508
 
 MM70:    CMPI.B  #'U',%D0
          BNE.S   MM80
@@ -6703,7 +6704,7 @@ MMA225:
 
          MOVE.W  #0x0002,%D7    | A@ ONLY
          BSR     EA
-         BRA     MM825
+         BRA.S   MM825
 
 
 MJMP:    .align  2              | (INDEX 18)
@@ -6765,7 +6766,7 @@ MLINK:   BSR     GETREGA        | (INDEX 20)
 
          BSR     COMMA
 
-         BSR     GETIMM
+         BSR.S   GETIMM
          MOVE.L  %D0,%D5
          BSR     EA16BITS       | -32K TO +32K
          MOVE.W  %D0,TDATA+2(%A1)
@@ -6775,7 +6776,7 @@ MLINK:   BSR     GETREGA        | (INDEX 20)
 
 MSTOP:   .align  2              | (INDEX 23)
 * UNSIZED
-         BSR     GETIMM
+         BSR.S   GETIMM
          CMPI.L  #0x00010000,%D0
          BCC     ER
          MOVE.W  %D0,TDATA+2(%A1)
@@ -6783,7 +6784,7 @@ MSTOP:   .align  2              | (INDEX 23)
          BRA     CMMD2
 
 MTRAP:   .align  2              | (INDEX 25)
-         BSR     GETIMM
+         BSR.S   GETIMM
          CMPI.L  #16,%D0
          BCC     ER
          OR.W    %D0,%D2
@@ -6948,7 +6949,7 @@ IMMED65: MOVE.L  %D0,%D1        | D1 = XXXXXXXX........
          BNE     FERROR
 
 IMMED75: EXT.L   %D0
-         BRA     IMMED45
+         BRA.S   IMMED45
 
 *  BIT   5432109876543210
 *        ....RRRMMM......       | DESTINATION REGISTER MODE
@@ -7040,7 +7041,7 @@ FORMREG5:ANDI.B  #0x07,%D4
          RTS
 
 FORMREGD:MOVE.B  #'D',(%A6)+    | FORMAT D@
-         BRA     FORMREG5
+         BRA.S   FORMREG5
 
 *  BIT   5432109876543210
 *        ....DDD......DDD       | DATA REGISTERS
@@ -7048,12 +7049,12 @@ FORMREGD:MOVE.B  #'D',(%A6)+    | FORMAT D@
                                 | LONG
 FORM7:   .align  2              | EXG
          ROL.W   #7,%D4
-         BSR     FORMREGD
+         BSR.S   FORMREGD
 
          MOVE.B  %D5,(%A6)+     | COMMA SEPARATOR
 
          MOVE.W  (%A4),%D4
-         BSR     FORMREGD
+         BSR.S   FORMREGD
          BRA.S   CS13           | COMMON
 
 *  BIT   5432109876543210
@@ -7062,13 +7063,13 @@ FORM7:   .align  2              | EXG
                                 | LONG
 FORM8:   .align  2              | EXG
          ROL.W   #7,%D4
-         BSR     FORMREGA
+         BSR.S   FORMREGA
 
 FORM815: MOVE.B  #',',(%A6)+    | COMMA SEPARATOR
 
          MOVE.W  (%A4),%D4
-         BSR     FORMREGA
-CS13:    BRA     CS12           | COMMON
+         BSR.S   FORMREGA
+CS13:    BRA.S   CS12           | COMMON
 
 *  BIT   5432109876543210
 *        ....DDD.........       | DATA REGISTER
@@ -7077,8 +7078,8 @@ CS13:    BRA     CS12           | COMMON
                                 | LONG
 FORM9:   .align  2              | EXG
          ROL.W   #7,%D4
-         BSR     FORMREGD       | DATA REGISTER
-         BRA     FORM815
+         BSR.S   FORMREGD       | DATA REGISTER
+         BRA.S   FORM815
 
 EEA10:   BRA     EEA
 
@@ -7114,13 +7115,13 @@ FORM10EX:.align  2              | ADD  CMP  SUB
 FORM10E3:MOVE.B  #'.',(%A5)+
          MOVE.B  #'L',(%A5)+
 
-FORM10E4:BSR     EEA10
+FORM10E4:BSR.S   EEA10
 
          MOVE.B  %D5,(%A6)+     | STORE COMMA SEPARATOR
 
          MOVE.W  (%A4),%D4
          ROL.W   #7,%D4
-         BSR     FORMREGA       | <EA>,A@
+         BSR.S   FORMREGA       | <EA>,A@
          BRA.S   CS12           | COMMON
 
 FORM10E6:BTST.B  #0,(%A4)
@@ -7143,13 +7144,13 @@ FORM10:  .align  2              | AND  EOR  OR
 
 FORM103: MOVE.W  #0xFFD,%D7     | DATA ADDRESSING
 FORM104: BSR     FORMSIZE
-         BSR     EEA10          | <EA>,D@
+         BSR.S   EEA10          | <EA>,D@
 
          MOVE.B  %D5,(%A6)+     | COMMA SEPARATOR
 
          MOVE.B  (%A4),%D4
          LSR.B   #1,%D4
-         BSR     FORMREGD
+         BSR.S   FORMREGD
          BRA.S   CS12           | COMMON
 
 FORM105: BSR     FORMSIZE       | D@,<EA>
@@ -7161,14 +7162,14 @@ FORM105: BSR     FORMSIZE       | D@,<EA>
 
          MOVE.W  (%A4),%D4
          MOVE.W  #0x1FD,%D7     | ALTERABLE MEMORY ADDRESSING
-         BSR     EEA10
+         BSR.S   EEA10
 CS12:    BRA     COMMON
 
                                 | LONG
 *                               PEA     (JMP  JSR)
 FORM11:  MOVE.W  #0x7E4,%D7     | CONTROL ADDERSSING
-         BSR     EEA10
-         BRA     CS12           | COMMON
+         BSR.S   EEA10
+         BRA.S   CS12           | COMMON
 
                                 | LONG
 *                               | JMP  JSR
@@ -7182,7 +7183,7 @@ FORM112: CMPI.W  #0x39,%D0
          BNE.S   FORM114
          MOVE.B  #'.',(%A5)+    | PERIOD
          MOVE.B  #'L',(%A5)+    | L
-FORM114: BRA     FORM11
+FORM114: BRA.S   FORM11
 
 *  BIT   5432109876543210
 *        ....XXX.....0...       DATA DESTINATION REGISTER
@@ -7270,11 +7271,11 @@ IMOVEQ:  .align  2
 
          ROL.W   #7,%D4
          BSR     FORMREGD
-         BRA     CS11           | COMMON
+         BRA.S   CS11           | COMMON
 
 SCHR:    MOVE.B  %D0,(%A6)+     | OUTPUT STRING
          LSR.L   #8,%D0
-         BNE     SCHR           | MORE TO OUTPUT
+         BNE.S   SCHR           | MORE TO OUTPUT
          RTS
 
 * MOVE FROM SR  (STATUS REGISTER)
@@ -7282,17 +7283,17 @@ SCHR:    MOVE.B  %D0,(%A6)+     | OUTPUT STRING
                                 | LONG
 IMVFSR:  MOVE.L  #"\x2CRS\0",%D0   | SR,
 
-         BSR     SCHR
+         BSR.S   SCHR
          BSR     EEA            | DATA ALTERABLE
-         BRA     CS11           | COMMON
+         BRA.S   CS11           | COMMON
 
 * MOVE FROM USP (USER STACK POINTER)
 *
                                 | LONG
 IMVFUSP: MOVE.L  #"\x2cPSU",%D0    | USP,
-         BSR     SCHR
+         BSR.S   SCHR
          BSR     FORMREGA
-         BRA     CS11           | COMMON
+         BRA.S   CS11           | COMMON
 
 * MOVE TO SR (STATUS REGISTER)
 *
@@ -7300,15 +7301,15 @@ IMVFUSP: MOVE.L  #"\x2cPSU",%D0    | USP,
 IMVTSR:  MOVE.W  #0xFFD,%D7     | DATA ADDRESSING
          BSR     EEA
          MOVE.L  #"RS\2c\0",%D0   | ,SR
-IMVT44:  BSR     SCHR
-         BRA     CS11           | COMMON
+IMVT44:  BSR.S   SCHR
+         BRA.S   CS11           | COMMON
 
 * MOVE TO USP (USER STACK POINTER)
 *
                                 | LONG
 IMVTUSP: BSR     FORMREGA
          MOVE.L  #"PSU\x2c",%D0    | ,USP
-         BRA     IMVT44
+         BRA.S   IMVT44
 
 *  MOVE TO CCR (CONDITION CODE REGISTER)
 *
@@ -7316,7 +7317,7 @@ IMVTUSP: BSR     FORMREGA
 IMVTCCR: MOVE.W  #0xFFD,%D7     | DATA ADDRESSING
          BSR     EEA
          MOVE.L  #"RCC\X2C",%D0    | ,CCR
-         BRA     IMVT44
+         BRA.S   IMVT44
 
 *  BIT   5432109876543210
 *        0000...1..001...       FIXED
@@ -7357,7 +7358,7 @@ IMOVEP35:BSR.S   IMOVEP66       | $HHHH(A@),D@
          MOVE.B  (%A4),%D4
          LSR.B   #1,%D4
          BSR     FORMREGD
-         BRA     CS20           | COMMON4
+         BRA.S   CS20           | COMMON4
 
 IMOVEP66:MOVE.B  #"0x",(%A6)+   | FORMAT DISPLACEMENT
          MOVE.W  2(%A4),%D0
@@ -7376,7 +7377,7 @@ SCOMMON: BRA     COMMON         | NOP RESET RTE RTR RTS TRAPV
                                 | LONG
 ISCC:    BSR     ICCCC          | GET REST OF OP-CODE
          BSR     EEA            | DATA ALTERABLE
-         BRA     SCOMMON
+         BRA.S   SCOMMON
 
 
                                 | LONG
@@ -7400,9 +7401,9 @@ IDBCC:   .align  2              | DB--
 ICC:     .align  2              | B--
          BSR     ICCCC
 
-IBSR:    MOVE.B  #'$',(%A6)+    | BSR   BRA
+IBSR:    MOVE.B  #'$',(%A6)+    | BSR.S BRA
 
-         TST.B   D4
+         TST.B   %D4
          BEQ.S   ICC55          | 16 BIT DISPLACEMENT
 
          MOVE.B  #'.',(%A5)+
@@ -7418,13 +7419,13 @@ ICC35:   EXT.L   %D4            | SIGN-EXTENDED DISPLACEMENT
          BCS     FERROR         | ODD BOUNDRY DISPLACEMENT
 
          BSR     PNT6HX
-         BRA     SCOMMON
+         BRA.S   SCOMMON
 
 ICC55:   ADDQ.L  #2,%D3         | SIZE
          MOVE.W  2(%A4),%D4
          MOVE.B  #'.',(%A5)+
          MOVE.B  #'L',(%A5)+    | .L FOR 16 BIT DISPLACEMENT
-         BRA     ICC35
+         BRA.S   ICC35
 
                                 | LONG
 *                               | BCHG  BCLR  BSET  BTST
@@ -7436,7 +7437,7 @@ ISETD12: MOVE.B  %D5,(%A6)+     | COMMA SEPARATOR
 
          MOVE.W  (%A4),%D4
          BSR     EEA            | DATA ALTERABLE
-CS18:    BRA     SCOMMON
+CS18:    BRA.S   SCOMMON
 
                                 | LONG
 *                            BCHG  BCLR  BSET  BTST
@@ -7454,7 +7455,7 @@ ISETS:   .align  2              | STATIC BIT
          BNE     FERROR
          BSR     HEX2DEC        | DECIMAL
 
-         BRA     ISETD12
+         BRA.S   ISETD12
 
 *   BIT  5432109876543210
 *        ....XXX.........       IMMEDIATE COUNT/REGISTER
@@ -7501,7 +7502,7 @@ ISHIFT44:MOVE.B  %D5,(%A6)+     | COMMA SEPARATOR
 
          MOVE.W  (%A4),%D4
          BSR     FORMREGD
-CS17:    BRA     CS18           | COMMON
+CS17:    BRA.S   CS18           | COMMON
 
 ISHIFTM1:MOVE.B  #'.',(%A5)+    | PERIOD
          MOVE.B  #'W',(%A5)+    | .WORD
@@ -7511,7 +7512,7 @@ ISHIFTM1:MOVE.B  #'.',(%A5)+    | PERIOD
 
          MOVE.W  #0x1FC,%D7     | MEMORY ALTERABLE ADDRESSING
          BSR     EEA
-         BRA     CS17           | COMMON
+         BRA.S   CS17           | COMMON
 
 ICCCC:   MOVEQ   #0x0F,%D0      | APPEND CONDITION CODE
          AND.B   (%A4),%D0      | D0 = CCC
@@ -7650,7 +7651,7 @@ EA100:   MOVE.B  #'-',(%A6)+
          BSR     FORMREGA
          MOVE.B  #')',(%A6)+
          BTST    #4,%D7
-         BNE     EA011RTS
+         BNE.S   EA011RTS
 FE10:    BRA     FERROR         | THIS MODE NOT ALLOWED
 
 *  ENTER       %A4 = POINTER TO FIRST WORD
@@ -7662,19 +7663,19 @@ EEA:     .align  2
          MOVE.L  %D4,%D0
          LSR.W   #3,%D0
          ANDI.W  #0x7,%D0
-         BEQ     EA000
+         BEQ.S   EA000
 
          CMPI.B  #1,%D0
-         BEQ     EA001
+         BEQ.S   EA001
 
          CMPI.B  #2,%D0
-         BEQ     EA010
+         BEQ.S   EA010
 
          CMPI.B  #3,%D0
-         BEQ     EA011
+         BEQ.S   EA011
 
          CMPI.B  #4,%D0
-         BEQ     EA100
+         BEQ.S   EA100
 
          CMPI.B  #5,%D0
          BEQ.S   EA101
@@ -7695,11 +7696,11 @@ EEA:     .align  2
 * EA110            ADDRESS REGISTER INDIRECT WITH INDEX
 
          BTST    #6,%D7
-         BEQ     FE10           | FERROR  THIS MODE NOT ALLOWED
+         BEQ.S   FE10           | FERROR  THIS MODE NOT ALLOWED
 
          MOVE.W  (%A4,%D3),%D1
          ANDI.W  #0x0700,%D1
-         BNE     FE10           | FERROR  BITS 10-8 MUST BE ZERO
+         BNE.S   FE10           | FERROR  BITS 10-8 MUST BE ZERO
 
          MOVE.W  (%A4,%D3),%D0  | D0 = DISPLACEMENT
          EXT.W   %D0
@@ -7810,11 +7811,11 @@ EA1114:  CMPI.B  #3,%D4
 *        ........XXXXXXXX       DISPLACEMENT INTEGER
 *
          BTST    #10,%D7
-         BEQ     FE11           | FERROR  THIS MODE NOT ASLLOWED
+         BEQ.S   FE11           | FERROR  THIS MODE NOT ASLLOWED
 
          MOVE.W  (%A4,%D3),%D1
          ANDI.W  #0x0700,%D1
-         BNE     FE11           | FERROR;  BITS 10-8 MUST BE ZERO
+         BNE.S   FE11           | FERROR;  BITS 10-8 MUST BE ZERO
 
          MOVE.B  1(%A4,%D3),%D0 | 111100;   DESTINATION(PC,R@.X)
          EXT.W   %D0
@@ -7921,10 +7922,10 @@ MOVEMR33:MOVE.B  %D4,1(%A6)     | REG TYPE
          BRA.S   MOVEMR88
 
 MOVEMR44:CMPI.B  #',',(%A6)
-         BEQ     MOVEMR33       | COMMA SEPARATOR
+         BEQ.S   MOVEMR33       | COMMA SEPARATOR
 
          CMP.B   (%A6),%D7      | / SEPARATOR
-         BEQ     MOVEMR33
+         BEQ.S   MOVEMR33
 
          MOVE.B  %D4,1(%A6)     | REG TYPE
          MOVE.B  %D5,2(%A6)     | REG #
@@ -7944,7 +7945,7 @@ MOVEMR79:MOVE.B  %D7,(%A6)      | / SEPARATOR
 MOVEMR88:ADDQ.L  #1,%D5
          ADD.L   %D6,%D1        | D1 = BIT POSITION
          CMPI.B  #'8',%D5
-         BNE     MOVEMR11
+         BNE.S   MOVEMR11
 
          CMP.B   (%A6),%D0      | SPACE
          BEQ.S   MOVEMR94
@@ -7956,7 +7957,7 @@ MOVEMR88:ADDQ.L  #1,%D5
 
 MOVEMR94:MOVE.B  #'0',%D5       | RESET REG TO ZERO
          LSR.W   #8,%D4         | CHANGE REG TYPE
-         BNE     MOVEMR11       | MORE
+         BNE.S   MOVEMR11       | MORE
 
          MOVE.B  %D0,(%A6)      | SPACE
          RTS
@@ -7971,7 +7972,7 @@ DCODE68K:.align  2
          MOVE.L  %A3,%A6
 DEC311:  MOVE.B  #BLANK,(%A6)+  | SPACE FILL BUFFER
          SUBQ.L  #1,%D0
-         BNE     DEC311
+         BNE.S   DEC311
 
          MOVE.L  %A3,%A6        | FORMAT ADDRESS
          MOVE.L  HISPC(%A1),%D0
@@ -7986,7 +7987,7 @@ DEC311:  MOVE.B  #BLANK,(%A6)+  | SPACE FILL BUFFER
 DEC404:  CMP.W   (%A5)+,%D0
          BEQ.S   FE12           | FERROR;  ILLEGAL CODE
          CMP.L   %A6,%A5
-         BNE     DEC404
+         BNE.S   DEC404
 
 * LOOK FOR MATCH OF OP-CODE
 *
@@ -7998,8 +7999,8 @@ DEC411:  MOVE.W  (%A4),%D0      |  FIRST WORD
          BEQ.S   DEC425         | FOUND MATCH
          ADDQ.L  #2,%A5         | UPDATE POINTER
          CMP.L   %A6,%A5
-         BNE     DEC411         | MORE TABLE
-FE12:    BRA     FERROR         | ILLEGAL INSTRUCTION
+         BNE.S   DEC411         | MORE TABLE
+FE12:    BRA.S   FERROR         | ILLEGAL INSTRUCTION
 
 DEC425:  CLR.L   %D6
          MOVE.B  (%A5)+,%D6     | D6 = (GOTO OFFSET)/4
@@ -8014,9 +8015,9 @@ DEC425:  CLR.L   %D6
 DEC510:  TST     D7
          BEQ.S   DEC530         | AT INDEX
 DEC515:  TST.B   (%A0)+
-         BPL     DEC515         | MOVE THROUGH FIELD
+         BPL.S   DEC515         | MOVE THROUGH FIELD
          SUBQ.L  #1,%D7
-         BRA     DEC510
+         BRA.S   DEC510
 
 DEC530:  MOVEQ   #FOC,%D0
          LEA.L   (%A3,%D0),%A5  | A5 = STORE POINTER  OP-CODE
@@ -8024,7 +8025,7 @@ DEC535:  MOVE.B  (%A0)+,%D0
          BCLR    #7,%D0
          BNE.S   DEC537         | END OF MOVE
          MOVE.B  %D0,(%A5)+
-         BRA     DEC535
+         BRA.S   DEC535
 DEC537:  MOVE.B  %D0,(%A5)+
 
 * CALCULATE GOTO AND GO
@@ -8064,7 +8065,7 @@ COMMON35:MOVE.W  (%A4)+,%D0     | GET NEXT WORD OF DATA.
          ADDQ.L  #2,HISPC(%A1)  | ADJUST PROG COUNTER.
          BSR     PNT4HX         | FORMAT DATA. (A6)+
          SUBQ.B  #2,%D3
-         BNE     COMMON35
+         BNE.S   COMMON35
 
          MOVE.L  %A5,%A6        | A6 = RESTORE END POINTER
 
@@ -8086,7 +8087,7 @@ FERROR35:MOVE.B  (%A5)+,%D0
          CMPI.B  #EOT,%D0
          BEQ.S   FERROR39
          MOVE.B  %D0,(%A6)+
-         BRA     FERROR35
+         BRA.S   FERROR35
 FERROR39:.align  2
 
          MOVE.W  (%A4),%D0
@@ -8094,7 +8095,7 @@ FERROR39:.align  2
 
          MOVEQ   #2,%D3         | SIZE
 
-         BRA     COMMON
+         BRA.S   COMMON
 
 MSG111:  .ascii "DC.W    $"
          DC.B    EOT
@@ -8304,7 +8305,7 @@ T100:    MOVE.B  (%A1),%D1      | D1 = FUNCTION FROM TABLE
          BEQ.S   T400           | FOUND MATCH
 
          ADDQ.L  #4,%A1
-         BRA     T100
+         BRA.S   T100
 
 T400:    MOVE.L  (%A1),%D1      | FFAAAAAA
          ASL.L   #8,%D1         | AAAAAA..
@@ -8427,9 +8428,9 @@ F110:    BSR     GETSER1        | A0 = PORT1 ADDRESS
 
 F120:    BSR     OUTPUT         | OUTPUT STRING,CR,LF PORT1 (A5) (A6)
          MOVEQ   #CR,%D0
-         BSR     F100           | OUTPUT CHAR
+         BSR.S   F100           | OUTPUT CHAR
          MOVEQ   #LF,%D0
-         BSR     F100           | OUTPUT CHAR
+         BSR.S   F100           | OUTPUT CHAR
          RTS
 
 
