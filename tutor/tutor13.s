@@ -321,7 +321,6 @@ _AV48:   DS.L    1              | 48  $30
          DS.L    1              | 254  $FE            2ND
          DS.L    1              | 255  $FF VECTOR FOR 1ST IPC DISK CONTROLLER
 
-
 *  PSEUDO REGISTERS
 
 _REGPC:  DS.L    1              | USERS PROGRAM COUNTER
@@ -331,8 +330,6 @@ _REGS:   DS.L    8              | D REGISTERS
          DS.L    7              | A0 THROUGH A6 REGISTERS
 _REGA7:  DS.L    1              | A7 REGISTER
 _REGUS:  DS.L    1              | USER STACK
-
-
 
 ****************************************************************
 *              WORKING STORAGE                                 *
@@ -355,8 +352,6 @@ _TRACECNT:DS.L   1              | TRACE COUNTER (-1=TRACE 1 & RUN)
 _TRACEON: DS.W   1              | FLAG FOR TRACE ON
 _BPSTATUS:DS.W   1              | 1=PB ARE IN  0=ARE OUT OF MEMORY
 _ECHOPT1:DS.L    1              | ECHO FLAG TO PORT ONE
-
-
 
 * THE FOLLOWING MUST REMAIN AS IS
 *  User docomentation DEPENDS upon it!
@@ -415,11 +410,7 @@ _TAPENULS:DS.B   1              | NULLS FOR CASSETTE
 
 _CTLINK: DS.L    1              | POINTER TO FIRST TABLE
 
-
-
 _ENDHRAM: .align 2              | MUST START ON WORD BOUNDRY
-
-
 
 *********************
 * SYSTEM STACK AREA *
@@ -433,7 +424,6 @@ _SYSTACK: DS.W   1              | START OF STACK (ADDRESS DECREASES)
          DS.B    120            | EXTENDED AREA USED IF DISASSEMBLER
 
          .align  1              | LAST LOW MEMORY LOCATION USED + 1
-
 
 *-------------------------------------------------------------------------
 
@@ -451,21 +441,16 @@ PTRBUFE  =       0x0000001A     | DS.L    1              POINTER TO END OF FORMA
 LINK     =       0x0000001E     | DS.L    1              SAVE FOR UNLINK
 ESKE     =       0x00000022     | DS.B    0
 
-
 *DCODE68K
 *                                 OFFSET  -LOCVARSZ
 DDATA    =       0xFFFFFFF0     | DS.L    3
 HISPC    =       0xFFFFFFFC     | DS.L    1
-
 
 *LOAD
 *                                 OFFSET  -((BUFFSIZE/2)+4)
 CC       =       0xFFFFFFBC     | DS.L    1              CC (BYTE COUNT)
 ADDRESS  =       0xFFFFFFC0     | DS.L    1              ADDRESS + OFFSET
 LDATA    =       0xFFFFFFC4     | DS.B    1
-
-
-
 
 *-------------------------------------------------------------------------
 * File B         Init Vectors+Ram                                 05/29/82
@@ -477,7 +462,6 @@ FIRST:   DC.L    REGA7          | SUPERVISOR STACK
          START = 0x8146
          DC.L    START          | PROGRAM COUNTER
 V2:      BRA     TRACE
-
 
 **********************************
 * INITIALIZE HIGH RAM SUBROUTINE *
@@ -500,7 +484,6 @@ INIT:    MOVE.B  %D1,(%A0)+     | ZERO MEMORY
 
          RTS
 
-
 ****************************************************
 * SPECIAL HANDLING FOR BUS ERROR AND ADDRESS ERROR *
 ****************************************************
@@ -510,7 +493,6 @@ BERRMSG: MOVE.L  #0x42555320,0x30 | "BUS "
          BRA.S   VECTBE
 
 ADDRMSG: MOVE.L  #0x41444452,0x30 | "ADDR"
-
 
          BERRD = 0x04ca
 VECTBE:  MOVE.L  (%A7)+,BERRD
@@ -580,9 +562,6 @@ P2PHY2:  BSR     PNT8HX         | FORMAT ADDR2
 MSG019:  .ascii  "PHYSICAL ADDRESS="
          DC.B    EOT
 
-
-
-
 *************************************************************
 * -FIXDATA- SUBROUTINE...  MOVES MESSAGE POINTED TO BY (A5) *
 *                          INTO "BUFFER". EOT, ($04), ENDS  *
@@ -600,7 +579,6 @@ FIXDADD: CMPI.B  #EOT,(%A5)
 FIXD2:   LEA     BUFFER,%A5
          RTS
 
-
 ************************************************************
 * -FIXDCRLF- SUBROUTINE INSERTS A CARRIAGE RETURN AND LINE *
 *                       FEED IN FRONT OF THE TEXT, THEN    *
@@ -611,9 +589,6 @@ FIXD2:   LEA     BUFFER,%A5
 FIXDCRLF:LEA     BUFFER,%A6
          MOVE.W  #0x0D0A,(%A6)+   | CR,LF
          BRA.S   FIXDADD
-
-
-
 
 *-------------------------------------------------------------------------
 * File E         VERSAbug entry point                             01/08/81
@@ -630,7 +605,6 @@ INIT0:   MOVE.L  %A1,(%A0)+     | INITIALIZE VECTOR
          BMI.S   INIT0          | *
          RTS
 
-
 * SPECIAL ENTRY THAT DOES NOT CHANGE VECTORS
 
          REGSR = 0x00000404
@@ -644,7 +618,6 @@ START1S: MOVEM.W %D0,REGSR+2     | Assure good parity.
          SYSTACK = 0x0786
          LEA     SYSTACK,%A7
          BRA     START11
-
 
 ************************
 *    INITIALIZATION    *
@@ -665,7 +638,6 @@ START:   MOVEM.W %D0,REGSR+2    | Assure good parity
 
          BSR.S   INITVECT
 
-
 START11: MOVE.W  #0x2700,%SR     | MASK OFF INTERRUPTS
 
          MOVE.L  %USP,%A0
@@ -674,25 +646,20 @@ START11: MOVE.W  #0x2700,%SR     | MASK OFF INTERRUPTS
 
          BSR     INITHRAM       | ZERO (INITIALIZE) HIGH RAM
 
-
 * VECTMSG.SA
          BSR     INITVMSG
-
 
 * H.SA
          AV4 = 0x0010
          ADDR2MEM CHKBP,AV4     | ILLEGAL INSTRUCTION
 
-
 * TM.SA
          TMCHARS = 0x04ea
          MOVE.W  #0x1801,TMCHARS | CNTLX,CNTL/A
 
-
 * W.SA
          AV31 = 0x007c
          ADDR2MEM  ABORTB,AV31  | ABORT
-
 
 * Y.SA
          OUTPORT1 = 0x0630
@@ -716,7 +683,6 @@ START11: MOVE.W  #0x2700,%SR     | MASK OFF INTERRUPTS
          MOVE.B  #8,TAPENULS    | NULLS FOR CASSETTE
          PDIPORT = 0x064E
          MOVE.L  #PDI1,PDIPORT  | PRINTER
-
 
 *        INITIALIZE MC68230 PI/T
          MOVE.L  #PDI1,%A0       | BASE ADDRESS OF PI/T
@@ -860,17 +826,12 @@ NOCMD:   MOVEQ   #-4,%D3        | SET "NO" SWITCH
          MOVE.B  1(%A5),%D1     | MOVE CHAR #4
          BRA.S   DECODE21       | WHICH "NO" COMMAND?
 
-
 *-------------------------------------------------------------------------
 * File COMMANDS  Command list                                     06/20/82
-
 
 MSG001:  DC.B    CR,LF
          .ascii  "TUTOR  1.3 "
          DC.B    EOT            | "PROMPT"
-
-
-
 
 *******************************************************
 * C O P Y R I G H T . 1 9 8 1 . B Y . M O T O R O L A *
@@ -992,7 +953,6 @@ VECTI2:  MOVE.L  %A0,(%A1)+     | MOVE ADDRESS TO VECTOR
          BNE.S   VECTI2
          RTS
 
-
 *************************************************************************
 * STANDARD VECTOR "MESSAGE" HANDLING ROUTINE ($30 IS TEMP STORAGE AREA) *
 *************************************************************************
@@ -1097,9 +1057,6 @@ EVECT7:  BRA.S   EVECT
 *
 EVECT:   BRA     EVECTL
 
-
-
-
 *-------------------------------------------------------------------------
 * File BF        Block Fill command                               06/16/82
 
@@ -1137,9 +1094,6 @@ BFCMD11:
          CMP.L   %A0,%A1
          BCC.S   BFCMD11
          BRA     MACSBUG
-
-
-
 
 *-------------------------------------------------------------------------
 * File BM        BM (Block Move) Command                          11/27/81
@@ -1184,9 +1138,6 @@ BM132:   MOVE.B  -(%A3),-(%A2)
          BNE.S   BM132
 BM142:   BRA     MACSBUG
 
-
-
-
 *-------------------------------------------------------------------------
 * File BR        BR, GD, GT, TR, TT, PER Commands                 12/04/81
 
@@ -1206,7 +1157,6 @@ TCMDHOT: .align  2              | SPECIAL ENTRY FROM DECODE
 TCMD15:  MOVE.L  %D0,TRACECNT
          BRA.S   TRACE2
 
-
 *
 ** TT ** "TRACE TILL" COMMAND
 *
@@ -1222,13 +1172,11 @@ TTCMD:   LEA     SYNTAX(%PC),%A0
          MOVE.L  %D6,BPTILL      | 9TH BP
          MOVE.L  #0xFFFF,TRACECNT  | SET FOR A VERY LONG TIME
 
-
 TRACE2:  MOVE.W  #-1,TRACEON    | FOR DECODE OF NEXT COMMAND
 
          MOVE.L  REGPC,%D0
          BSR     PPHY           | DISPLAY START (PC) ADDRESS
          BRA     UNTRACE
-
 
 *
 *   ***GT***  RUN PROGRAM TO TEMP BREAKPOINT
@@ -1273,7 +1221,6 @@ GOCMD1:  MOVE.L  #-1,TRACECNT   | "FLAG" COUNTER AS SPECIAL
 
 GDCMD:   BSR.S   GOSET1         | "GO DIRECT" Command
          BRA     UNSTACK
-
 
 *   ***BR***  SET AND PRINT BREAKPOINTS
 
@@ -1382,9 +1329,6 @@ NOBR3:   MOVE.L  (%A0),%D1      | GET BREAKPOINT IN TABLE
 NOBR4:   CLR.L   (%A0)           | CLEAR THIS BREAKPOINT
          LEA     BCMD7(%PC),%A0  | WHERE TO GO IF NO PARAMETER
          BRA.S   NOBR1
-
-
-
 
 *-------------------------------------------------------------------------
 * File BS        BS (Block Search) Command                        11/27/81
@@ -1550,9 +1494,6 @@ BS365:   ADDQ.L  #1,%A3
          BCS     MACSBUG        | DONE
          BRA.S   BS323
 
-
-
-
 *-------------------------------------------------------------------------
 * File BT        BT (Block Test) command                          11/30/81
 
@@ -1582,9 +1523,6 @@ BTCMD:   BSR     MTSETUP        | PREPARE PARMS (FROM,TO/COUNT)
          BSR     PNT4HX
 
          BRA     MSG            | PRINT IT
-
-
-
 
 *-------------------------------------------------------------------------
 * File DC        DC (Data Conversion) Command                     12/10/81
@@ -1622,9 +1560,6 @@ NUMCON2: MOVE.B  #'$',(%A6)+
 NUMCON3: MOVE.B  #'&',(%A6)+
          BSR     HEX2DEC        | PUT VALUE IN BUFFER
          BRA     MSG            | GO PRINT IT
-
-
-
 
 *-------------------------------------------------------------------------
 * File DFDI      DF (Display registers) WITH disassembler         05/27/82
@@ -1743,9 +1678,6 @@ TDCC9:   MOVE.L  %D7,%D6        | DUPLICATE STUFF
          MOVE.B  #'.',%D7       | PUT IN PERIOD IF OFF
 TDCC91:  MOVE.B  %D7,(%A6)+     | PUT IN LETTER IF ON
          RTS
-
-
-
 
 *-------------------------------------------------------------------------
 * File DUMP      DU     Dump "S-Records"                          05/10/82
@@ -1884,9 +1816,6 @@ PNTSREC: ADD     #1,%D6         | ONE MORE BYTE (CHECKSUM)
          SUB.L   %A1,%A1        | CLEAR COUNTER OF BYTES PROCESSED
 PNTSRTS: RTS
 
-
-
-
 *-------------------------------------------------------------------------
 * File GETA      GET ADDRESS Subroutine                           12/01/81
 
@@ -1900,7 +1829,6 @@ PNTSRTS: RTS
 *
 *  RETURN:  D0 = ADDRESS
 
-
 * FORMATS HANDLED:
 *  1.  NUMBER        DEFAULTS TO HEX
 *  2.  $NUMBER       HEX
@@ -1912,7 +1840,6 @@ PNTSRTS: RTS
 *  8.  [NUMBER]      MEMORY INDIRECT
 *
 *   FORMATS 1,2,3,8  ADD OFFSET R0 UNLESS R1 - R7 SPECIFIED
-
 
 * WORK REGISTERS
 *  D4    VALUE BEING BUILT
@@ -2119,9 +2046,6 @@ GASRGN:  CLR.L   %D0
          MOVE.L  (%A0,%D0.W),%D1
          RTS
 
-
-
-
 *-------------------------------------------------------------------------
 * File H         Register save,Trace, Breakpoint                  03/03/82
 
@@ -2178,7 +2102,6 @@ TRACE:   MOVE.W  #0x2700,%SR     | MASK OFF INTERRUPTS
          MOVE.L  %A5,REGA7       | REFLECT ADJUSTMENTS IN PSUEDO STACK
 TRACE16: ANDI.W  #0x7FFF,REGSR+2  | RESET "T" (TRACE) BIT
 
-
          MOVE.L  TRACECNT,%D5
          BMI.S   TRACE39        | EXECUTING ONE-INSTRUCTION
          BEQ     ABORT335       | NOT TRACEING
@@ -2218,14 +2141,12 @@ TRACE03: BSR     TDISPLY        | DO TRACE DISPLAY
          BEQ     MACSBUG        | STOP WHEN ZERO
          BRA.S   UNTRACE        | CONTINUE WITH TRACE
 
-
 * END UP HERE AFTER BREAKPOINTING ONE INSTRUCTION
 * -- PUT BP BACK IN AND CONTINUE TO RUN
 
 TRACE39: CLR.L   TRACECNT
          BSR.S   SWAPIN         | PUT BP INTO USER'S MEMORY
          BRA.S   UNSTACK        | CONTINUE TO RUN
-
 
 UNTRACE: ORI.W   #0x8000,REGSR+2 | SET UP TRACE BIT!
          AV9 = 0x0024
@@ -2234,7 +2155,6 @@ UNTRACE: ORI.W   #0x8000,REGSR+2 | SET UP TRACE BIT!
 UNSTACK: MOVE.L  REGUS,%A1
          MOVE.L  %A1,%USP       | US = TARGET'S USER STACK
          MOVE.L  REGPC,%A2      | A2 = TARGET'S PC
-
 
          .align  2              | INSURE MEMORY AT LOCATION OF PC
          MOVE.W  (%A2),%D0      | * ADDR TRAP ERROR * IF NO MEMORY
@@ -2254,7 +2174,6 @@ UNSTACK: MOVE.L  REGUS,%A1
          MOVE.L  TEMP,%A7       | SS = TARGET'S
 
          RTE                    | GO BACK TO THE USER
-
 
 SWAPIN:  BSR.S   SWAPOUT        | MAKE SURE THEY ARE ALL OUT
 
@@ -2421,7 +2340,6 @@ MSG002:  .ascii  ".PC .SR .US .SS"
 *-------------------------------------------------------------------------
 * File HEX2DEC   HEX2DEC convert hex to decimal                   11/02/81
 
-
 *    CONVERT BINARY TO DECIMAL  REG  D0 PUT IN ( A6) BUFFER AS ASCII
 
 HEX2DEC: MOVEM.L %D1-%D4/%D6-%D7,-(%A7)   | SAVE REGISTERS
@@ -2467,9 +2385,6 @@ HX2DC5:  SUBQ.L  #1,%D6           | NEXT POWER
 HX2DC57: MOVE.B  #'0',(%A6)+      | PRINT AT LEST A ZERO
 HX2DC6:  MOVEM.L (%A7)+,%D1-%D4/%D6-%D7 | RESTORE REGISTERS
          RTS                      | END OF ROUTINE
-
-
-
 
 *-------------------------------------------------------------------------
 * File LOAD      LO & VE (Load & Verify) Commands.                02/22/82
@@ -2542,7 +2457,6 @@ READ08:  BSR     OUTPUT2        | SEND REST OF LINE(+CR) TO PORT
 READ09:  MOVE.B  %D5,ECHOPT1    | MOVE ECHO FLAG
          MOVE.L  OUTPORT1,OUTTO | SEND OUTPUT TO CONSOLE
 
-
 READ0:   LEA     SYSTACK,%A7    | FORCE STACK (FOR ERROR RECOVERY)
 
          LINK    %A4,#-((BUFFSIZE/2)+4) | CREATE BUFFER ON STACK
@@ -2599,7 +2513,6 @@ READ100: BSR.S   READHEX        | GET DATA BYTE
          BNE.S   READCKSM       | ERROR
 READ120:
 
-
 * STORE DATA (VERIFY) TO MEMORY
 
          MOVE.L  CC(%A4),%D3    | BYTE COUNT
@@ -2614,7 +2527,6 @@ READ130: MOVE.B  (%A2),(%A3)    | STORE DATA
          BNE     SETME          | DATA DID NOT STORE
          DBRA    %D3,READ130
 READ135: BRA     READ0
-
 
 ***     VERIFY
 
@@ -2702,7 +2614,6 @@ READS9:  CLR.L   %D0
          BSR.S   READHEX4       | GET ADDRESS
          BRA.S   READS800
 
-
 *-------------------------------------------------------------------------
 * File MDDI      MD[S] (Memory Display) Command                   06/16/82
 
@@ -2737,7 +2648,6 @@ PRINTMB: BNE     SYNTAX         | COMMAND SYNTAX ERROR
          BNE.S   PRINTMB
          MOVEQ   #-1,%D7        | DISASSEMBLE OPTION
 PRINTDI:
-
 
 * LOOK FOR "S" IN COMMAND
          MOVE.B  (%A5),%D0
@@ -2838,9 +2748,6 @@ PRINT9:  LEA     MSG001(%PC),%A5 | SET UP FOR PROMPT
          BEQ     PRINT3         | NOTHING ENTERED; DO 16 MORE LINES
          CLR.L   OUTTO
          BRA     DECODE6        | GO MAKE SURE 2ND DIGIT IS BLANK
-
-
-
 
 *-------------------------------------------------------------------------
 * File MMDI      Modify Memory command WITH asm/disasm            11/27/81
@@ -2947,7 +2854,6 @@ MMDI44:  MOVE.B  #BLANK,(%A6)+  | SPACES
          MOVE.B  #'?',(%A6)+    | ? ALLOW REINPUT
          BSR     OUTPUT
          BRA.S   MMDI31
-
 
 MCMD:    .align  2              | "M" Alias for "MM" Command
 MMCMD:   .align  2              | "MM" Command -Memory Modify-
@@ -3146,9 +3052,6 @@ MM95:    BSR     FIXDCRLF
 MM905:   LEA     MSGEOT(%PC),%A5
          BRA.S   MM95
 
-
-
-
 *-------------------------------------------------------------------------
 * File MS        Memory set command                               11/02/81
 
@@ -3257,9 +3160,6 @@ MTSETUP: .align  2
          ADDQ.L  #2,%A1          | ADJUST END ADDR
          RTS
 
-
-
-
 *-------------------------------------------------------------------------
 * File OF        OF & PERIOD Command                              12/18/81
 
@@ -3298,7 +3198,6 @@ PER3:    CMP.W   %D1,%D0
          LEA     FIRST(%PC),%A0  | A0 = Start of VERSAbug RO
          ADD.L   %D7,%A0         | Add offset
          JMP     (%A0)           | Now go to the calculated location
-
 
 ***************
 REGTBL:
@@ -3363,7 +3262,6 @@ SETRN:   LEA     OFFSET,%A4     | SET OFFSET
          CMPI.B  #'7',%D1
          BEQ     SYNTAX         | NOT ALLOWED TO CHANGE A7
 
-
 *  ROUTINE TO ENTER DATA FOR A SINGLE REGISTER
 *   A5-A6 ARE COMMAND BUFFER
 *   %D0 HAS REGISTER DIGIT %A4 HAS CLASS OFFSET
@@ -3414,7 +3312,6 @@ SETSR1:  BSR.S   PRINTR         | FIX UP TO PRINT
 
 SETSR15: .align  2
          RTS
-
 
 * SEE IF CHARACTER IS IN BUFFER
 
@@ -3496,9 +3393,6 @@ PNTREG1: MOVE.L  (%A4),%D0      | GET REG CONTENT
          ADDQ.L  #1,%D6         | BUMP REG#
          RTS
 
-
-
-
 *-------------------------------------------------------------------------
 * File PF        "PFCMD", Port format                             05/19/82
 
@@ -3542,7 +3436,6 @@ PFPT:    BSR     FIXDCRLF       | FORMAT FROM A5
          MOVE.B  1(%A1),%D0
          BSR     PNT2HX         | FORMAT DATA PORT 2
          RTS
-
 
 PFCMD1:  LEA     MD1CON,%A1
          LEA     MSG003(%PC),%A5
@@ -3661,9 +3554,6 @@ MTSTOR0:
 RAMERR:  MOVE.L  %D3,%A0        | RESTORE A0
          RTS                    | RETURN
 
-
-
-
 *-------------------------------------------------------------------------
 * File TM        TM  Transparent mode                             12/28/81
 
@@ -3757,7 +3647,6 @@ MSG012:  DC.B    LF,LF
          .align  2
 
 ABORTE:MOVE.L    #0x3f3f3f3f,0x30   | "????" UNKNOWN INTERRUPT
-
 
 *    SAVE REGISTERS AND PRINT VECTOR MSG
 *
@@ -4185,7 +4074,6 @@ GETSER1: LEA     SER1,%A0       | DEFAULT
          MOVE.L  ALTSER1,%A0    | ELSE USE ALTERNATE SERIAL PORT 1
 RETURN:  RTS                    | RETURN (USED FROM A COUPLE OF PLACES)
 
-
 *
 *   GET BASE ADDRESS OF SERIAL PORT 2 IN A0
 *
@@ -4291,10 +4179,6 @@ NOAUTOLF:.align  2
 
  MOVEM.L (%A7)+,%D0-%D4/%D7/%A0-%A2 | Restore Regs.
          RTS                    | RETURN TO CALLER
-
-
-
-
 
 *-------------------------------------------------------------------------
 * File Y         TUTOR     I/O Routine                            05/19/82
@@ -4455,8 +4339,6 @@ BREAK79: BSR     FIXDCRLF
 MSG013:  DC.B    LF,LF
          .ascii  "BREAK"
          DC.B    CR,LF,LF,EOT
-
-
 
          DC.B    0              | PAD BYTE
 
@@ -4681,7 +4563,6 @@ RES140:
          ADDQ.L  #1,%A6        | INCREMENT STORE POINTER
 RES150:  RTS
 
-
 RES190:  CMP.L   %A5,%A6
          BEQ.S   RES150        | NULL RECORD; IGNORE
 
@@ -4829,9 +4710,6 @@ PACMD:   MOVEQ   #-1,%D0        | ENTRY FOR "PA" (D0=-1[CRT & PRINT])
 NOPACMD: CLR.L   %D0            | D0 = ZEROS... "CRT" ONLY
 SETCRTPR:MOVE.W  %D0,CRTPNT     | SET THE "CRT" AND "PRINTER" SWITCH
          BRA     MACSBUG        | GO BE "READY"
-
-
-
 
 *-------------------------------------------------------------------------
 * File CODE68K   68K ONE LINE ASSEMBLER                           07/23/82
@@ -5332,7 +5210,6 @@ EA16BITS:
 EA16BITC:MOVE.L  #0x7FFF,%D1    | D1  <--  2^16-1.
          BRA.S   EAS            | GO TO THE COMMON TEST ROUTINE.
 
-
 EA8BIT:
          BSR.S   EA8BITC        | CHECK RANGE -128 TO 127.  IF INVALID,
          MOVE.L  %D5,%D1        | CHECK WHETHER THE HIGH 24 BITS ARE
@@ -5771,7 +5648,6 @@ CMMD35:  MOVEM.L (%A1),%D0-%D2  | D0-D2 = DATA   *TDATA(A1),D0-D2
 *                               | D6 = NUMBER OF BYTES ASSEMBLED
 *                               | D7 = ERROR FLAG (POSITION)
 
-
 *  SIZE = BYTE
 *    DY,DX
 *    -(AY),-(AX)
@@ -5809,7 +5685,6 @@ MABCD55: BSR     GETREGD        | D@,D@
          ROR.W   #7,%D0
          OR.W    %D0,%D2
 CMMD2S10:BRA.S   CMMD2
-
 
 MCMP:    .align  2              | (INDEX 34)
          BSR     EAALL
@@ -6347,7 +6222,6 @@ MEXG35:  ORI.W   #0x0040,%D2    | OP-MODE
          ORI.W   #0x0048,%D2    | AX,AY
          BRA.S   MEXG25
 
-
 MEXT:    .align  2              | (INDEX 17)
          TST.W   TLENGTH(%A1)
          BEQ     ER             | BYTE SIZE NOT ALLOWED
@@ -6385,7 +6259,6 @@ MMOVEM:  .align  2              | (INDEX 27)
 
          BSR.S   MMM48
          BRA     CMMD2
-
 
 *   <REGISTER LIST>,<EA>        | REGISTER TO MEMORY
 MMM44:   .align  2
@@ -6469,9 +6342,6 @@ RL30:    BSET    %D1,%D6
          RTS
 
 MTBL:    DC.B    15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0
-
-
-
 
 *   D@,<DATA>(A@)
 *   <DATA>(A@),D@
@@ -6693,7 +6563,6 @@ MMA225:
          BSR     EA
          BRA.S   MM825
 
-
 MJMP:    .align  2              | (INDEX 18)
          TST.B   TLSPEC(%A1)
          BEQ.S   MJMP32         | DEFAULT (ALLOW EITHER .S OR .L)
@@ -6723,7 +6592,6 @@ MLEA:    .align  2              | (INDEX 19)
          ROR.W   #7,%D0
          OR.W    %D0,%D2
          BRA     CMMD2
-
 
 * SIZE = LONG
 MPEA:    .align  2              | (INDEX 36)
@@ -6789,9 +6657,6 @@ MDC:     .align  2              | (INDEX 37) .W ONLY ALLOWED
          BSR     EA16BIT        | ONLY .W ALLOWED     -32K TO +64K
          MOVE.W  %D5,%D2
          BRA     CMMD2
-
-
-
 
 *-------------------------------------------------------------------------
 * File DCODE68K  68K ONE LINE DISASSEMBLER                        07/28/82
@@ -6967,7 +6832,6 @@ ILINK:   .align  2
          .align  4
 FORM1:   .align  2              | CLR  NEG  NEGX  NOT TST
          BSR     FORMSIZE
-
 
 *                               | NBCD TAS
 FORM1A:  BSR     EEA            | DATA ALTERABLE ONLY
@@ -7392,7 +7256,6 @@ SCOMMON: BRA     COMMON         | NOP RESET RTE RTR RTS TRAPV
 ISCC:    BSR     ICCCC          | GET REST OF OP-CODE
          BSR     EEA            | DATA ALTERABLE
          BRA.S   SCOMMON
-
 
          .align  4
 
@@ -8094,7 +7957,6 @@ COMMON35:MOVE.W  (%A4)+,%D0     | GET NEXT WORD OF DATA.
 
          RTS
 
-
 FERROR:  .align  2
 * ILLEGAL INSTRUCTION
 *
@@ -8120,7 +7982,6 @@ MSG111:  .ascii "DC.W    $"
 
 KI:      DC.W    0x4AFB         | KNOWN ILLEGAL CODES
 KIEND:   .align  2
-
 
 *  \1   MASK
 *  \2   OP-CODE PATTERN
@@ -8392,7 +8253,6 @@ T700:    .align  2              | 253 APPEND NEW TABLE
          ROR.L   #8,%D1         | FEAAAAAA
          MOVE.L  %D1,CTLINK
          RTS
-
 
 *  CREATE ENTRY TO FUNCTION/ADDRESS TABLE
 *    FFAAAAAA
