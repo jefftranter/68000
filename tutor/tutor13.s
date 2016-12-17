@@ -1355,7 +1355,7 @@ BCMD7:   LEA     MSGBR(%PC),%A5  | "BREAKPOINTS"
          BSR     FIXDCRLF
 BCMD77:  BSR     OUT1CR
 
-         BSR     FIXBP          | SET ADDRESS & COUNTER
+         BSR.S   FIXBP          | SET ADDRESS & COUNTER
 BCMD8:   MOVE.L  (%A2)+,%D6     | D6 = COUNT
          MOVE.L  (%A0),%D0      | D0 = ADDRESS
          BEQ.S   BCMD9          | ZERO ADDRESS
@@ -1372,12 +1372,11 @@ BCMD8:   MOVE.L  (%A2)+,%D6     | D6 = COUNT
 BCMD81:  BSR     OUT1CR
 BCMD9:   ADDQ.L  #4,%A0
          SUBQ.L  #1,%D7         | LOOP AROUND
-         BNE     BCMD8
+         BNE.S   BCMD8
          BRA     MACSBUG
 
-MSGBR:   DC.B    "BREAKPOINTS",EOT
-
-
+MSGBR:   .ascii  "BREAKPOINTS"
+         DC.B    EOT
 
 * NOBR COMMAND
 
@@ -1385,7 +1384,7 @@ NOBR0:   LEA     NOBRCMD(%PC),%A0 | WHERE TO GO IF NO PARAMETERS
 NOBR1:   BSR     FNEXTF         | FIND NEXT FIELD
          BSR     GETA           | GO DECODE NUMBER/ADDRESS
          TST.L   %D0
-         BEQ     BCMD55         | ZERO NOT VALID BREAKPOINT
+         BEQ.S   BCMD55         | ZERO NOT VALID BREAKPOINT
          BSR     CKWADR         | CHECK WORD BOUNDRY ADDRESS
 
          LEA     BPADD,%A0      | SET UP TABLE POINTER
@@ -2362,25 +2361,16 @@ CHKBP4:  BSR     FIXDCRLF
          BSR     TDISPLY         | PRINT TRACE DISPLAY
          BRA     MACSBUG
 
-MSG009:  DC.B    "ILLEGAL INSTRUCTION",EOT
+MSG009:  .ascii  "ILLEGAL INSTRUCTION"
+         DC.B    EOT
 
+MSG014:  .ascii  "AT BREAKPOINT"
+         DC.B    EOT
 
-
-
-MSG014:  DC.B    "AT BREAKPOINT",EOT
-
-
-
-MSG020:  DC.B    ".PC within \"DEBUGGER\"",BELL,EOT
-
-
-
-
+MSG020:  .ascii  ".PC within \"DEBUGGER\""
+         DC.B    BELL,EOT
 
          DC.B    0              | PAD BYTE
-
-
-
 
 *-------------------------------------------------------------------------
 * File HE        HELP Command                                     12/01/81
@@ -2429,34 +2419,19 @@ HELP6:   BSR     OUT1CR          | PRINT ANY REMAINING PORTION
 *        BRA     HELP1           | SEE IF COMPLETE
          BRA     MACSBUG         | HELP IS COMPLETE SO RETURN
 
-MSG002:  DC.B    ".PC .SR .US .SS",CR,LF
+MSG002:  .ascii  ".PC .SR .US .SS"
+         DC.B    CR,LF
 
+         .ascii  ".D0 .D1 .D2 .D3 .D4 .D5 .D6 .D7"
+         DC.B    CR,LF
 
+         .ascii    ".A0 .A1 .A2 .A3 .A4 .A5 .A6 .A7"
+         DC.B    CR,LF
 
-         DC.B    ".D0 .D1 .D2 .D3 .D4 .D5 .D6 .D7",CR,LF
-
-
-
-
-
-
-         DC.B    ".A0 .A1 .A2 .A3 .A4 .A5 .A6 .A7",CR,LF
-
-
-
-
-
-
-         DC.B    ".R0 .R1 .R2 .R3 .R4 .R5 .R6",CR,LF,EOT
-
-
-
-
-
+         .ascii  ".R0 .R1 .R2 .R3 .R4 .R5 .R6"
+         DC.B    CR,LF,EOT
 
          DC.B    0              | PAD BYTE
-
-
 
 *-------------------------------------------------------------------------
 * File HEX2DEC   HEX2DEC convert hex to decimal                   11/02/81
@@ -2716,11 +2691,11 @@ RHEX3:   LEA     MSGLOAD1(%PC),%A5 |"NOT HEX=X?"  MESSAGE
          MOVE.B  -(%A3),(%A6)+  | BAD CHARACTER
          BRA     READ430        | GO TRY NEXT RECORD
 
-MSGLOAD1:DC.B    "NOT HEX=",EOT
+MSGLOAD1:.ascii  "NOT HEX="
+         DC.B    EOT
 
-
-MSGLOAD2:DC.B    " CHKSUM=",EOT
-
+MSGLOAD2:.ascii  " CHKSUM="
+         DC.B    EOT
 
 READHEX6:CLR.L   %D0            | FORM ADDRESS (3 BYTE)
          BSR     READHEX
@@ -3265,16 +3240,10 @@ SETM7:   BSR     FIXBUF         | DISPLAY CURRENT ADDRESS
          BEQ     MACSBUG
          BRA     SETM1          | DO DECODE IT
 
-MSG017:  DC.B    "DATA DID NOT STORE",CR,LF,EOT
-
-
-
-
+MSG017:  .ascii  "DATA DID NOT STORE"
+         DC.B    CR,LF,EOT
 
          DC.B    0              | PAD BYTE
-
-
-
 
 *-------------------------------------------------------------------------
 * File MTSETUP   MTSETUP memory test setup                        11/02/81
@@ -3619,24 +3588,18 @@ PFCH2:   MOVE.B  (%A1),%D0
          MOVE.B  %D0,(%A1)
 PFCH4:   RTS
 
-MSG003:  DC.B    "FORMAT=   ",EOT
+MSG003:  .ascii  "FORMAT=   "
+         DC.B    EOT
 
+MSG004:  .ascii  "CHAR NULL="
+         DC.B    EOT
 
+MSG005:  .ascii  "C/R  NULL="
+         DC.B    EOT
 
-MSG004:  DC.B    "CHAR NULL=",EOT
-
-
-
-MSG005:  DC.B    "C/R  NULL=",EOT
-
-
-
-MSG031:  DC.B    CR,LF,"OPTIONS@",EOT
-
-
-
-
-
+MSG031:  DC.B    CR,LF
+         .ascii  "OPTIONS@"
+         DC.B    EOT
 
 *-------------------------------------------------------------------------
 * File RAMTEST   RAMTEST                                          11/02/81
@@ -3775,15 +3738,11 @@ P2CMD4:  SUBQ.L  #1,%D0         | DELAY; ALLOW HOST TO SYNC
          MOVE.B  %D7,2(%A0)     | SEND CHAR
 P2CMD6:  BRA     MACSBUG
 
-MSG006:  DC.B    "*TRANSPARENT* EXIT=$",EOT
-
-
-
-
+MSG006:  .ascii  "*TRANSPARENT* EXIT=$"
+         DC.B    EOT
 
          DC.B    0              | PAD BYTE
          .align  2
-
 
 *-------------------------------------------------------------------------
 * File W         Software Abort, Hex print routines               06/05/82
@@ -3825,10 +3784,8 @@ EVECT2:  BSR     FIXBUF         | PRINT MESSAGE "XXXX TRAP ERROR"
          BSR     FIXDADD
          BRA     EVECT4
 
-MSG010:  DC.B    " TRAP ERROR",CR,LF,EOT
-
-
-
+MSG010:  .ascii  " TRAP ERROR"
+         DC.B    CR,LF,EOT
 
 *
 *  PRINT HEX ROUTINES
@@ -3993,10 +3950,8 @@ CKADR39: LEA     MSG018(%PC),%A5
 
 CKADR99: RTS
 
-MSG018:  DC.B    "INVALID ADDRESS=",EOT
-
-
-
+MSG018:  .ascii  "INVALID ADDRESS="
+         DC.B    EOT
 
          DC.B    0              | PAD BYTE
          .align  2
@@ -4118,9 +4073,8 @@ GETN90:  MOVE.L  %D1,%D0        | SET UP RESULT FOR RETURN
 GETN95:  MOVEM.L (%A7)+,%D1-%D5/%A0 | RESTORE SOME REGISTERS
          RTS
 
-GETNDATA:DC.B    " (+,-.:;=^]",0 | TERMINATE CHARS
-
-
+GETNDATA:.ascii  " (+,-.:;=^]"
+         DC.B    0              | TERMINATE CHARS
 
 *
 *  ***GETHEX***  GET HEX (BINARY VALUE FROM ASCII)
@@ -4145,17 +4099,11 @@ PNMSG011:BSR     FIXBUF         | PRINT NOT A HEX DIGIT
          BSR     FIXDADD
          BRA     MSG            | GO PRINT IT AND ENTER MACSBUG
 
-MSG011:  DC.B    "  IS NOT A HEX DIGIT",EOT
-
-
-
-
+MSG011:  .ascii  "  IS NOT A HEX DIGIT"
+         DC.B    EOT
 
          DC.B    0              | PAD BYTE
          .align  2
-
-
-
 
 *-------------------------------------------------------------------------
 * File X         COMMON I/O                                       05/17/82
@@ -4708,8 +4656,8 @@ PORT2260:SUBQ.L  #1,%D3
 PORT2300:LEA     MSG030(%PC),%A5 | TIMEOUT ERROR
          BRA     BREAK79
 
-MSG030:  DC.B    "TIMEOUT",EOT
-
+MSG030:  .ascii  "TIMEOUT"
+         DC.B    EOT
 
 P2READY: MOVE.B  (%A0),%D1     | CHECK FOR ACTIVITY ON PORT1
          ANDI.B  #0x10,%D1     | CHECK FOR BREAK
@@ -7577,22 +7525,22 @@ ICCCC:   MOVEQ   #0x0F,%D0      | APPEND CONDITION CODE
          MOVE.B  %D1,(%A5)+
 ICCCC9:  RTS
 
-BRTBL:   DC.W    " T"           | "T " BRA ACCEPTED
-         DC.W    " F"           | "F "
-         DC.W    "IH"           | "HI"
-         DC.W    "SL"           | "LS"
+BRTBL:   .ascii  "T "           | "T " BRA ACCEPTED
+         .ascii  "F "           | "F "
+         DC.W    "HI"           | "HI"
+         DC.W    "LS"           | "LS"
          .ascii  "CC"           | "CC"
-         DC.B    "SC"           | "CS"
-         DC.B    "EN"           | "NE"
-         DC.B    "QE"           | "EQ"
-         DC.B    "CV"           | "VC"
-         DC.B    "SV"           | "VS"
-         DC.B    "LP"           | "PL"
-         DC.B    "IM"           | "MI"
-         DC.B    "EG"           | "GE"
-         DC.B    "TL"           | "LT"
-         DC.B    "TG"           | "GT"
-         DC.B    "EL"           | "LE"
+         .ASCII  "CS"           | "CS"
+         .ASCII  "NE"           | "NE"
+         .ASCII  "EQ"           | "EQ"
+         .ASCII  "VC"           | "VC"
+         .ASCII  "VS"           | "VS"
+         .ASCII  "PL"           | "PL"
+         .ASCII  "MI"           | "MI"
+         .ASCII  "GE"           | "GE"
+         .ASCII  "LT"           | "LT"
+         .ASCII  "GT"           | "GT"
+         .ASCII  "LE"           | "LE"
 
 *   BIT  5432109876543210
 *        ....RRRMMM......    DESTINATION REGISTER MODE
@@ -8148,9 +8096,8 @@ FERROR39:.align  2
 
          BRA     COMMON
 
-MSG111:  DC.B    "DC.W    $",EOT
-
-
+MSG111:  .ascii "DC.W    $"
+         DC.B    EOT
 
 KI:      DC.W    0x4AFB         | KNOWN ILLEGAL CODES
 KIEND:   .align  2
@@ -8415,11 +8362,8 @@ T500:    MOVEM.L (%A7)+,%D1/%D7/%A1/%A2
          BSR     TDISPLY
          BRA     MACSBUG
 
-MSGT14:  DC.B    "UNDEFINED TRAP 14",EOT
-
-
-
-
+MSGT14:  .ascii  "UNDEFINED TRAP 14"
+         DC.B    EOT
 
 T600:    MOVE.L  (%A1),%A1
          BRA     T100
