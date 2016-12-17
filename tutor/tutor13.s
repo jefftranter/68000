@@ -1578,19 +1578,19 @@ BTCMD:   BSR     MTSETUP        | PREPARE PARMS (FROM,TO/COUNT)
          MOVE.L  %D0,-(%A7)      | SAVE DATA WRITTEN CAUSING ERROR
 
          BSR     FIXBUF         | SET UP TO PRINT
-         MOVE.L  #"FAIL",(%A6)+
-         MOVE.L  #"ED A",(%A6)+
-         MOVE.W  #"T ",(%A6)+
+         MOVE.L  #0x4641494C,(%A6)+ | "FAIL"
+         MOVE.L  #0x45442041,(%A6)+ | "ED A"
+         MOVE.W  #0x5420,(%A6)+ | "T "
          MOVE.L  %A2,%D0        | ADDRESS WHERE IT FAILED
          BSR     PNT6HX
 
-         MOVE.L  #"  WR",(%A6)+
-         MOVE.L  #"OTE=",(%A6)+
+         MOVE.L  #0x20205752,(%A6)+ | "  WR"
+         MOVE.L  #0x4f54453d,(%A6)+ | "OTE="
          MOVE.L  (%A7)+,%D0     | WHAT WAS WRITTEN
          BSR     PNT4HX
 
-         MOVE.L  #"   R",(%A6)+
-         MOVE.L  #"EAD=",(%A6)+
+         MOVE.L  #0x20202052,(%A6)+ | "   R"
+         MOVE.L  #0x4541443d,(%A6)+ | "EAD="
          MOVE.L  (%A7)+,%D0     | WHAT WAS READ
          BSR     PNT4HX
 
@@ -1667,7 +1667,7 @@ TD09:
 
 TD1:     MOVE.W  (%A4)+,%D0     | GET REG NAME
          MOVE.L  (%A2)+,%D7     | GET REG CONTENT
-         CMPI.W  #"??",%D0      | SEE IF AT END OF REGS
+         CMPI.W  #0x3f3f,%D0    | "??" SEE IF AT END OF REGS
          BNE.S   TD4
          BSR     OUT1CR         | PRINT BUFFER
 
@@ -1707,18 +1707,18 @@ TD4:     MOVE.W  %D0,%D2        | PRINT REG NAME IN BUFFER
          MOVE.B  %D0,(%A6)+     |  SAVE FIRST LETTER
          MOVE.B  %D2,(%A6)+     | SAVE NEXT LETTER
          MOVE.B  #'=',(%A6)+    | EQUAL SIGN
-         CMPI.W  #"US",%D2
+         CMPI.W  #0x5553,%D2    | "US"
          BNE.S   T44
          MOVE.L  REGUS,%D0      | USER STACK
          BRA.S   T449
 
-T44:     CMPI.W  #"SS",%D2      | SUPER STACK IS SPECIAL
+T44:     CMPI.W  #0x5353,%D2    | "SS" SUPER STACK IS SPECIAL
          BNE.S   T448
          MOVE.L  REGA7,%D0      | GET A7
          BRA.S   T449
 
 T448:    MOVE.L  %D7,%D0        | REGISTER VALUE
-         CMPI.W  #"SR",%D2      | SEE IF STATUS REGISTER
+         CMPI.W  #0x5352,%D2    | "SR" SEE IF STATUS REGISTER
          BEQ.S   TDCC
 T449:    BSR     PNT8HX         | FORMAT 8 HEX CHAR
 TD9:     MOVE.B  #BLANK,(%A6)+  | SPACE BETWEEN REGS
@@ -1810,8 +1810,8 @@ PUM13:   EXG     %A2,%D5         | D5 = END OF TEXT +1
          BSR     FIXBUF         | A5,A6=#BUFFER
          MOVEQ   #2,%D6         | THE BYTE COUNT
          CLR.L   %D4            | CLEAR THE CHECKSUM
-         MOVE.L  #"S0??",(%A6)+ | START OF S RECORD
-         MOVE.L  #"0000",(%A6)+ | DUMMY ADDRESS
+         MOVE.L  #0x53303f3f,(%A6)+ | "S0??" START OF S RECORD
+         MOVE.L  #0x30303030,(%A6)+ | "0000" DUMMY ADDRESS
 MORES0:  CMP.L   %D5,%A2        | SEE IF AT END OF TEXT
          BGE.S   ENDS0          | WHERE TO GO WHEN ALL CHARACTERS USED
          ADDQ.L  #1,%D6         | ANOTHER BYTE
@@ -1835,7 +1835,7 @@ MORESP:  BSR     FIXBUF         | A5,A6=#BUFFER
          ADD.L   %D3,%D1        | INSURE END OF LINE ADDRESS IS MAX
          ANDI.L  #0xFF0000,%D1  | SEE IF 3 BYTE ADDRESS
          BNE.S   S2REC          | WHERE TO GO IF 3 BYTES NEEDED
-         MOVE.L  #"S1??",(%A6)+ | PUSH
+         MOVE.L  #0x53313f3f,(%A6)+ | "S1??" PUSH
          MOVE    %A3,%D0        | SET UP TO PRINT 2 BYTE ADDRESS
          BSR     PNT4HX         | PRINT 4 HEX CHAR ADDRESS
          MOVEQ   #2,%D6         | BYTE COUNT
@@ -1845,7 +1845,7 @@ MORESP:  BSR     FIXBUF         | A5,A6=#BUFFER
          ADD.B   %D0,%D4        | HIGH BYTE OF ADDRESS
          BRA.S   PNCA3          | GO PUNCH A LINE
 
-S2REC:   MOVE.L  #"S2??",(%A6)+ | PUSH
+S2REC:   MOVE.L  #0X53323F3F,(%A6)+ | "S2??" PUSH
          BSR     PNT6HX         | PRINT 6 HEX CHAR ADDRESS
          MOVEQ   #3,%D6         | BYTE COUNT
          MOVE.L  %A3,%D0        | FIX UP CHECKSUM
@@ -1861,8 +1861,8 @@ PNCA3:   CMP.L   %A4,%A3        | SEE IF AT ENDING ADDRESS
          BSR.S   PNTSRECX       | END IT BY PRINTING LAST RECORD
          BSR     FIXBUF         | A5,A6=#BUFFER
          CLR.L   %D4            | CLEAR THE CHECKSUM
-         MOVE.L  #"S9??",(%A6)+ | MOVE TO PRINT BUFFER
-         MOVE.L  #"0000",(%A6)+ | MOVE "0000" TO PRIT BUFFER
+         MOVE.L  #0x53393f3f,(%A6)+ | "S9??" MOVE TO PRINT BUFFER
+         MOVE.L  #0x30303030,(%A6)+ | MOVE "0000" TO PRIT BUFFER
          MOVEQ   #2,%D6         | BYTE COUNT
          BSR.S   PNTSREC        | PRINT "S9" END-OF-FILE RECORD
          BRA     MACSBUG        | REENTER MACSBUG
@@ -2390,16 +2390,16 @@ HELP4:   MOVE.W  (%A4)+,%D1      | GET 2 BYTE COMMAND
          TST.W   %D1             | IS THE INVISIBLE INDICATOR ON?
          BMI.S   HELP4           | YES... THEN BYPASS THIS ONE
          MOVE.W  %D1,%D3         | SAVE XX FOR "XX" AND "NOXX" IN HELP
-         ANDI.W  #0x7F7F,%D1      | REMOVE CONTROL BITS
+         ANDI.W  #0x7F7F,%D1     | REMOVE CONTROL BITS
          MOVE.W  %D1,(%A6)+      | NO.... MOVE THIS COMMAND TO "PRINT" LINE
-         MOVE.L  #"    ",(%A6)+  | MOVE BLANKS FOR SPACING
+         MOVE.L  #0x20202020,(%A6)+  | MOVE BLANKS FOR SPACING
          BSR.S   HELP81          | PRINT THE LINE IF FULL
          BTST    #7,%D3          | IS "NO" OPTION SUPPORTED?
          BEQ.S   EOHLOOP         | NO...BYPASS THIS COMMAND, ELSE...
-         MOVE.W  #"NO",(%A6)+    | "NO  "   IN MSG
-         ANDI.W  #0x7F7F,%D3      | RESET CONTROL BITS
+         MOVE.W  #0x4e4f,(%A6)+  | "NO  "   IN MSG
+         ANDI.W  #0x7F7F,%D3     | RESET CONTROL BITS
          MOVE.W  %D3,(%A6)+      | "NOCC"   IN MSG (WHERE CC=COMMAND CODE)
-         MOVE.W  #"  ",(%A6)+    | "NOCC  " IN MSG    "    "    "      "
+         MOVE.W  #0x2020,(%A6)+  | "NOCC  " IN MSG    "    "    "      "
          BSR.S   HELP81          | PRINT THE LINE IF FULL
 EOHLOOP: BRA.S   HELP4           | NEXT COMMAND.
 
@@ -3226,7 +3226,7 @@ SETME:   LEA     MSG017(%PC),%A5 | "DATA DID NOT STORE"
 SETM7:   BSR     FIXBUF         | DISPLAY CURRENT ADDRESS
          MOVE.L  %A1,%D0
          BSR     PNT8HX         | PUT ADDRESS IN BUFFER
-         MOVE.L  #"  ? ",(%A6)+ | PROMPT
+         MOVE.L  #0x20203f20,(%A6)+ | "  ? " PROMPT
          BSR     OUTPUT         | DUMP BUFFER WITH NO LF CR
          BSR     FIXBUF         | GET READY FOR INPUT
          MOVE.B  #BLANK,(%A5)+  | ADVANCE IN BUFFER
@@ -3701,11 +3701,11 @@ P2CMD0:  MOVE.W  TMCHARS,%D7
          BSR     FIXDCRLF       | SET UP FOR MESSAGE
          MOVE.L  %D7,%D0        | EXIT CHARACTER
          BSR     PNT2HX         | PRINT 2 HEX CHARACTERS
-         MOVE.W  #" =",(%A6)+
+         MOVE.W  #0x203d,(%A6)+ | " ="
          MOVE.B  %D7,%D0        | SEE IF CONTROL CHAR
          CMPI.B  #BLANK,%D0
          BPL.S   P2CMD01
-         MOVE.L  #" CTL",(%A6)+
+         MOVE.L  #0x2043544c,(%A6)+ | " CTL"
          ADDI.B  #64,%D0        | MAKE IT A PRINTABLE CHARACTER
 P2CMD01: MOVE.B  #BLANK,(%A6)+
          MOVE.B  %D0,(%A6)+
@@ -3768,7 +3768,7 @@ MSG012:  DC.B    LF,LF,"SOFTWARE ABORT",CR,LF,EOT
          DC.B    0              | PAD BYTE
          .align  2
 
-ABORTE:MOVE.L    #"????",0x30   | UNKNOWN INTERRUPT
+ABORTE:MOVE.L    #0x3f3f3f3f,0x30   | "????" UNKNOWN INTERRUPT
 
 
 *    SAVE REGISTERS AND PRINT VECTOR MSG
@@ -4477,7 +4477,7 @@ TAPEOUT: MOVEM.L %D0-%D4/%A0-%A1,-(%A7) | SAVE REGISTERS
          MOVE.L  %A5,%A0        | REMEMBER WHERE BUFFER STARTS
          MOVEA.L #PDI1,%A1
          CLR.B   0x21(%A1)
-         CMPI.W  #"S0",(%A0)    | HEADER RECORD?
+         CMPI.W  #0x5330,(%A0)  | "S0" HEADER RECORD?
          BNE.S   TAPEOUT2       | NO
          MOVE.B  #2,9(%A1)      | YES, PC0 INPUT, PC1 OUTPUT
          MOVE.W  #700,%D3       | OUTPUT NULLS (HEADER)
@@ -6892,7 +6892,7 @@ CS16:    BRA.S   CS15           | COMMON
 ISTOP:   .align  2
          MOVE.W  2(%A4),%D0
          MOVE.B  #'#',(%A6)+    | IMMEDIATE
-         MOVE.B  #"0x",(%A6)+   | HEX
+         MOVE.B  #'$',(%A6)+    | HEX
          BSR     PNT4HX         | VALUE
          BRA     COMMON4
 
@@ -7216,7 +7216,7 @@ FORM125: MOVE.B  #'-',(%A6)+    | -
          MOVE.B  #'(',(%A6)+    | (
          BSR     FORMREGA       | A@    SOURCE
 
-         MOVE.L  #"(-,)",%D0    | ),-(
+         MOVE.L  #0x282d2c29,%D0 | ),-(
          BSR.S   SCHR           | STORE CHARS
 
          MOVE.B  (%A4),%D4
@@ -7240,7 +7240,7 @@ FORM12A: .align  2              | CMPM
          MOVE.B  #'(',(%A6)+    | (
          BSR     FORMREGA       | A@
 
-         MOVE.L  #"(,+)",%D0    | )+,(
+         MOVE.L  #0x282c2b29,%D0  | )+,(
          BSR.S   SCHR           | STORE CHARS
 
          MOVE.B  (%A4),%D4
@@ -7281,7 +7281,7 @@ SCHR:    MOVE.B  %D0,(%A6)+     | OUTPUT STRING
 * MOVE FROM SR  (STATUS REGISTER)
 *
                                 | LONG
-IMVFSR:  MOVE.L  #"\x2CRS\0",%D0   | SR,
+IMVFSR:  MOVE.L  #0x002c5253,%D0 | SR,
 
          BSR.S   SCHR
          BSR     EEA            | DATA ALTERABLE
@@ -7290,7 +7290,7 @@ IMVFSR:  MOVE.L  #"\x2CRS\0",%D0   | SR,
 * MOVE FROM USP (USER STACK POINTER)
 *
                                 | LONG
-IMVFUSP: MOVE.L  #"\x2cPSU",%D0    | USP,
+IMVFUSP: MOVE.L  #0x2c505355,%D0 | USP,
          BSR.S   SCHR
          BSR     FORMREGA
          BRA.S   CS11           | COMMON
@@ -7300,7 +7300,7 @@ IMVFUSP: MOVE.L  #"\x2cPSU",%D0    | USP,
                                 | LONG
 IMVTSR:  MOVE.W  #0xFFD,%D7     | DATA ADDRESSING
          BSR     EEA
-         MOVE.L  #"RS\2c\0",%D0   | ,SR
+         MOVE.L  #0x0052532c,%D0 | ,SR
 IMVT44:  BSR.S   SCHR
          BRA.S   CS11           | COMMON
 
@@ -7308,7 +7308,7 @@ IMVT44:  BSR.S   SCHR
 *
                                 | LONG
 IMVTUSP: BSR     FORMREGA
-         MOVE.L  #"PSU\x2c",%D0    | ,USP
+         MOVE.L  #0x5053552c,%D0 | ,USP
          BRA.S   IMVT44
 
 *  MOVE TO CCR (CONDITION CODE REGISTER)
@@ -7316,7 +7316,7 @@ IMVTUSP: BSR     FORMREGA
                                 | LONG
 IMVTCCR: MOVE.W  #0xFFD,%D7     | DATA ADDRESSING
          BSR     EEA
-         MOVE.L  #"RCC\X2C",%D0    | ,CCR
+         MOVE.L  #0x5243432c,%D0 | ,CCR
          BRA.S   IMVT44
 
 *  BIT   5432109876543210
@@ -7331,7 +7331,7 @@ IMVTCCR: MOVE.W  #0xFFD,%D7     | DATA ADDRESSING
                                 | LONG
 IMOVEP:  .align  2
          MOVE.B  #'.',(%A5)+    | D@,#(A@)
-         MOVE.W  #"LW",%D0
+         MOVE.W  #0x4c57,%D0    | "LW"
          BTST    #6,%D4
          BEQ.S   IMOVEP11       | USE "W"
          LSR.W   #8,%D0         | USE "L"
@@ -7360,7 +7360,7 @@ IMOVEP35:BSR.S   IMOVEP66       | $HHHH(A@),D@
          BSR     FORMREGD
          BRA.S   CS20           | COMMON4
 
-IMOVEP66:MOVE.B  #"0x",(%A6)+   | FORMAT DISPLACEMENT
+IMOVEP66:MOVE.B  #'$',(%A6)+    | FORMAT DISPLACEMENT
          MOVE.W  2(%A4),%D0
          BSR     PNT4HX
 
@@ -7386,7 +7386,7 @@ IDBCC:   .align  2              | DB--
          BSR     FORMREGD
 
          MOVE.B  %D5,(%A6)+     | COMMA SEPARATOR
-         MOVE.B  #"0x",(%A6)+   | HEX FIELD TO FOLLOW
+         MOVE.B  #'$',(%A6)+    | HEX FIELD TO FOLLOW
 
          BSR     ICCCC
          BRA.S   ICC55
@@ -7471,7 +7471,7 @@ ISETS:   .align  2              | STATIC BIT
 *
                                 | LONG
 ISHIFT:  .align   2             | AS-  LS-  RO-  ROX-
-         MOVE.W  #"LR",%D0
+         MOVE.W  #0x4c52,%D0    | "LR"
          BTST    #8,%D4         | DIRECTION BIT
          BEQ.S   ISHIFT13       | RIGHT
          LSR.W   #8,%D0         | LEFT
@@ -7528,8 +7528,8 @@ ICCCC9:  RTS
 
 BRTBL:   .ascii  "T "           | "T " BRA ACCEPTED
          .ascii  "F "           | "F "
-         DC.W    "HI"           | "HI"
-         DC.W    "LS"           | "LS"
+         .ascii  "HI"           | "HI"
+         .ascii  "LS"           | "LS"
          .ascii  "CC"           | "CC"
          .ASCII  "CS"           | "CS"
          .ASCII  "NE"           | "NE"
@@ -7790,7 +7790,7 @@ EA1113A:
          ADDQ.L  #2,%D0
          MOVE.B  #'$',(%A6)+    | HEX "$"
          BSR     PNT8HX         | DESTINATION
-         MOVE.L  #"\X29CP\X28",%D0    | (PC)
+         MOVE.L  #0x29435028,%D0  | (PC)
          BSR     SCHR           | STORE WORD
          ADDQ.L  #2,%D3         | SIZE
          RTS
@@ -7825,7 +7825,7 @@ EA1114:  CMPI.B  #3,%D4
          MOVE.B  #'$',(%A6)+    | HEX "$"
          BSR     PNT8HX         | DESTINATION
 
-         MOVE.L  #"\X2CCP\X28",%D0
+         MOVE.L  #0x2c435028,%D0
          BSR     SCHR           | DES(PC,
 
          MOVE.W  (%A4,%D3),%D4
@@ -7840,7 +7840,7 @@ EAF27:
          MOVE.B  #'.',(%A6)+    | DES(PC,R@.
 
          MOVE.W  (%A4,%D3),%D4
-         MOVE.W  #"LW",%D0
+         MOVE.W  #0x4c57,%D0    | "LW"
          BTST    #11,%D4
          BEQ.S   EAF35
          LSR.W   #8,%D0
@@ -7892,7 +7892,7 @@ EA11155: MOVE.L  (%A4,%D3),%D0
          RTS
 
 MOVEMS:  MOVE.B  #'.',(%A5)+    | PERIOD
-         MOVE.W  #"LW",%D0
+         MOVE.W  #0x4c57,%D0    | "LW"
          BTST    #6,%D4
          BEQ.S   MOVEMS2
          LSR.W   #8,%D0
@@ -7907,7 +7907,7 @@ MOVEMR:  .align  2
          MOVEQ   #0x2F,%D7      | D7 = /
          SUBQ.L  #1,%A6         | ADJUST STORE POINTER
          MOVEQ   #0x30,%D5      | D5 = REGISTER #
-         MOVE.W  #"AD",%D4      | D4 = REG CLASS
+         MOVE.W  #0x4144,%D4    | "AD" D4 = REG CLASS
 
 MOVEMR11:BTST    %D1,%D2
          BEQ.S   MOVEMR77       | BIT RESET
