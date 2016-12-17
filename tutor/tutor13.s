@@ -5383,7 +5383,7 @@ TBLKEYS: .align  2              | INDEX
          ADR     ASL            |  7  ASL  LSL ROL ROXL
          ADR     DBCC           |  8  DBCC
          ADR     BCHG           |  9  BCHG
-         ADR     BRA.S          | 10  BRA.SBSR.SBCC
+         ADR     BRA            | 10  BRA BSR BCC
          ADR     BSET           | 11  BSET
          ADR     CHK            | 12  CHK  DIVS DIVU MILS MULU
          ADR     CLR            | 13  CLR NEG NEGX NOT TST
@@ -6826,13 +6826,12 @@ MDC:     .align  2              | (INDEX 37) .W ONLY ALLOWED
 *FOP     =       39             OPERAND FIELD
 
 * CAUSES ORGIN MODULO 4
-LONG:    .MACRO
-         .align  2
-         DS.B    (*-X)&2
-         .ENDM
+*LONG:    .MACRO
+*         .align  2
+*         DS.B    (*-X)&2
+*         .ENDM
 
-
-X:       .align  2              | BASE ADDRESS THIS MODULE
+X:       .align  4              | BASE ADDRESS THIS MODULE
                                 | LONG
 
 *  MOVEM REGISTERS TO EA
@@ -6869,7 +6868,8 @@ IM7799:  BSR     MOVEMR         | BUILD MASK WORD
          BSR     EEA
          BRA.S   CS16           | COMMON
 
-                                | LONG
+         .align  4
+
 * MOVEM  EA  TO REGISTERS
 *
 IMOVEMTR:BSR     MOVEMS         | SIZE
@@ -6885,8 +6885,8 @@ IMOVEMTR:BSR     MOVEMS         | SIZE
 
 CS16:    BRA.S   CS15           | COMMON
 
-
-                                | LONG
+         .align 4
+         
 ISTOP:   .align  2
          MOVE.W  2(%A4),%D0
          MOVE.B  #'#',(%A6)+    | IMMEDIATE
@@ -6894,7 +6894,8 @@ ISTOP:   .align  2
          BSR     PNT4HX         | VALUE
          BRA     COMMON4
 
-                                | LONG
+         .align  4
+
 IMMED:   .align  2              | ADD  AND  CMP #  EOR  OR  SUB
          BSR     FORMSIZE
          ADDQ.L  #2,%D3         | SIZE = 4
@@ -6957,11 +6958,12 @@ IMMED75: EXT.L   %D0
 *        0010............       | .LONG
 *
 * IF BYTE SIZE; DESTINATION ADDRESS DIRECT NOT ALLOWED
-                                | LONG
-IMOVE:   .align  2
+
+IMOVE:   .align  4
          BRA     IMOVEA1
 
-                                | LONG
+         .align  4
+
 ILINK:   .align  2
          BSR.S   FORMREGA
 
@@ -6973,7 +6975,7 @@ ILINK:   .align  2
          BSR     HEX2DEC        | DECIMAL DISPLACEMENT
          BRA     COMMON4
 
-                                | LONG
+         .align  4
 FORM1:   .align  2              | CLR  NEG  NEGX  NOT TST
          BSR     FORMSIZE
 
@@ -6982,12 +6984,14 @@ FORM1:   .align  2              | CLR  NEG  NEGX  NOT TST
 FORM1A:  BSR     EEA            | DATA ALTERABLE ONLY
 CS14:    BRA.S   CS13           | COMMON
 
-                                | LONG
+         .align  4
+
 FORM3:   .align  2              | EXT  SWAP
          BSR.S   FORMREGD
          BRA.S   CS13           | COMMON
 
-                                | LONG
+         .align  4
+
 FORM4:   .align  2              | TRAP
          MOVE.B  #'#',(%A6)+
          MOVE.W  (%A4),%D0
@@ -6995,7 +6999,8 @@ FORM4:   .align  2              | TRAP
          BSR     HEX2DEC        | DECIMAL
          BRA.S   CS13           | COMMON
 
-                                | LONG
+         .align  4
+
 FORM5:   .align  2              | UNLNK
          BSR.S   FORMREGA
          BRA.S   CS13           | COMMON
@@ -7004,7 +7009,8 @@ FORM5:   .align  2              | UNLNK
 *        ....RRR.........       | ADDRESS REGISTER
 *        ..........XXXXXX       | EFFECTIVE ADDRESS
 *
-                                | LONG
+         .align  4
+
 FORM6A:  .align  2              | LEA
          MOVE.W  #0x7E4,%D7     | CONTROL ADDRESSING
          BSR.S   EEA10
@@ -7020,7 +7026,8 @@ FORM6A:  .align  2              | LEA
 *        ....DDD.........       | DATA REGISTER
 *        ..........XXXXXX       | EFFECTIVE ADDRESS
 *
-                                | LONG
+         .align  4
+
 FORM6D:  .align  2              | CHK  DIVS  DIVU  MULS  MULU
          MOVE.W  #0xFFD,%D7     | DATA ADDRESSING
          BSR.S   EEA10
@@ -7044,7 +7051,8 @@ FORMREGD:MOVE.B  #'D',(%A6)+    | FORMAT D@
 *  BIT   5432109876543210
 *        ....DDD......DDD       | DATA REGISTERS
 *
-                                | LONG
+         .align  4
+
 FORM7:   .align  2              | EXG
          ROL.W   #7,%D4
          BSR.S   FORMREGD
@@ -7058,7 +7066,8 @@ FORM7:   .align  2              | EXG
 *  BIT   5432109876543210
 *        ....AAA......AAA       | ADDRESS REGISTERS
 *
-                                | LONG
+         .align  4
+
 FORM8:   .align  2              | EXG
          ROL.W   #7,%D4
          BSR.S   FORMREGA
@@ -7067,13 +7076,14 @@ FORM815: MOVE.B  #',',(%A6)+    | COMMA SEPARATOR
 
          MOVE.W  (%A4),%D4
          BSR.S   FORMREGA
-CS13:    BRA.S   CS12           | COMMON
+CS13:    BRA     CS12           | COMMON
 
 *  BIT   5432109876543210
 *        ....DDD.........       | DATA REGISTER
 *        .............AAA       | ADDRESS REGISTER
 *
-                                | LONG
+         .align  4
+
 FORM9:   .align  2              | EXG
          ROL.W   #7,%D4
          BSR.S   FORMREGD       | DATA REGISTER
@@ -7094,7 +7104,8 @@ EEA10:   BRA     EEA
 *        ........01......         WORD
 *        ........10......         LONG
 *
-                                | LONG
+         .align  4
+
 *                               ADD <EA>,A@   CMP <EA>,A@   SUB <EA>,A@
 FORM10EX:.align  2              | ADD  CMP  SUB
          MOVE.W  #0xFFF,%D7     | ALL MODES ALLOWED
@@ -7135,7 +7146,9 @@ FORM10E6:BTST.B  #0,(%A4)
 *        ........00......       BYTE
 *        ........01......       WORD
 *        ........10......       LONG
-                                | LONG
+
+         .align  4
+
 FORM10:  .align  2              | AND  EOR  OR
          BTST.B  #0,(%A4)
          BNE.S   FORM105
@@ -7148,7 +7161,7 @@ FORM104: BSR     FORMSIZE
 
          MOVE.B  (%A4),%D4
          LSR.B   #1,%D4
-         BSR.S   FORMREGD
+         BSR     FORMREGD
          BRA.S   CS12           | COMMON
 
 FORM105: BSR     FORMSIZE       | D@,<EA>
@@ -7163,13 +7176,15 @@ FORM105: BSR     FORMSIZE       | D@,<EA>
          BSR.S   EEA10
 CS12:    BRA     COMMON
 
-                                | LONG
+         .align  4
+
 *                               PEA     (JMP  JSR)
 FORM11:  MOVE.W  #0x7E4,%D7     | CONTROL ADDERSSING
-         BSR.S   EEA10
+         BSR     EEA10
          BRA.S   CS12           | COMMON
 
-                                | LONG
+         .align  4
+
 *                               | JMP  JSR
 FORM11SL:MOVE.L  %D4,%D0        | LOOK FOR .S  OR  .L
          ANDI.W  #0x3F,%D0
@@ -7194,7 +7209,8 @@ FORM114: BRA.S   FORM11
 *        ............0xXX       DATA SOURCE REGISTER
 *        ............1XXX       ADDRESS SOURCE REGISTER
 *
-                                | LONG
+         .align  4
+
 FORM12:  .align  2              | ABCD  ADDX  SBCD  SUBX
          BSR     FORMSIZE
 
@@ -7231,7 +7247,8 @@ FORM125: MOVE.B  #'-',(%A6)+    | -
 *        ............1...       MEMORY TO MEMORY
 *        ............1XXX       ADDRESS SOURCE REGISTER
 *
-                                | LONG
+         .align  4
+
 FORM12A: .align  2              | CMPM
          BSR     FORMSIZE
 
@@ -7248,7 +7265,8 @@ FORM12A: .align  2              | CMPM
          MOVE.B  #'+',(%A6)+
 CS11:    BRA     COMMON
 
-                                | LONG
+         .align  4
+
 IQUICK:  BRA     IQUICKA        | ADDQ  SUBQ
 
 *  BIT   5432109876543210
@@ -7256,7 +7274,8 @@ IQUICK:  BRA     IQUICKA        | ADDQ  SUBQ
 *        ....RRR.........       DATA REGISTER
 *        ........DDDDDDDD       SIGN EXTENDED DATA
 *
-                                | LONG
+         .align  4
+
 IMOVEQ:  .align  2
          MOVE.B  #'#',(%A6)+    | IMMEDIATE
 
@@ -7278,7 +7297,8 @@ SCHR:    MOVE.B  %D0,(%A6)+     | OUTPUT STRING
 
 * MOVE FROM SR  (STATUS REGISTER)
 *
-                                | LONG
+         .align  4
+
 IMVFSR:  MOVE.L  #0x002c5253,%D0 | SR,
 
          BSR.S   SCHR
@@ -7287,7 +7307,8 @@ IMVFSR:  MOVE.L  #0x002c5253,%D0 | SR,
 
 * MOVE FROM USP (USER STACK POINTER)
 *
-                                | LONG
+         .align  4
+
 IMVFUSP: MOVE.L  #0x2c505355,%D0 | USP,
          BSR.S   SCHR
          BSR     FORMREGA
@@ -7295,7 +7316,8 @@ IMVFUSP: MOVE.L  #0x2c505355,%D0 | USP,
 
 * MOVE TO SR (STATUS REGISTER)
 *
-                                | LONG
+         .align  4
+
 IMVTSR:  MOVE.W  #0xFFD,%D7     | DATA ADDRESSING
          BSR     EEA
          MOVE.L  #0x0052532c,%D0 | ,SR
@@ -7304,14 +7326,16 @@ IMVT44:  BSR.S   SCHR
 
 * MOVE TO USP (USER STACK POINTER)
 *
-                                | LONG
+         .align  4
+
 IMVTUSP: BSR     FORMREGA
          MOVE.L  #0x5053552c,%D0 | ,USP
          BRA.S   IMVT44
 
 *  MOVE TO CCR (CONDITION CODE REGISTER)
 *
-                                | LONG
+         .align  4
+
 IMVTCCR: MOVE.W  #0xFFD,%D7     | DATA ADDRESSING
          BSR     EEA
          MOVE.L  #0x5243432c,%D0 | ,CCR
@@ -7326,7 +7350,8 @@ IMVTCCR: MOVE.W  #0xFFD,%D7     | DATA ADDRESSING
 *        .........1......       LONG
 *        .............XXX       ADDRESS REGISTER
 *
-                                | LONG
+         .align  4
+
 IMOVEP:  .align  2
          MOVE.B  #'.',(%A5)+    | D@,#(A@)
          MOVE.W  #0x4c57,%D0    | "LW"
@@ -7369,16 +7394,19 @@ IMOVEP66:MOVE.B  #'$',(%A6)+    | FORMAT DISPLACEMENT
          MOVE.B  #')',(%A6)+
          RTS
 
-                                | LONG
+         .align  4
+
 SCOMMON: BRA     COMMON         | NOP RESET RTE RTR RTS TRAPV
 
-                                | LONG
+         .align  4
+
 ISCC:    BSR     ICCCC          | GET REST OF OP-CODE
          BSR     EEA            | DATA ALTERABLE
          BRA.S   SCOMMON
 
 
-                                | LONG
+         .align  4
+
 IDBCC:   .align  2              | DB--
          MOVE.W  (%A4),%D4
          BSR     FORMREGD
@@ -7395,7 +7423,8 @@ IDBCC:   .align  2              | DB--
 *        ........DDDDDDD0       DISPLACEMENT
 *        ...............1       ERROR (ODD BOUNDRY DISPLACEMENT)
 *
-                                | LONG
+         .align  4
+
 ICC:     .align  2              | B--
          BSR     ICCCC
 
@@ -7425,7 +7454,7 @@ ICC55:   ADDQ.L  #2,%D3         | SIZE
          MOVE.B  #'L',(%A5)+    | .L FOR 16 BIT DISPLACEMENT
          BRA.S   ICC35
 
-                                | LONG
+         .align  4
 *                               | BCHG  BCLR  BSET  BTST
 ISETD:   .align  2              | DYNAMIC BIT
          ROL.W   #7,%D4
@@ -7437,7 +7466,8 @@ ISETD12: MOVE.B  %D5,(%A6)+     | COMMA SEPARATOR
          BSR     EEA            | DATA ALTERABLE
 CS18:    BRA.S   SCOMMON
 
-                                | LONG
+         .align   4
+
 *                            BCHG  BCLR  BSET  BTST
 *  1ST WORD     .... .... ..XX XXXX    EA   DATA ALTERABLE ONLY
 *  2ND WORD     0000 0000 000Y YYYY    BIT NUMBER
@@ -7467,7 +7497,8 @@ ISETS:   .align  2              | STATIC BIT
 *        ..........0.....       SHIFT IMMEDIATE COUNT
 *        ..........1.....       SHIFT COUNT (MODULO 64) IN DATA REGISTER
 *
-                                | LONG
+         .align   4
+                              
 ISHIFT:  .align   2             | AS-  LS-  RO-  ROX-
          MOVE.W  #0x4c52,%D0    | "LR"
          BTST    #8,%D4         | DIRECTION BIT
@@ -8109,8 +8140,8 @@ KIEND:   .align  2
 C68:     .MACRO a1,a2,a3,a4
          DC.W    0x\a1
          DC.W    0x\a2
-*         DC.B    (\a3-X)>>2
-         DC.B    \a4
+         DC.B    (\a3-X)>>2
+         DC.B    0x\a4
          .ENDM
 
 TBL:     .align  2
@@ -8432,7 +8463,7 @@ F120:    BSR     OUTPUT         | OUTPUT STRING,CR,LF PORT1 (A5) (A6)
          RTS
 
 
-         DC.B   0x54,0          | PAD BYTES
+         .fill   0x54,1,0       | PAD BYTES
 
 
 *-------------------------------------------------------------------------
