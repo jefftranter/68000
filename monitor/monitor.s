@@ -1187,7 +1187,7 @@ COMTAB:  DC.B     4,4              | JUMP <address> causes execution to
          .ascii   "DISP"           | pseudo registers in TSK_T.
          DC.L     EX_DIS-COMTAB
          DC.B    4,2               | GO <address> starts program execution
-         .ascii   "GO  "            | at <address> and loads regs from TSK_T
+         .ascii   "GO  "           | at <address> and loads regs from TSK_T
          DC.L    GO-COMTAB
          DC.B    4,2               | BRGT puts a breakpoint in the BP
          .ascii  "BRGT"            | table - but not in the code

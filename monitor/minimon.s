@@ -136,7 +136,7 @@ SRCH2:   MOVE.L   %A4,%A3           |   Else get address of next entry
 SRCH3:   SUB.B    #1,%D1            | One less character to match
          BEQ.S    SRCH6             | If match counter zero then all done
          LEA.L    3(%A3),%A3        |   Else point to next character in table
-SRCH4:   MOVE.B   (%A3)+,%D2         |  Now match a pair of characters
+SRCH4:   MOVE.B   (%A3)+,%D2        |  Now match a pair of characters
          CMP.B    (%A5)+,%D2
          BNE.S    SRCH2             | If no match then try next entry
          SUB.B    #1,%D1            | Else decrement match counter and
@@ -366,7 +366,7 @@ LOAD7:   BSR.S    LOAD8             | Get byte of data for loading
          BSR.S    LOAD8             | Read checksum
          ADD.B    #1,%D3            | Add 1 to total checksum
          BEQ.S    LOAD2             | If zero then start next record
-         OR.B     #0b00001000,%D7    | Else set checksum error bit,
+         OR.B     #0b00001000,%D7   | Else set checksum error bit,
          BRA.S    LOAD3             | restore I/O devices and return
 *
 LOAD8:   BSR     BYTE               | Get a byte
@@ -846,7 +846,7 @@ COMTAB:  .BYTE    4,4              | JUMP <address> causes execution to
          .ascii   "DISP"           | pseudo registers in TSK_T.
          DC.L     EX_DIS-COMTAB
          .BYTE    4,2              | GO <address> starts program execution
-         .ascii   "GO"              | at <address> and loads regs from TSK_T
+         .ascii   "GO"             | at <address> and loads regs from TSK_T
          DC.L     GO-COMTAB
          .BYTE    2,2              |  BRGT puts a breakpoint in the BP
          .ascii  "BRGT"            | table - but not in the code
