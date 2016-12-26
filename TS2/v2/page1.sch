@@ -489,20 +489,30 @@ A12
 Text GLabel 6800 3300 0    60   Output ~ 0
 E
 Wire Wire Line
-	7450 1800 7900 1800
+	7450 1800 7500 1800
 Wire Wire Line
-	7450 1900 7900 1900
+	7500 1800 7900 1800
 Wire Wire Line
-	7450 2000 7900 2000
+	7450 1900 7650 1900
+Wire Wire Line
+	7650 1900 7900 1900
+Wire Wire Line
+	7450 2000 7800 2000
+Wire Wire Line
+	7800 2000 7900 2000
 Wire Wire Line
 	8850 1450 8850 1350
 Wire Wire Line
-	8950 1250 8950 1450
+	8950 1250 8950 1350
+Wire Wire Line
+	8950 1350 8950 1450
 Wire Wire Line
 	8850 1350 8950 1350
 Connection ~ 8950 1350
 Wire Wire Line
-	8950 5950 8950 6150
+	8950 5950 8950 6050
+Wire Wire Line
+	8950 6050 8950 6150
 Wire Wire Line
 	8850 5950 8850 6050
 Wire Wire Line
@@ -515,7 +525,9 @@ Wire Wire Line
 Wire Wire Line
 	7800 1400 7800 2000
 Wire Wire Line
-	7500 900  7800 900 
+	7500 900  7650 900 
+Wire Wire Line
+	7650 900  7800 900 
 Connection ~ 7650 900 
 Wire Wire Line
 	7500 900  7500 800 
@@ -530,11 +542,15 @@ Wire Wire Line
 Wire Wire Line
 	1800 4600 1800 5000
 Wire Wire Line
-	1800 5000 2200 5000
+	1800 5000 1900 5000
+Wire Wire Line
+	1900 5000 2200 5000
 Wire Wire Line
 	1800 4400 1800 4000
 Wire Wire Line
-	1800 4000 2200 4000
+	1800 4000 2100 4000
+Wire Wire Line
+	2100 4000 2200 4000
 Wire Wire Line
 	1900 3800 1900 5000
 Connection ~ 1900 5000
@@ -556,7 +572,9 @@ Wire Wire Line
 Wire Wire Line
 	3400 4400 3400 4100
 Wire Wire Line
-	3400 4900 4400 4900
+	3400 4900 4200 4900
+Wire Wire Line
+	4200 4900 4400 4900
 Wire Wire Line
 	4200 4900 4200 4400
 Wire Wire Line
@@ -565,12 +583,20 @@ Connection ~ 4200 4900
 Wire Wire Line
 	3150 1850 3250 1850
 Wire Wire Line
-	3250 1350 3250 2250
+	3250 1350 3250 1850
+Wire Wire Line
+	3250 1850 3250 2050
+Wire Wire Line
+	3250 2050 3250 2250
 Connection ~ 3250 1850
 Wire Wire Line
-	1450 1350 1450 2250
+	1450 1350 1450 1650
 Wire Wire Line
-	1450 850  3250 850 
+	1450 1650 1450 2250
+Wire Wire Line
+	1450 850  1650 850 
+Wire Wire Line
+	1650 850  3250 850 
 Wire Wire Line
 	1750 1650 1450 1650
 Connection ~ 1450 1650
@@ -581,21 +607,26 @@ Wire Wire Line
 Wire Wire Line
 	1650 2150 1750 2150
 Wire Wire Line
-	1650 750  1650 2150
+	1650 750  1650 850 
+Wire Wire Line
+	1650 850  1650 2150
 Connection ~ 1650 850 
 Wire Wire Line
-	1150 2750 3250 2750
+	1150 2750 1450 2750
+Wire Wire Line
+	1450 2750 3250 2750
 Connection ~ 1450 2750
 Wire Wire Line
-	1150 2650 1150 2850
+	1150 2650 1150 2750
 Wire Wire Line
-	3150 1650 4800 1650
+	1150 2750 1150 2850
 Wire Wire Line
-	4800 1450 4800 2650
+	4800 1450 4800 1650
+Wire Wire Line
+	4800 1650 4800 2050
+Wire Wire Line
+	4800 2050 4800 2650
 Connection ~ 4800 2050
-Wire Wire Line
-	4000 1650 4000 1550
-Connection ~ 4000 1650
 Wire Wire Line
 	5700 1450 5900 1450
 Wire Wire Line
@@ -603,7 +634,9 @@ Wire Wire Line
 Wire Wire Line
 	5700 2050 5900 2050
 Wire Wire Line
-	5700 2650 5900 2650
+	5700 2650 5800 2650
+Wire Wire Line
+	5800 2650 5900 2650
 Wire Wire Line
 	5300 4400 5700 4400
 Wire Wire Line
@@ -611,16 +644,26 @@ Wire Wire Line
 Wire Wire Line
 	5300 4900 5800 4900
 Wire Wire Line
-	5800 2650 5800 5500
+	5800 2650 5800 4900
+Wire Wire Line
+	5800 4900 5800 5500
 Connection ~ 5800 2650
 Wire Wire Line
-	6800 4900 7900 4900
+	6800 4900 7350 4900
 Wire Wire Line
-	6800 5000 7900 5000
+	7350 4900 7900 4900
 Wire Wire Line
-	6800 4450 7900 4450
+	6800 5000 7150 5000
 Wire Wire Line
-	6800 4250 7900 4250
+	7150 5000 7900 5000
+Wire Wire Line
+	6800 4450 7550 4450
+Wire Wire Line
+	7550 4450 7900 4450
+Wire Wire Line
+	6800 4250 7750 4250
+Wire Wire Line
+	7750 4250 7900 4250
 Wire Wire Line
 	7750 4250 7750 4150
 Wire Wire Line
@@ -630,9 +673,15 @@ Wire Wire Line
 Wire Wire Line
 	7550 3850 7550 3750
 Wire Wire Line
-	6800 3400 7900 3400
+	6800 3400 7300 3400
 Wire Wire Line
-	7150 3750 7750 3750
+	7300 3400 7900 3400
+Wire Wire Line
+	7150 3750 7350 3750
+Wire Wire Line
+	7350 3750 7550 3750
+Wire Wire Line
+	7550 3750 7750 3750
 Wire Wire Line
 	9900 1800 10000 1800
 Wire Wire Line
@@ -764,8 +813,6 @@ Text GLabel 10000 1600 2    60   3State ~ 0
 A02
 Text GLabel 10000 1500 2    60   3State ~ 0
 A01
-Text Label 4100 1500 2    60   ~ 0
-TP1
 Wire Wire Line
 	3400 4700 3400 4900
 Connection ~ 3400 4900
@@ -939,4 +986,8 @@ Connection ~ 7800 2000
 Connection ~ 5700 2050
 Text Notes 6200 1200 0    60   ~ 0
 Pullups can be omitted if\noptional interrupt circuitry\non page 9 is present.
+Wire Wire Line
+	4000 1650 4800 1650
+Wire Wire Line
+	3150 1650 4000 1650
 $EndSCHEMATC
