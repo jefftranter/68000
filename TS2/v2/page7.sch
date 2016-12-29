@@ -543,4 +543,6 @@ Text Notes 8450 4550 0    60   ~ 0
 Auxiliary (host) Serial Port
 Text Notes 8350 2800 0    60   ~ 0
 Console (terminal) Serial Port
+Text Notes 7600 750  0    60   ~ 0
+153.6 kHz
 $EndSCHEMATC
