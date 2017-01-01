@@ -17,7 +17,7 @@ $Descr A 11000 8500
 encoding utf-8
 Sheet 8 9
 Title "TS2 68000 Single Board Computer"
-Date "2016-12-11"
+Date "2016-12-31"
 Rev "2.0"
 Comp "Jeff Tranter"
 Comment1 "ACIAs"
@@ -272,17 +272,6 @@ F 3 "" H 8450 2000 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L VCC #PWR096
-U 1 1 57CB20FE
-P 8450 2200
-F 0 "#PWR096" H 8450 2050 50  0001 C CNN
-F 1 "VCC" H 8450 2350 50  0000 C CNN
-F 2 "" H 8450 2200 50  0000 C CNN
-F 3 "" H 8450 2200 50  0000 C CNN
-	1    8450 2200
-	0    -1   -1   0   
-$EndComp
-$Comp
 L GND #PWR097
 U 1 1 57CB2D6B
 P 4500 3000
@@ -303,17 +292,6 @@ F 2 "" H 8450 4850 50  0000 C CNN
 F 3 "" H 8450 4850 50  0000 C CNN
 	1    8450 4850
 	0    1    1    0   
-$EndComp
-$Comp
-L VCC #PWR099
-U 1 1 57CB3ACF
-P 8450 5050
-F 0 "#PWR099" H 8450 4900 50  0001 C CNN
-F 1 "VCC" H 8450 5200 50  0000 C CNN
-F 2 "" H 8450 5050 50  0000 C CNN
-F 3 "" H 8450 5050 50  0000 C CNN
-	1    8450 5050
-	0    -1   -1   0   
 $EndComp
 $Comp
 L GND #PWR0100
@@ -462,15 +440,11 @@ Wire Wire Line
 Wire Wire Line
 	8600 2000 8450 2000
 Wire Wire Line
-	8600 2200 8450 2200
-Wire Wire Line
 	4500 2300 8600 2300
 Wire Wire Line
 	4500 2400 8600 2400
 Wire Wire Line
 	8450 4850 8600 4850
-Wire Wire Line
-	8600 5050 8450 5050
 Wire Wire Line
 	4500 5150 8600 5150
 Wire Wire Line
@@ -545,4 +519,6 @@ Text Notes 8350 2800 0    60   ~ 0
 Console (terminal) Serial Port
 Text Notes 7600 750  0    60   ~ 0
 153.6 kHz
+NoConn ~ 8600 2200
+NoConn ~ 8600 5050
 $EndSCHEMATC

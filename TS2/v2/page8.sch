@@ -17,7 +17,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 9 9
 Title "TS2 68000 Single Board Computer"
-Date "2016-12-11"
+Date "2016-12-31"
 Rev "2.0"
 Comp "Jeff Tranter"
 Comment1 "Interrupt Control Circuitry (optional)"
