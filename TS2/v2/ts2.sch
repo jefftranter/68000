@@ -17,7 +17,7 @@ $Descr A 11000 8500
 encoding utf-8
 Sheet 1 9
 Title "TS2 68000 Single Board Computer"
-Date "2016-12-31"
+Date "2017-01-03"
 Rev "2.0"
 Comp "Jeff Tranter"
 Comment1 "Top Level Schematic"
@@ -388,10 +388,10 @@ F 3 "" H 4800 4800 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L VCC #PWR?
+L VCC #PWR018
 U 1 1 585E8EEE
 P 4800 4650
-F 0 "#PWR?" H 4800 4500 50  0001 C CNN
+F 0 "#PWR018" H 4800 4500 50  0001 C CNN
 F 1 "VCC" H 4800 4800 50  0000 C CNN
 F 2 "" H 4800 4650 50  0000 C CNN
 F 3 "" H 4800 4650 50  0000 C CNN
@@ -399,10 +399,10 @@ F 3 "" H 4800 4650 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L GND #PWR?
+L GND #PWR019
 U 1 1 585E8F6D
 P 4800 4950
-F 0 "#PWR?" H 4800 4700 50  0001 C CNN
+F 0 "#PWR019" H 4800 4700 50  0001 C CNN
 F 1 "GND" H 4800 4800 50  0000 C CNN
 F 2 "" H 4800 4950 50  0000 C CNN
 F 3 "" H 4800 4950 50  0000 C CNN
