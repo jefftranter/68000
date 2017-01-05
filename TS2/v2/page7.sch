@@ -17,7 +17,7 @@ $Descr A 11000 8500
 encoding utf-8
 Sheet 8 9
 Title "TS2 68000 Single Board Computer"
-Date "2017-01-03"
+Date "2017-01-05"
 Rev "2.0"
 Comp "Jeff Tranter"
 Comment1 "ACIAs"
@@ -332,20 +332,20 @@ NoConn ~ 8600 2500
 NoConn ~ 8600 2100
 NoConn ~ 8600 5350
 NoConn ~ 8600 4950
-Text Notes 8150 1300 0    60   ~ 0
+Text Notes 8300 1300 0    60   ~ 0
 9600
-Text Notes 8150 1400 0    60   ~ 0
+Text Notes 8300 1400 0    60   ~ 0
 4800
-Text Notes 8150 1500 0    60   ~ 0
+Text Notes 8300 1500 0    60   ~ 0
 2400
-Text Notes 8150 1600 0    60   ~ 0
+Text Notes 8300 1600 0    60   ~ 0
 1200
-Text Notes 8150 1700 0    60   ~ 0
+Text Notes 8300 1700 0    60   ~ 0
 600
-Text Notes 8150 1800 0    60   ~ 0
+Text Notes 8300 1800 0    60   ~ 0
 300
-Text Notes 8450 1550 0    60   ~ 0
-Select baud rate
+Text Notes 8600 1550 0    60   ~ 0
+Select baud rate (console and aux.\nports can use different baud rates\nif desired).
 Wire Wire Line
 	6100 1700 6450 1700
 Wire Wire Line
@@ -361,7 +361,7 @@ Wire Wire Line
 Wire Wire Line
 	3100 1750 2050 1750
 Wire Wire Line
-	8050 1250 8050 1250
+	8050 1250 8200 1250
 Wire Wire Line
 	8050 1250 8050 800 
 Wire Wire Line
@@ -462,19 +462,16 @@ Wire Wire Line
 Wire Wire Line
 	5100 4700 4500 4700
 Wire Wire Line
-	5100 800  5100 4700
-Connection ~ 5100 1850
-Wire Wire Line
-	4500 1850 5100 1850
+	4500 1850 5300 1850
 Connection ~ 4500 4700
 Wire Wire Line
 	4500 4700 4500 4600
 Wire Wire Line
-	8050 800  5100 800 
+	8050 800  5300 800 
 Text Notes 9450 2250 0    60   ~ 0
-FTDI
+FTDI (USB to\nserial adaptor)
 Text Notes 9400 5100 0    60   ~ 0
-FTDI
+FTDI (USB to\nserial adaptor)
 $Comp
 L 74LS00 U3
 U 3 1 5842F0A3
@@ -505,9 +502,9 @@ Wire Wire Line
 	2400 6900 2050 6900
 Connection ~ 2400 6900
 Wire Wire Line
-	4000 7400 4000 6700
+	4000 6700 4000 7400
 Wire Wire Line
-	3300 7400 4000 7400
+	4000 7400 3300 7400
 Wire Wire Line
 	2400 7400 2050 7400
 Wire Wire Line
@@ -517,8 +514,15 @@ Text Notes 8450 4550 0    60   ~ 0
 Auxiliary (host) Serial Port
 Text Notes 8350 2800 0    60   ~ 0
 Console (terminal) Serial Port
-Text Notes 7600 750  0    60   ~ 0
-153.6 kHz
 NoConn ~ 8600 2200
 NoConn ~ 8600 5050
+Wire Wire Line
+	5300 800  5300 1850
+Wire Wire Line
+	5100 4700 5100 600 
+Wire Wire Line
+	5100 600  8200 600 
+Wire Wire Line
+	8200 600  8200 1250
+Connection ~ 8050 1250
 $EndSCHEMATC
