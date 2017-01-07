@@ -329,7 +329,6 @@ RX
 Text Notes 9050 5400 0    60   ~ 0
 RTS
 NoConn ~ 8600 2500
-NoConn ~ 8600 2100
 NoConn ~ 8600 5350
 NoConn ~ 8600 4950
 Text Notes 8300 1300 0    60   ~ 0
@@ -512,8 +511,6 @@ Wire Wire Line
 Connection ~ 2400 4150
 Text Notes 8450 4550 0    60   ~ 0
 Auxiliary (host) Serial Port
-Text Notes 8350 2800 0    60   ~ 0
-Console (terminal) Serial Port
 NoConn ~ 8600 2200
 NoConn ~ 8600 5050
 Wire Wire Line
@@ -525,4 +522,32 @@ Wire Wire Line
 Wire Wire Line
 	8200 600  8200 1250
 Connection ~ 8050 1250
+$Comp
+L Jumper_NO_Small JP5
+U 1 1 586F01C1
+P 8500 2100
+F 0 "JP5" H 8450 2000 50  0000 C CNN
+F 1 "Jumper_NO_Small" H 8510 2040 50  0001 C CNN
+F 2 "" H 8500 2100 50  0000 C CNN
+F 3 "" H 8500 2100 50  0000 C CNN
+	1    8500 2100
+	1    0    0    -1  
+$EndComp
+$Comp
+L VCC #PWR0101
+U 1 1 586F01FE
+P 8200 2100
+F 0 "#PWR0101" H 8200 1950 50  0001 C CNN
+F 1 "VCC" H 8200 2250 50  0000 C CNN
+F 2 "" H 8200 2100 50  0000 C CNN
+F 3 "" H 8200 2100 50  0000 C CNN
+	1    8200 2100
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	8200 2100 8400 2100
+Text Notes 8350 2800 0    60   ~ 0
+Console (terminal) Serial Port
+Text Notes 8350 3100 0    60   ~ 0
+Connect jumper JP5 to use optional USB\npower instead of external power supply.
 $EndSCHEMATC
