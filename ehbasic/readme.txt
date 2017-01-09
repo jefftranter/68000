@@ -1,3 +1,16 @@
+This is a port of Lee Davison's Enhanced Basic for 68000 to my TS2
+single board computer. It relies on the presence of the Motorola ECB
+TUTOR firmware.
+
+It is intended to be assembled using the VASM retargetable assembler.
+
+References:
+
+1. http://retro.hansotten.nl/home/lee-davison-web-site/
+2. http://www.easy68k.com/applications.htm
+3. http://sun.hasenbraten.de/vasm/
+
+------------------------------------------------------------------------
 
  EhBASIC68
 

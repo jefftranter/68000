@@ -66,7 +66,7 @@ nobrk		EQU	0				* null response to INPUT causes a break
 *************************************************************************************
 
 
-	INCLUDE	"Basic68k3.41.inc"
+	INCLUDE	"basic68k.inc"
 							* RAM offset definitions
 
 	ORG		$000400			* past the vectors in a real system
@@ -6860,7 +6860,7 @@ LAB_U00B
 
 	MOVEQ		#0,d3				* else allow for the decimal point
 LAB_U00C
-	MOVE.		d2,d6				* copy the write index as the number
+	MOVE.w		d2,d6				* copy the write index as the number
 							* string length
 	MOVEQ		#0,d0				* clear d0 to null terminate the number
 							* string
