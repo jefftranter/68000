@@ -1,8 +1,8 @@
 
 * This lot is in RAM
 
-*	OFFSET	0			* start of RAM
-
+        ORG     0			* start of RAM
+ 
 ram_strt	ds.l	$100			* allow 1K for the stack, this should be plenty
 						* for any BASIC program that doesn't do something
 						* silly, it could even be much less.
@@ -199,6 +199,6 @@ prg_strt
 
 *	ORG	*
 
-ram_addr	EQU	$80000		* RAM start address
-ram_size	EQU	$80000		* RAM size
+ram_addr	EQU	$04000		* RAM start address
+ram_size	EQU	$84000		* RAM size
 

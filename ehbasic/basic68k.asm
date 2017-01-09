@@ -22,7 +22,7 @@
 
 * Ver 3.52 stops USING$() from reading beyond the end of the format string
 * Ver 3.51 fixes the UCASE$() and LCASE$() functions for null strings
-* Ver 3.50 uniary minus in concatenate generates a type mismatch error
+* Ver 3.50 unary minus in concatenate generates a type mismatch error
 * Ver 3.49 doesn't tokenise 'DEF' or 'DEC' within a hex value
 * Ver 3.48 allows scientific notation underflow in the USING$() function
 * Ver 3.47 traps the use of array elements as the FOR loop variable
@@ -69,7 +69,7 @@ nobrk		EQU	0				* null response to INPUT causes a break
 	INCLUDE	"basic68k.inc"
 							* RAM offset definitions
 
-	ORG		$000400			* past the vectors in a real system
+	ORG		$000800			* past the vectors in a real system
 
 
 *************************************************************************************
@@ -81,8 +81,8 @@ nobrk		EQU	0				* null response to INPUT causes a break
 VEC_OUT
 	MOVEM.l	d0-d1,-(sp)			* save d0, d1
 	MOVE.b	d0,d1				* copy character
-	MOVEQ		#6,d0				* character out
-	TRAP		#15				* do I/O function
+	MOVEQ		#6,d0			* character out
+	TRAP		#15			* do I/O function
 
 	MOVEM.l	(sp)+,d0-d1			* restore d0, d1
 	RTS
@@ -342,7 +342,7 @@ code_start
 *
 *	a6 -	temp Bpntr				* temporary BASIC execute pointer
 *	a5 -	Bpntr					* BASIC execute (get byte) pointer
-*	a4 -	des_sk				* descriptor stack pointer
+*	a4 -	des_sk				        * descriptor stack pointer
 *	a3 -	ram_strt				* start of RAM. all RAM references are offsets
 *							* from this value
 *
