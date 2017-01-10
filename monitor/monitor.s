@@ -528,7 +528,7 @@ DELAY1:  SUB.L     #1,%D0             | Count down         (8 clk cycles)
 *
 *************************************************************************
 *
-*  TM  Enter transparant mode (All communication to go from terminal to
+*  TM  Enter transparent mode (All communication to go from terminal to
 *  the host processor until escape sequence entered). End sequence
 *  = ESC, E. A newline is sent to the host to "clear it down".
 *

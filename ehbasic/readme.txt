@@ -1,8 +1,8 @@
 This is a port of Lee Davison's Enhanced Basic for 68000 to my TS2
-single board computer. It relies on the presence of the Motorola ECB
-TUTOR firmware.
+single board computer. 
 
-It is intended to be assembled using the VASM retargetable assembler.
+It should be assembled using the VASM retargetable assembler. It can
+be loaded into RAM and started from address $0800.
 
 References:
 

@@ -193,12 +193,11 @@ ccnull	ds.b	1			* CTRL-C last received byte 'life' timer
 file_byte	ds.b	1			* load/save data byte
 file_id	ds.l	1			* load/save file ID
 
-		dc.w	0			* dummy even value and zero pad byte
+		even			        * dummy even value and zero pad byte
 
 prg_strt
 
 *	ORG	*
 
 ram_addr	EQU	$04000		* RAM start address
-ram_size	EQU	$84000		* RAM size
-
+ram_size	EQU	$04000		* RAM size

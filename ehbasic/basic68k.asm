@@ -71,6 +71,9 @@ nobrk		EQU	0				* null response to INPUT causes a break
 
 	ORG		$000800			* past the vectors in a real system
 
+ACIA_1   =      $00010040        * Console ACIA base address
+
+         BRA    code_start       * For convenience, so you can start from first address
 
 *************************************************************************************
 *
@@ -79,13 +82,15 @@ nobrk		EQU	0				* null response to INPUT causes a break
 * output character to the console from register d0.b
 
 VEC_OUT
-	MOVEM.l	d0-d1,-(sp)			* save d0, d1
-	MOVE.b	d0,d1				* copy character
-	MOVEQ		#6,d0			* character out
-	TRAP		#15			* do I/O function
-
-	MOVEM.l	(sp)+,d0-d1			* restore d0, d1
-	RTS
+        MOVEM.L  A0/D1,-(A7)    * Save working registers
+        LEA.L    ACIA_1,A0      * A0 points to console ACIA
+TXNOTREADY
+        MOVE.B   (A0),D1        * Read ACIA status
+        BTST     #1,D1          * Test TDRE bit
+        BEQ.S    TXNOTREADY     * Until ACIA Tx ready
+        MOVE.B   D0,2(A0)       * Write character to send
+        MOVEM.L  (A7)+,A0/D1    * Restore working registers
+        RTS
 
 
 *************************************************************************************
@@ -94,29 +99,19 @@ VEC_OUT
 * else return Cb=0 if there's no character available
 
 VEC_IN
-	MOVE.l	d1,-(sp)			* save d1
-	MOVEQ		#7,d0				* get the status
-	TRAP		#15				* do I/O function
-
-	MOVE.b	d1,d0				* copy the returned status
-	BNE.s		RETCHR			* if a character is waiting go get it
-
-	MOVE.l	(sp)+,d1			* else restore d1
-	TST.b		d0				* set the z flag
-*	ANDI.b	#$FE,CCR			* clear the carry, flag we got no byte
-*							* done by the TST.b
+        MOVEM.L  A0/D1,-(A7)    * Save working registers
+        LEA.L    ACIA_1,A0      * A0 points to console ACIA
+        MOVE.B   (A0),D1        * Read ACIA status
+        BTST     #0,D1          * Test RDRF bit
+        BEQ.S    RXNOTREADY     * Branch of ACIA Rx not ready
+        MOVE.B   2(A0),D0       * Read character received
+        MOVEM.L  (A7)+,A0/D1    * Restore working registers
+	ORI.b	 #1,CCR	        * Set the carry, flag we got a byte
+        RTS                     * Return
+RXNOTREADY:
+        MOVEM.L  (A7)+,A0/D1    * Restore working registers
+	ANDI.b	#$FE,CCR	* Clear the carry, flag character available
 	RTS
-
-RETCHR
-	MOVEQ		#5,d0				* get byte form the keyboard
-	TRAP		#15				* do I/O function
-
-	MOVE.b	d1,d0				* copy the returned byte
-	MOVE.l	(sp)+,d1			* restore d1
-	TST.b		d0				* set the z flag on the received byte
-	ORI.b		#1,CCR			* set the carry, flag we got a byte
-	RTS
-
 
 *************************************************************************************
 *
@@ -320,9 +315,10 @@ SAVE_OUT
 * turn off simulator key echo
 
 code_start
-	MOVEQ		#12,d0			* keyboard echo
-	MOVEQ		#0,d1				* turn off echo
-	TRAP		#15				* do I/O function
+                                * Set up ACIA parameters
+        LEA.L   ACIA_1,A0       * A0 points to console ACIA
+        MOVE.B  #$15,(A0)       * Set up ACIA1 constants (no IRQ,
+                                * RTS* low, 8 bit, no parity, 1 stop)
 
 * to tell EhBASIC where and how much RAM it has pass the address in a0 and the size
 * in d0. these values are at the end of the .inc file
@@ -357,8 +353,8 @@ LAB_COLD
 	BGE.s		LAB_sizok			* branch if >= 16k
 
 	MOVEQ		#5,d0				* error 5 - not enough RAM
-	RTS						* just exit. this as stands will never execute
-							* but could be used to exit back to an OS
+        move.b          #228,D7                         * Go to TUTOR function
+        trap            #14                             * Call TRAP14 handler
 
 LAB_sizok
 	MOVEA.l	a0,a3				* copy RAM base to a3
