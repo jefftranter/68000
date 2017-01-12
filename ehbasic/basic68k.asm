@@ -1,21 +1,21 @@
 *************************************************************************************
-*														*
-*	Enhanced BASIC for the Motorola MC680xx							*
-*														*
-*	This is the generic version with I/O and LOAD/SAVE example code for the		*
-*	EASy68k editor/simulator. 2002-2012.							*
-*														*
+*										    *
+*	Enhanced BASIC for the Motorola MC680xx					    *
+*										    *
+*	This version is for the TS2 single board computer.		            *
+*	Jeff Tranter (tranter@pobox.com)					    *
+*										    *
 *************************************************************************************
-*														*
-*	Copyright(C) 2002-12 by Lee Davison. This program may be freely distributed	*
-*	for personal use only. All commercial rights are reserved.				*
-*														*
-*	More 68000 and other projects can be found on my website at ..			*
-*														*
-*	 http://mycorner.no-ip.org/index.html							*
-*														*
-*	mail : leeedavison@googlemail.com								*
-*														*
+*										    *
+*	Copyright(C) 2002-12 by Lee Davison. This program may be freely distributed *
+*	for personal use only. All commercial rights are reserved.		    *
+*										    *
+*	More 68000 and other projects can be found on my website at ..		    *
+*										    *
+*	 http://mycorner.no-ip.org/index.html					    *
+*										    *
+*	mail : leeedavison@googlemail.com					    *
+*										    *
 *************************************************************************************
 
 * Ver 3.52
@@ -114,205 +114,19 @@ RXNOTREADY:
 
 *************************************************************************************
 *
-* LOAD routine for the Easy68k simulator
+* LOAD routine for the TS2 computer (not implemented)
 
 VEC_LD
-	LEA		load_title(pc),a1		* set the LOAD request title string pointer
-	BSR		get_filename		        * get the filename from the line or the request
-
-	BEQ		LAB_FCER			* if null do function call error then warm start
-
 	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
 	BRA		LAB_XERR			* do error #d7, then warm start
-
-	TST.w		d0				* test load result
-	BNE.s		LOAD_exit			* if error clear up and exit
-
-	MOVE.l	d1,file_id(a3)		* save the file ID
-
-	LEA		LOAD_in(pc),a1		* get byte from file vector
-	MOVE.l	a1,V_INPTv(a3)		* set the input vector
-	BRA		LAB_127D			* now we just wait for Basic command, no "Ready"
-
-LOAD_exit
-	BSR		LAB_147A			* go do "CLEAR"
-	BRA		LAB_1274			* BASIC warm start entry, go wait for Basic
-							* command
-
-* input character to register d0 from file
-
-LOAD_in
-	MOVEM.l	d1-d2/a1,-(sp)		* save d1, d2 & a1
-	MOVE.l	file_id(a3),d1		* get file ID back
-	LEA		file_byte(a3),a1		* point to byte buffer
-	MOVEQ		#1,d2				* set count for one byte
-
-	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
-	BRA		LAB_XERR			* do error #d7, then warm start
-
-	TST.w		d0				* test status
-	BNE.s		LOAD_eof			* branch if byte read failed
-
-	MOVE.b	(a1),d0			* get byte
-	MOVEM.l	(sp)+,d1-d2/a1		* restore d1, d2 & a1
-	ORI.b		#1,CCR			* set carry, flag we got a byte
-	RTS
-							* got an error on read so restore the input
-							* vector and tidy up
-LOAD_eof
-	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
-	BRA		LAB_XERR			* do error #d7, then warm start
-
-	LEA		VEC_IN(pc),a1		* get byte from input device vector
-	MOVE.l	a1,V_INPTv(a3)		* set input vector
-	MOVEQ		#0,d0				* clear byte
-	MOVEM.l	(sp)+,d1-d2/a1		* restore d1, d2 & a1
-	BSR		LAB_147A			* do CLEAR, erase variables/functions and
-							* flush stacks
-	BRA		LAB_1274			* BASIC warm start entry, go wait for Basic
-							* command
-
 
 *************************************************************************************
 *
-* get the filename from the line or from the filename requester
-*
-* if the name is null, "", or there is nothing following then the requester is used
-* to get a filename else the filename is got from the line. if the requester is used
-* the name buffer is allocated in string space and is always null terminated before
-* it is passed to the file requester
-
-get_filename
-	BEQ.s		get_name			* if no following go use the requester
-
-get_file
-	MOVE.l	a1,-(sp)			* save the title string pointer
-	SUBQ.w	#1,a5				* decrement the execute pointer
-	BSR		LAB_GVAL			* get value from line
-	MOVEA.l	(sp)+,a1			* restore the title string pointer
-	TST.b		Dtypef(a3)			* test the data type flag
-	BPL		LAB_TMER			* if not string type do type mismatch error
-
-	MOVEA.l	FAC1_m(a3),a2		* get the descriptor pointer
-	MOVE.w	4(a2),d1			* get the string length
-	BEQ.s		get_name			* if null go use the file requester
-
-	MOVEA.l	(a2),a1			* get the string pointer
-	MOVE.w	d1,d0				* copy the string length
-	ADDQ.w	#1,d1				* increment the string length
-	BSR		LAB_2115			* make space d1 bytes long
-
-	MOVE.b	#$00,(a0,d0.w)		* null terminate the new string
-	SUBQ.w	#1,d0				* decrement the string length
-name_copy
-	MOVE.b	(a1,d0.w),(a0,d0.w)	* copy a file name byte
-	DBF		d0,name_copy		* loop while more to do
-
-	MOVEA.l	a0,a1				* copy the new, terminated, file name pointer
-
-	MOVEA.l	a2,a0				* copy the old filename descriptor pointer
-	BRA		LAB_22B6			* pop string off descriptor stack or from memory
-							* returns with d0 = length, a0 = pointer
-
-* get a name with the file requester
-
-get_name
-	MOVE.l	a3,-(sp)			* save the variables base pointer
-	MOVE.w	#$100,d1			* enough space for the request filename
-	BSR		LAB_2115			* make space d1 bytes long
-	MOVEA.l	a0,a3				* copy the file name buffer pointer
-	LEA		file_list(pc),a2		* set the file types list pointer
-	MOVEQ		#0,d1				* file open
-	MOVE.b	d1,(a3)			* ensure initial null file name
-
-	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
-	BRA		LAB_XERR			* do error #d7, then warm start
-
-	MOVEA.l	a3,a1				* copy the file name pointer
-	MOVEA.l	(sp)+,a3			* restore the variables pointer
-	TST.l		d1				* did the user hit open
-	RTS
-
-
-load_title
-	dc.b	'LOAD file',0			* LOAD file title string
-
-save_title
-	dc.b	'SAVE file',0			* SAVE file title string
-
-file_list
-	dc.b	'*.bas',0				* file type list
-	ds.w	0					* ensure even
-
-
-*************************************************************************************
-*
-* SAVE routine for the Easy68k simulator
+* SAVE routine for the TS2 computer (not implemented)
 
 VEC_SV
-	LEA		save_title(pc),a1		* set the SAVE request title string pointer
-	PEA		SAVE_RTN(pc)		* set the return point
-	BEQ.s		get_name			* if no following go use the file requester
-
-	CMP.b		#',',d0			* compare the following byte with ","
-	BNE		get_file			* if not "," get the filename from the line
-
-	BEQ.s		get_name			* else go use the file requester
-
-SAVE_RTN
-	BEQ		LAB_FCER			* if null do function call error then warm start
-
-	MOVEA.l	a0,a1				* copy filename pointer
-
 	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
 	BRA		LAB_XERR			* do error #d7, then warm start
-
-	TST.w		d0				* test save result
-	BNE		LAB_FCER			* if error do function call error, warm start
-
-	MOVE.l	d1,file_id(a3)		* save file ID
-
-	MOVE.l	V_OUTPv(a3),-(sp)		* save the output vector
-	LEA		SAVE_OUT(pc),a1		* send byte to file vector
-	MOVE.l	a1,V_OUTPv(a3)		* change the output vector
-
-	MOVE.b	TWidth(a3),-(sp)		* save the current line length
-	MOVE.b	#$00,TWidth(a3)		* set infinite length line for save
-
-	BSR		LAB_GBYT			* get next BASIC byte
-	BEQ		SAVE_bas			* if no following go do SAVE
-
-	CMP.b		#',',d0			* else compare with ","
-	BNE		LAB_SNER			* if not "," so go do syntax error/warm start
-
-	BSR		LAB_IGBY			* increment & scan memory
-SAVE_bas
-	BSR		LAB_LIST			* go do list (line numbers applicable)
-	MOVE.b	(sp)+,TWidth(a3)		* restore the line length
-
-	MOVE.l	(sp)+,V_OUTPv(a3)		* restore the output vector
-
-	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
-	BRA		LAB_XERR			* do error #d7, then warm start
-
-	RTS
-
-
-* output character to file from register d0
-
-SAVE_OUT
-	MOVEM.l	d0-d2/a1,-(sp)		* save d0, d1, d2 & a1
-	MOVE.l	file_id(a3),d1		* get file ID back
-	LEA		file_byte(a3),a1		* point to byte buffer
-	MOVE.b	d0,(a1)			* save byte
-	MOVEQ		#1,d2				* set byte count
-
-	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
-	BRA		LAB_XERR			* do error #d7, then warm start
-
-	MOVEM.l	(sp)+,d0-d2/a1		* restore d0, d1, d2 & a1
-	RTS
-
 
 *************************************************************************************
 *
