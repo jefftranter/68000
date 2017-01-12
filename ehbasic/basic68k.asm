@@ -92,7 +92,6 @@ TXNOTREADY
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
         RTS
 
-
 *************************************************************************************
 *
 * input a character from the console into register d0
@@ -103,7 +102,7 @@ VEC_IN
         LEA.L    ACIA_1,A0      * A0 points to console ACIA
         MOVE.B   (A0),D1        * Read ACIA status
         BTST     #0,D1          * Test RDRF bit
-        BEQ.S    RXNOTREADY     * Branch of ACIA Rx not ready
+        BEQ.S    RXNOTREADY     * Branch If ACIA Rx not ready
         MOVE.B   2(A0),D0       * Read character received
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
 	ORI.b	 #1,CCR	        * Set the carry, flag we got a byte
@@ -119,12 +118,12 @@ RXNOTREADY:
 
 VEC_LD
 	LEA		load_title(pc),a1		* set the LOAD request title string pointer
-	BSR		get_filename		* get the filename from the line or the request
+	BSR		get_filename		        * get the filename from the line or the request
 
 	BEQ		LAB_FCER			* if null do function call error then warm start
 
-	MOVE		#51,d0			* open existing file
-	TRAP		#15				* do I/O function
+	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
+	BRA		LAB_XERR			* do error #d7, then warm start
 
 	TST.w		d0				* test load result
 	BNE.s		LOAD_exit			* if error clear up and exit
@@ -147,8 +146,9 @@ LOAD_in
 	MOVE.l	file_id(a3),d1		* get file ID back
 	LEA		file_byte(a3),a1		* point to byte buffer
 	MOVEQ		#1,d2				* set count for one byte
-	MOVEQ		#53,d0			* read from file
-	TRAP		#15				* do I/O function
+
+	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
+	BRA		LAB_XERR			* do error #d7, then warm start
 
 	TST.w		d0				* test status
 	BNE.s		LOAD_eof			* branch if byte read failed
@@ -160,8 +160,8 @@ LOAD_in
 							* got an error on read so restore the input
 							* vector and tidy up
 LOAD_eof
-	MOVEQ		#50,d0			* close all files
-	TRAP		#15				* do I/O function
+	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
+	BRA		LAB_XERR			* do error #d7, then warm start
 
 	LEA		VEC_IN(pc),a1		* get byte from input device vector
 	MOVE.l	a1,V_INPTv(a3)		* set input vector
@@ -224,8 +224,9 @@ get_name
 	LEA		file_list(pc),a2		* set the file types list pointer
 	MOVEQ		#0,d1				* file open
 	MOVE.b	d1,(a3)			* ensure initial null file name
-	MOVEQ		#58,d0			* file I/O
-	TRAP		#15
+
+	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
+	BRA		LAB_XERR			* do error #d7, then warm start
 
 	MOVEA.l	a3,a1				* copy the file name pointer
 	MOVEA.l	(sp)+,a3			* restore the variables pointer
@@ -262,8 +263,9 @@ SAVE_RTN
 	BEQ		LAB_FCER			* if null do function call error then warm start
 
 	MOVEA.l	a0,a1				* copy filename pointer
-	MOVE		#52,d0			* open new file
-	TRAP		#15				* do I/O function
+
+	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
+	BRA		LAB_XERR			* do error #d7, then warm start
 
 	TST.w		d0				* test save result
 	BNE		LAB_FCER			* if error do function call error, warm start
@@ -289,8 +291,9 @@ SAVE_bas
 	MOVE.b	(sp)+,TWidth(a3)		* restore the line length
 
 	MOVE.l	(sp)+,V_OUTPv(a3)		* restore the output vector
-	MOVEQ		#50,d0			* close all files
-	TRAP		#15				* do I/O function
+
+	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
+	BRA		LAB_XERR			* do error #d7, then warm start
 
 	RTS
 
@@ -303,8 +306,9 @@ SAVE_OUT
 	LEA		file_byte(a3),a1		* point to byte buffer
 	MOVE.b	d0,(a1)			* save byte
 	MOVEQ		#1,d2				* set byte count
-	MOVEQ		#54,d0			* write to file
-	TRAP		#15				* do I/O function
+
+	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
+	BRA		LAB_XERR			* do error #d7, then warm start
 
 	MOVEM.l	(sp)+,d0-d2/a1		* restore d0, d1, d2 & a1
 	RTS
@@ -8866,6 +8870,7 @@ LAB_BAER
 	dc.w	LAB_WD-LAB_BAER			* $28 wrong dimensions
 	dc.w	LAB_AD-LAB_BAER			* $2A address
 	dc.w	LAB_FO-LAB_BAER			* $2C format
+	dc.w	LAB_NI-LAB_BAER			* $2E not implemented
 
 LAB_NF	dc.b	'NEXT without FOR',$00
 LAB_SN	dc.b	'Syntax',$00
@@ -8890,6 +8895,7 @@ LAB_UA	dc.b	'Undimensioned array',$00
 LAB_WD	dc.b	'Wrong dimensions',$00
 LAB_AD	dc.b	'Address',$00
 LAB_FO	dc.b	'Format',$00
+LAB_NI  dc.b    'Not implemented',$00
 
 
 *************************************************************************************
