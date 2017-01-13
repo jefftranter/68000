@@ -2,7 +2,8 @@ This is a port of Lee Davison's Enhanced Basic for 68000 to my TS2
 single board computer. 
 
 It should be assembled using the VASM retargetable assembler. It can
-be loaded into RAM and started from address $0800.
+be loaded into RAM and started from address $0800 or built to run
+from EPROM at $C000.
 
 References:
 

@@ -69,7 +69,10 @@ nobrk		EQU	0				* null response to INPUT causes a break
 	INCLUDE	"basic68k.inc"
 							* RAM offset definitions
 
-	ORG		$000800			* past the vectors in a real system
+* Use this value to run out of ROM
+	ORG		$00C000			* past the vectors in a real system
+* Use this value to run out of RAM
+*	ORG		$000800			* past the vectors in a real system
 
 ACIA_1   =      $00010040        * Console ACIA base address
 
