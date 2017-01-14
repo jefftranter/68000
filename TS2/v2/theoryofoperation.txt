@@ -1,0 +1,211 @@
+                TS2 68000 Computer Theory Of Operation
+                ======================================
+
+This is based on the "Design Example Using the 68000" section of the
+book "Microprocessor Systems Design 68000 Hardware, Software, and
+Interfacing", third edition, by Alan Clements. It has been adjusted to
+reflect my modified design. Refer to the schematic diagram when
+reading the following sections.
+
+Specifications of the TS2
+-------------------------
+
+1. The TS2 uses a 68000 CPU.
+
+2. It is built on a single circuit board.
+
+3. The CPU card is capable of operating on its own. System testing is
+   thus facilitated because other modules are not required to operate
+   the CPU card in a stand-alone mode.
+
+4. The original TS2 provided an external bus. This was omitted in my
+   design as it was not required and reduced the chip count
+   considerably.
+
+5. The memory on the CPU card is static RAM and EPROM/EEPROM to avoid
+   the complexity and associated difficulty of debugging dynamic RAM
+   circuitry.
+
+6. Full seven-level interrupt facilities are provided, but are
+   optional. If included, these can support a level 7 interrupt
+   (abort) switch, interrupts from the two ACIAs, and external
+   interrupts.
+
+7. Full address decoding is provided. The address space is compatible
+   with the Motorola MEX68KECB Educational Computer Board (ECB)
+   development system in order to facilitate the transfer of software
+   between the TS2 and ECB.
+
+8. The vector table at $00000000 to $000003FF is implemented in RAM,
+   with the exception of the reset vectors which are mapped to the
+   first 8 bytes of ROM (this is described in more detail later).
+
+9. The RAM is implemented by 8Kx8 CMOS devices to minimize the
+    component count.
+
+10. The ROM is implemented by 2764 type 8Kx8 EPROMs or 2864 type 8Kx8
+    EEPROMs (or equivalent CMOS devices).
+
+11. The terminal (console) interface is through a serial port. A
+    secondary port is also provided. Configuration is the same as in
+    the ECB development system.
+
+12. The module's local address and data buses have not been buffered
+    as the CPU has adequate fanout.
+
+Top Level Schematic (schematic page 1)
+--------------------------------------
+
+Each IC has a 0.1 uF ceramic bypass capacitor across the Vcc and GND
+pins. A single 100 uF capacitor provides additional power supply
+filtering. It requires a +5 volt supply. A switch controls power and a
+green LED (D2) indicates power on.
+
+The majority of chips are 7400 series LS family TTL devices. There are
+a few spare gates. Their inputs are grounded as per standard TTL
+design practice.
+
+Reset, Halt, and Clock Control Circuits (schematic page 2)
+----------------------------------------------------------
+
+Every CPU requires a certain amount of basic control circuitry to
+enable it to operate -- this circuitry includes its clock, reset,
+halt, and similar functions. Such circuitry can be designed largely
+independently of the rest of the system and is needed to perform even
+the simplest tests on the CPU. Therefore, we will design these
+circuits first.
+
+Page 2 gives the diagram of the control circuitry surrounding the
+68000, excluding the interrupt request inputs. The control of HALT*
+and RESET* is conventional. At power-on, a 555 timer configured as a
+monostable, U1, generates a single active-high pulse.
+
+Open-collector buffers, U4C and U4D, apply the reset pulse to the
+68000's RESET* and HALT* inputs, respectively. A manual reset
+generator is formed from two cross-coupled NAND gates, U3A and U3B,
+and applied to the reseet lines by a further two open-collector
+buffers, U4A and U4B. An inverting buffer, U5A, gates the reset pulse
+from U1 onto the system bus as the active-low POR* (Power On Reset).
+This signal can be used by other modules to clear circuits on
+power-up.
+
+An LED, D1, is connected to the HALT* pin via a buffer. This LED is
+fitted to the front panel and confirms the reset operation. It also
+shows if the CPU has asserted HALT* because of a double bus fault.
+
+The 68000 clock input is provided by an 8 MHz crystal-controlled clock
+in a DIP package. If desired, a lower speed clock oscillator can be
+used either for test purposes or to allow using a lower-speed 68000
+chip.
+
+The high impedance control circuits show on page 1 are pulled up to
+the Vcc by resistors. Although pullup resistors are necessary on BR*,
+DTACK*, etc., the reader may be surprised to find them on AS*, UDS*,
+LDS*, and R/W*. They are required here because these pins are driven
+by tristate outputs in the 68000. When the 68000 relinquishes the bus
+all tristate lines are floated. To leave the state of these bus lines
+undefined is unwise, as a spurious bus cycle might possibly be
+generated in certain circumstances. A better course is to be safe
+rather than sorry. During the testing phase, some of the pullup
+resistors were temporary and used only for testing purposes, because
+they were connected to lines that will later be pulled up or down by
+totem-pole outputs. They appear so that the circuit can be tested
+independently of the rest of the system.
+
+Testing the CPU control circuitry is very easy. The power on reset
+circuit is tested by attaching an oscilloscope probe to test point 1
+(TP1), switching on the Vcc power supply, and observing the
+positive-going pulse. A negative-going pulse should be observed at the
+CPU's RESET* ad HALT* pins. The manual reset pulse generator should
+force HALT* and RESET* low whenever the reset button is pushed.
+
+An 8 MHz square wave should be observed at the CLK input to the CPU.
+All inputs pulled up to a logical 1 should be at a logical 1 state.
+
+The next step is to install the 68000 and force the CPU to free-run.
+As no memory components have yet been fitted, the CPU must be fooled
+into thinking that it is executing valid bus cycles. To do this,
+DTACK* is temporarily connected to the AS* output. Whenever the 68000
+starts a memory access by asserting AS*, DTACK* is automatically
+asserted to complete the cycle.
+
+The 68000 is a trick beast to test in a free-running mode, because it
+generates an exception if a nonvalid op-code is detected. Should the
+68000 then generate a second exception, the resulting bus fault will
+cause it to halt. Therefore, the 68000 must always see a valid op-code
+on its data bus. One way of doing this is to pull up (or down) the
+data bus lines with resistors to Vcc (or ground). Traditionally, CPUs
+are tested by placing a NOP (no operation) op-code on the data bus.
+The 68000 NOP code is $4E71 (i.e. %0100 1110 0111 0001). If this code
+is jammed onto the data bus, the 68000 will also use it for the stack
+pointer and reset vectors during the exception processing. Sadly, this
+code will lead to an address error. When the CPU reads the stack
+pointer from addresses $00 0000 and $00 0002 at the start of its reset
+exception processing, it obtains $4E71 4E71. Unfortunately this value
+is odd an generates an address exception. We need to use a dummy
+op-code that is even to allow the CPU to free-run. One suitable opcode
+is $0000 which corresponds to the instruction ORI.B #0,D0.
+
+When a suitable op-code has been jammed into D00 to D15, the 68000
+should free-run and a square wave observed on address pins A01 to A23.
+The frequency at pin Ai should be one half of that at Ai-1.
+
+Address Decoding (schematic page 3)
+-----------------------------------
+
+
+RAM and ROM Address Select (schematic page 4)
+---------------------------------------------
+
+RAM and ROM  (schematic pages 5 and 6)
+--------------------------------------
+
+DTACK and BERR Control Circuitry  (schematic page 7)
+----------------------------------------------------
+
+ACIAs  (schematic page 8)
+-------------------------
+
+Omitted serial port echo feature of the original TS2.
+
+Implemented using FTDI connector for USB to serial rather than true
+RS-232 which would require the connected computer to have RS-232
+serial ports.
+
+Optionally it can be powered by USB using either of the FTDI serial
+ports - a jumper needs to be connected to to the port where power is
+taken from, in which case an external power supply should not be used.
+
+Interrupt Control Circuitry  (schematic page 9)
+-----------------------------------------------
+
+To be determined. This circuitry is currently incomplete and untested.
+
+Design Notes
+------------
+
+The prototype was wirewrapped on a phenolic board with 0.1" holes 6 by
+9 inches in size.
+
+Sockets were used for all ICs and most discrete components.
+
+5 volt power connects to two binding posts. Optionally it can be
+powered by USB. Current consumption is approximately 600 mA will all
+ICs installed.
+
+Possible Future Enhancements
+----------------------------
+
+Ideas for a possible rev 2.x:
+
+Printed circuit board.
+Replace baud rate generator with fixed clock oscillator/counter.
+Add one or two PIA, VIA, or PIT chips.
+Add some connectors for external parallel i/o, interrupts, etc.
+Use more common chip(s) in place of 25LS248
+On-board 5 volt regulator/buck converter.
+Support higher baud rates (through jumpers or software).
+Add a seven segment LED display for diagnostics?
+Prototype area?
+Support either RAM or EPROM/EEPROM in all sockets.
+Support larger RAM and ROM chips (e.g. 27128, 27256, etc. Impacts memory map).
