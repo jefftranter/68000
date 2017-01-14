@@ -160,19 +160,19 @@ gives the memory map of the TS2 CPU module.
 
   Size (bytes)  Device        Address Space
   ------------  ------        -----------------
- 1   8          EPROM1        00000000-00000007
- 2  16K         RAM1          00000008-00003FFF
- 3  16K         RAM2          00004000-00007FFF
- 4  16K         EPROM1        00008000-0000BFFF
- 5  16K         EPROM2        0000C000-0000FFFF
- 6  64          Peripheral 1  01000000-0100003F
- 7  64          Peripheral 2  01000040-0100007F
- 8  64          Peripheral 3  01000080-010000BF
- 9  64          Peripheral 4  010000C0-010000FF
-10  64          Peripheral 5  01000100-0100013F
-11  64          Peripheral 6  01000140-0100017F
-12  64          Peripheral 7  01000180-010001BF
-13  64          Peripheral 8  010001C0-010001FF
+ 1   8          EPROM1        $00000000-$00000007
+ 2  16K         RAM1          $00000008-$00003FFF
+ 3  16K         RAM2          $00004000-$00007FFF
+ 4  16K         EPROM1        $00008000-$0000BFFF
+ 5  16K         EPROM2        $0000C000-$0000FFFF
+ 6  64          Peripheral 1  $01000000-$0100003F
+ 7  64          Peripheral 2  $01000040-$0100007F
+ 8  64          Peripheral 3  $01000080-$010000BF
+ 9  64          Peripheral 4  $010000C0-$010000FF
+10  64          Peripheral 5  $01000100-$0100013F
+11  64          Peripheral 6  $01000140-$0100017F
+12  64          Peripheral 7  $01000180-$010001BF
+13  64          Peripheral 8  $010001C0-$010001FF
 
 The address decoding table corresponding to the memory map above is
 given in the table below.
@@ -205,7 +205,7 @@ address range $00010000 to $00013FFF) enabled a second three line to
 eight line decoder, U27. U27 is a 25LS2548 that has two active-low and
 two active-high enable inputs. It also has an active-low
 open-collector output, ACK*, that is asserted whenever the device is
-enabled and strobed by a negative going oulse on its RD* or WR*
+enabled and strobed by a negative going pulse on its RD* or WR*
 inputs.
 
 U27 is also enabled by U24B, which is high when A09 to A13 are all
@@ -234,10 +234,39 @@ an oscilloscope.
 RAM and ROM Address Select (schematic page 4)
 ---------------------------------------------
 
-The selection of the individual RAM and EPROM components
+The selection of the individual RAM and EPROM components from the
+address decoder outputs is carried out by the circuit of page 4.
+Two-input OR gates combine one of the four device-select signals
+(SEL0* to SEL3*) from the address decoder with the appropriate data
+strobe (UDS* or LDS*) to produce the actual active-low chip-select
+inputs to the eight memory components on the CPU module.
+
+The circuit is also responsible for overlaying the reset vector space
+onto the ROM memory space. When the RV* signal goes active-low while a
+reset vector is being fetched, the read/write memory at $00000000 to
+$00003FFF is disabled and the EPROM at $00008000 to $0000BFFF
+substituted.
 
 RAM and ROM  (schematic pages 5 and 6)
 --------------------------------------
+
+The use of 8Kx8 memory components permits the design of a memory with
+a very low component count and virtually no design effort. Page 5
+gives the design of half of the components of the CPU module -- the
+others on page 6 (omitted in the Clements book) are arranged in
+exactly the same fashion but are enabled by different chip-select
+signals from the address decoder.
+
+No further comment is required other than to point out that the EPROMs
+have their active-low output enables (OE*) driven by R/W* from the
+processor via an inverter. This action is necessary to avoid a bus
+conflict if a write access is made to EPROM memory space.
+
+The original design used 2764 ultraviolet-erasable EPROMs. It is also
+compatible with 2864 electrically erasable EEPROMs. Either will work,
+but the later are more easily erased and programmed. It can also use
+more modern CMOS memory devices (e.g. 27C64 and 28C64) which have
+lower current consumption.
 
 DTACK and BERR Control Circuitry  (schematic page 7)
 ----------------------------------------------------
@@ -269,7 +298,7 @@ The prototype was wirewrapped on a phenolic board with 0.1" holes 6 by
 Sockets were used for all ICs and most discrete components.
 
 5 volt power connects to two binding posts. Optionally it can be
-powered by USB. Current consumption is approximately 600 mA will all
+powered by USB. Current consumption is approximately 600 mA with all
 ICs installed.
 
 Possible Future Enhancements
