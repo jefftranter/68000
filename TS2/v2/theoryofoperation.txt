@@ -128,7 +128,7 @@ DTACK* is temporarily connected to the AS* output. Whenever the 68000
 starts a memory access by asserting AS*, DTACK* is automatically
 asserted to complete the cycle.
 
-The 68000 is a trick beasty to test in a free-running mode, because it
+The 68000 is a tricky beast to test in a free-running mode, because it
 generates an exception if a nonvalid op-code is detected. Should the
 68000 then generate a second exception, the resulting bus fault will
 cause it to halt. Therefore, the 68000 must always see a valid op-code
