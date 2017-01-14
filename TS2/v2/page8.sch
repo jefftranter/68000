@@ -614,4 +614,12 @@ Wire Wire Line
 	8000 4000 8200 4000
 Wire Wire Line
 	3950 4400 5150 4400
+Text Notes 6350 2050 0    60   ~ 0
+7 levels of\ninterrupt\nrequest
+Text Notes 6200 3500 0    60   ~ 0
+7 levels of interrupt acknowledge
+Text Notes 4250 4550 0    60   ~ 0
+IACK*
+Text Notes 4100 4100 0    60   ~ 0
+Function\ncodes\n0-7
 $EndSCHEMATC
