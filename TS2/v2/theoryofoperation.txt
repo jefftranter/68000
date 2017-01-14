@@ -83,11 +83,10 @@ monostable, U1, generates a single active-high pulse.
 Open-collector buffers, U4C and U4D, apply the reset pulse to the
 68000's RESET* and HALT* inputs, respectively. A manual reset
 generator is formed from two cross-coupled NAND gates, U3A and U3B,
-and applied to the reseet lines by a further two open-collector
+and applied to the reset lines by a further two open-collector
 buffers, U4A and U4B. An inverting buffer, U5A, gates the reset pulse
 from U1 onto the system bus as the active-low POR* (Power On Reset).
-This signal can be used by other modules to clear circuits on
-power-up.
+This signal is used by other modules to clear circuits on power-up.
 
 An LED, D1, is connected to the HALT* pin via a buffer. This LED is
 fitted to the front panel and confirms the reset operation. It also
@@ -116,7 +115,7 @@ Testing the CPU control circuitry is very easy. The power on reset
 circuit is tested by attaching an oscilloscope probe to test point 1
 (TP1), switching on the Vcc power supply, and observing the
 positive-going pulse. A negative-going pulse should be observed at the
-CPU's RESET* ad HALT* pins. The manual reset pulse generator should
+CPU's RESET* and HALT* pins. The manual reset pulse generator should
 force HALT* and RESET* low whenever the reset button is pushed.
 
 An 8 MHz square wave should be observed at the CLK input to the CPU.
@@ -129,7 +128,7 @@ DTACK* is temporarily connected to the AS* output. Whenever the 68000
 starts a memory access by asserting AS*, DTACK* is automatically
 asserted to complete the cycle.
 
-The 68000 is a trick beast to test in a free-running mode, because it
+The 68000 is a trick beasty to test in a free-running mode, because it
 generates an exception if a nonvalid op-code is detected. Should the
 68000 then generate a second exception, the resulting bus fault will
 cause it to halt. Therefore, the 68000 must always see a valid op-code
@@ -140,11 +139,11 @@ The 68000 NOP code is $4E71 (i.e. %0100 1110 0111 0001). If this code
 is jammed onto the data bus, the 68000 will also use it for the stack
 pointer and reset vectors during the exception processing. Sadly, this
 code will lead to an address error. When the CPU reads the stack
-pointer from addresses $00 0000 and $00 0002 at the start of its reset
-exception processing, it obtains $4E71 4E71. Unfortunately this value
-is odd an generates an address exception. We need to use a dummy
-op-code that is even to allow the CPU to free-run. One suitable opcode
-is $0000 which corresponds to the instruction ORI.B #0,D0.
+pointer from addresses $00000000 and $00000002 at the start of its
+reset exception processing, it obtains $4E714E71. Unfortunately this
+value is odd and generates an address exception. We need to use a
+dummy op-code that is even to allow the CPU to free-run. One suitable
+opcode is $0000 which corresponds to the instruction ORI.B #0,D0.
 
 When a suitable op-code has been jammed into D00 to D15, the 68000
 should free-run and a square wave observed on address pins A01 to A23.
@@ -153,9 +152,89 @@ The frequency at pin Ai should be one half of that at Ai-1.
 Address Decoding (schematic page 3)
 -----------------------------------
 
+The specification for the TS2 CPU module calls for up to 32 Kbytes of
+static RAM and up to 32 Kbytes of EPROM at the bottom of the
+processors 16-MByte address space, permitting up to eight
+memory-mapped components, each occupying 64 bytes. The table below
+gives the memory map of the TS2 CPU module.
+
+  Size (bytes)  Device        Address Space
+  ------------  ------        -----------------
+ 1   8          EPROM1        00000000-00000007
+ 2  16K         RAM1          00000008-00003FFF
+ 3  16K         RAM2          00004000-00007FFF
+ 4  16K         EPROM1        00008000-0000BFFF
+ 5  16K         EPROM2        0000C000-0000FFFF
+ 6  64          Peripheral 1  01000000-0100003F
+ 7  64          Peripheral 2  01000040-0100007F
+ 8  64          Peripheral 3  01000080-010000BF
+ 9  64          Peripheral 4  010000C0-010000FF
+10  64          Peripheral 5  01000100-0100013F
+11  64          Peripheral 6  01000140-0100017F
+12  64          Peripheral 7  01000180-010001BF
+13  64          Peripheral 8  010001C0-010001FF
+
+The address decoding table corresponding to the memory map above is
+given in the table below.
+
+Device    A23 A22 ... A16 A15 A14 A13 A12 A11 A10 A09 A08 A07 A06 A05 A04 A03 A02 A01
+ 1 EPROM1  0  0   ...  0   0   0   0   0   0   0   0   0   0   0   0   0   0   X   X
+ 2 RAM1    0  0   ...  0   0   0   X   X   X   X   X   X   X   X   X   X   X   X   X
+ 3 RAM2    0  0   ...  0   0   1   X   X   X   X   X   X   X   X   X   X   X   X   X
+ 4 EPROM1  0  0   ...  0   1   0   X   X   X   X   X   X   X   X   X   X   X   X   X
+ 5 EPROM2  0  0   ...  0   1   1   X   X   X   X   X   X   X   X   X   X   X   X   X
+ 6 PERI1   0  0   ...  1   0   0   0   0   0   0   0   0   0   0   X   X   X   X   X
+ 7 PERI2   0  0   ...  1   0   0   0   0   0   0   0   0   0   1   X   X   X   X   X
+ 8 PERI3   0  0   ...  1   0   0   0   0   0   0   0   0   1   0   X   X   X   X   X
+ 9 PERI4   0  0   ...  1   0   0   0   0   0   0   0   0   1   1   X   X   X   X   X
+10 PERI5   0  0   ...  1   0   0   0   0   0   0   0   1   0   0   X   X   X   X   X
+11 PERI6   0  0   ...  1   0   0   0   0   0   0   0   1   0   1   X   X   X   X   X
+12 PERI7   0  0   ...  1   0   0   0   0   0   0   0   1   1   0   X   X   X   X   X
+13 PERI8   0  0   ...  1   0   0   0   0   0   0   0   1   1   1   X   X   X   X   X
+
+A five-input NOR gate, U24A, generates an active-high output whenever
+A19 to A23 are all low. Together with A18 and A17, this gate enables a
+three line to eight line decoder, U26, that divides the lower 128
+KBytes of memory space from $00000000 to $0001FFFF into eight blocks
+of 16K. The first four blocks decode the address space for the
+read/write memory and ROM. We deal with the selection of the reset
+vector memory space in ROM later.
+
+The active-low peripherals group select output of U26 (i.e. the
+address range $00010000 to $00013FFF) enabled a second three line to
+eight line decoder, U27. U27 is a 25LS2548 that has two active-low and
+two active-high enable inputs. It also has an active-low
+open-collector output, ACK*, that is asserted whenever the device is
+enabled and strobed by a negative going oulse on its RD* or WR*
+inputs.
+
+U27 is also enabled by U24B, which is high when A09 to A13 are all
+low, and by AS* from the CPU. Thus, whenever a valid address in the
+range $00010000 to $000101FF appears on the address bus, one of U27's
+active-low outputs is asserted, indicating a synchronous access to a
+peripheral by asserting the processor's VPA* input. Note that this
+arrangement is intended to be used in conjunction with 6800-series
+peripherals.
+
+An access to the reset vectors in the range $00000000 to $00000007 is
+detected by gates U24A, U25A, U24B, U25B, U10C, and U19B. When the
+output of each NOR gate is high, signifying a zero on A03 to A23, the
+output of the NAND gate U19B, RV*, goes active-low. That is, RV* is
+low whenever a reset vector is being accessed and is used to overlay
+the exception table in read/write memory with the reset vectors in
+ROM.
+
+The address decoder on page 3 can be tested to a limit extent by
+free-running the CPU and detecting decoding pulses at the outputs of
+the address decoder. A better technique is to insert a test ROM and to
+execute an infinite loop which periodically accesses the reset vector
+space. This makes it easy to observe the operation of the circuit with
+an oscilloscope.
 
 RAM and ROM Address Select (schematic page 4)
 ---------------------------------------------
+
+The selection of the individual RAM and EPROM components
 
 RAM and ROM  (schematic pages 5 and 6)
 --------------------------------------
