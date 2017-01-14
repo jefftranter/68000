@@ -274,15 +274,34 @@ DTACK and BERR Control Circuitry  (schematic page 7)
 ACIAs  (schematic page 8)
 -------------------------
 
-Omitted serial port echo feature of the original TS2.
+The only I/O ports implemented on the TS2 CPU module are the two 6850
+ACIAs show on schematic page 8. The circuit is almost identical to
+that found in the ECB module. One port is dedicated to the terminal
+(IC U29 at address $00010040) and the other (IC U30 at address
+$00010041) is dedicated to the host computer interface.
 
-Implemented using FTDI connector for USB to serial rather than true
-RS-232 which would require the connected computer to have RS-232
-serial ports.
+Omitted from my design is the serial port transparent mode feature of
+the original TS2, also present on the ECB, which connected the
+terminal interface directly to the host port whenever RTS from U29 was
+high. This means that the TS2 monitor TRAN and TUTOR TM commands will
+not operate correctly, but the transparent mode is of little use
+unless the console is actually a dumb terminal rather than a host
+computer.
 
-Optionally it can be powered by USB using either of the FTDI serial
-ports - a jumper needs to be connected to to the port where power is
-taken from, in which case an external power supply should not be used.
+An error should be noted on the schematic on page 896 of the Clements
+book. The chip selects for the ACIAs should be driven by the signal
+CS_PERI2* and not CS_PERI1* as shown in the book.
+
+My design also replaces the 1488 and 1489 RS-232 line drivers and
+receivers with an FTDI connector to support FTDI USB to serial devices
+rather than true RS-232, which would require the connected computer to
+have RS-232 serial ports. This also removed the need for +12V and -12C
+power supplies.
+
+Optionally the board it can be powered by USB using either of the FTDI
+serial ports - a jumper needs to be connected on the port where power
+is taken from, in which case an external power supply should not be
+used.
 
 Interrupt Control Circuitry  (schematic page 9)
 -----------------------------------------------
@@ -299,7 +318,8 @@ Sockets were used for all ICs and most discrete components.
 
 5 volt power connects to two binding posts. Optionally it can be
 powered by USB. Current consumption is approximately 600 mA with all
-ICs installed.
+ICs installed. The original TS2 also required +12V and -12V supplies,
+but they are not required in my design.
 
 Possible Future Enhancements
 ----------------------------
