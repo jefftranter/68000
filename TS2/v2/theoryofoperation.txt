@@ -97,7 +97,7 @@ in a DIP package. If desired, a lower speed clock oscillator can be
 used either for test purposes or to allow using a lower-speed 68000
 chip.
 
-The high impedance control circuits show on page 1 are pulled up to
+The high impedance control circuits shown on page 1 are pulled up to
 the Vcc by resistors. Although pullup resistors are necessary on BR*,
 DTACK*, etc., the reader may be surprised to find them on AS*, UDS*,
 LDS*, and R/W*. They are required here because these pins are driven
@@ -271,14 +271,92 @@ lower current consumption.
 DTACK and BERR Control Circuitry  (schematic page 7)
 ----------------------------------------------------
 
+Each memory access cycle begins with the assertion of AS* by the 68000
+and ends with the assertion of DTACK* (or VPA*) by the addressed
+device or with the assertion of BERR* by a watchdog timer. Schematic
+page 7 gives the diagram of the DTACK* and BERR* control circuitry on
+the CPU module.
+
+Whenever a block of 16 KBytes of memory is selected on the CPU module,
+one of the four select signals, SEL0* to SEL3*, goes active-low. The
+output, MSEL, of the NAND gate U19A is then forced active-high. MSEL
+becomes the ENABLE/LOAD* control input of a 74LS161 4-bit counter,
+U22. When MSEL=0 (i.e. on-board memory is not accessed), the counter
+is held in its load state and the data inputs on P0 to P3 are
+preloaded into the counter, by default 1100. The desired preload value
+can be set using DIP switches. The Q3 output from the counter is
+gated, uninverted, through U10B and U7B to form the processor's DTACK*
+input.
+
+When MSEL goes high the counter is enabled. The counter is clocked
+from the 68000's clock and counts upward from 1100. After four clock
+pulses, the counter rolls over from 1111 to 0000 and Q3 (and therefore
+DTACK*) goes low to provide the handshake required by the 68000 CPU.
+At the end of the cycle, AS* is negated and MSEL goes low to preload
+the counter with 1100 and negate DTACK*.
+
+At the same time that U22 begins counting, a second timer, U21 (another
+74LS161), also begins to count upward. The count clock is taken from
+the 68000's E output which runs at CLK/10. This counter is cleared to
+zero whenever AS* is negated. The rippled output from the counter goes
+high after the fifteenth count from zero and is inverted by the
+open-collector gate U4E to provide the CPU with a BERR* input.
+Therefore, unless AS* is negated within 15 E-clock cycles of the start
+of a bus cycle, BERR* is forced low to terminate the cycle. Note that
+the counter is disabled (Cep=0) in the singlestep mode (discussed
+later) to avoid a spurious bus error exception.
+
+A useful feature of the DTACK* circuit is the addition of a
+single-step mode, allowing the execution of a single bus cycle (note
+bus cycle, not instruction) each time a button is pushed. This
+facility can be used to debug the system by freezing the state of the
+processor.
+
+One of the inputs to the OR gate U10B is INHIBIT_DTACK. If this is
+active-high, the output of the OR gate is permanently true and the
+generation of DTACK* by the DTACK* delay circuit is inhibited.
+Therefore, a bus cycle remains frozen with AS* asserted, forcing the
+CPU to generate an infinite stream of wait states.
+
+Two positive-edge triggered D flip-flops, U20A and U23A, control
+INHIBIT_DTACK. U20A acts as a debounced switch and produces an SS/RUN*
+signal fro its Q output, depending only on the state of the
+single-step/run switch. Unfortunately, it would be unwise to use the
+output of U20A to inhibit DTACK*, because changing from run to
+single-step mode in mid bus cycle might lead to unpredictable results.
+Instead, the output of U20A is synchronized with AS* from the
+processor by a second flip-flop, U23A. The INHIBIT_DTACK signal from
+U23A is forced high only when AS* is negated at the end of a bus
+cycle. The 68000 always enters its single-step mode at the start of a
+new cycle before AS* is asserted.
+
+In the single-step mode, DTACK* pulses are generated manually by
+pressing the "step" switch. The output of this switch is debounced by
+flip-flop U20B. A second flip-flop, U23B, generates a single,
+active-low pulse, SS_DTACK*, each time the step button is pushed.
+SS_DTACK* is gated in U7B to produce the DTACK* input needed to
+terminate the current bus cycle.
+
+There are two simple ways of testing the DTACK* control circuits. One
+is in the free-run mode and is done by connecting, say, SEL0* to AS*,
+so that a delayed DTACK* is produced for each bus cycle. The
+single-step circuit can also be tested in this mode. Another procedure
+is to construct a special test rig for the circuit, which simulates
+the behavior of the 68000 by providing AS*, CLK, and SEL0* signals.
+
 ACIAs  (schematic page 8)
 -------------------------
 
 The only I/O ports implemented on the TS2 CPU module are the two 6850
-ACIAs show on schematic page 8. The circuit is almost identical to
+ACIAs shown on schematic page 8. The circuit is almost identical to
 that found in the ECB module. One port is dedicated to the terminal
 (IC U29 at address $00010040) and the other (IC U30 at address
 $00010041) is dedicated to the host computer interface.
+
+The baud rate can be selected by selecting the appropriate output of
+the baud rate generator U31, but there is little reason to use a rate
+lower than 9600 bps. The two ACIAs can also be run a different baud
+rates if desired.
 
 Omitted from my design is the serial port transparent mode feature of
 the original TS2, also present on the ECB, which connected the
@@ -306,10 +384,10 @@ used.
 Interrupt Control Circuitry  (schematic page 9)
 -----------------------------------------------
 
-To be determined. This circuitry is currently incomplete and untested.
+To be written. This circuitry is currently incomplete and untested.
 
-Design Notes
-------------
+Construction Notes
+------------------
 
 The prototype was wirewrapped on a phenolic board with 0.1" holes 6 by
 9 inches in size.
