@@ -17,7 +17,7 @@ $Descr A 11000 8500
 encoding utf-8
 Sheet 7 9
 Title "TS2 68000 Single Board Computer"
-Date "2017-01-05"
+Date "2017-01-14"
 Rev "2.0"
 Comp "Jeff Tranter"
 Comment1 "DTACK and BERR Control Circuitry"
@@ -761,8 +761,8 @@ F 3 "" H 4400 1800 50  0000 C CNN
 $EndComp
 Text Notes 3550 7400 0    60   ~ 0
 Watchdog timer
-Text Notes 5350 5000 0    60   ~ 0
-DTACK* generated in single step mode
+Text Notes 5000 5250 0    60   ~ 0
+(DTACK* generated in single step mode)
 Text Notes 650  5900 0    60   ~ 0
 A single bus cycle\nis executed each\ntime the STEP switch\nis pushed
 Text Notes 5350 3650 0    60   ~ 0
@@ -780,4 +780,10 @@ Wire Wire Line
 Connection ~ 3700 1300
 Wire Wire Line
 	3400 2000 3400 2300
+Text Notes 2550 1950 0    60   ~ 0
+MSEL
+Text Notes 4850 3500 0    60   ~ 0
+INHIBIT_DTACK
+Text Notes 5050 5050 0    60   ~ 0
+SS_DTACK*
 $EndSCHEMATC
