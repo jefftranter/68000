@@ -427,7 +427,7 @@ The interrupt circuitry can be tested from the TUTOR monitor. Pressing
 the ABORT switch should generate a level 7 interrupt which will
 produce a "SOFTWARE ABORT" message and register dump.
 
-Pulling IRQ5* or IRQ6* low should cause tutor to produce "AV#5 TRAP
+Pulling IRQ5* or IRQ6* low should cause TUTOR to produce "AV#5 TRAP
 ERROR" and "AV#6 TRAP ERROR" messages, respectively. In order for this
 to happen the interrupt mask in the status register must be set to
 enable these interrupts.
