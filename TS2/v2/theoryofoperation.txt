@@ -384,7 +384,53 @@ used.
 Interrupt Control Circuitry  (schematic page 9)
 -----------------------------------------------
 
-To be written. This circuitry is currently incomplete and untested.
+The interrupt control circuitry surrounding the 68000 is conventional.
+A 74LS148 eight line to three line priority encoder, U28, converts the
+seven levels of interrupt request input into a 3-bit code on IPL0* to
+IPL2*. Note that each interrupt request input must have a pull-up
+resistor, except IRQ7* which is always driven by U35A.
+
+The function code from the 68000 is decoded by U32, a 74LS138, and the
+resulting IACK* output is used to enable a second decoder, U33. U33 is
+also strobed by AS* and converts the information on A01 to A03 during
+an IACK cycle into one of seven levels of interrupt acknowledge output
+(IACK1* to IACK7*). Other function code information supplied by U32
+that may be useful in debugging the system is the "user/supervisor"
+memory access codes and the "program/data" bus cycle codes.
+
+The ABORT switch can generate a level 7 interrupt. This is present on
+the ECB and with the TUTOR firmware can be used to interrupt program
+execution. The switch is debounced by cross-coupled NAND gates U34A
+and U34B and then clocks flip-flop U35A high (it has its data input
+tied high). The Q* output of the flip-flop goes low, and is connected
+to the IRQ7* input. Note that, unlike interrupts 1 through 6, a level
+7 interrupt cannot be masked or disabled. During an interrupt
+acknowledge cycle for a level 7 interrupt, IACK7* will go low and
+clear the flip-flop. The IACK7* signal will also ripple through U7D,
+U34C and U4F, driving VPA* low to indicate to the 68000 to perform an
+autovectored interrupt operation. The CPU will then use the level 7
+autovector interrupt address in RAM.
+
+Interrupts 5 and 6 are connected to the two ACIAs, allowing interrupt
+driven i/o to be performed if desired (the TS2 and TUTOR monitor
+programs do not make use of this). These interrupts are used in the
+same way on the Motorola ECB board. Like level 7, the interrupts are
+also configured for autovectored operation. The relevant IACK5* or
+IACK6* signal will go low and in turn drive VPA* low to perform
+autovectored interrupt handling.
+
+IRQ4* is also available and configured for autovectored operation.
+Interrupts IRQ1* through IRQ3* are not -- they could be used with
+vectored interrupts if external circuitry is added for this.
+
+The interrupt circuitry can be tested from the TUTOR monitor. Pressing
+the ABORT switch should generate a level 7 interrupt which will
+produce a "SOFTWARE ABORT" message and register dump.
+
+Pulling IRQ5* or IRQ6* low should cause tutor to produce "AV#5 TRAP
+ERROR" and "AV#6 TRAP ERROR" messages, respectively. In order for this
+to happen the interrupt mask in the status register must be set to
+enable these interrupts.
 
 Construction Notes
 ------------------
