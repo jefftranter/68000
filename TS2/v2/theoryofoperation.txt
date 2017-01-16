@@ -129,7 +129,7 @@ starts a memory access by asserting AS*, DTACK* is automatically
 asserted to complete the cycle.
 
 The 68000 is a tricky beast to test in a free-running mode, because it
-generates an exception if a nonvalid op-code is detected. Should the
+generates an exception if an invalid op-code is detected. Should the
 68000 then generate a second exception, the resulting bus fault will
 cause it to halt. Therefore, the 68000 must always see a valid op-code
 on its data bus. One way of doing this is to pull up (or down) the
@@ -154,7 +154,7 @@ Address Decoding (schematic page 3)
 
 The specification for the TS2 CPU module calls for up to 32 Kbytes of
 static RAM and up to 32 Kbytes of EPROM at the bottom of the
-processors 16-MByte address space, permitting up to eight
+processor's 16-MByte address space, permitting up to eight
 memory-mapped components, each occupying 64 bytes. The table below
 gives the memory map of the TS2 CPU module.
 
@@ -264,7 +264,7 @@ conflict if a write access is made to EPROM memory space.
 
 The original design used 2764 ultraviolet-erasable EPROMs. It is also
 compatible with 2864 electrically erasable EEPROMs. Either will work,
-but the later are more easily erased and programmed. It can also use
+but the latter are more easily erased and programmed. It can also use
 more modern CMOS memory devices (e.g. 27C64 and 28C64) which have
 lower current consumption.
 
@@ -295,15 +295,15 @@ DTACK*) goes low to provide the handshake required by the 68000 CPU.
 At the end of the cycle, AS* is negated and MSEL goes low to preload
 the counter with 1100 and negate DTACK*.
 
-At the same time that U22 begins counting, a second timer, U21 (another
-74LS161), also begins to count upward. The count clock is taken from
-the 68000's E output which runs at CLK/10. This counter is cleared to
-zero whenever AS* is negated. The rippled output from the counter goes
-high after the fifteenth count from zero and is inverted by the
-open-collector gate U4E to provide the CPU with a BERR* input.
+At the same time that U22 begins counting, a second timer, U21
+(another 74LS161), also begins to count upward. The count clock is
+taken from the 68000's E output which runs at CLK/10. This counter is
+cleared to zero whenever AS* is negated. The rippled output from the
+counter goes high after the fifteenth count from zero and is inverted
+by the open-collector gate U4E to provide the CPU with a BERR* input.
 Therefore, unless AS* is negated within 15 E-clock cycles of the start
 of a bus cycle, BERR* is forced low to terminate the cycle. Note that
-the counter is disabled (Cep=0) in the singlestep mode (discussed
+the counter is disabled (Cep=0) in the single-step mode (discussed
 later) to avoid a spurious bus error exception.
 
 A useful feature of the DTACK* circuit is the addition of a
