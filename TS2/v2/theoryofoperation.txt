@@ -53,6 +53,10 @@ Specifications of the TS2
 12. The module's local address and data buses have not been buffered
     as the CPU has adequate fanout.
 
+An additional goal was to replicate the original Teesside TS computer
+using parts of its era, so not significant designs changes were made
+to use a more modern approach like PALs, GALs, ULAs, etc.
+
 Top Level Schematic (schematic page 1)
 --------------------------------------
 
