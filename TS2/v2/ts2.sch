@@ -17,7 +17,7 @@ $Descr A 11000 8500
 encoding utf-8
 Sheet 1 9
 Title "TS2 68000 Single Board Computer"
-Date "2017-01-15"
+Date "2017-01-19"
 Rev "2.0"
 Comp "Jeff Tranter"
 Comment1 "Top Level Schematic"
@@ -453,4 +453,11 @@ F 3 "" H 2150 5550 50  0000 C CNN
 	1    2150 5550
 	1    0    0    -1  
 $EndComp
+Text GLabel 2550 6000 2    60   Input ~ 0
+POWER
+Wire Wire Line
+	2550 6000 2250 6000
+Wire Wire Line
+	2250 6000 2250 5450
+Connection ~ 2250 5450
 $EndSCHEMATC

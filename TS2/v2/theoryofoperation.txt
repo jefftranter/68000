@@ -63,7 +63,10 @@ Top Level Schematic (schematic page 1)
 Each IC has a 0.1 uF ceramic bypass capacitor across the Vcc and GND
 pins. A single 100 uF capacitor provides additional power supply
 filtering. It requires a +5 volt supply. A switch controls power and a
-green LED (D2) indicates power on.
+green LED (D2) indicates power on. Power can come from the external
+supply or from one of the two USB to serial ports on page 8.
+
+Diode D3 provides protection against reversed power supply polarity.
 
 The majority of chips are 7400 series LS family TTL devices. There are
 a few spare gates. Their inputs are grounded as per standard TTL

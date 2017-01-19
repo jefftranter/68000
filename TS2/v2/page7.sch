@@ -17,7 +17,7 @@ $Descr A 11000 8500
 encoding utf-8
 Sheet 8 9
 Title "TS2 68000 Single Board Computer"
-Date "2017-01-15"
+Date "2017-01-19"
 Rev "2.0"
 Comp "Jeff Tranter"
 Comment1 "ACIAs"
@@ -509,8 +509,7 @@ Wire Wire Line
 Connection ~ 2400 4150
 Text Notes 8450 4550 0    60   ~ 0
 Auxiliary (host) Serial Port
-NoConn ~ 8600 2200
-NoConn ~ 8600 5050
+NoConn ~ 8600 2100
 Wire Wire Line
 	5300 800  5300 1850
 Wire Wire Line
@@ -523,31 +522,20 @@ Connection ~ 8050 1250
 $Comp
 L Jumper_NO_Small JP5
 U 1 1 586F01C1
-P 8500 2100
-F 0 "JP5" H 8450 2000 50  0000 C CNN
-F 1 "Jumper_NO_Small" H 8510 2040 50  0001 C CNN
-F 2 "" H 8500 2100 50  0000 C CNN
-F 3 "" H 8500 2100 50  0000 C CNN
-	1    8500 2100
+P 8500 2200
+F 0 "JP5" H 8450 2250 50  0000 C CNN
+F 1 "Jumper_NO_Small" H 8510 2140 50  0001 C CNN
+F 2 "" H 8500 2200 50  0000 C CNN
+F 3 "" H 8500 2200 50  0000 C CNN
+	1    8500 2200
 	1    0    0    -1  
 $EndComp
-$Comp
-L VCC #PWR0104
-U 1 1 586F01FE
-P 8200 2100
-F 0 "#PWR0104" H 8200 1950 50  0001 C CNN
-F 1 "VCC" H 8200 2250 50  0000 C CNN
-F 2 "" H 8200 2100 50  0000 C CNN
-F 3 "" H 8200 2100 50  0000 C CNN
-	1    8200 2100
-	0    -1   -1   0   
-$EndComp
 Wire Wire Line
-	8200 2100 8400 2100
+	8200 2200 8400 2200
 Text Notes 8350 2800 0    60   ~ 0
 Console (terminal) Serial Port
-Text Notes 8350 3100 0    60   ~ 0
-Connect jumper JP5 to use optional USB\npower instead of external power supply.
+Text Notes 8150 3100 0    60   ~ 0
+Connect jumper JP5 or JP6 to use optional USB\npower instead of external power supply.
 Text GLabel 2100 3850 0    60   Output ~ 0
 IRQ5*
 Wire Wire Line
@@ -556,4 +544,21 @@ Wire Wire Line
 	3450 6700 2050 6700
 Text GLabel 2050 6700 0    60   Output ~ 0
 IRQ6*
+$Comp
+L Jumper_NO_Small JP6
+U 1 1 5880D454
+P 8500 5050
+F 0 "JP6" H 8450 5100 50  0000 C CNN
+F 1 "Jumper_NO_Small" H 8510 4990 50  0001 C CNN
+F 2 "" H 8500 5050 50  0000 C CNN
+F 3 "" H 8500 5050 50  0000 C CNN
+	1    8500 5050
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8100 5050 8400 5050
+Text GLabel 8200 2200 0    60   Output ~ 0
+POWER
+Text GLabel 8100 5050 0    60   Output ~ 0
+POWER
 $EndSCHEMATC
