@@ -1,0 +1,160 @@
+                        68000 fig-FORTH
+
+This version of FORTH implements the fig-FORTH model presented in the
+FORTH Interest Group's Installation Manual in code for the Motorola
+68000 microprocessor. The listing presented here after is identical to
+the version 1.0 of Kenneth Mantei, except that this is in standard
+Motorola assembler format. The transcription was done by members of
+the Dutch fig chapter, as it was felt that this format would greatly
+enhance the usability. Then this introduction was made to match the
+new listing. It is a 64 K version,using conventional two-byte
+addresses, which does not make use of the 32-bit addressing
+capabilities of the 68000. Primitive words are located at
+2000-2500H,with the six-byte inner interpreter appended to each word.
+Constants and variables run from 2500-2700H. Most of the constants
+relate to hardware and it seemed desirable to locate these on the USER
+page, So a new primitive, (USERCONSTANT) was defined that requires no
+modification to FORTH source material,but gets constants from the USER
+page. The rest of the kernal runs from 2700-3000H. The conditional
+compiler,math words,output words,and VLIST run from 3000- 3400H. Disc
+I/O and boot-up code runs from 3400-3700H. FORTH is entered by a jump
+to the COLD label (at 364E).or the warm start at the label WARM (at
+368A).
+
+The 1802 model used as a starting point assumed 128-byte buffer
+blocks. Modifications were made in +BUF to handle automatically
+1024,512, and 256 byte buffers as well. "84" was replaced by "B/BUF 4
++ ". Similarly,the null word X,was modified to handle 1,2,4,as well as
+the original 8 buffers/screen, "7" was replaced by "B/SCR 1 -", B/BUF
+and B/SCR,now userconstants on the USER page need only be chosen to
+give 1024 bytes/screen.
+
+CREATE originally assumed that unchecked dictionary growth would run
+into the computation stack. To enable the latter to be located
+arbitrarily, a USER variable, DICTLIMIT,has been introduced. CREATE
+now checks to be sure the dictionary is not exceeding DICTLIMIT,rather
+than encountering the computation stack. to ensure that LFA's fall on
+even addresses, as required by the 68000,CREATE has also been modified
+to insert 00 fill bytes ahead of NFA's when necessary.
+
+Kenneth Mantei changed CMOVE to an intelligent move in this version,
+hence it does not agree with the fig standard and cannot be used by
+FILL. To abide by the fig standards you may perform the modification
+suggested in the listing.
+
+The 68000 is considered a word addressing processor, so ! and @ do not
+handle odd addresses. However C@ C! C, CMOVE all work as expected
+(with the aforementionned restriction with respect to CMOVE)
+
+A new code word,C=,has been added that functions like = except that
+only the low bytes are compared. This is used in EXPECT a couple of
+times to replace =. EXPECT has also been modified to get its
+backspace-keyin and backspace-output ASCII codes from the USER
+page,where they are called BKSPKEY and BKSPEMIT.
+
+
++ORIGIN accesses the same bootup parameters,exactly as shown on SCR#
+79 and 97 of the Installation Manual. However,the bootups are now
+located in COLD,rather than in front of FORTH.
+
+224 words are listed in the glossary of the Installation Manual,
+Modification of 4 of these: CMOVE,FILL,EXPECT and CREATE has been
+mentioned above. 17 other glossary words have been ommitted in this
+implementation:
+   (ABORT) ;CODE .CPU FLUSH TASK TRIAD DR1 (from the general
+   FIG-model) and LIST MON MOVE BLOCK-READ BLOCK-WRITE NEXT POP PUSH
+   and PUT (only compared with the 1802 source).
+18 words not appearing in the glossary,are added:
+   ORIGIN CURRENT C/L C= !CODE (VAR) (CONST) (USERCONSTANT) (NEST)
+   BKSPKEY BKSPEMIT DICTLIMIT EMITSUB KEYSUB ?TERMSUB CRSUB and
+   R/WSUB.
+
+We aschewed the use of advanced features in the assembler such as
+macros as they may not be available on all assemblers. Actually we
+used ourselves the A68k public domain CP/M cross assembler from QUELO.
+Some labels in repeat loops have been replaced by the SET directive.
+This releaves the burden on the symbol table (in our case crucial) and
+it is also cleaner because it shows that the label is strictly local.
+
+
+                                REGISTER ALLOCATION
+
+Address registers are numbered A0..A7 in the 68000 and data registers
+are D0...D7. Five address registers are dedicated pointers. A3 is CS,
+the computation stack pointer which grows toward low memory and is
+always pointing at the high order (but lower memory) byte of the top
+2-byte stack cell. A4 is IP,the instruction pointer,which is
+incremented when used, to point to the next cell. A5 is the word
+pointer,loaded as usual via IP and incremented as used, A6 is US, the
+USER page pointer with which offset addresses are used to locate USER
+variables and userconstants. A7 is RS ,the return stack,which operates
+like CS. Any code routines that use A3-A7 must save and restore them.
+
+                              RUNNING 68000 fig-FORTH
+
+1. Load the 68000 code into a 68000 system from 2000-370B or at
+whatever place you choose to assemble.
+
+2. Write 68000 code subroutines for EMIT,KEY,?TERMINAL.CR, and R/W and
+put the addresses of these subroutines at bytes 40-49 on the USER page
+by filling them into the appropriate locations in the COLDUS data
+block. It is much easier to append the customized code to the 68000
+source and assemble the whole lot in one go. The addresses of the
+subroutines will be filled in automatically correct. Data register D0
+is used to pass ASCII bytes in EMIT and KEY,and the flag in ?TERMINAL.
+Remember to save and restore address register A3-A7 if they are used.
+FORTH will look on the user page for the addresses of these
+subroutines, and COLD will have put them there.
+
+3. Fit U0 S0 R0 TIB BKSPKEY BKSPEMIT DICTLIMIT FIRST LIMIT USE PREV
+B/BUF and B/SCR to fit your hardware. Do this by changing the
+addresses in COLD as needed. If desired, on the first attempt to bring
+this system up, WARNING can be left 0. But it must be rest to 1 in
+order for the disc words to function.
+
+4. Run by jumping to the label COLD (364E in the unmodified case) or
+later to WARM (368A).
+
+
+                        LAST MINUTE NOTES
+
+Since the release of 1.0 one significant bug has been found. The +LOOP
+of version 1.0 can not handle negative increments. Also it was found
+that 1.0 could not fetch data from odd addresses, but it could be
+argued that this is not too bad for a 16 bit processor. For both
+problems Kenneth Mantei has supplied fixes, and they are to be found
+in the appendix at page 58. Both fixes are fully relocatable, so you
+may use the hex code directly as found in the assembly listing. No
+address translation is necessary.
+If you type in the assembly listing for yourself you may replace the
+source of the listing for @ and (+LOOP) by the code given in the
+appendix.
+
+To use the fix in an existing system type
+
+HEX HERE 3053 , <other hex code > 4ED0 ,
+' @  CFA !
+
+and similar for (+LOOP), replace @ by (+LOOP).
+
+Before you could do a cold start with this patch, you have to adjust
+the dictionary start value in the bootup block, at address
+COLDUS+$0012
+
+HEX HERE 368A !
+
+It is cleaner to store HERE in COLDUS+$0010 (cold fence) as well, but
+no harm can be done as it is not possible to forget orphan code
+without forgetting the preceeding word.
+
+Also included in the appendix is an implementation of the fig_FORTH
+MATCH word that is needed for the string editing words of the EDITOR
+presented in the fig-FORTH INSTALLATION MANUAL GLOSSARY MODEL RELEASE
+1, MAY 1979. This was written by Kenneth Mantei to work with this
+fig-FORTH.
+
+The MATCH word can also be "comma"ed in as usual:
+
+CREATE MATCH 301B , < hex code > 4ED0 , SMUDGE ;S
+
+The code of MATCH is relocatable as well
