@@ -54,8 +54,8 @@ Specifications of the TS2
     as the CPU has adequate fanout.
 
 An additional goal was to replicate the original Teesside TS computer
-using parts of its era, so not significant designs changes were made
-to use a more modern approach like PALs, GALs, ULAs, etc.
+using parts of its era, so no significant design changes were made to
+use a more modern approach like PALs, GALs, ULAs, etc.
 
 Top Level Schematic (schematic page 1)
 --------------------------------------
@@ -461,7 +461,8 @@ Printed circuit board.
 Replace baud rate generator with fixed clock oscillator/counter.
 Add one or two PIA, VIA, or PIT chips.
 Add some connectors for external parallel i/o, interrupts, etc.
-Use more common chip(s) in place of 25LS248
+Use more common chip(s) in place of 25LS248 (could use A 74LS138 plus
+a 74LS06 and another gate or two)
 On-board 5 volt regulator/buck converter.
 Support higher baud rates (through jumpers or software).
 Add a seven segment LED display for diagnostics?
