@@ -1,46 +1,46 @@
                 TS2 68000 Computer Theory Of Operation
                 ======================================
 
-This is based on the "Design Example Using the 68000" section of the
-book "Microprocessor Systems Design 68000 Hardware, Software, and
-Interfacing", third edition, by Alan Clements. It has been adjusted to
-reflect my modified design. Refer to the schematic diagram when
-reading the following sections.
+This description is based on the "Design Example Using the 68000"
+section of the book "Microprocessor Systems Design 68000 Hardware,
+Software, and Interfacing", third edition, by Alan Clements. It has
+been adjusted to reflect my modified design. Refer to the schematic
+diagram when reading the following sections.
 
 Specifications of the TS2
 -------------------------
 
-1. The TS2 uses a 68000 CPU.
+1.  The TS2 uses an 8 MHz 68000 CPU.
 
-2. It is built on a single circuit board.
+2.  It is built on a single circuit board.
 
-3. The CPU card is capable of operating on its own. System testing is
-   thus facilitated because other modules are not required to operate
-   the CPU card in a stand-alone mode.
+3.  The CPU card is capable of operating on its own. System testing is
+    thus facilitated because other modules are not required to operate
+    the CPU card in a stand-alone mode.
 
-4. The original TS2 provided an external bus. This was omitted in my
-   design as it was not required and reduced the chip count
-   considerably.
+4.  The original TS2 provided an external bus. This was omitted in my
+    design as it was not required and reduced the chip count
+    considerably.
 
-5. The memory on the CPU card is static RAM and EPROM/EEPROM to avoid
-   the complexity and associated difficulty of debugging dynamic RAM
-   circuitry.
+5.  The memory on the CPU card is static RAM and EPROM/EEPROM to avoid
+    the complexity and associated difficulty of debugging dynamic RAM
+    circuitry.
 
-6. Full seven-level interrupt facilities are provided, but are
-   optional. If included, these can support a level 7 interrupt
-   (abort) switch, interrupts from the two ACIAs, and external
-   interrupts.
+6.  Full seven-level interrupt facilities are provided, but are
+    optional. If included, these can support a level 7 interrupt
+    (abort) switch, interrupts from the two ACIAs, and external
+    interrupts.
 
-7. Full address decoding is provided. The address space is compatible
-   with the Motorola MEX68KECB Educational Computer Board (ECB)
-   development system in order to facilitate the transfer of software
-   between the TS2 and ECB.
+7.  Full address decoding is provided. The address space is compatible
+    with the Motorola MEX68KECB Educational Computer Board (ECB)
+    development system in order to facilitate the transfer of software
+    between the TS2 and ECB.
 
-8. The vector table at $00000000 to $000003FF is implemented in RAM,
-   with the exception of the reset vectors which are mapped to the
-   first 8 bytes of ROM (this is described in more detail later).
+8.  The vector table at $00000000 to $000003FF is implemented in RAM,
+    with the exception of the reset vectors which are mapped to the
+    first 8 bytes of ROM (this is described in more detail later).
 
-9. The RAM is implemented by 8Kx8 CMOS devices to minimize the
+9.  The RAM is implemented by 8Kx8 CMOS devices to minimize the
     component count.
 
 10. The ROM is implemented by 2764 type 8Kx8 EPROMs or 2864 type 8Kx8
@@ -60,11 +60,11 @@ use a more modern approach like PALs, GALs, ULAs, etc.
 Top Level Schematic (schematic page 1)
 --------------------------------------
 
-Each IC has a 0.1 uF ceramic bypass capacitor across the Vcc and GND
-pins. A single 100 uF capacitor provides additional power supply
-filtering. It requires a +5 volt supply. A switch controls power and a
-green LED (D2) indicates power on. Power can come from the external
-supply or from one of the two USB to serial ports on page 8.
+Each IC has a 0.1 uF ceramic bypass capacitor across the Vcc and
+ground pins. A single 100 uF capacitor provides additional power
+supply filtering. It requires a +5 volt supply. A switch controls
+power and a green LED (D2) indicates power on. Power can come from the
+external supply or from one of the two USB to serial ports on page 8.
 
 Diode D3 provides protection against reversed power supply polarity.
 
@@ -105,7 +105,7 @@ used either for test purposes or to allow using a lower-speed 68000
 chip.
 
 The high impedance control circuits shown on page 1 are pulled up to
-the Vcc by resistors. Although pullup resistors are necessary on BR*,
+Vcc by resistors. Although pullup resistors are necessary on BR*,
 DTACK*, etc., the reader may be surprised to find them on AS*, UDS*,
 LDS*, and R/W*. They are required here because these pins are driven
 by tristate outputs in the 68000. When the 68000 relinquishes the bus
@@ -231,7 +231,7 @@ low whenever a reset vector is being accessed and is used to overlay
 the exception table in read/write memory with the reset vectors in
 ROM.
 
-The address decoder on page 3 can be tested to a limit extent by
+The address decoder on page 3 can be tested to a limited extent by
 free-running the CPU and detecting decoding pulses at the outputs of
 the address decoder. A better technique is to insert a test ROM and to
 execute an infinite loop which periodically accesses the reset vector
@@ -362,7 +362,7 @@ $00010041) is dedicated to the host computer interface.
 
 The baud rate can be selected by selecting the appropriate output of
 the baud rate generator U31, but there is little reason to use a rate
-lower than 9600 bps. The two ACIAs can also be run a different baud
+lower than 9600 bps. The two ACIAs can also be run at different baud
 rates if desired.
 
 Omitted from my design is the serial port transparent mode feature of
@@ -373,6 +373,13 @@ not operate correctly, but the transparent mode is of little use
 unless the console is actually a dumb terminal rather than a host
 computer.
 
+If desired, the second (host) 6850 ACIA can be omitted as it is not
+particularly useful. If the console port is connected to a computer,
+files can be uploaded and downloaded through the console port.
+Separate console and host ports made sense in the days of dumb
+terminals, but today most terminal emulator programs can support file
+transfers.
+
 An error should be noted on the schematic on page 896 of the Clements
 book. The chip selects for the ACIAs should be driven by the signal
 CS_PERI2* and not CS_PERI1* as shown in the book.
@@ -381,12 +388,13 @@ My design also replaces the 1488 and 1489 RS-232 line drivers and
 receivers with an FTDI connector to support FTDI USB to serial devices
 rather than true RS-232, which would require the connected computer to
 have RS-232 serial ports. This also removed the need for +12V and -12C
-power supplies.
+power supplies. It does have the limitation that the board cannot be
+connected to true RS-232 serial ports.
 
-Optionally the board it can be powered by USB using either of the FTDI
+Optionally, the board can be powered by USB using either of the FTDI
 serial ports - a jumper needs to be connected on the port where power
-is taken from, in which case an external power supply should not be
-used.
+is taken from (one or the other, but not both), in which case an
+external power supply should not be used.
 
 Interrupt Control Circuitry  (schematic page 9)
 -----------------------------------------------
@@ -402,7 +410,7 @@ resulting IACK* output is used to enable a second decoder, U33. U33 is
 also strobed by AS* and converts the information on A01 to A03 during
 an IACK cycle into one of seven levels of interrupt acknowledge output
 (IACK1* to IACK7*). Other function code information supplied by U32
-that may be useful in debugging the system is the "user/supervisor"
+that may be useful in debugging the system in the "user/supervisor"
 memory access codes and the "program/data" bus cycle codes.
 
 The ABORT switch can generate a level 7 interrupt. This is present on
@@ -428,7 +436,7 @@ autovectored interrupt handling.
 
 IRQ4* is also available and configured for autovectored operation.
 Interrupts IRQ1* through IRQ3* are not -- they could be used with
-vectored interrupts if external circuitry is added for this.
+vectored interrupts if external circuitry was added for this.
 
 The interrupt circuitry can be tested from the TUTOR monitor. Pressing
 the ABORT switch should generate a level 7 interrupt which will
@@ -460,12 +468,15 @@ Ideas for a possible rev 2.x:
 Printed circuit board.
 Replace baud rate generator with fixed clock oscillator/counter.
 Add one or two PIA, VIA, or PIT chips.
+Optionally support line drivers/receivers for true RS-232 serial ports.
 Add some connectors for external parallel i/o, interrupts, etc.
 Use more common chip(s) in place of 25LS248 (could use A 74LS138 plus
 a 74LS06 and another gate or two)
 On-board 5 volt regulator/buck converter.
 Support higher baud rates (through jumpers or software).
-Add a seven segment LED display for diagnostics?
+Add a seven segment LED display for diagnostics? (see Clements book
+p.649 for possible approach)
 Prototype area?
 Support either RAM or EPROM/EEPROM in all sockets.
+Optionally (jumper) allow EEPROM to be written to.
 Support larger RAM and ROM chips (e.g. 27128, 27256, etc. Impacts memory map).
