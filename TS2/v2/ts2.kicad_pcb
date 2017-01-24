@@ -3,7 +3,7 @@
   (general
     (links 625)
     (no_connects 625)
-    (area 12.607857 10.55646 210.007381 218.145)
+    (area 15.147857 13.39 203.650001 218.272)
     (thickness 1.6)
     (drawings 0)
     (tracks 0)
@@ -70,7 +70,7 @@
     (pad_drill 0.6)
     (pad_to_mask_clearance 0.2)
     (aux_axis_origin 0 0)
-    (visible_elements FFFFE77F)
+    (visible_elements FFFFF77F)
     (pcbplotparams
       (layerselection 0x00030_80000001)
       (usegerberextensions false)
@@ -525,12 +525,12 @@
     (add_net VPA*)
   )
 
-  (module Capacitors_ThroughHole:C_Disc_D3_P2.5 (layer F.Cu) (tedit 0) (tstamp 58867ED7)
-    (at 35.56 158.75)
+  (module Capacitors_ThroughHole:C_Disc_D3_P2.5 (layer F.Cu) (tedit 58868BEC) (tstamp 58867ED7)
+    (at 39.37 167.64)
     (descr "Capacitor 3mm Disc, Pitch 2.5mm")
     (tags Capacitor)
     (path /57B645BE/57B64B92)
-    (fp_text reference C1 (at 1.25 -2.5) (layer F.SilkS)
+    (fp_text reference C1 (at 2.286 0.508) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.15)))
     )
     (fp_text value 0.1uF (at 1.25 2.5) (layer F.Fab)
@@ -554,7 +554,7 @@
   )
 
   (module Capacitors_ThroughHole:C_Disc_D3_P2.5 (layer F.Cu) (tedit 0) (tstamp 58867EE3)
-    (at 29.845 158.115)
+    (at 45.212 166.116)
     (descr "Capacitor 3mm Disc, Pitch 2.5mm")
     (tags Capacitor)
     (path /57B645BE/57B64BA1)
@@ -582,7 +582,7 @@
   )
 
   (module Capacitors_ThroughHole:C_Disc_D12_P7.75 (layer F.Cu) (tedit 0) (tstamp 58867EF1)
-    (at 27.94 153.035)
+    (at 27.94 166.624)
     (descr "Capacitor 12mm Disc, Pitch 7.75mm")
     (tags Capacitor)
     (path /57B645BE/57B64BB0)
@@ -612,14 +612,14 @@
   )
 
   (module Capacitors_ThroughHole:C_Radial_D5_L6_P2.5 (layer F.Cu) (tedit 0) (tstamp 58867F19)
-    (at 55.88 15.875)
+    (at 64.135 18.415 180)
     (descr "Radial Electrolytic Capacitor Diameter 5mm x Length 6mm, Pitch 2.5mm")
     (tags "Electrolytic Capacitor")
     (path /57D36826)
-    (fp_text reference C4 (at 1.25 -3.8) (layer F.SilkS)
+    (fp_text reference C4 (at 1.25 -3.8 180) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.15)))
     )
-    (fp_text value 100uF (at 1.25 3.8) (layer F.Fab)
+    (fp_text value 100uF (at 1.25 3.8 180) (layer F.Fab)
       (effects (font (size 1 1) (thickness 0.15)))
     )
     (fp_line (start 1.325 -2.499) (end 1.325 2.499) (layer F.SilkS) (width 0.15))
@@ -656,9 +656,9 @@
     (fp_circle (center 2.5 0) (end 2.5 -0.9) (layer F.SilkS) (width 0.15))
     (fp_circle (center 1.25 0) (end 1.25 -2.5375) (layer F.SilkS) (width 0.15))
     (fp_circle (center 1.25 0) (end 1.25 -2.8) (layer F.CrtYd) (width 0.05))
-    (pad 1 thru_hole rect (at 0 0) (size 1.3 1.3) (drill 0.8) (layers *.Cu *.Mask F.SilkS)
+    (pad 1 thru_hole rect (at 0 0 180) (size 1.3 1.3) (drill 0.8) (layers *.Cu *.Mask F.SilkS)
       (net 5 VCC))
-    (pad 2 thru_hole circle (at 2.5 0) (size 1.3 1.3) (drill 0.8) (layers *.Cu *.Mask F.SilkS)
+    (pad 2 thru_hole circle (at 2.5 0 180) (size 1.3 1.3) (drill 0.8) (layers *.Cu *.Mask F.SilkS)
       (net 2 GND))
     (model Capacitors_ThroughHole.3dshapes/C_Radial_D5_L6_P2.5.wrl
       (at (xyz 0.0492126 0 0))
@@ -668,7 +668,7 @@
   )
 
   (module Capacitors_ThroughHole:C_Disc_D3_P2.5 (layer F.Cu) (tedit 0) (tstamp 58867F25)
-    (at 28.575 16.51)
+    (at 32.385 25.4)
     (descr "Capacitor 3mm Disc, Pitch 2.5mm")
     (tags Capacitor)
     (path /57D36890)
@@ -696,7 +696,7 @@
   )
 
   (module Capacitors_ThroughHole:C_Disc_D3_P2.5 (layer F.Cu) (tedit 0) (tstamp 58867F31)
-    (at 45.085 17.78)
+    (at 48.895 26.67)
     (descr "Capacitor 3mm Disc, Pitch 2.5mm")
     (tags Capacitor)
     (path /588680EB)
@@ -724,7 +724,7 @@
   )
 
   (module Capacitors_ThroughHole:C_Disc_D3_P2.5 (layer F.Cu) (tedit 0) (tstamp 58867F3D)
-    (at 74.93 18.415)
+    (at 72.39 27.305)
     (descr "Capacitor 3mm Disc, Pitch 2.5mm")
     (tags Capacitor)
     (path /58868128)
@@ -752,7 +752,7 @@
   )
 
   (module Capacitors_ThroughHole:C_Disc_D3_P2.5 (layer F.Cu) (tedit 0) (tstamp 58867F49)
-    (at 86.995 19.05)
+    (at 88.9 27.305)
     (descr "Capacitor 3mm Disc, Pitch 2.5mm")
     (tags Capacitor)
     (path /58868168)
@@ -780,7 +780,7 @@
   )
 
   (module Capacitors_ThroughHole:C_Disc_D3_P2.5 (layer F.Cu) (tedit 0) (tstamp 58867F55)
-    (at 99.695 17.78)
+    (at 100.965 27.305)
     (descr "Capacitor 3mm Disc, Pitch 2.5mm")
     (tags Capacitor)
     (path /588681A7)
@@ -808,7 +808,7 @@
   )
 
   (module Capacitors_ThroughHole:C_Disc_D3_P2.5 (layer F.Cu) (tedit 0) (tstamp 58867F61)
-    (at 116.205 15.24)
+    (at 117.475 24.13)
     (descr "Capacitor 3mm Disc, Pitch 2.5mm")
     (tags Capacitor)
     (path /588681ED)
@@ -1144,7 +1144,7 @@
   )
 
   (module Capacitors_ThroughHole:C_Disc_D3_P2.5 (layer F.Cu) (tedit 588683D9) (tstamp 58867FF1)
-    (at 139.065 40.64)
+    (at 145.415 43.815)
     (descr "Capacitor 3mm Disc, Pitch 2.5mm")
     (tags Capacitor)
     (path /588696EC)
@@ -1620,7 +1620,7 @@
   )
 
   (module Connect:PINHEAD1-2 (layer F.Cu) (tedit 0) (tstamp 588680BC)
-    (at 43.815 213.36)
+    (at 58.674 213.487)
     (path /57B645BE/57CAEF00)
     (attr virtual)
     (fp_text reference D1 (at 0 -3.9) (layer F.SilkS)
@@ -1641,7 +1641,7 @@
   )
 
   (module Connect:PINHEAD1-2 (layer F.Cu) (tedit 0) (tstamp 588680C7)
-    (at 59.69 213.36)
+    (at 73.914 213.487)
     (path /57D89DCF)
     (attr virtual)
     (fp_text reference D2 (at 0 -3.9) (layer F.SilkS)
@@ -1662,7 +1662,7 @@
   )
 
   (module Diodes_ThroughHole:Diode_DO-35_SOD27_Horizontal_RM10 (layer F.Cu) (tedit 552FFC30) (tstamp 588680D6)
-    (at 79.375 15.24)
+    (at 83.185 18.415)
     (descr "Diode, DO-35,  SOD27, Horizontal, RM 10mm")
     (tags "Diode, DO-35, SOD27, Horizontal, RM 10mm, 1N4148,")
     (path /585E8EAF)
@@ -1693,7 +1693,7 @@
   )
 
   (module Buttons_Switches_ThroughHole:SW_DIP_x1_Slide (layer F.Cu) (tedit 54C4BC96) (tstamp 588680E9)
-    (at 73.66 132.715 90)
+    (at 78.74 142.748 90)
     (descr "CTS Electrocomponents, Series 206/208")
     (path /57C4D163/57D82D4E)
     (fp_text reference JP1 (at 0 -10 90) (layer F.SilkS)
@@ -1727,7 +1727,7 @@
   )
 
   (module Buttons_Switches_ThroughHole:SW_DIP_x1_Slide (layer F.Cu) (tedit 54C4BC96) (tstamp 588680FC)
-    (at 66.04 139.065 270)
+    (at 69.85 147.955 270)
     (descr "CTS Electrocomponents, Series 206/208")
     (path /57C4D163/57D84338)
     (fp_text reference JP2 (at 0 -10 270) (layer F.SilkS)
@@ -1761,7 +1761,7 @@
   )
 
   (module Buttons_Switches_ThroughHole:SW_DIP_x1_Slide (layer F.Cu) (tedit 54C4BC96) (tstamp 5886810F)
-    (at 66.04 144.145 270)
+    (at 69.85 153.035 270)
     (descr "CTS Electrocomponents, Series 206/208")
     (path /57C4D163/57D82D8D)
     (fp_text reference JP3 (at 0 -10 270) (layer F.SilkS)
@@ -1795,7 +1795,7 @@
   )
 
   (module Buttons_Switches_ThroughHole:SW_DIP_x1_Slide (layer F.Cu) (tedit 54C4BC96) (tstamp 58868122)
-    (at 73.66 149.225 90)
+    (at 77.47 158.115 90)
     (descr "CTS Electrocomponents, Series 206/208")
     (path /57C4D163/57D842DD)
     (fp_text reference JP4 (at 0 -10 90) (layer F.SilkS)
@@ -1829,7 +1829,7 @@
   )
 
   (module Buttons_Switches_ThroughHole:SW_DIP_x1_Slide (layer F.Cu) (tedit 54C4BC96) (tstamp 58868135)
-    (at 108.585 146.685 270)
+    (at 112.395 155.575 270)
     (descr "CTS Electrocomponents, Series 206/208")
     (path /57C65407/586F01C1)
     (fp_text reference JP5 (at 0 -10 270) (layer F.SilkS)
@@ -1863,7 +1863,7 @@
   )
 
   (module Buttons_Switches_ThroughHole:SW_DIP_x1_Slide (layer F.Cu) (tedit 54C4BC96) (tstamp 58868148)
-    (at 109.22 168.275 270)
+    (at 113.03 177.165 270)
     (descr "CTS Electrocomponents, Series 206/208")
     (path /57C65407/5880D454)
     (fp_text reference JP6 (at 0 -10 270) (layer F.SilkS)
@@ -1897,7 +1897,7 @@
   )
 
   (module Connect:PINHEAD1-6 (layer F.Cu) (tedit 0) (tstamp 5886815A)
-    (at 115.57 136.525 270)
+    (at 119.38 145.415 270)
     (path /57C65407/57CB19C8)
     (attr virtual)
     (fp_text reference P1 (at 0 -3.75 270) (layer F.SilkS)
@@ -1929,7 +1929,7 @@
   )
 
   (module Connect:PINHEAD1-6 (layer F.Cu) (tedit 0) (tstamp 5886816C)
-    (at 115.57 156.845 270)
+    (at 119.38 165.735 270)
     (path /57C65407/57CB1A88)
     (attr virtual)
     (fp_text reference P2 (at 0 -3.75 270) (layer F.SilkS)
@@ -1961,7 +1961,7 @@
   )
 
   (module Connect:PINHEAD1-2 (layer F.Cu) (tedit 0) (tstamp 58868177)
-    (at 70.485 15.875)
+    (at 73.66 18.415)
     (path /587B85BD)
     (attr virtual)
     (fp_text reference P3 (at 0 -3.9) (layer F.SilkS)
@@ -1982,7 +1982,7 @@
   )
 
   (module Resistors_ThroughHole:Resistor_Horizontal_RM7mm (layer F.Cu) (tedit 569FCF07) (tstamp 58868185)
-    (at 47.625 157.48 180)
+    (at 59.944 166.624 180)
     (descr "Resistor, Axial,  RM 7.62mm, 1/3W,")
     (tags "Resistor Axial RM 7.62mm 1/3W R3")
     (path /57B645BE/57B64B74)
@@ -2007,7 +2007,7 @@
   )
 
   (module Resistors_ThroughHole:Resistor_Horizontal_RM7mm (layer F.Cu) (tedit 569FCF07) (tstamp 58868193)
-    (at 27.305 146.685)
+    (at 31.115 155.575)
     (descr "Resistor, Axial,  RM 7.62mm, 1/3W,")
     (tags "Resistor Axial RM 7.62mm 1/3W R3")
     (path /57B645BE/57B64B83)
@@ -2032,7 +2032,7 @@
   )
 
   (module Resistors_ThroughHole:Resistor_Horizontal_RM7mm (layer F.Cu) (tedit 569FCF07) (tstamp 588681A1)
-    (at 45.085 207.645)
+    (at 54.229 207.137)
     (descr "Resistor, Axial,  RM 7.62mm, 1/3W,")
     (tags "Resistor Axial RM 7.62mm 1/3W R3")
     (path /57B645BE/57CAEE89)
@@ -2057,7 +2057,7 @@
   )
 
   (module Resistors_ThroughHole:Resistor_Horizontal_RM7mm (layer F.Cu) (tedit 569FCF07) (tstamp 588681AF)
-    (at 112.395 186.69 90)
+    (at 116.205 195.58 90)
     (descr "Resistor, Axial,  RM 7.62mm, 1/3W,")
     (tags "Resistor Axial RM 7.62mm 1/3W R3")
     (path /57C65407/57C67003)
@@ -2082,7 +2082,7 @@
   )
 
   (module Resistors_ThroughHole:Resistor_Horizontal_RM7mm (layer F.Cu) (tedit 569FCF07) (tstamp 588681BD)
-    (at 59.055 207.645)
+    (at 73.914 207.137)
     (descr "Resistor, Axial,  RM 7.62mm, 1/3W,")
     (tags "Resistor Axial RM 7.62mm 1/3W R3")
     (path /57D89E08)
@@ -2107,7 +2107,7 @@
   )
 
   (module Resistors_ThroughHole:Resistor_Array_SIP8 (layer F.Cu) (tedit 0) (tstamp 588681CF)
-    (at 123.19 28.575 90)
+    (at 127 37.465 90)
     (descr "8 R pack")
     (tags R)
     (path /584DB98F/58866D67)
@@ -2148,14 +2148,14 @@
   )
 
   (module Resistors_ThroughHole:Resistor_Array_SIP8 (layer F.Cu) (tedit 0) (tstamp 588681E1)
-    (at 78.74 140.335 90)
+    (at 82.804 166.624)
     (descr "8 R pack")
     (tags R)
     (path /57C4D163/5886B17A)
-    (fp_text reference RR2 (at -1.27 -2.794 90) (layer F.SilkS)
+    (fp_text reference RR2 (at -1.27 -2.794) (layer F.SilkS)
       (effects (font (size 1 1) (thickness 0.15)))
     )
-    (fp_text value 4.7K (at 0 2.032 90) (layer F.Fab)
+    (fp_text value 4.7K (at 0 2.032) (layer F.Fab)
       (effects (font (size 1 1) (thickness 0.15)))
     )
     (fp_line (start 11.43 -1.27) (end 11.43 1.27) (layer F.SilkS) (width 0.15))
@@ -2163,23 +2163,23 @@
     (fp_line (start -11.43 1.27) (end -11.43 -1.27) (layer F.SilkS) (width 0.15))
     (fp_line (start 11.43 -1.27) (end -11.43 -1.27) (layer F.SilkS) (width 0.15))
     (fp_line (start -8.89 -1.27) (end -8.89 1.27) (layer F.SilkS) (width 0.15))
-    (pad 1 thru_hole rect (at -10.16 0 90) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
+    (pad 1 thru_hole rect (at -10.16 0) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
       (net 5 VCC))
-    (pad 2 thru_hole circle (at -7.62 0 90) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
+    (pad 2 thru_hole circle (at -7.62 0) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
       (net 11 "Net-(JP4-Pad2)"))
-    (pad 3 thru_hole circle (at -5.08 0 90) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
+    (pad 3 thru_hole circle (at -5.08 0) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
       (net 10 "Net-(JP3-Pad2)"))
-    (pad 4 thru_hole circle (at -2.54 0 90) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
+    (pad 4 thru_hole circle (at -2.54 0) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
       (net 9 "Net-(JP2-Pad2)"))
-    (pad 5 thru_hole circle (at 0 0 90) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
+    (pad 5 thru_hole circle (at 0 0) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
       (net 8 "Net-(JP1-Pad2)"))
-    (pad 6 thru_hole circle (at 2.54 0 90) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
+    (pad 6 thru_hole circle (at 2.54 0) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
       (net 35 "Net-(RR2-Pad6)"))
-    (pad 7 thru_hole circle (at 5.08 0 90) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
+    (pad 7 thru_hole circle (at 5.08 0) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
       (net 36 "Net-(RR2-Pad7)"))
-    (pad 8 thru_hole circle (at 7.62 0 90) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
+    (pad 8 thru_hole circle (at 7.62 0) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
       (net 37 "Net-(RR2-Pad8)"))
-    (pad 9 thru_hole circle (at 10.16 0 90) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
+    (pad 9 thru_hole circle (at 10.16 0) (size 1.397 1.397) (drill 0.8128) (layers *.Cu *.Mask F.SilkS)
       (net 38 "Net-(RR2-Pad9)"))
     (model Resistors_ThroughHole.3dshapes/Resistor_Array_SIP8.wrl
       (at (xyz 0 0 0))
@@ -2189,7 +2189,7 @@
   )
 
   (module Resistors_ThroughHole:Resistor_Array_SIP8 (layer F.Cu) (tedit 0) (tstamp 588681F3)
-    (at 57.15 92.075 90)
+    (at 60.96 101.092 90)
     (descr "8 R pack")
     (tags R)
     (path /57B645BE/5887056F)
@@ -2230,7 +2230,7 @@
   )
 
   (module Resistors_ThroughHole:Resistor_Array_SIP8 (layer F.Cu) (tedit 0) (tstamp 58868205)
-    (at 57.15 67.945 270)
+    (at 60.96 76.835 270)
     (descr "8 R pack")
     (tags R)
     (path /57B645BE/588742A5)
@@ -2271,7 +2271,7 @@
   )
 
   (module Connect:PINHEAD1-3 (layer F.Cu) (tedit 0) (tstamp 58868211)
-    (at 36.195 213.36)
+    (at 51.054 213.487)
     (path /57B645BE/57C56691)
     (attr virtual)
     (fp_text reference SW1 (at 0.05 -3.8) (layer F.SilkS)
@@ -2294,7 +2294,7 @@
   )
 
   (module Connect:PINHEAD1-3 (layer F.Cu) (tedit 0) (tstamp 5886821D)
-    (at 26.67 213.36)
+    (at 42.164 213.487)
     (path /57C4D163/57C55A0B)
     (attr virtual)
     (fp_text reference SW2 (at 0.05 -3.8) (layer F.SilkS)
@@ -2317,7 +2317,7 @@
   )
 
   (module Connect:PINHEAD1-3 (layer F.Cu) (tedit 0) (tstamp 58868229)
-    (at 17.145 213.36)
+    (at 33.274 213.487)
     (path /57C4D163/57CB85C9)
     (attr virtual)
     (fp_text reference SW3 (at 0.05 -3.8) (layer F.SilkS)
@@ -2340,7 +2340,7 @@
   )
 
   (module Connect:PINHEAD1-3 (layer F.Cu) (tedit 0) (tstamp 58868235)
-    (at 67.31 213.36)
+    (at 81.534 213.487)
     (path /584DB98F/587A99DA)
     (attr virtual)
     (fp_text reference SW4 (at 0.05 -3.8) (layer F.SilkS)
@@ -2363,7 +2363,7 @@
   )
 
   (module Connect:PINHEAD1-3 (layer F.Cu) (tedit 0) (tstamp 58868241)
-    (at 52.07 213.36)
+    (at 66.294 213.487)
     (path /587B85F6)
     (attr virtual)
     (fp_text reference SW5 (at 0.05 -3.8) (layer F.SilkS)
@@ -2385,7 +2385,7 @@
   )
 
   (module Housings_DIP:DIP-8_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 58868258)
-    (at 27.305 133.985)
+    (at 31.115 142.875)
     (descr "8-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57B645BE/57B64872)
@@ -2430,7 +2430,7 @@
   )
 
   (module Housings_DIP:DIP-14_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 58868275)
-    (at 15.24 111.76)
+    (at 17.78 118.364)
     (descr "14-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57B645BE/57B649FD)
@@ -2477,7 +2477,7 @@
   )
 
   (module Housings_DIP:DIP-14_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 58868292)
-    (at 27.305 110.49)
+    (at 30.988 118.872)
     (descr "14-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57B645BE/57B64881)
@@ -2534,7 +2534,7 @@
   )
 
   (module Housings_DIP:DIP-14_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 588682AF)
-    (at 16.51 178.435)
+    (at 20.32 175.895)
     (descr "14-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57B645BE/57B648AE)
@@ -2591,7 +2591,7 @@
   )
 
   (module Housings_DIP:DIP-14_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 588682CC)
-    (at 15.875 135.255)
+    (at 19.685 144.145)
     (descr "14-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57B645BE/57B6489F)
@@ -2648,7 +2648,7 @@
   )
 
   (module Housings_DIP:DIP-64_W15.24mm (layer F.Cu) (tedit 54130A77) (tstamp 5886831B)
-    (at 62.23 22.86)
+    (at 66.04 31.75)
     (descr "64-lead dip package, row spacing 15.24 mm (600 mils)")
     (tags "dil dip 2.54 600")
     (path /57B645BE/57B64715)
@@ -2805,7 +2805,7 @@
   )
 
   (module Housings_DIP:DIP-14_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 58868338)
-    (at 40.64 109.855)
+    (at 44.45 118.745)
     (descr "14-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C2F822/57C2F82D)
@@ -2862,7 +2862,7 @@
   )
 
   (module Housings_DIP:DIP-14_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 58868355)
-    (at 41.275 133.35)
+    (at 45.085 142.24)
     (descr "14-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C2F822/57C2F8C6)
@@ -2919,7 +2919,7 @@
   )
 
   (module Housings_DIP:DIP-14_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 58868372)
-    (at 38.1 178.435)
+    (at 42.672 175.768)
     (descr "14-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C2F822/57C2FA2E)
@@ -2976,7 +2976,7 @@
   )
 
   (module Housings_DIP:DIP-14_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 5886838F)
-    (at 48.26 177.165)
+    (at 53.34 175.768)
     (descr "14-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /5843109B)
@@ -3033,7 +3033,7 @@
   )
 
   (module Housings_DIP:DIP-28_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 588683BA)
-    (at 26.035 20.955)
+    (at 30.988 31.496)
     (descr "28-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C3779E/57CAE143)
@@ -3117,7 +3117,7 @@
   )
 
   (module Housings_DIP:DIP-28_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 588683E5)
-    (at 29.845 63.5)
+    (at 30.988 72.644)
     (descr "28-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C3779E/57D4E8EE)
@@ -3202,7 +3202,7 @@
   )
 
   (module Housings_DIP:DIP-28_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 58868410)
-    (at 41.91 22.225)
+    (at 45.212 31.496)
     (descr "28-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C3779E/57CAE144)
@@ -3286,7 +3286,7 @@
   )
 
   (module Housings_DIP:DIP-28_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 5886843B)
-    (at 41.91 64.135)
+    (at 45.212 72.644)
     (descr "28-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C3779E/57D4F506)
@@ -3371,7 +3371,7 @@
   )
 
   (module Housings_DIP:DIP-28_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 58868466)
-    (at 82.55 22.86)
+    (at 86.36 31.75)
     (descr "28-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C4CE2D/57C33086)
@@ -3455,7 +3455,7 @@
   )
 
   (module Housings_DIP:DIP-28_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 58868491)
-    (at 82.55 63.5)
+    (at 86.36 72.39)
     (descr "28-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C4CE2D/57D4FDC8)
@@ -3540,7 +3540,7 @@
   )
 
   (module Housings_DIP:DIP-28_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 588684BC)
-    (at 95.25 22.86)
+    (at 99.06 31.75)
     (descr "28-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C4CE2D/57C330E4)
@@ -3624,7 +3624,7 @@
   )
 
   (module Housings_DIP:DIP-28_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 588684E7)
-    (at 95.25 63.5)
+    (at 99.06 72.39)
     (descr "28-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C4CE2D/57D4FDF1)
@@ -3709,7 +3709,7 @@
   )
 
   (module Housings_DIP:DIP-14_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 58868504)
-    (at 59.055 177.165)
+    (at 64.008 175.26)
     (descr "14-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57B64777/57BFBD6F)
@@ -3764,7 +3764,7 @@
   )
 
   (module Housings_DIP:DIP-14_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 58868521)
-    (at 70.485 177.8)
+    (at 74.676 175.26)
     (descr "14-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C4D163/57CB85BB)
@@ -3821,7 +3821,7 @@
   )
 
   (module Housings_DIP:DIP-16_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 58868540)
-    (at 82.55 109.22)
+    (at 86.36 118.11)
     (descr "16-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C4D163/57CB85BF)
@@ -3882,7 +3882,7 @@
   )
 
   (module Housings_DIP:DIP-16_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 5886855F)
-    (at 81.915 133.985)
+    (at 85.725 142.875)
     (descr "16-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C4D163/57C4D9FF)
@@ -3943,7 +3943,7 @@
   )
 
   (module Housings_DIP:DIP-14_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 5886857C)
-    (at 82.55 175.26)
+    (at 86.868 175.26)
     (descr "14-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C4D163/57C4DAE8)
@@ -4000,7 +4000,7 @@
   )
 
   (module Housings_DIP:DIP-14_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 58868599)
-    (at 67.945 109.855)
+    (at 71.755 118.745)
     (descr "14-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57B64777/57C0F8CF)
@@ -4057,7 +4057,7 @@
   )
 
   (module Housings_DIP:DIP-14_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 588685B6)
-    (at 53.34 108.585)
+    (at 56.896 118.872)
     (descr "14-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57B64777/57C0F9CA)
@@ -4114,7 +4114,7 @@
   )
 
   (module Housings_DIP:DIP-16_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 588685D5)
-    (at 53.975 132.08)
+    (at 57.404 142.24)
     (descr "16-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57B64777/57B6565D)
@@ -4175,7 +4175,7 @@
   )
 
   (module Housings_DIP:DIP-20_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 588685F8)
-    (at 27.94 167.005)
+    (at 31.75 175.895)
     (descr "20-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57B64777/57C0FF1F)
@@ -4244,7 +4244,7 @@
   )
 
   (module Housings_DIP:DIP-16_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 58868617)
-    (at 111.76 19.685)
+    (at 113.665 20.32)
     (descr "16-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /584DB98F/584DC446)
@@ -4305,7 +4305,7 @@
   )
 
   (module Housings_DIP:DIP-24_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 5886863E)
-    (at 95.25 104.14)
+    (at 99.06 113.03)
     (descr "24-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C65407/57C6575D)
@@ -4380,7 +4380,7 @@
   )
 
   (module Housings_DIP:DIP-24_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 58868665)
-    (at 95.25 139.065)
+    (at 99.06 147.955)
     (descr "24-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C65407/57C657EF)
@@ -4455,7 +4455,7 @@
   )
 
   (module Housings_DIP:DIP-24_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 5886868C)
-    (at 95.25 174.625)
+    (at 99.06 183.515)
     (descr "24-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /57C65407/57C65845)
@@ -4521,7 +4521,7 @@
   )
 
   (module Housings_DIP:DIP-16_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 588686AB)
-    (at 111.76 68.58)
+    (at 113.665 69.85)
     (descr "16-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /584DB98F/584DC49D)
@@ -4582,7 +4582,7 @@
   )
 
   (module Housings_DIP:DIP-16_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 588686CA)
-    (at 111.125 44.45)
+    (at 113.665 45.085)
     (descr "16-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /584DB98F/584DC516)
@@ -4643,7 +4643,7 @@
   )
 
   (module Housings_DIP:DIP-14_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 588686E7)
-    (at 127 109.855)
+    (at 113.665 116.205)
     (descr "14-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /587B2C0E)
@@ -4700,7 +4700,7 @@
   )
 
   (module Housings_DIP:DIP-14_W7.62mm (layer F.Cu) (tedit 54130A77) (tstamp 58868704)
-    (at 113.03 92.075)
+    (at 113.665 93.98)
     (descr "14-lead dip package, row spacing 7.62 mm (300 mils)")
     (tags "dil dip 2.54 300")
     (path /587B2C8B)
@@ -4757,7 +4757,7 @@
   )
 
   (module Crystals:Crystal_HC49-U_Vertical (layer F.Cu) (tedit 0) (tstamp 5886873D)
-    (at 107.315 182.88 270)
+    (at 111.125 191.77 270)
     (descr "Crystal, Quarz, HC49/U, vertical, stehend,")
     (tags "Crystal, Quarz, HC49/U, vertical, stehend,")
     (path /57C65407/57C66EB0)
