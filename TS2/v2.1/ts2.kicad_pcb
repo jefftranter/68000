@@ -15,8 +15,8 @@
   (page A portrait)
   (title_block
     (title "TS2 68000 Single Board Computer")
-    (date 2017-01-23)
-    (rev 2.0)
+    (date 2017-02-12)
+    (rev 2.1)
     (company "Jeff Tranter")
     (comment 1 "PCB Layout")
   )
