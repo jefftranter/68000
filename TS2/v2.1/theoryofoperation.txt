@@ -1,0 +1,482 @@
+                TS2 68000 Computer Theory Of Operation
+                ======================================
+
+This description is based on the "Design Example Using the 68000"
+section of the book "Microprocessor Systems Design 68000 Hardware,
+Software, and Interfacing", third edition, by Alan Clements. It has
+been adjusted to reflect my modified design. Refer to the schematic
+diagram when reading the following sections.
+
+Specifications of the TS2
+-------------------------
+
+1.  The TS2 uses an 8 MHz 68000 CPU.
+
+2.  It is built on a single circuit board.
+
+3.  The CPU card is capable of operating on its own. System testing is
+    thus facilitated because other modules are not required to operate
+    the CPU card in a stand-alone mode.
+
+4.  The original TS2 provided an external bus. This was omitted in my
+    design as it was not required and reduced the chip count
+    considerably.
+
+5.  The memory on the CPU card is static RAM and EPROM/EEPROM to avoid
+    the complexity and associated difficulty of debugging dynamic RAM
+    circuitry.
+
+6.  Full seven-level interrupt facilities are provided, but are
+    optional. If included, these can support a level 7 interrupt
+    (abort) switch, interrupts from the two ACIAs, and external
+    interrupts.
+
+7.  Full address decoding is provided. The address space is compatible
+    with the Motorola MEX68KECB Educational Computer Board (ECB)
+    development system in order to facilitate the transfer of software
+    between the TS2 and ECB.
+
+8.  The vector table at $00000000 to $000003FF is implemented in RAM,
+    with the exception of the reset vectors which are mapped to the
+    first 8 bytes of ROM (this is described in more detail later).
+
+9.  The RAM is implemented by 8Kx8 CMOS devices to minimize the
+    component count.
+
+10. The ROM is implemented by 2764 type 8Kx8 EPROMs or 2864 type 8Kx8
+    EEPROMs (or equivalent CMOS devices).
+
+11. The terminal (console) interface is through a serial port. A
+    secondary port is also provided. Configuration is the same as in
+    the ECB development system.
+
+12. The module's local address and data buses have not been buffered
+    as the CPU has adequate fanout.
+
+An additional goal was to replicate the original Teesside TS computer
+using parts of its era, so no significant design changes were made to
+use a more modern approach like PALs, GALs, ULAs, etc.
+
+Top Level Schematic (schematic page 1)
+--------------------------------------
+
+Each IC has a 0.1 uF ceramic bypass capacitor across the Vcc and
+ground pins. A single 100 uF capacitor provides additional power
+supply filtering. It requires a +5 volt supply. A switch controls
+power and a green LED (D2) indicates power on. Power can come from the
+external supply or from one of the two USB to serial ports on page 8.
+
+Diode D3 provides protection against reversed power supply polarity.
+
+The majority of chips are 7400 series LS family TTL devices. There are
+a few spare gates. Their inputs are grounded as per standard TTL
+design practice.
+
+Reset, Halt, and Clock Control Circuits (schematic page 2)
+----------------------------------------------------------
+
+Every CPU requires a certain amount of basic control circuitry to
+enable it to operate -- this circuitry includes its clock, reset,
+halt, and similar functions. Such circuitry can be designed largely
+independently of the rest of the system and is needed to perform even
+the simplest tests on the CPU. Therefore, we will design these
+circuits first.
+
+Page 2 gives the diagram of the control circuitry surrounding the
+68000, excluding the interrupt request inputs. The control of HALT*
+and RESET* is conventional. At power-on, a 555 timer configured as a
+monostable, U1, generates a single active-high pulse.
+
+Open-collector buffers, U4C and U4D, apply the reset pulse to the
+68000's RESET* and HALT* inputs, respectively. A manual reset
+generator is formed from two cross-coupled NAND gates, U3A and U3B,
+and applied to the reset lines by a further two open-collector
+buffers, U4A and U4B. An inverting buffer, U5A, gates the reset pulse
+from U1 onto the system bus as the active-low POR* (Power On Reset).
+This signal is used by other modules to clear circuits on power-up.
+
+An LED, D1, is connected to the HALT* pin via a buffer. This LED is
+fitted to the front panel and confirms the reset operation. It also
+shows if the CPU has asserted HALT* because of a double bus fault.
+
+The 68000 clock input is provided by an 8 MHz crystal-controlled clock
+in a DIP package. If desired, a lower speed clock oscillator can be
+used either for test purposes or to allow using a lower-speed 68000
+chip.
+
+The high impedance control circuits shown on page 1 are pulled up to
+Vcc by resistors. Although pullup resistors are necessary on BR*,
+DTACK*, etc., the reader may be surprised to find them on AS*, UDS*,
+LDS*, and R/W*. They are required here because these pins are driven
+by tristate outputs in the 68000. When the 68000 relinquishes the bus
+all tristate lines are floated. To leave the state of these bus lines
+undefined is unwise, as a spurious bus cycle might possibly be
+generated in certain circumstances. A better course is to be safe
+rather than sorry. During the testing phase, some of the pullup
+resistors were temporary and used only for testing purposes, because
+they were connected to lines that will later be pulled up or down by
+totem-pole outputs. They appear so that the circuit can be tested
+independently of the rest of the system.
+
+Testing the CPU control circuitry is very easy. The power on reset
+circuit is tested by attaching an oscilloscope probe to test point 1
+(TP1), switching on the Vcc power supply, and observing the
+positive-going pulse. A negative-going pulse should be observed at the
+CPU's RESET* and HALT* pins. The manual reset pulse generator should
+force HALT* and RESET* low whenever the reset button is pushed.
+
+An 8 MHz square wave should be observed at the CLK input to the CPU.
+All inputs pulled up to a logical 1 should be at a logical 1 state.
+
+The next step is to install the 68000 and force the CPU to free-run.
+As no memory components have yet been fitted, the CPU must be fooled
+into thinking that it is executing valid bus cycles. To do this,
+DTACK* is temporarily connected to the AS* output. Whenever the 68000
+starts a memory access by asserting AS*, DTACK* is automatically
+asserted to complete the cycle.
+
+The 68000 is a tricky beast to test in a free-running mode, because it
+generates an exception if an invalid op-code is detected. Should the
+68000 then generate a second exception, the resulting bus fault will
+cause it to halt. Therefore, the 68000 must always see a valid op-code
+on its data bus. One way of doing this is to pull up (or down) the
+data bus lines with resistors to Vcc (or ground). Traditionally, CPUs
+are tested by placing a NOP (no operation) op-code on the data bus.
+The 68000 NOP code is $4E71 (i.e. %0100 1110 0111 0001). If this code
+is jammed onto the data bus, the 68000 will also use it for the stack
+pointer and reset vectors during the exception processing. Sadly, this
+code will lead to an address error. When the CPU reads the stack
+pointer from addresses $00000000 and $00000002 at the start of its
+reset exception processing, it obtains $4E714E71. Unfortunately this
+value is odd and generates an address exception. We need to use a
+dummy op-code that is even to allow the CPU to free-run. One suitable
+opcode is $0000 which corresponds to the instruction ORI.B #0,D0.
+
+When a suitable op-code has been jammed into D00 to D15, the 68000
+should free-run and a square wave observed on address pins A01 to A23.
+The frequency at pin Ai should be one half of that at Ai-1.
+
+Address Decoding (schematic page 3)
+-----------------------------------
+
+The specification for the TS2 CPU module calls for up to 32 Kbytes of
+static RAM and up to 32 Kbytes of EPROM at the bottom of the
+processor's 16-MByte address space, permitting up to eight
+memory-mapped components, each occupying 64 bytes. The table below
+gives the memory map of the TS2 CPU module.
+
+  Size (bytes)  Device        Address Space
+  ------------  ------        -----------------
+ 1   8          EPROM1        $00000000-$00000007
+ 2  16K         RAM1          $00000008-$00003FFF
+ 3  16K         RAM2          $00004000-$00007FFF
+ 4  16K         EPROM1        $00008000-$0000BFFF
+ 5  16K         EPROM2        $0000C000-$0000FFFF
+ 6  64          Peripheral 1  $01000000-$0100003F
+ 7  64          Peripheral 2  $01000040-$0100007F
+ 8  64          Peripheral 3  $01000080-$010000BF
+ 9  64          Peripheral 4  $010000C0-$010000FF
+10  64          Peripheral 5  $01000100-$0100013F
+11  64          Peripheral 6  $01000140-$0100017F
+12  64          Peripheral 7  $01000180-$010001BF
+13  64          Peripheral 8  $010001C0-$010001FF
+
+The address decoding table corresponding to the memory map above is
+given in the table below.
+
+Device    A23 A22 ... A16 A15 A14 A13 A12 A11 A10 A09 A08 A07 A06 A05 A04 A03 A02 A01
+ 1 EPROM1  0  0   ...  0   0   0   0   0   0   0   0   0   0   0   0   0   0   X   X
+ 2 RAM1    0  0   ...  0   0   0   X   X   X   X   X   X   X   X   X   X   X   X   X
+ 3 RAM2    0  0   ...  0   0   1   X   X   X   X   X   X   X   X   X   X   X   X   X
+ 4 EPROM1  0  0   ...  0   1   0   X   X   X   X   X   X   X   X   X   X   X   X   X
+ 5 EPROM2  0  0   ...  0   1   1   X   X   X   X   X   X   X   X   X   X   X   X   X
+ 6 PERI1   0  0   ...  1   0   0   0   0   0   0   0   0   0   0   X   X   X   X   X
+ 7 PERI2   0  0   ...  1   0   0   0   0   0   0   0   0   0   1   X   X   X   X   X
+ 8 PERI3   0  0   ...  1   0   0   0   0   0   0   0   0   1   0   X   X   X   X   X
+ 9 PERI4   0  0   ...  1   0   0   0   0   0   0   0   0   1   1   X   X   X   X   X
+10 PERI5   0  0   ...  1   0   0   0   0   0   0   0   1   0   0   X   X   X   X   X
+11 PERI6   0  0   ...  1   0   0   0   0   0   0   0   1   0   1   X   X   X   X   X
+12 PERI7   0  0   ...  1   0   0   0   0   0   0   0   1   1   0   X   X   X   X   X
+13 PERI8   0  0   ...  1   0   0   0   0   0   0   0   1   1   1   X   X   X   X   X
+
+A five-input NOR gate, U24A, generates an active-high output whenever
+A19 to A23 are all low. Together with A18 and A17, this gate enables a
+three line to eight line decoder, U26, that divides the lower 128
+KBytes of memory space from $00000000 to $0001FFFF into eight blocks
+of 16K. The first four blocks decode the address space for the
+read/write memory and ROM. We deal with the selection of the reset
+vector memory space in ROM later.
+
+The active-low peripherals group select output of U26 (i.e. the
+address range $00010000 to $00013FFF) enabled a second three line to
+eight line decoder, U27. U27 is a 25LS2548 that has two active-low and
+two active-high enable inputs. It also has an active-low
+open-collector output, ACK*, that is asserted whenever the device is
+enabled and strobed by a negative going pulse on its RD* or WR*
+inputs.
+
+U27 is also enabled by U24B, which is high when A09 to A13 are all
+low, and by AS* from the CPU. Thus, whenever a valid address in the
+range $00010000 to $000101FF appears on the address bus, one of U27's
+active-low outputs is asserted, indicating a synchronous access to a
+peripheral by asserting the processor's VPA* input. Note that this
+arrangement is intended to be used in conjunction with 6800-series
+peripherals.
+
+An access to the reset vectors in the range $00000000 to $00000007 is
+detected by gates U24A, U25A, U24B, U25B, U10C, and U19B. When the
+output of each NOR gate is high, signifying a zero on A03 to A23, the
+output of the NAND gate U19B, RV*, goes active-low. That is, RV* is
+low whenever a reset vector is being accessed and is used to overlay
+the exception table in read/write memory with the reset vectors in
+ROM.
+
+The address decoder on page 3 can be tested to a limited extent by
+free-running the CPU and detecting decoding pulses at the outputs of
+the address decoder. A better technique is to insert a test ROM and to
+execute an infinite loop which periodically accesses the reset vector
+space. This makes it easy to observe the operation of the circuit with
+an oscilloscope.
+
+RAM and ROM Address Select (schematic page 4)
+---------------------------------------------
+
+The selection of the individual RAM and EPROM components from the
+address decoder outputs is carried out by the circuit of page 4.
+Two-input OR gates combine one of the four device-select signals
+(SEL0* to SEL3*) from the address decoder with the appropriate data
+strobe (UDS* or LDS*) to produce the actual active-low chip-select
+inputs to the eight memory components on the CPU module.
+
+The circuit is also responsible for overlaying the reset vector space
+onto the ROM memory space. When the RV* signal goes active-low while a
+reset vector is being fetched, the read/write memory at $00000000 to
+$00003FFF is disabled and the EPROM at $00008000 to $0000BFFF
+substituted.
+
+RAM and ROM  (schematic pages 5 and 6)
+--------------------------------------
+
+The use of 8Kx8 memory components permits the design of a memory with
+a very low component count and virtually no design effort. Page 5
+gives the design of half of the components of the CPU module -- the
+others on page 6 (omitted in the Clements book) are arranged in
+exactly the same fashion but are enabled by different chip-select
+signals from the address decoder.
+
+No further comment is required other than to point out that the EPROMs
+have their active-low output enables (OE*) driven by R/W* from the
+processor via an inverter. This action is necessary to avoid a bus
+conflict if a write access is made to EPROM memory space.
+
+The original design used 2764 ultraviolet-erasable EPROMs. It is also
+compatible with 2864 electrically erasable EEPROMs. Either will work,
+but the latter are more easily erased and programmed. It can also use
+more modern CMOS memory devices (e.g. 27C64 and 28C64) which have
+lower current consumption.
+
+DTACK and BERR Control Circuitry  (schematic page 7)
+----------------------------------------------------
+
+Each memory access cycle begins with the assertion of AS* by the 68000
+and ends with the assertion of DTACK* (or VPA*) by the addressed
+device or with the assertion of BERR* by a watchdog timer. Schematic
+page 7 gives the diagram of the DTACK* and BERR* control circuitry on
+the CPU module.
+
+Whenever a block of 16 KBytes of memory is selected on the CPU module,
+one of the four select signals, SEL0* to SEL3*, goes active-low. The
+output, MSEL, of the NAND gate U19A is then forced active-high. MSEL
+becomes the ENABLE/LOAD* control input of a 74LS161 4-bit counter,
+U22. When MSEL=0 (i.e. on-board memory is not accessed), the counter
+is held in its load state and the data inputs on P0 to P3 are
+preloaded into the counter, by default 1100. The desired preload value
+can be set using DIP switches. The Q3 output from the counter is
+gated, uninverted, through U10B and U7B to form the processor's DTACK*
+input.
+
+When MSEL goes high the counter is enabled. The counter is clocked
+from the 68000's clock and counts upward from 1100. After four clock
+pulses, the counter rolls over from 1111 to 0000 and Q3 (and therefore
+DTACK*) goes low to provide the handshake required by the 68000 CPU.
+At the end of the cycle, AS* is negated and MSEL goes low to preload
+the counter with 1100 and negate DTACK*.
+
+At the same time that U22 begins counting, a second timer, U21
+(another 74LS161), also begins to count upward. The count clock is
+taken from the 68000's E output which runs at CLK/10. This counter is
+cleared to zero whenever AS* is negated. The rippled output from the
+counter goes high after the fifteenth count from zero and is inverted
+by the open-collector gate U4E to provide the CPU with a BERR* input.
+Therefore, unless AS* is negated within 15 E-clock cycles of the start
+of a bus cycle, BERR* is forced low to terminate the cycle. Note that
+the counter is disabled (Cep=0) in the single-step mode (discussed
+later) to avoid a spurious bus error exception.
+
+A useful feature of the DTACK* circuit is the addition of a
+single-step mode, allowing the execution of a single bus cycle (note
+bus cycle, not instruction) each time a button is pushed. This
+facility can be used to debug the system by freezing the state of the
+processor.
+
+One of the inputs to the OR gate U10B is INHIBIT_DTACK. If this is
+active-high, the output of the OR gate is permanently true and the
+generation of DTACK* by the DTACK* delay circuit is inhibited.
+Therefore, a bus cycle remains frozen with AS* asserted, forcing the
+CPU to generate an infinite stream of wait states.
+
+Two positive-edge triggered D flip-flops, U20A and U23A, control
+INHIBIT_DTACK. U20A acts as a debounced switch and produces an SS/RUN*
+signal fro its Q output, depending only on the state of the
+single-step/run switch. Unfortunately, it would be unwise to use the
+output of U20A to inhibit DTACK*, because changing from run to
+single-step mode in mid bus cycle might lead to unpredictable results.
+Instead, the output of U20A is synchronized with AS* from the
+processor by a second flip-flop, U23A. The INHIBIT_DTACK signal from
+U23A is forced high only when AS* is negated at the end of a bus
+cycle. The 68000 always enters its single-step mode at the start of a
+new cycle before AS* is asserted.
+
+In the single-step mode, DTACK* pulses are generated manually by
+pressing the "step" switch. The output of this switch is debounced by
+flip-flop U20B. A second flip-flop, U23B, generates a single,
+active-low pulse, SS_DTACK*, each time the step button is pushed.
+SS_DTACK* is gated in U7B to produce the DTACK* input needed to
+terminate the current bus cycle.
+
+There are two simple ways of testing the DTACK* control circuits. One
+is in the free-run mode and is done by connecting, say, SEL0* to AS*,
+so that a delayed DTACK* is produced for each bus cycle. The
+single-step circuit can also be tested in this mode. Another procedure
+is to construct a special test rig for the circuit, which simulates
+the behavior of the 68000 by providing AS*, CLK, and SEL0* signals.
+
+ACIAs  (schematic page 8)
+-------------------------
+
+The only I/O ports implemented on the TS2 CPU module are the two 6850
+ACIAs shown on schematic page 8. The circuit is almost identical to
+that found in the ECB module. One port is dedicated to the terminal
+(IC U29 at address $00010040) and the other (IC U30 at address
+$00010041) is dedicated to the host computer interface.
+
+The baud rate can be selected by selecting the appropriate output of
+the baud rate generator U31, but there is little reason to use a rate
+lower than 9600 bps. The two ACIAs can also be run at different baud
+rates if desired.
+
+Omitted from my design is the serial port transparent mode feature of
+the original TS2, also present on the ECB, which connected the
+terminal interface directly to the host port whenever RTS from U29 was
+high. This means that the TS2 monitor TRAN and TUTOR TM commands will
+not operate correctly, but the transparent mode is of little use
+unless the console is actually a dumb terminal rather than a host
+computer.
+
+If desired, the second (host) 6850 ACIA can be omitted as it is not
+particularly useful. If the console port is connected to a computer,
+files can be uploaded and downloaded through the console port.
+Separate console and host ports made sense in the days of dumb
+terminals, but today most terminal emulator programs can support file
+transfers.
+
+An error should be noted on the schematic on page 896 of the Clements
+book. The chip selects for the ACIAs should be driven by the signal
+CS_PERI2* and not CS_PERI1* as shown in the book.
+
+My design also replaces the 1488 and 1489 RS-232 line drivers and
+receivers with an FTDI connector to support FTDI USB to serial devices
+rather than true RS-232, which would require the connected computer to
+have RS-232 serial ports. This also removed the need for +12V and -12C
+power supplies. It does have the limitation that the board cannot be
+connected to true RS-232 serial ports.
+
+Optionally, the board can be powered by USB using either of the FTDI
+serial ports - a jumper needs to be connected on the port where power
+is taken from (one or the other, but not both), in which case an
+external power supply should not be used.
+
+Interrupt Control Circuitry  (schematic page 9)
+-----------------------------------------------
+
+The interrupt control circuitry surrounding the 68000 is conventional.
+A 74LS148 eight line to three line priority encoder, U28, converts the
+seven levels of interrupt request input into a 3-bit code on IPL0* to
+IPL2*. Note that each interrupt request input must have a pull-up
+resistor, except IRQ7* which is always driven by U35A.
+
+The function code from the 68000 is decoded by U32, a 74LS138, and the
+resulting IACK* output is used to enable a second decoder, U33. U33 is
+also strobed by AS* and converts the information on A01 to A03 during
+an IACK cycle into one of seven levels of interrupt acknowledge output
+(IACK1* to IACK7*). Other function code information supplied by U32
+that may be useful in debugging the system in the "user/supervisor"
+memory access codes and the "program/data" bus cycle codes.
+
+The ABORT switch can generate a level 7 interrupt. This is present on
+the ECB and with the TUTOR firmware can be used to interrupt program
+execution. The switch is debounced by cross-coupled NAND gates U34A
+and U34B and then clocks flip-flop U35A high (it has its data input
+tied high). The Q* output of the flip-flop goes low, and is connected
+to the IRQ7* input. Note that, unlike interrupts 1 through 6, a level
+7 interrupt cannot be masked or disabled. During an interrupt
+acknowledge cycle for a level 7 interrupt, IACK7* will go low and
+clear the flip-flop. The IACK7* signal will also ripple through U7D,
+U34C and U4F, driving VPA* low to indicate to the 68000 to perform an
+autovectored interrupt operation. The CPU will then use the level 7
+autovector interrupt address in RAM.
+
+Interrupts 5 and 6 are connected to the two ACIAs, allowing interrupt
+driven i/o to be performed if desired (the TS2 and TUTOR monitor
+programs do not make use of this). These interrupts are used in the
+same way on the Motorola ECB board. Like level 7, the interrupts are
+also configured for autovectored operation. The relevant IACK5* or
+IACK6* signal will go low and in turn drive VPA* low to perform
+autovectored interrupt handling.
+
+IRQ4* is also available and configured for autovectored operation.
+Interrupts IRQ1* through IRQ3* are not -- they could be used with
+vectored interrupts if external circuitry was added for this.
+
+The interrupt circuitry can be tested from the TUTOR monitor. Pressing
+the ABORT switch should generate a level 7 interrupt which will
+produce a "SOFTWARE ABORT" message and register dump.
+
+Pulling IRQ5* or IRQ6* low should cause TUTOR to produce "AV#5 TRAP
+ERROR" and "AV#6 TRAP ERROR" messages, respectively. In order for this
+to happen the interrupt mask in the status register must be set to
+enable these interrupts.
+
+Construction Notes
+------------------
+
+The prototype was wirewrapped on a phenolic board with 0.1" holes 6 by
+9 inches in size.
+
+Sockets were used for all ICs and most discrete components.
+
+5 volt power connects to two binding posts. Optionally it can be
+powered by USB. Current consumption is approximately 600 mA with all
+ICs installed. The original TS2 also required +12V and -12V supplies,
+but they are not required in my design.
+
+Possible Future Enhancements
+----------------------------
+
+Ideas for a possible rev 2.x:
+
+Printed circuit board.
+Replace baud rate generator with fixed clock oscillator/counter.
+Add one or two PIA, VIA, or PIT chips.
+Optionally support line drivers/receivers for true RS-232 serial ports.
+Add some connectors for external parallel i/o, interrupts, etc.
+Use more common chip(s) in place of 25LS248 (could use A 74LS138 plus
+a 74LS06 and another gate or two)
+On-board 5 volt regulator/buck converter.
+Support higher baud rates (through jumpers or software).
+Add a seven segment LED display for diagnostics? (see Clements book
+p.649 for possible approach)
+Prototype area?
+Support either RAM or EPROM/EEPROM in all sockets.
+Optionally (jumper) allow EEPROM to be written to.
+Support larger RAM and ROM chips (e.g. 27128, 27256, etc. Impacts memory map).
