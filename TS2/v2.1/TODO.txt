@@ -1,0 +1,5 @@
+Verify new circuit to replace 25LS2548.
+Verify new baud rate generator circuit.
+Redo PCB layout.
+Wider tracks for VCC and GND (using design rules).
+Order some PCBs.

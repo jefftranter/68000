@@ -1,4 +1,4 @@
-(pcb /home/tranter/git/68000/TS2/v2/ts2.dsn
+(pcb /home/tranter/git/68000/TS2/v2.1/ts2.dsn
   (parser
     (string_quote ")
     (space_in_quoted_tokens on)
@@ -1365,7 +1365,7 @@
       A18 A19 A20 A21 A22 A23 AS* BERR* BGACK* BR* CLK CS_PERI2* CS_RAM1L*
       CS_RAM1U* CS_RAM2L* CS_RAM2U* CS_ROM1L* CS_ROM1U* CS_ROM2L* CS_ROM2U*
       D00 D01 D02 D03 D04 D05 D06 D07 D08 D09 D10 D11 D12 D13 D14 D15 DTACK*
-      E FC0 FC1 FC2 GND HALT* IPL0* IPL1* IPL2* IRQ1* IRQ2* IRQ3* IRQ4* IRQ5*
+      E FC0 FC1 FC2 HALT* IPL0* IPL1* IPL2* IRQ1* IRQ2* IRQ3* IRQ4* IRQ5*
       IRQ6* IRQ7* LDS* "Net-(C1-Pad1)" "Net-(C2-Pad1)" "Net-(C3-Pad1)" "Net-(D1-Pad2)"
       "Net-(D2-Pad1)" "Net-(JP1-Pad2)" "Net-(JP2-Pad2)" "Net-(JP3-Pad2)" "Net-(JP4-Pad2)"
       "Net-(JP5-Pad2)" "Net-(JP6-Pad2)" "Net-(P1-Pad2)" "Net-(P1-Pad4)" "Net-(P1-Pad5)"
@@ -1394,12 +1394,21 @@
       "Net-(U34-Pad11)" "Net-(U34-Pad2)" "Net-(U34-Pad3)" "Net-(U34-Pad8)"
       "Net-(U34-Pad9)" "Net-(U35-Pad5)" "Net-(U35-Pad8)" "Net-(U35-Pad9)"
       "Net-(U5-Pad6)" "Net-(U6-Pad11)" "Net-(U7-Pad3)" "Net-(U8-Pad3)" POR*
-      POWER R*/W R/W* RESET* RV* SEL0* SEL1* SEL2* SEL3* UDS* VCC VMA* VPA*
+      POWER R*/W R/W* RESET* RV* SEL0* SEL1* SEL2* SEL3* UDS* VMA* VPA*
       (circuit
         (use_via Via[0-1]_600:400_um)
       )
       (rule
         (width 250)
+        (clearance 200.1)
+      )
+    )
+    (class Power GND VCC
+      (circuit
+        (use_via Via[0-1]_600:400_um)
+      )
+      (rule
+        (width 1000)
         (clearance 200.1)
       )
     )
