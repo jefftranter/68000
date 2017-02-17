@@ -17,7 +17,7 @@ $Descr A4 11693 8268
 encoding utf-8
 Sheet 9 9
 Title "TS2 68000 Single Board Computer"
-Date "2017-02-15"
+Date "2017-02-17"
 Rev "2.1"
 Comp "Jeff Tranter"
 Comment1 "Interrupt Control Circuitry (optional)"
@@ -286,15 +286,15 @@ IACK7*
 $Comp
 L 74LS06 U4
 U 6 1 587B12E8
-P 9550 5600
-F 0 "U4" H 9745 5715 50  0000 C CNN
-F 1 "74LS06" H 9740 5475 50  0000 C CNN
-F 2 "Housings_DIP:DIP-14_W7.62mm" H 9550 5600 50  0001 C CNN
-F 3 "" H 9550 5600 50  0000 C CNN
-	6    9550 5600
+P 9550 5850
+F 0 "U4" H 9745 5965 50  0000 C CNN
+F 1 "74LS06" H 9740 5725 50  0000 C CNN
+F 2 "Housings_DIP:DIP-14_W7.62mm" H 9550 5850 50  0001 C CNN
+F 3 "" H 9550 5850 50  0000 C CNN
+	6    9550 5850
 	1    0    0    -1  
 $EndComp
-Text GLabel 10000 5600 2    60   Output ~ 0
+Text GLabel 10000 5850 2    60   Output ~ 0
 VPA*
 NoConn ~ 6350 3800
 NoConn ~ 6350 3900
@@ -514,18 +514,18 @@ IRQ7*
 $Comp
 L 74LS00 U34
 U 4 1 58A651E7
-P 8500 5600
-F 0 "U34" H 8500 5650 50  0000 C CNN
-F 1 "74LS00" H 8500 5500 50  0000 C CNN
-F 2 "" H 8500 5600 50  0000 C CNN
-F 3 "" H 8500 5600 50  0000 C CNN
-	4    8500 5600
+P 8500 5850
+F 0 "U34" H 8500 5900 50  0000 C CNN
+F 1 "74LS00" H 8500 5750 50  0000 C CNN
+F 2 "" H 8500 5850 50  0000 C CNN
+F 3 "" H 8500 5850 50  0000 C CNN
+	4    8500 5850
 	1    0    0    -1  
 $EndComp
-Text GLabel 7600 5700 0    60   Input ~ 0
+Text GLabel 7600 5950 0    60   Input ~ 0
 PERI_VPA*
 Wire Wire Line
-	7600 5700 7900 5700
+	7600 5950 7900 5950
 $Comp
 L 74LS00 U37
 U 3 1 58A65894
@@ -538,7 +538,7 @@ F 3 "" H 8500 4900 50  0000 C CNN
 	-1   0    0    1   
 $EndComp
 Wire Wire Line
-	7900 4900 7900 5500
+	7900 4900 7900 5750
 Wire Wire Line
 	9300 4050 9300 4900
 Wire Wire Line

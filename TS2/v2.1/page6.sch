@@ -17,7 +17,7 @@ $Descr A 11000 8500
 encoding utf-8
 Sheet 7 9
 Title "TS2 68000 Single Board Computer"
-Date "2017-02-15"
+Date "2017-02-17"
 Rev "2.1"
 Comp "Jeff Tranter"
 Comment1 "DTACK and BERR Control Circuitry"

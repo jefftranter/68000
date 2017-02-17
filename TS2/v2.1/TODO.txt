@@ -1,7 +1,2 @@
 Verify new circuit to replace 25LS2548.
 Verify new baud rate generator circuit.
-Try to optimize spare gates.
-Add spare gates to schematic.
-Redo PCB layout.
-Wider tracks for VCC and GND (using design rules).
-Order some PCBs.
