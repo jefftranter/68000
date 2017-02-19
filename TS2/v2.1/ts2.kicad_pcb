@@ -89,7 +89,7 @@
       (mirror false)
       (drillshape 0)
       (scaleselection 1)
-      (outputdirectory /home/tranter/git/68000/TS2/v2/))
+      (outputdirectory /home/tranter/git/68000/TS2/v2.1/))
   )
 
   (net 0 "")
