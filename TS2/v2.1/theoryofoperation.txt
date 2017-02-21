@@ -458,6 +458,23 @@ powered by USB. Current consumption is approximately 600 mA with all
 ICs installed. The original TS2 also required +12V and -12V supplies,
 but they are not required in my design.
 
+PCB Layout Notes
+----------------
+
+A printed circuit board layout is provided. At the time of writing it
+had not yet been tested. It is a double-sided board with soldermask
+and silkscreen.
+
+The layout is slightly different from the wirewrap prototype. The
+front panel switches and LEDs are intended to be mounted in a case and
+connected to the PCB using wires. Four mounting holes are provided.
+
+The board is layed out for a 68000 chip with 0.9" spacing. Some
+versions, e.g. plastic packages, can be 0.8" spacing.
+
+It is recommended to install ICs using sockets. The 64-pin socket can
+be hard to find -- two 40-pin sockets can be cut and used instead.
+
 Possible Future Enhancements
 ----------------------------
 
