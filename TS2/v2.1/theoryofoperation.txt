@@ -453,10 +453,46 @@ The prototype was wirewrapped on a phenolic board with 0.1" holes 6 by
 
 Sockets were used for all ICs and most discrete components.
 
-5 volt power connects to two binding posts. Optionally it can be
+5 volt power connects to two header pins. Optionally it can be
 powered by USB. Current consumption is approximately 600 mA with all
 ICs installed. The original TS2 also required +12V and -12V supplies,
 but they are not required in my design.
+
+If you build the board, I would suggest constructing it in this order:
+
+1. Install all IC sockets, connector headers, and bypass caps.
+
+2. wire up the front panel switches and LEDs. Verify that the power
+   switch and power LED are working when powered by USB or with
+   external +5V power.
+
+3. Connect the 8 MHz crystal oscillator and verify the presence of the
+   clock signal.
+
+4. Wire up the baud rate generator made up of U23, crystal, resistor
+   and two caps. Verify the baud rate clock which should be a 153.6 KHz
+   square wave.
+
+5. Assemble the powerup reset circuit consisting of U1 and associated
+   resistors and caps. Insert U4 and U5. It should produce a pulse on
+   power up and briefly flash the reset/halt LED.
+
+6. Assemble the reset pushbutton circuit using U3. It should drive the
+   HALT* and RESET* lines low when pressed and light up the reset/halt
+   LED.
+
+7. Install the remaining parts. Program the EPPROM or EEPROM chips with
+   the TUTOR firmware (available here). Connect a computer running a
+   terminal emulator to the console port using an FTDI module. Use a
+   baud rate of 9600 bps.
+
+8. If the board does not come up, try getting it to freerun as
+  described in my blog posts. Be sure that the ROMs are programmed
+  correctly, the STEP/RUN switch is in the RUN position, and that the
+  board is getting power.
+
+Some parts are obsolete but available used or NOS (New Old Stock).
+Some good sources for parts include eBay and Unicorn Electronics.
 
 PCB Layout Notes
 ----------------
