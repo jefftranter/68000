@@ -32,12 +32,12 @@ lsqrt   tst.l d0        (4)     ; skip doing zero.
 
 *************************************************************************
 *                                                                       *
-*       Faster Integer Square Root (16 to 8 bit). For small arguments.  *
+*       Faster Integer Square Root (16 to 8 bit).  For small arguments. *
 *                                                                       *
 *       (Exact method, not approximate).                                *
 *                                                                       *
 *       Call with:                                                      *
-*               D0.L = Unsigned number.                                 *
+*               D0.W = Unsigned number.                                 *
 *                                                                       *
 *       Returns:                                                        *
 *               D0.W - SQRT(D0.W)                                       *
@@ -60,6 +60,7 @@ qsqrt1  addq.w #2,d1    (4)
         sub.w d1,d0     (4)
         bpl  qsqrt1     (10/8)
         asr.w #1,d1     (8)
+        move.w d1,d0    (4)
         move.w (sp)+,d1 (12)
 done    rts             (16)
 
@@ -97,7 +98,7 @@ gsqrt   movem.w d1-d4,-(sp) (24)
         clr.w d2        (4)
 sqrt1   add.w d0,d0     (4)     ; Get 2 leading bits a time and add
         addx.w d1,d1    (4)     ; into Error term for interpolation.
-        add.w d0,d0     (4)     ; (Classical method, easu in binary).
+        add.w d0,d0     (4)     ; (Classical method, easy in binary).
         addx.w d1,d1    (4)
         add.w d2,d2     (4)     ; Running estimate *2.
         move.w d2,d3    (4)
@@ -150,7 +151,7 @@ glsqrt  movem.w d1-d4,-(sp) (40)
         moveq #0,d2     (4)
 lsqrt1  add.l d0,d0     (8)     ; Get 2 leading bits a time and add
         addx.w d1,d1    (4)     ; into Error term for interpolation.
-        add.l d0,d0     (8)     ; (Classical method, easyin binary).
+        add.l d0,d0     (8)     ; (Classical method, easy in binary).
         addx.w d1,d1    (4)
         add.w d2,d2     (4)     ; Running estimate * 2.
         move.w d2,d3    (4)
