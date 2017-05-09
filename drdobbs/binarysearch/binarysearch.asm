@@ -9,6 +9,8 @@
 ;TARGET IS ABSENT.
 ;
 ;
+               ORG        $1000
+
 BINSRCH        CLR.L      D5                  ;D5 = pointer to bottom
                CLR.L      D6
 
