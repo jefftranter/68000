@@ -1,5 +1,5 @@
 ; Simple test program for TS2 68000 board
-; Displays decimal numbers on the console.
+; Displays decimal numbers 1 through 1000 on the console.
 ; Calls code in the TUTOR monitor ROM.
 
         ORG	$2000                   Located in RAM
