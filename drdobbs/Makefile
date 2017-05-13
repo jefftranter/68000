@@ -1,7 +1,10 @@
 SUBDIRS = \
     binarysearch \
+    nonuniformrandom \
     random \
-    squareroot
+    squareroot \
+    tinybasic \
+    worm
 
 all:
 	@for i in $(SUBDIRS); do \
