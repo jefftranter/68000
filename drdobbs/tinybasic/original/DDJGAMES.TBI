@@ -1,0 +1,315 @@
+
+:000AREM  Various games adapted for 68000 Tiny BASIC
+:0014REM  Adapted by Gordon Brandly from Dr. Dobb's Journal #7
+:001EPRINT
+:03E8PRINT "Which game do you want to play?"
+:03E9PRINT "Type 1 for Stars"
+:03EAPRINT "Type 2 for Acey-Ducey"
+:03EBPRINT "Type 3 for Trap"
+:03ECPRINT "Type 4 for Slots"
+:03F2PRINT:INPUT "Enter your choice" Z
+:03FCIF Z<1 GOTO 1000
+:0406IF Z>4 GOTO 1000
+:0410IF Z=1 GOTO 1100
+:041AIF Z=2 GOTO 2000
+:0424IF Z=3 GOTO 4000
+:042EIF Z=4 GOTO 5000
+:044CPRINT:PRINT
+:0460PRINT "Welcome to my galaxy. I'm in charge of the stars here."
+:046APRINT "Play my game STARS and get some stars for yourself!"
+:0474PRINT
+:047EPRINT "I will think of a whole number from 1 to 100."
+:0488PRINT "Try to guess my number. After you guess, I will"
+:0492PRINT "display one or more stars (*). The closer"
+:049CPRINT "you are to my number, the more stars I will display."
+:04A6PRINT "One star (*) means you are far away from my"
+:04B0PRINT "number, seven stars (*******) means you are very,"
+:04BAPRINT "very, very close to my number!"
+:04C4X=RND(100)
+:04CEPRINT
+:04D8PRINT "OK, starseeker, I am thinking of a number. Start guessing."
+:04E2N=1
+:04ECPRINT
+:04F6INPUT "Enter your guess" G
+:050AIF G=X GOTO 1550
+:055AD=ABS(G-X)
+:0564IF D>=64 GOTO 1500
+:056EIF D>=32 GOTO 1490
+:0578IF D>=16 GOTO 1480
+:0582IF D>=8 GOTO 1470
+:058CIF D>=4 GOTO 1460
+:0596IF D>=2 GOTO 1450
+:05A0PRINT " *",
+:05AAPRINT " *",
+:05B4PRINT " *",
+:05BEPRINT " *",
+:05C8PRINT " *",
+:05D2PRINT " *",
+:05DCPRINT " *"
+:05F0N=N+1
+:05FAGOTO 1260
+:060EPRINT " ** ** ** ** ** ** ** ** ** ",
+:0618PRINT "** ** ** ** ** ** ** ** ** !!!"
+:0636PRINT "That's it!!! You guessed my cosmic number in ",#1,N," guesses."
+:0640PRINT
+:064APRINT "Do you want to play again?"
+:0654INPUT "Enter 1 to play again or 2 to play a different game" I
+:0668IF I=1 GOTO 1220
+:0672IF I=2 GOTO 1000
+:067CGOTO 1600
+:07D0REM  Acey-Ducey
+:0834PRINT
+:0835PRINT "Acey-Ducey is played in the following manner:"
+:0836PRINT "The dealer (computer) deals two cards face up."
+:0837PRINT "You have the option to bet or not to bet depending"
+:0838PRINT "on whether or not you feel the next card will have"
+:0839PRINT "a value between the first two."
+:083APRINT "If you don't want to bet, enter a bet of 0."
+:083EPRINT
+:0870N=100
+:087AQ=100
+:088EPRINT "You now have ",#1,Q," dollars."
+:0893PRINT
+:0898GOTO 2260
+:08A2Q=Q+M
+:08ACGOTO 2190
+:08C0Q=Q-M
+:08CAGOTO 2190
+:08D4PRINT "Here are your next two cards..."
+:08DEA=RND(13)+1
+:08FCB=RND(13)+1
+:091AIF A>=B GOTO 2270
+:092EIF A<11 GOTO 2400
+:0933PRINT "        ",
+:0938IF A=11 GOTO 2420
+:0942IF A=12 GOTO 2440
+:094CIF A=13 GOTO 2460
+:0956IF A=14 GOTO 2480
+:0960PRINT A
+:096AGOTO 2500
+:0974PRINT "Jack"
+:097EGOTO 2500
+:0988PRINT "Queen"
+:0992GOTO 2500
+:099CPRINT "King"
+:09A6GOTO 2500
+:09B0PRINT "Ace"
+:09C4IF B<11 GOTO 2550
+:09C9PRINT "         ",
+:09CEIF B=11 GOTO 2570
+:09D8IF B=12 GOTO 2590
+:09E2IF B=13 GOTO 2610
+:09ECIF B=14 GOTO 2630
+:09F6PRINT B
+:0A00GOTO 2650
+:0A0APRINT "Jack"
+:0A14GOTO 2650
+:0A1EPRINT "Queen"
+:0A28GOTO 2650
+:0A32PRINT "King"
+:0A3CGOTO 2650
+:0A46PRINT "Ace"
+:0A5APRINT
+:0A64INPUT "Enter your bet" M
+:0A6EIF M<>0 GOTO 2680
+:0A73PRINT "Chicken!!":PRINT
+:0A75GOTO 2260
+:0A78IF M<=Q GOTO 2730
+:0A82PRINT "Sorry, my friend, but you bet too much."
+:0A8CPRINT "You have only ",#1,Q," dollars to bet."
+:0A96GOTO 2650
+:0AAAC=RND(13)+1
+:0AC8IF C<11 GOTO 2810
+:0ACDPRINT "         ",
+:0AD2IF C=11 GOTO 2830
+:0ADCIF C=12 GOTO 2850
+:0AE6IF C=13 GOTO 2870
+:0AF0IF C=14 GOTO 2890
+:0AFAPRINT C
+:0B04GOTO 2910
+:0B0EPRINT "Jack"
+:0B18GOTO 2910
+:0B22PRINT "Queen"
+:0B2CGOTO 2910
+:0B36PRINT "King"
+:0B40GOTO 2910
+:0B4APRINT "Ace"
+:0B5EIF C>A GOTO 2930
+:0B68GOTO 2970
+:0B72IF C>=B GOTO 2970
+:0B86PRINT "You win!"
+:0B90GOTO 2210
+:0B9APRINT "Sorry, you lose."
+:0BA4IF M<Q GOTO 2240
+:0BB8PRINT
+:0BC2PRINT "Sorry, friend, but you blew your wad."
+:0BCCPRINT
+:0BD6PRINT "Do you want to try again?"
+:0BE0PRINT "Enter 1 to play again or 2 to play a different game."
+:0BEAINPUT "Enter your choice" I
+:0BF4IF I=1 GOTO 2110
+:0BFEIF I=2 GOTO 1000
+:0C08GOTO 3040
+:0FA0REM  Trap
+:1040PRINT "I will think of a number from 1 to 100."
+:104APRINT "Try to guess my number. Enter two numbers, trying"
+:1054PRINT "to trap my number by your two trap numbers. I'll"
+:105EPRINT "tell you if you have trapped my number or if my"
+:1068PRINT "number is smaller than your two trap numbers or"
+:1072PRINT "if my number is larger than your two trap numbers."
+:107CPRINT "If I tell you that you have trapped my number, I"
+:1086PRINT "mean that my number is BETWEEN your trap numbers"
+:1090PRINT "or perhaps my number is the same as one of your"
+:109APRINT "trap numbers."
+:10A4PRINT
+:10AEPRINT "IMPORTANT!!  If you think you know my number, then"
+:10B8PRINT "enter your guess for BOTH trap numbers."
+:10C2PRINT
+:10CCX=RND(100)
+:10D6PRINT "I'm thinking...thinking...Ah! I have a number!"
+:10E0K=1
+:10EAPRINT
+:10F4INPUT "First trap number" A
+:1108INPUT "Second trap number" B
+:1113Y=X-A
+:1114IF Y<0 Y=-1
+:1115IF Y>0 Y=1
+:1116Z=X-B
+:1117IF Z<0 Z=-1
+:1118IF Z>0 Z=1
+:111CT=Y+Z
+:1126IF T=-2 GOTO 4430
+:1127IF T=-1 GOTO 4410
+:1128IF T=0 GOTO 4400
+:1129IF T=1 GOTO 4410
+:112AIF T=2 GOTO 4450
+:1130IF A=B GOTO 4480
+:113APRINT "My number is trapped by your numbers."
+:1144GOTO 4460
+:114EPRINT "My number is smaller than your trap numbers."
+:1158GOTO 4460
+:1162PRINT "My number is larger than your trap numbers."
+:116CK=K+1
+:1176GOTO 4330
+:1180PRINT "You got it in ",#1,K," guesses!!"
+:1185PRINT
+:118APRINT "Do you want to play again?"
+:1194INPUT "Type 1 to play again or 2 to play a different game" I
+:119EIF I=1 GOTO 4290
+:11A8IF I=2 GOTO 1000
+:11B2GOTO 4500
+:1388REM  Slots
+:13ECPRINT
+:1400PRINT "This is a simulation of a slot machine using a computer."
+:140APRINT "Each time you 'pull' I will ask you if you wish to play again."
+:1414PRINT "Just answer with a '1' for yes and a '0' for no."
+:141EPRINT "Please place 4 quarters on my keyboard for each play."
+:1428B=0
+:1432PRINT
+:143CD=RND(8)
+:143DE=RND(7)
+:143EF=RND(7)
+:1451IF D=1 GOTO 5211
+:1452IF D=2 GOTO 5213
+:1453IF D=3 GOTO 5215
+:1454IF D=4 GOTO 5217
+:1455IF D=5 GOTO 5219
+:1456IF D=6 GOTO 5221
+:1457IF D=7 GOTO 5223
+:1458IF D=8 GOTO 5226
+:145BPRINT "  BELL ",
+:145CGOTO 5231
+:145DPRINT "  BAR  ",
+:145EGOTO 5231
+:145FPRINT " CHERRY",
+:1460GOTO 5231
+:1461PRINT " APPLE ",
+:1462GOTO 5231
+:1463PRINT " LEMON ",
+:1464GOTO 5231
+:1465PRINT "  $$$  ",
+:1466GOTO 5231
+:1467PRINT " CHERRY",
+:1468D=3
+:1469GOTO 5231
+:146APRINT " CHERRY",
+:146BD=3
+:146FIF E=1 GOTO 5241
+:1470IF E=2 GOTO 5243
+:1471IF E=3 GOTO 5245
+:1472IF E=4 GOTO 5247
+:1473IF E=5 GOTO 5249
+:1474IF E=6 GOTO 5251
+:1475IF E=7 GOTO 5253
+:1479PRINT "  BELL ",
+:147AGOTO 5261
+:147BPRINT "  BAR  ",
+:147CGOTO 5261
+:147DPRINT " CHERRY",
+:147EGOTO 5261
+:147FPRINT " APPLE ",
+:1480GOTO 5261
+:1481PRINT " LEMON ",
+:1482GOTO 5261
+:1483PRINT "  $$$  ",
+:1484GOTO 5261
+:1485PRINT " CHERRY",
+:1486E=3
+:148DIF F=1 GOTO 5271
+:148EIF F=2 GOTO 5273
+:148FIF F=3 GOTO 5275
+:1490IF F=4 GOTO 5277
+:1491IF F=5 GOTO 5279
+:1492IF F=6 GOTO 5281
+:1493IF F=7 GOTO 5283
+:1497PRINT "  BELL ",
+:1498GOTO 5410
+:1499PRINT "  BAR  ",
+:149AGOTO 5410
+:149BPRINT " CHERRY",
+:149CGOTO 5410
+:149DPRINT " APPLE ",
+:149EGOTO 5410
+:149FPRINT " LEMON ",
+:14A0GOTO 5410
+:14A1PRINT "  $$$  ",
+:14A2GOTO 5410
+:14A3PRINT " CHERRY",
+:14A4F=3
+:1522IF D<>E GOTO 5440
+:152CIF E=F GOTO 5530
+:1536IF D=E GOTO 5460
+:1540IF D<>F GOTO 5490
+:154AGOTO 5510
+:1554IF D=1 GOTO 5510
+:1555IF D=3 GOTO 5510
+:1556IF D=5 GOTO 5510
+:1557IF D=7 GOTO 5510
+:155EB=B+5
+:1563PRINT " Keno...You win $5...Total = $",#1,B,
+:1568GOTO 5550
+:1572B=B-1
+:1577PRINT " You have lost $1 -- Total = $",#1,B,
+:157CGOTO 5550
+:1586B=B+1
+:158BPRINT " You have won $1 -- Total = $",#1,B,
+:1590GOTO 5550
+:159AIF D=2 GOTO 5540
+:159BIF D=6 GOTO 5545
+:159FB=B+20
+:15A0PRINT " Jackpot...$20...Total = $",#1,B,
+:15A1GOTO 5550
+:15A4B=B+50
+:15A5PRINT " Jackpot...$50...Total = $",#1,B,
+:15A6GOTO 5550
+:15A9B=B+100
+:15AAPRINT " Jackpot...$100...Total = $",#1,B,
+:15AEINPUT " Again? (1=Y,0=N)" I
+:15B9IF I>1 GOTO 5550
+:15BAIF I=1 GOTO 5170
+:15BDPRINT
+:15C2PRINT "It's been nice operating for you - come back soon!"
+:15C3PRINT
+:15C7GOTO 1000
+@
+

@@ -1,0 +1,130 @@
+ 5 Y=2999:IN."Do you want a difficult game?  ","(Y or N)"A
+ 10 P."Stardate 3200:  Your mission is ",:IFA=YY=999
+ 15 K=0,B=0,D=30:F.I=0TO63:J=R.(99)<5,B=B+J
+ 20 M=R.(Y),M=(M<209)+(M<99)+(M<49)+(M<24)+(M<9)+(M<2),K=K+M
+ 25 @(I)=-100*M-10*J-R.(8):N.I:IF(B<2)+(K<4)G.15
+ 30 P."to destroy ",#1,K," Klingons in 30 stardates.
+ 35 P."There are ",#1,B," starbases.":GOS.160:C=0,H=K
+ 40 U=R.(8),V=R.(8),X=R.(8),Y=R.(8)
+ 45 F.I=71TO152:@(I)=0:N.I:@(8*X+Y+62)=4,M=A.(@(8*U+V-9)),N=M/100
+ 50 I=1:IFNF.J=1TON:GOS.165:@(J+134)=300,@(J+140)=S,@(J+146)=T:N.J
+ 55 GOS.175:M=M-100*N,I=2:IFM/10GOS.165
+ 60 M=M-M/10*10,I=3:IFMF.J=1TOM:GOS.165:N.J
+ 65 GOS.145:GOS.325:IFKG.95
+ 70 P.:P."Mission accomplished.":IFD<3P."Boy, you barely made it.
+ 75 IFD>5P."Good work...":IFD>9P."Fantastic!":IFD>13P."Unbelievable!
+ 80 D=30-D,I=H*100/D*10:P.#1,H," Klingons in ",D," stardates. (",I,")
+ 85 J=100*(C=0)-5*C:P.#1,C," casualties incurred. (",J,")
+ 90 P."Your score:",I+J:G.110
+ 95 IFD<0P."It's too late, the Federation has been conquered.":G.110
+ 100 IFE>=0G.120
+ 105 P."Enterprise destroyed":IFH-K>9P."But you were a good opponent
+ 110 Y=987:P.:IN."Another game?  ","(Y or N)"A:IFA=YG.5
+ 115 P."Goodbye...":STOP
+ 120 S=220,G=180,L=200,P=260,R=420,W=465,T=555:IN."Captain"A
+ 125 IF(A=S)+(A=G)+(A=L)+(A=P)+(A=R)+(A=W)+(A=T)G.A
+ 130 P."R=Report       S=SR. sensor   L=LR. sensor
+ 135 P."G=Galaxy map   P=Phaser       T=Torpedo
+ 140 P."W=Warp engine  * Please use one of these commands *":G.120
+ 145 F.I=X-(X>1)TOX+(X<8):F.J=Y-(Y>1)TOY+(Y<8)
+ 150 IF@(8*I+J+62)<>2N.J:N.I:O=0:R.
+ 155 IFO=0P.'Sulu: "Captain, we are docked at Starbase."
+ 160 E=4000,F=10,O=1:F.I=64TO70:@(I)=0:N.I:R.
+ 165 S=R.(8),T=R.(8),A=8*S+T+62:IF@(A)G.165
+ 170 @(A)=I:R.
+ 175 P."Enterprise in Q-",#1,U,V," S-",X,Y:R.
+ 180 GOS.175:J=2:GOS.375:IFIG.120
+ 185 P." of galaxy map":F.I=0TO7:P.:P.#1,I+1,":",:F.J=0TO7:M=@(8*I+J)
+ 190 P.#4,(M>0)*M,:N.J:P.:N.I:P."  ",:F.I=0TO7:P."  ..",:N.I:P.
+ 195 P."  ",:F.I=1TO8:P.#4,I,:N.I:P.:P.:G.120
+ 200 GOS.175:J=3:GOS.375:IFIG.120
+ 205 P.:F.I=U-1TOU+1:F.J=V-1TOV+1:M=8*I+J-9,A=0
+ 210 IF(I>0)*(I<9)*(J>0)*(J<9)A=A.(@(M)),@(M)=A
+ 215 P.#4,A,:N.J:P.:N.I:G.120
+ 220 GOS.175:J=1:GOS.375:IFIG.120
+ 225 M=8*U+V-9,@(M)=A.(@(M))
+ 230 P.:F.I=1TO8:P.#1,I,:F.J=1TO8:M=@(8*I+J+62):IFM=0P." .",
+ 235 IFM=1P." K",
+ 240 IFM=2P." B",
+ 245 IFM=3P." *",
+ 250 IFM=4P." E",
+ 255 N.J:P.:N.I:P." ",:F.I=1TO8:P.#2,I,:N.I:P.:G.120
+ 260 J=4:GOS.375:IFIG.120
+ 265 IN." Energized. ","Units to fire"A:IFA<1G.120
+ 270 IFA>EP.'Spock: "We have only ',#1,E,' units."':G.120
+ 275 E=E-A:IFN<1P."Phaser fired at empty space.":G.65
+ 280 A=A/N:F.M=135TO140:IF@(M)=0G.290
+ 285 GOS.295:P.#3,S," units hit ",:GOS.305
+ 290 N.M:G.65
+ 295 IFA>1090P."...OVERLOADED..":J=4,@(67)=1,A=9:GOS.375
+ 300 I=@(M+6)-X,J=@(M+12)-Y,S=A*30/(30+I*I+J*J)+1:R.
+ 305 P."Klingon at S-",#1,@(M+6),@(M+12),:@(M)=@(M)-S
+ 310 IF@(M)>0P." **DAMAGED**":R.
+ 315 @(M)=0,I=8*U+V-9,J=@(I)/A.(@(I)),@(I)=@(I)-100*J,K=K-1
+ 320 I=8*@(M+6)+@(M+12)+62,@(I)=0,N=N-1:P." ***DESTROYED***":R.
+ 325 IFN=0R.
+ 330 P."Klingon attack":IFOP."Starbase protects Enterprise":R.
+ 335 T=0:F.M=135TO140:IF@(M)=0G.350
+ 340 A=(@(M)+R.(@(M)))/2:GOS.295:T=T+S,I=@(M+6),J=@(M+12)
+ 345 P.#3,S," units hit from Klingon at S-",#1,I,J
+ 350 N.M:E=E-T:IFE<=0P."*** BANG ***":R.
+ 355 P.#1,E," units of energy left.":IFR.(E/4)>TR.
+ 360 IF@(70)=0@(70)=R.(T/50+1),J=7:G.375
+ 365 J=R.(6),@(J+63)=R.(T/99+1)+@(J+63),I=R.(8)+1,C=C+I
+ 370 P.'McCoy: "Sickbay to bridge, we suffered',#2,I,' casualties."
+ 375 I=@(J+63):IFJ=1P."Short range sensor",
+ 380 IFJ=2P."Computer display",
+ 385 IFJ=3P."Long range sensor",
+ 390 IFJ=4P."Phaser",
+ 395 IFJ=5P."Warp engine",
+ 400 IFJ=6P."Photon terpedo tubes",
+ 405 IFJ=7P."Shield",
+ 410 IFI=0R.
+ 415 P." damaged, ",#1,I," stardates estimated for repair":R.
+ 420 P."Status report:":P."Stardate",#10,3230-D:P."Time Left",#7,D
+ 425 P."Condition     ",:IFOP."Docked":G.445
+ 430 IFNP."Red":G.445
+ 435 IFE<999P."Yellow":G.445
+ 440 P."Green
+ 445 P."Position      Q-",#1,U,V," S-",X,Y:P."Energy",#12,E
+ 450 P."Torpedoes",#7,F:P."Klingons left",#3,K:P."Starbases",#6,B
+ 455 F.J=1TO7:IF@(J+63)GOS.375
+ 460 N.J:G.120
+ 465 J=5:GOS.375:IFI=0P.
+ 470 IN."Sector distance"W:IFW<1G.120
+ 475 IFI*(W>2)P.'Chekov: "We can try 2 at most, Sir."':G.470
+ 480 IFW>91W=91:P.'Spock: "Are you sure, Captain?"
+ 485 IFE<W*W/2P.'Scotty: "Sir, we do not have the energy."':G.120
+ 490 GOS.615:IFR=0G.120
+ 495 D=D-1,E=E-W*W/2,@(8*X+Y+62)=0
+ 500 F.M=64TO70:@(M)=(@(M)-1)*(@(M)>0):N.M
+ 505 P=45*X+22,G=45*Y+22,W=45*W:F.M=1TO8:W=W-R:IFW<-22G.525
+ 510 P=P+S,G=G+T,I=P/45,J=G/45:IF(I<1)+(I>8)+(J<1)+(J>8)G.530
+ 515 IF@(8*I+J+62)=0X=I,Y=J:N.M
+ 520 P."**EMERGENCY STOP**":P.'Spock: "To err is Human."
+ 525 @(8*X+Y+62)=4:GOS.175:G.65
+ 530 P=U*72+P/5+W/5*S/R-9,U=P/72,G=V*72+G/5+W/5*T/R-9,V=G/72
+ 535 IFR.(9)<2P."***SPACE STORM***":T=100:GOS.360
+ 540 IF(U>0)*(U<9)*(V>0)*(V<9)X=(P+9-72*U)/9,Y=(G+9-72*V)/9:G.45
+ 545 P."**You wandered outside the galaxy**
+ 550 P."On-board computer takes over, and saved your life":G.40
+ 555 J=6:GOS.375:IFIG.120
+ 560 IFF=0P." Empty":G.120
+ 565 P." Loaded":GOS.615:IFR=0G.120
+ 570 P."Torpedo track ",:F=F-1,P=45*X+22,G=45*Y+22:F.M=1TO8
+ 575 P=P+S,G=G+T,I=P/45,J=G/45:IF(I<1)+(I>8)+(J<1)+(J>8)G.585
+ 580 L=8*I+J+62,W=8*U+V-9,R=@(W)/A.(@(W)):P.#1,I,J," ",:G.585+5*@(L)
+ 585 N.M:P."...Missed":G.65
+ 590 S=R.(99)+280:F.M=135TO140:IF(@(M+6)=I)*(@(M+12)=J)GOS.305
+ 592 N.M:G.65
+ 595 B=B-1,@(L)=0,@(W)=@(W)-10*R:P."Starbase destroyed!
+ 597 P.'SPOCK: "I often find Human behaviour fascinating."':G.65
+ 600 P."Hit a star":IFR.(9)<3P."Torpedo absorbed":G.65
+ 605 @(L)=0,@(W)=@(W)-R:IFR.(9)<6P."Star destroyed":G.65
+ 610 T=300:P."It novas!   ***RADIATION ALARM***":GOS.360:G.65
+ 615 IN."Course (0-360)"I:IF(I>360)+(I<0)R=0:R.
+ 620 S=(I+45)/90,I=I-S*90,R=(45+I*I)/110+45:G.625+5*(S<4)*S
+ 625 S=-45,T=I:R.
+ 630 S=I,T=45:R.
+ 635 S=45,T=-I:R.
+ 640 S=-I,T=-45:R.

@@ -1,0 +1,84 @@
+
+:0064REM  Shooting Stars in 68000 Tiny BASIC
+:006EREM  Adapted by Gordon Brandly from an article in DDJ #7
+:0078REM  This game was described in the May 1976 issue
+:0082REM  of BYTE magazine and I haven't the faintest idea
+:008CREM  how to play it!
+:00A0@(1)=-23
+:00AA@(2)=-3
+:00B4@(3)=-19
+:00BE@(4)=-11
+:00C8@(5)=2
+:00D2@(6)=-5
+:00DC@(7)=-13
+:00E6@(8)=-7
+:00F0@(9)=-17
+:00FA@(10)=1518
+:0104@(11)=1311
+:010E@(12)=570
+:0118@(13)=3289
+:0122@(14)=2310
+:012C@(15)=1615
+:0136@(16)=2002
+:0140@(17)=1547
+:014A@(18)=1190
+:0154REM  Initialize the shot counter
+:015EC=0
+:0168REM  Randomize star and black hole position
+:0172FOR I=1 TO 9
+:017CX=RND(32762)
+:0186IF X>20000 @(I)=-@(I)
+:0190NEXT I
+:019AREM  Print initial pattern
+:01A4GOSUB 840
+:01AEREM  Get first shot
+:01B8INPUT "Your shot" X
+:01C2IF (X<1)+(X>9) P. "You must enter a number from 1 to 9.":GOTO 440
+:01CCREM  Increment shot counter
+:01D6C=C+1
+:01E0REM  Check for valid shot
+:01EAIF @(X)>0 GOTO 530
+:01F4PRINT "You can only shoot stars."
+:01FEGOTO 440
+:0208REM  Initialize scoring counter
+:0212B=0
+:021CREM  Invert (change sign) of appropriate galaxy.
+:0226GOSUB 770
+:0230REM  Check score by adding star values
+:023AFOR L=1 TO 9
+:0244B=B+@(L)
+:024ENEXT L
+:0258REM  Print out modified universe
+:0262GOSUB 840
+:026CREM  If B=-100 all points are black holes
+:0276IF B=-100 GOTO 690
+:0280REM  If B is neither -100 nor 96 game continues
+:028AIF B<>96 GOTO 440
+:0294PRINT "You win!"
+:029EPRINT "You fired ",#1,C," shots."
+:02A8GOTO 700
+:02B2PRINT "Sorry, you lost."
+:02BCPRINT "To play again, type RUN and press the RETURN key."
+:02C6STOP
+:02D0REM  The following subroutine checks to see if the F value
+:02DAREM  for the shot can be evenly divided by the S value
+:02E4REM  for each position.  If S divides into F without
+:02EEREM  a remainder, the star or black hole is inverted.
+:02F8REM  (Its sign is changed.)
+:0302FOR K=1 TO 9
+:030CIF (@(X+9)/@(K))*@(K)=@(X+9) @(K)=-@(K)
+:0316NEXT K
+:0320RETURN
+:032AREM  This subroutine prints out the galaxy
+:0348FOR Z=1 TO 24:PRINT:NEXT Z
+:0352FOR J=1 TO 9
+:035CIF @(J)<0 PRINT "   .",
+:0366IF @(J)>0 PRINT "   *",
+:0370REM  If J isn't divisible by 3, skip carriage returns.
+:037AIF J/3*3<>J GOTO 920
+:0384PRINT
+:038EPRINT
+:0398NEXT J
+:03A2RETURN
+@
+

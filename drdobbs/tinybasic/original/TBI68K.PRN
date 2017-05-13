@@ -1,0 +1,1629 @@
+A68K  1.9  11/08/82 -- Run on ??/??/??
+		       ******************************************************************
+		       *								*
+		       *	       Tiny BASIC for the Motorola MC68000		*
+		       *								*
+		       * Derived from Palo Alto Tiny BASIC as published in the May 1976 *
+		       * issue of Dr. Dobb's Journal.  Adapted to the 68000 by:         *
+		       *       Gordon Brandly						*
+		       *       ------							*
+		       *       ---------------------------				*
+		       *       -------							*
+		       *								*
+		       *								*
+		       * This version is for MEX68KECB Educational Computer Board I/O.	*
+		       *								*
+		       ******************************************************************
+		       *    Copyright (C) 1984 by Gordon Brandly. This program may be	*
+		       *    freely distributed for personal use only. All commercial	*
+		       *		      rights are reserved.			*
+		       ******************************************************************
+
+		       * Vers. 1.0  1984/7/17  - Original version by Gordon Brandly
+		       *       1.1  1984/12/9  - Addition of '$' print term by Marvin Lipford
+		       *       1.2  1985/4/9   - Bug fix in multiply routine by Rick Murray
+
+			       OPT     FRS,BRS	       forward ref.'s & branches default to short
+
+      0000000D	       CR      EQU     $0D	       ASCII equates
+      0000000A	       LF      EQU     $0A
+      00000009	       TAB     EQU     $09
+      00000003	       CTRLC   EQU     $03
+      00000008	       CTRLH   EQU     $08
+      00000013	       CTRLS   EQU     $13
+      00000018	       CTRLX   EQU     $18
+
+      00000050	       BUFLEN  EQU     80	       length of keyboard input buffer
+
+000900			       ORG     $900	       first free address using Tutor
+		       *
+		       * Standard jump table. You can change these addresses if you are
+		       * customizing this interpreter for a different environment.
+		       *
+000900	6000 0022      START   BRA.L   CSTART	       Cold Start entry point
+000904	6000 0048      GOWARM  BRA.L   WSTART	       Warm Start entry point
+000908	6000 0AEC      GOOUT   BRA.L   OUTC	       Jump to character-out routine
+00090C	6000 0AFA      GOIN    BRA.L   INC	       Jump to character-in routine
+000910	6000 0B0C      GOAUXO  BRA.L   AUXOUT	       Jump to auxiliary-out routine
+000914	6000 0B1A      GOAUXI  BRA.L   AUXIN	       Jump to auxiliary-in routine
+000918	6000 0B2C      GOBYE   BRA.L   BYEBYE	       Jump to monitor, DOS, etc.
+		       *
+		       * Modifiable system constants:
+		       *
+00091C	00001512       TXTBGN  DC.L    TXT	       beginning of program memory
+000920	00008000       ENDMEM  DC.L    $8000	       end of available memory
+		       *
+		       * The main interpreter starts here:
+		       *
+000924	2E78 0920      CSTART  MOVE.L  ENDMEM,SP       initialize stack pointer
+000928	4DF8 144C	       LEA     INITMSG,A6      tell who we are
+00092C	6100 0ABC	       BSR.L   PRMESG
+000930	21F8 091C	       MOVE.L  TXTBGN,TXTUNF   init. end-of-program pointer
+	14B6
+000936	2038 0920	       MOVE.L  ENDMEM,D0       get address of end of memory
+00093A	0480 00000800	       SUB.L   #2048,D0        reserve 2K for the stack
+000940	21C0 14BE	       MOVE.L  D0,STKLMT
+000944	0480 0000006C	       SUB.L   #108,D0	       reserve variable area (27 long words)
+00094A	21C0 14BA	       MOVE.L  D0,VARBGN
+00094E	4280	       WSTART  CLR.L   D0	       initialize internal variables
+000950	21C0 14A2	       MOVE.L  D0,LOPVAR
+000954	21C0 149A	       MOVE.L  D0,STKGOS
+000958	21C0 1496	       MOVE.L  D0,CURRNT       current line number pointer = 0
+00095C	2E78 0920	       MOVE.L  ENDMEM,SP       init S.P. again, just in case
+000960	4DF8 1472	       LEA     OKMSG,A6        display "OK"
+000964	6100 0A84	       BSR.L   PRMESG
+000968	103C 003E      ST3     MOVE.B  #'>',D0         Prompt with a '>' and
+00096C	6100 07B8	       BSR.L   GETLN	       read a line.
+000970	6100 0A18	       BSR.L   TOUPBUF	       convert to upper case
+000974	2848		       MOVE.L  A0,A4	       save pointer to end of line
+000976	41F8 14C2	       LEA     BUFFER,A0       point to the beginning of line
+00097A	6100 09CC	       BSR.L   TSTNUM	       is there a number there?
+00097E	6100 09FE	       BSR.L   IGNBLK	       skip trailing blanks
+000982	4A41		       TST     D1	       does line no. exist? (or nonzero?)
+000984	6700 011A	       BEQ.L   DIRECT	       if not, it's a direct statement
+000988	0C81 0000FFFF	       CMP.L   #$FFFF,D1       see if line no. is <= 16 bits
+00098E	6400 078E	       BCC.L   QHOW	       if not, we've overflowed
+000992	1101		       MOVE.B  D1,-(A0)        store the binary line no.
+000994	E059		       ROR     #8,D1	       (Kludge to store a word on a
+000996	1101		       MOVE.B  D1,-(A0)        possible byte boundary)
+000998	E159		       ROL     #8,D1
+00099A	6100 082A	       BSR.L   FNDLN	       find this line in save area
+00099E	2A49		       MOVE.L  A1,A5	       save possible line pointer
+0009A0	6612		       BNE     ST4	       if not found, insert
+0009A2	6100 0848	       BSR.L   FNDNXT	       find the next line (into A1)
+0009A6	244D		       MOVE.L  A5,A2	       pointer to line to be deleted
+0009A8	2678 14B6	       MOVE.L  TXTUNF,A3       points to top of save area
+0009AC	6100 0848	       BSR.L   MVUP	       move up to delete
+0009B0	21CA 14B6	       MOVE.L  A2,TXTUNF       update the end pointer
+0009B4	200C	       ST4     MOVE.L  A4,D0	       calculate the length of new line
+0009B6	9088		       SUB.L   A0,D0
+0009B8	0C80 00000003	       CMP.L   #3,D0	       is it just a line no. & CR?
+0009BE	67A8		       BEQ     ST3	       if so, it was just a delete
+0009C0	2678 14B6	       MOVE.L  TXTUNF,A3       compute new end
+0009C4	2C4B		       MOVE.L  A3,A6
+0009C6	D7C0		       ADD.L   D0,A3
+0009C8	2038 14BA	       MOVE.L  VARBGN,D0       see if there's enough room
+0009CC	B08B		       CMP.L   A3,D0
+0009CE	6300 0746	       BLS.L   QSORRY	       if not, say so
+0009D2	21CB 14B6	       MOVE.L  A3,TXTUNF       if so, store new end position
+0009D6	224E		       MOVE.L  A6,A1	       points to old unfilled area
+0009D8	244D		       MOVE.L  A5,A2	       points to beginning of move area
+0009DA	6100 0824	       BSR.L   MVDOWN	       move things out of the way
+0009DE	2248		       MOVE.L  A0,A1	       set up to do the insertion
+0009E0	244D		       MOVE.L  A5,A2
+0009E2	264C		       MOVE.L  A4,A3
+0009E4	6100 0810	       BSR.L   MVUP	       do it
+0009E8	6000 FF7E	       BRA     ST3	       go back and get another line
+
+		       *
+		       *******************************************************************
+		       *
+		       * *** Tables *** DIRECT *** EXEC ***
+		       *
+		       * This section of the code tests a string against a table. When
+		       * a match is found, control is transferred to the section of
+		       * code according to the table.
+		       *
+		       * At 'EXEC', A0 should point to the string, A1 should point to
+		       * the character table, and A2 should point to the execution
+		       * table. At 'DIRECT', A0 should point to the string, A1 and
+		       * A2 will be set up to point to TAB1 and TAB1.1, which are
+		       * the tables of all direct and statement commands.
+		       *
+		       * A '.' in the string will terminate the test and the partial
+		       * match will be considered as a match, e.g. 'P.', 'PR.','PRI.',
+		       * 'PRIN.', or 'PRINT' will all match 'PRINT'.
+		       *
+		       * There are two tables: the character table and the execution
+		       * table. The character table consists of any number of text items.
+		       * Each item is a string of characters with the last character's
+		       * high bit set to one. The execution table holds a 16-bit
+		       * execution addresses that correspond to each entry in the
+		       * character table.
+		       *
+		       * The end of the character table is a 0 byte which corresponds
+		       * to the default routine in the execution table, which is
+		       * executed if none of the other table items are matched.
+		       *
+		       * Character-matching tables:
+0009EC	4C 49 53 D4    TAB1    DC.B    'LIS',('T'+$80)         Direct commands
+0009F0	4C 4F 41 C4	       DC.B    'LOA',('D'+$80)
+0009F4	4E 45 D7	       DC.B    'NE',('W'+$80)
+0009F7	52 55 CE	       DC.B    'RU',('N'+$80)
+0009FA	53 41 56 C5	       DC.B    'SAV',('E'+$80)
+0009FE	4E 45 58 D4    TAB2    DC.B    'NEX',('T'+$80)         Direct / statement
+000A02	4C 45 D4	       DC.B    'LE',('T'+$80)
+000A05	49 C6		       DC.B    'I',('F'+$80)
+000A07	47 4F 54 CF	       DC.B    'GOT',('O'+$80)
+000A0B	47 4F 53 55	       DC.B    'GOSU',('B'+$80)
+	C2
+000A10	52 45 54 55	       DC.B    'RETUR',('N'+$80)
+	52 CE
+000A16	52 45 CD	       DC.B    'RE',('M'+$80)
+000A19	46 4F D2	       DC.B    'FO',('R'+$80)
+000A1C	49 4E 50 55	       DC.B    'INPU',('T'+$80)
+	D4
+000A21	50 52 49 4E	       DC.B    'PRIN',('T'+$80)
+	D4
+000A26	50 4F 4B C5	       DC.B    'POK',('E'+$80)
+000A2A	53 54 4F D0	       DC.B    'STO',('P'+$80)
+000A2E	42 59 C5	       DC.B    'BY',('E'+$80)
+000A31	43 41 4C CC	       DC.B    'CAL',('L'+$80)
+000A35	00		       DC.B    0
+000A36	50 45 45 CB    TAB4    DC.B    'PEE',('K'+$80)         Functions
+000A3A	52 4E C4	       DC.B    'RN',('D'+$80)
+000A3D	41 42 D3	       DC.B    'AB',('S'+$80)
+000A40	53 49 5A C5	       DC.B    'SIZ',('E'+$80)
+000A44	00		       DC.B    0
+000A45	54 CF	       TAB5    DC.B    'T',('O'+$80)           "TO" in "FOR"
+000A47	00		       DC.B    0
+000A48	53 54 45 D0    TAB6    DC.B    'STE',('P'+$80)         "STEP" in "FOR"
+000A4C	00		       DC.B    0
+000A4D	3E BD	       TAB8    DC.B    '>',('='+$80)           Relational operators
+000A4F	3C BE		       DC.B    '<',('>'+$80)
+000A51	BE		       DC.B    ('>'+$80)
+000A52	BD		       DC.B    ('='+$80)
+000A53	3C BD		       DC.B    '<',('='+$80)
+000A55	BC		       DC.B    ('<'+$80)
+000A56	00		       DC.B    0
+000A57	00		       DC.B    0       <- for aligning on a word boundary
+
+		       * Execution address tables:
+trim16 address
+000A58	0B44	       TAB1.1  DC.W    LIST		       Direct commands
+trim16 address
+000A5A	0D80		       DC.W    LOAD
+trim16 address
+000A5C	0AE6		       DC.W    NEW
+trim16 address
+000A5E	0AF8		       DC.W    RUN
+trim16 address
+000A60	0DDE		       DC.W    SAVE
+trim16 address
+000A62	0C8C	       TAB2.1  DC.W    NEXT		       Direct / statement
+trim16 address
+000A64	0D70		       DC.W    LET
+trim16 address
+000A66	0CDC		       DC.W    IF
+trim16 address
+000A68	0B30		       DC.W    GOTO
+trim16 address
+000A6A	0BDC		       DC.W    GOSUB
+trim16 address
+000A6C	0C04		       DC.W    RETURN
+trim16 address
+000A6E	0CDA		       DC.W    REM
+trim16 address
+000A70	0C22		       DC.W    FOR
+trim16 address
+000A72	0D02		       DC.W    INPUT
+trim16 address
+000A74	0B70		       DC.W    PRINT
+trim16 address
+000A76	0E5C		       DC.W    POKE
+trim16 address
+000A78	0AF0		       DC.W    STOP
+trim16 address
+000A7A	0918		       DC.W    GOBYE
+trim16 address
+000A7C	0E74		       DC.W    CALL
+trim16 address
+000A7E	0D6A		       DC.W    DEFLT
+trim16 address
+000A80	103E	       TAB4.1  DC.W    PEEK		       Functions
+trim16 address
+000A82	104A		       DC.W    RND
+trim16 address
+000A84	107C		       DC.W    ABS
+trim16 address
+000A86	108C		       DC.W    SIZE
+trim16 address
+000A88	0F46		       DC.W    XP40
+trim16 address
+000A8A	0C3A	       TAB5.1  DC.W    FR1		       "TO" in "FOR"
+trim16 address
+000A8C	10D6		       DC.W    QWHAT
+trim16 address
+000A8E	0C4E	       TAB6.1  DC.W    FR2		       "STEP" in "FOR"
+trim16 address
+000A90	0C54		       DC.W    FR3
+trim16 address
+000A92	0E98	       TAB8.1  DC.W    XP11    >=	       Relational operators
+trim16 address
+000A94	0E9E		       DC.W    XP12    <>
+trim16 address
+000A96	0EA4		       DC.W    XP13    >
+trim16 address
+000A98	0EB0		       DC.W    XP15    =
+trim16 address
+000A9A	0EAA		       DC.W    XP14    <=
+trim16 address
+000A9C	0EB8		       DC.W    XP16    <
+trim16 address
+000A9E	0EC8		       DC.W    XP17
+		       *
+000AA0	43F8 09EC      DIRECT  LEA     TAB1,A1
+000AA4	45F8 0A58	       LEA     TAB1.1,A2
+000AA8	6100 08D4      EXEC    BSR.L   IGNBLK	       ignore leading blanks
+000AAC	2648		       MOVE.L  A0,A3	       save the pointer
+000AAE	4202		       CLR.B   D2	       clear match flag
+000AB0	1018	       EXLP    MOVE.B  (A0)+,D0        get the program character
+000AB2	1211		       MOVE.B  (A1),D1	       get the table character
+000AB4	6604		       BNE     EXNGO	       If end of table,
+000AB6	204B		       MOVE.L  A3,A0	       restore the text pointer and...
+000AB8	6024		       BRA     EXGO	       execute the default.
+000ABA	1600	       EXNGO   MOVE.B  D0,D3	       Else check for period...
+000ABC	C602		       AND.B   D2,D3	       and a match.
+000ABE	0C03 002E	       CMP.B   #'.',D3
+000AC2	671A		       BEQ     EXGO	       if so, execute
+000AC4	0201 007F	       AND.B   #$7F,D1	       ignore the table's high bit
+000AC8	B200		       CMP.B   D0,D1	       is there a match?
+000ACA	670C		       BEQ     EXMAT
+000ACC	548A		       ADDQ.L  #2,A2	       if not, try the next entry
+000ACE	204B		       MOVE.L  A3,A0	       reset the program pointer
+000AD0	4202		       CLR.B   D2	       sorry, no match
+000AD2	4A19	       EX1     TST.B   (A1)+	       get to the end of the entry
+000AD4	6AFC		       BPL     EX1
+000AD6	60D8		       BRA     EXLP	       back for more matching
+000AD8	74FF	       EXMAT   MOVEQ   #-1,D2	       we've got a match so far
+000ADA	4A19		       TST.B   (A1)+	       end of table entry?
+000ADC	6AD2		       BPL     EXLP	       if not, go back for more
+000ADE	47F8 0000      EXGO    LEA     0,A3	       execute the appropriate routine
+000AE2	3652		       MOVE    (A2),A3
+000AE4	4ED3		       JMP     (A3)
+		       *
+		       *******************************************************************
+		       *
+		       * What follows is the code to execute direct and statement
+		       * commands. Control is transferred to these points via the command
+		       * table lookup code of 'DIRECT' and 'EXEC' in the last section.
+		       * After the command is executed, control is transferred to other
+		       * sections as follows:
+		       *
+		       * For 'LIST', 'NEW', and 'STOP': go back to the warm start point.
+		       * For 'RUN': go execute the first stored line if any; else go
+		       * back to the warm start point.
+		       * For 'GOTO' and 'GOSUB': go execute the target line.
+		       * For 'RETURN' and 'NEXT'; go back to saved return line.
+		       * For all others: if 'CURRNT' is 0, go to warm start; else go
+		       * execute next command. (This is done in 'FINISH'.)
+		       *
+		       *******************************************************************
+		       *
+		       * *** NEW *** STOP *** RUN (& friends) *** GOTO ***
+		       *
+		       * 'NEW<CR>' sets TXTUNF to point to TXTBGN
+		       *
+		       * 'STOP<CR>' goes back to WSTART
+		       *
+		       * 'RUN<CR>' finds the first stored line, stores its address
+		       * in CURRNT, and starts executing it. Note that only those
+		       * commands in TAB2 are legal for a stored program.
+		       *
+		       * There are 3 more entries in 'RUN':
+		       * 'RUNNXL' finds next line, stores it's address and executes it.
+		       * 'RUNTSL' stores the address of this line and executes it.
+		       * 'RUNSML' continues the execution on same line.
+		       *
+		       * 'GOTO expr<CR>' evaluates the expression, finds the target
+		       * line, and jumps to 'RUNTSL' to do it.
+		       *
+000AE6	6100 05E2      NEW     BSR.L   ENDCHK
+000AEA	21F8 091C	       MOVE.L  TXTBGN,TXTUNF   set the end pointer
+	14B6
+
+000AF0	6100 05D8      STOP    BSR.L   ENDCHK
+000AF4	6000 FE58	       BRA     WSTART
+
+000AF8	6100 05D0      RUN     BSR.L   ENDCHK
+000AFC	2078 091C	       MOVE.L  TXTBGN,A0       set pointer to beginning
+000B00	21C8 1496	       MOVE.L  A0,CURRNT
+
+000B04	4AB8 1496      RUNNXL  TST.L   CURRNT	       executing a program?
+000B08	6700 FE44	       BEQ.L   WSTART	       if not, we've finished a direct stat.
+000B0C	4281		       CLR.L   D1	       else find the next line number
+000B0E	2248		       MOVE.L  A0,A1
+000B10	6100 06C2	       BSR.L   FNDLNP
+000B14	6500 FE38	       BCS     WSTART	       if we've fallen off the end, stop
+
+000B18	21C9 1496      RUNTSL  MOVE.L  A1,CURRNT       set CURRNT to point to the line no.
+000B1C	2049		       MOVE.L  A1,A0	       set the text pointer to
+000B1E	5488		       ADDQ.L  #2,A0	       the start of the line text
+
+000B20	6100 08B2      RUNSML  BSR.L   CHKIO	       see if a control-C was pressed
+000B24	43F8 09FE	       LEA     TAB2,A1	       find command in TAB2
+000B28	45F8 0A62	       LEA     TAB2.1,A2
+000B2C	6000 FF7A	       BRA     EXEC	       and execute it
+
+000B30	6100 0356      GOTO    BSR.L   EXPR	       evaluate the following expression
+000B34	6100 0594	       BSR.L   ENDCHK	       must find end of line
+000B38	2200		       MOVE.L  D0,D1
+000B3A	6100 068A	       BSR.L   FNDLN	       find the target line
+000B3E	6600 05DE	       BNE.L   QHOW	       no such line no.
+000B42	60D4		       BRA     RUNTSL	       go do it
+
+		       *
+		       *******************************************************************
+		       *
+		       * *** LIST *** PRINT ***
+		       *
+		       * LIST has two forms:
+		       * 'LIST<CR>' lists all saved lines
+		       * 'LIST #<CR>' starts listing at the line #
+		       * Control-S pauses the listing, control-C stops it.
+		       *
+		       * PRINT command is 'PRINT ....:' or 'PRINT ....<CR>'
+		       * where '....' is a list of expressions, formats, back-arrows,
+		       * and strings.  These items a separated by commas.
+		       *
+		       * A format is a pound sign followed by a number.  It controls
+		       * the number of spaces the value of an expression is going to
+		       * be printed in.  It stays effective for the rest of the print
+		       * command unless changed by another format.  If no format is
+		       * specified, 11 positions will be used.
+		       *
+		       * A string is quoted in a pair of single- or double-quotes.
+		       *
+		       * An underline (back-arrow) means generate a <CR> without a <LF>
+		       *
+		       * A <CR LF> is generated after the entire list has been printed
+		       * or if the list is empty.  If the list ends with a semicolon,
+		       * however, no <CR LF> is generated.
+		       *
+
+000B44	6100 0802      LIST    BSR.L   TSTNUM	       see if there's a line no.
+000B48	6100 0580	       BSR.L   ENDCHK	       if not, we get a zero
+000B4C	6100 0678	       BSR.L   FNDLN	       find this or next line
+000B50	6500 FDFC      LS1     BCS     WSTART	       warm start if we passed the end
+000B54	6100 07C0	       BSR.L   PRTLN	       print the line
+000B58	6100 087A	       BSR.L   CHKIO	       check for listing halt request
+000B5C	670C		       BEQ     LS3
+000B5E	0C00 0013	       CMP.B   #CTRLS,D0       pause the listing?
+000B62	6606		       BNE     LS3
+000B64	6100 086E      LS2     BSR.L   CHKIO	       if so, wait for another keypress
+000B68	67FA		       BEQ     LS2
+000B6A	6100 0668      LS3     BSR.L   FNDLNP	       find the next line
+000B6E	60E0		       BRA     LS1
+
+000B70	383C 000B      PRINT   MOVE    #11,D4	       D4 = number of print spaces
+000B74	6100 07BA	       BSR.L   TSTC	       if null list and ":"
+000B78	3A 07		       DC.B    ':',PR2-*
+000B7A	6100 086A	       BSR.L   CRLF	       give CR-LF and continue
+000B7E	60A0		       BRA     RUNSML	       execution on the same line
+000B80	6100 07AE      PR2     BSR.L   TSTC	       if null list and <CR>
+000B84	0D 09		       DC.B    CR,PR0-*
+000B86	6100 085E	       BSR.L   CRLF	       also give CR-LF and
+000B8A	6000 FF78	       BRA     RUNNXL	       execute the next line
+000B8E	6100 07A0      PR0     BSR.L   TSTC	       else is it a format?
+000B92	23 09		       DC.B    '#',PR1-*
+000B94	6100 02F2	       BSR.L   EXPR	       yes, evaluate expression
+000B98	3800		       MOVE    D0,D4	       and save it as print width
+000B9A	6016		       BRA     PR3	       look for more to print
+000B9C	6100 0792      PR1     BSR.L   TSTC	       is character expression? (MRL)
+000BA0	24 0B		       DC.B    '$',PR4-*
+000BA2	6100 02E4	       BSR.L   EXPR	       yep. Evaluate expression (MRL)
+000BA6	6100 FD60	       BSR     GOOUT	       print low byte (MRL)
+000BAA	6006		       BRA     PR3	       look for more. (MRL)
+000BAC	6100 06B6      PR4     BSR.L   QTSTG	       is it a string?
+000BB0	6012		       BRA.S   PR8	       if not, must be an expression
+000BB2	6100 077C      PR3     BSR.L   TSTC	       if ",", go find next
+000BB6	2C 07		       DC.B    ',',PR6-*
+000BB8	6100 04F6	       BSR.L   FIN	       in the list.
+000BBC	60D0		       BRA     PR0
+000BBE	6100 0826      PR6     BSR.L   CRLF	       list ends here
+000BC2	6010		       BRA     FINISH
+000BC4	3F04	       PR8     MOVE    D4,-(SP)        save the width value
+000BC6	6100 02C0	       BSR.L   EXPR	       evaluate the expression
+000BCA	381F		       MOVE    (SP)+,D4        restore the width
+000BCC	2200		       MOVE.L  D0,D1
+000BCE	6100 06D2	       BSR.L   PRTNUM	       print its value
+000BD2	60DE		       BRA     PR3	       more to print?
+
+000BD4	6100 04DA      FINISH  BSR.L   FIN	       Check end of command
+000BD8	6000 04FC	       BRA.L   QWHAT	       print "What?" if wrong
+
+		       *
+		       *******************************************************************
+		       *
+		       * *** GOSUB *** & RETURN ***
+		       *
+		       * 'GOSUB expr:' or 'GOSUB expr<CR>' is like the 'GOTO' command,
+		       * except that the current text pointer, stack pointer, etc. are
+		       * saved so that execution can be continued after the subroutine
+		       * 'RETURN's.  In order that 'GOSUB' can be nested (and even
+		       * recursive), the save area must be stacked.  The stack pointer
+		       * is saved in 'STKGOS'.  The old 'STKGOS' is saved on the stack.
+		       * If we are in the main routine, 'STKGOS' is zero (this was done
+		       * in the initialization section of the interpreter), but we still
+		       * save it as a flag for no further 'RETURN's.
+		       *
+		       * 'RETURN<CR>' undoes everything that 'GOSUB' did, and thus
+		       * returns the execution to the command after the most recent
+		       * 'GOSUB'.  If 'STKGOS' is zero, it indicates that we never had
+		       * a 'GOSUB' and is thus an error.
+		       *
+000BDC	6100 0644      GOSUB   BSR.L   PUSHA	       save the current 'FOR' parameters
+000BE0	6100 02A6	       BSR.L   EXPR	       get line number
+000BE4	2F08		       MOVE.L  A0,-(SP)        save text pointer
+000BE6	2200		       MOVE.L  D0,D1
+000BE8	6100 05DC	       BSR.L   FNDLN	       find the target line
+000BEC	6600 0532	       BNE.L   AHOW	       if not there, say "How?"
+000BF0	2F38 1496	       MOVE.L  CURRNT,-(SP)    found it, save old 'CURRNT'...
+000BF4	2F38 149A	       MOVE.L  STKGOS,-(SP)    and 'STKGOS'
+000BF8	42B8 14A2	       CLR.L   LOPVAR	       load new values
+000BFC	21CF 149A	       MOVE.L  SP,STKGOS
+000C00	6000 FF16	       BRA     RUNTSL
+
+000C04	6100 04C4      RETURN  BSR.L   ENDCHK	       there should be just a <CR>
+000C08	2238 149A	       MOVE.L  STKGOS,D1       get old stack pointer
+000C0C	6700 04C8	       BEQ.L   QWHAT	       if zero, it doesn't exist
+000C10	2E41		       MOVE.L  D1,SP	       else restore it
+000C12	21DF 149A	       MOVE.L  (SP)+,STKGOS    and the old 'STKGOS'
+000C16	21DF 1496	       MOVE.L  (SP)+,CURRNT    and the old 'CURRNT'
+000C1A	205F		       MOVE.L  (SP)+,A0        and the old text pointer
+000C1C	6100 05EA	       BSR.L   POPA	       and the old 'FOR' parameters
+000C20	60B2		       BRA     FINISH	       and we are back home
+
+		       *
+		       *******************************************************************
+		       *
+		       * *** FOR *** & NEXT ***
+		       *
+		       * 'FOR' has two forms:
+		       * 'FOR var=exp1 TO exp2 STEP exp1' and 'FOR var=exp1 TO exp2'
+		       * The second form means the same thing as the first form with a
+		       * STEP of positive 1.  The interpreter will find the variable 'var'
+		       * and set its value to the current value of 'exp1'.  It also
+		       * evaluates 'exp2' and 'exp1' and saves all these together with
+		       * the text pointer, etc. in the 'FOR' save area, which consisits of
+		       * 'LOPVAR', 'LOPINC', 'LOPLMT', 'LOPLN', and 'LOPPT'.  If there is
+		       * already something in the save area (indicated by a non-zero
+		       * 'LOPVAR'), then the old save area is saved on the stack before
+		       * the new values are stored.  The interpreter will then dig in the
+		       * stack and find out if this same variable was used in another
+		       * currently active 'FOR' loop.  If that is the case, then the old
+		       * 'FOR' loop is deactivated. (i.e. purged from the stack)
+		       *
+		       * 'NEXT var' serves as the logical (not necessarily physical) end
+		       * of the 'FOR' loop.  The control variable 'var' is checked with
+		       * the 'LOPVAR'.  If they are not the same, the interpreter digs in
+		       * the stack to find the right one and purges all those that didn't
+		       * match.  Either way, it then adds the 'STEP' to that variable and
+		       * checks the result with against the limit value.  If it is within
+		       * the limit, control loops back to the command following the
+		       * 'FOR'.  If it's outside the limit, the save area is purged and
+		       * execution continues.
+		       *
+000C22	6100 05FE      FOR     BSR.L   PUSHA	       save the old 'FOR' save area
+000C26	6100 046E	       BSR.L   SETVAL	       set the control variable
+000C2A	21CE 14A2	       MOVE.L  A6,LOPVAR       save its address
+000C2E	43F8 0A45	       LEA     TAB5,A1	       use 'EXEC' to test for 'TO'
+000C32	45F8 0A8A	       LEA     TAB5.1,A2
+000C36	6000 FE70	       BRA     EXEC
+000C3A	6100 024C      FR1     BSR.L   EXPR	       evaluate the limit
+000C3E	21C0 14AA	       MOVE.L  D0,LOPLMT       save that
+000C42	43F8 0A48	       LEA     TAB6,A1	       use 'EXEC' to look for the
+000C46	45F8 0A8E	       LEA     TAB6.1,A2       word 'STEP'
+000C4A	6000 FE5C	       BRA     EXEC
+000C4E	6100 0238      FR2     BSR.L   EXPR	       found it, get the step value
+000C52	6002		       BRA     FR4
+000C54	7001	       FR3     MOVEQ   #1,D0	       not found, step defaults to 1
+000C56	21C0 14A6      FR4     MOVE.L  D0,LOPINC       save that too
+000C5A	21F8 1496      FR5     MOVE.L  CURRNT,LOPLN    save address of current line number
+	14AE
+000C60	21C8 14B2	       MOVE.L  A0,LOPPT        and text pointer
+000C64	2C4F		       MOVE.L  SP,A6	       dig into the stack to find 'LOPVAR'
+000C66	6006		       BRA     FR7
+000C68	DDFC 00000014  FR6     ADD.L   #20,A6	       look at next stack frame
+000C6E	2016	       FR7     MOVE.L  (A6),D0	       is it zero?
+000C70	6716		       BEQ     FR8	       if so, we're done
+000C72	B0B8 14A2	       CMP.L   LOPVAR,D0       same as current LOPVAR?
+000C76	66F0		       BNE     FR6	       nope, look some more
+000C78	244F		       MOVE.L  SP,A2	       Else remove 5 long words from...
+000C7A	224E		       MOVE.L  A6,A1	       inside the stack.
+000C7C	47F8 0014	       LEA     20,A3
+000C80	D7C9		       ADD.L   A1,A3
+000C82	6100 057C	       BSR.L   MVDOWN
+000C86	2E4B		       MOVE.L  A3,SP	       set the SP 5 long words up
+000C88	6000 FF4A      FR8     BRA     FINISH	       and continue execution
+
+000C8C	6100 02E4      NEXT    BSR.L   TSTV	       get address of variable
+000C90	6500 0444	       BCS.L   QWHAT	       if no variable, say "What?"
+000C94	2240		       MOVE.L  D0,A1	       save variable's address
+000C96	2038 14A2      NX0     MOVE.L  LOPVAR,D0       If 'LOPVAR' is zero, we never...
+000C9A	6700 043A	       BEQ.L   QWHAT	       had a FOR loop, so say "What?"
+000C9E	B3C0		       CMP.L   D0,A1	       else we check them
+000CA0	6706		       BEQ     NX3	       OK, they agree
+000CA2	6100 0564	       BSR.L   POPA	       nope, let's see the next frame
+000CA6	60EE		       BRA     NX0
+000CA8	2011	       NX3     MOVE.L  (A1),D0	       get control variable's value
+000CAA	D0B8 14A6	       ADD.L   LOPINC,D0       add in loop increment
+000CAE	6900 046E	       BVS.L   QHOW	       say "How?" for 32-bit overflow
+000CB2	2280		       MOVE.L  D0,(A1)	       save control variable's new value
+000CB4	2238 14AA	       MOVE.L  LOPLMT,D1       get loop's limit value
+000CB8	4AB8 14A6	       TST.L   LOPINC
+000CBC	6A02		       BPL     NX1	       branch if loop increment is positive
+000CBE	C141		       EXG     D0,D1
+000CC0	B280	       NX1     CMP.L   D0,D1	       test against limit
+000CC2	6D0E		       BLT     NX2	       branch if outside limit
+000CC4	21F8 14AE	       MOVE.L  LOPLN,CURRNT    Within limit, go back to the...
+	1496
+000CCA	2078 14B2	       MOVE.L  LOPPT,A0        saved 'CURRNT' and text pointer.
+000CCE	6000 FF04	       BRA     FINISH
+000CD2	6100 0534      NX2     BSR.L   POPA	       purge this loop
+000CD6	6000 FEFC	       BRA     FINISH
+
+		       *
+		       *******************************************************************
+		       *
+		       * *** REM *** IF *** INPUT *** LET (& DEFLT) ***
+		       *
+		       * 'REM' can be followed by anything and is ignored by the
+		       * interpreter.
+		       *
+		       * 'IF' is followed by an expression, as a condition and one or
+		       * more commands (including other 'IF's) separated by colons.
+		       * Note that the word 'THEN' is not used.  The interpreter evaluates
+		       * the expression.  If it is non-zero, execution continues.  If it
+		       * is zero, the commands that follow are ignored and execution
+		       * continues on the next line.
+		       *
+		       * 'INPUT' is like the 'PRINT' command, and is followed by a list
+		       * of items.  If the item is a string in single or double quotes,
+		       * or is an underline (back arrow), it has the same effect as in
+		       * 'PRINT'.  If an item is a variable, this variable name is
+		       * printed out followed by a colon, then the interpreter waits for
+		       * an expression to be typed in.	The variable is then set to the
+		       * value of this expression.  If the variable is preceeded by a
+		       * string (again in single or double quotes), the string will be
+		       * displayed followed by a colon.  The interpreter the waits for an
+		       * expression to be entered and sets the variable equal to the
+		       * expression's value.  If the input expression is invalid, the
+		       * interpreter will print "What?", "How?", or "Sorry" and reprint
+		       * the prompt and redo the input.  The execution will not terminate
+		       * unless you press control-C.  This is handled in 'INPERR'.
+		       *
+		       * 'LET' is followed by a list of items separated by commas.
+		       * Each item consists of a variable, an equals sign, and an
+		       * expression.  The interpreter evaluates the expression and sets
+		       * the variable to that value.  The interpreter will also handle
+		       * 'LET' commands without the word 'LET'.  This is done by 'DEFLT'.
+		       *
+000CDA	600A	       REM     BRA     IF2	       skip the rest of the line
+
+000CDC	6100 01AA      IF      BSR.L   EXPR	       evaluate the expression
+000CE0	4A80	       IF1     TST.L   D0	       is it zero?
+000CE2	6600 FE3C	       BNE     RUNSML	       if not, continue
+000CE6	2248	       IF2     MOVE.L  A0,A1
+000CE8	4281		       CLR.L   D1
+000CEA	6100 0502	       BSR.L   FNDSKP	       if so, skip the rest of the line
+000CEE	6400 FE28	       BCC     RUNTSL	       and run the next line
+000CF2	6000 FC5A	       BRA.L   WSTART	       if no next line, do a warm start
+
+000CF6	2E78 149E      INPERR  MOVE.L  STKINP,SP       restore the old stack pointer
+000CFA	21DF 1496	       MOVE.L  (SP)+,CURRNT    and old 'CURRNT'
+000CFE	588F		       ADDQ.L  #4,SP
+000D00	205F		       MOVE.L  (SP)+,A0        and old text pointer
+
+000D02	2F08	       INPUT   MOVE.L  A0,-(SP)        save in case of error
+000D04	6100 055E	       BSR.L   QTSTG	       is next item a string?
+000D08	600A		       BRA.S   IP2	       nope
+000D0A	6100 0266	       BSR.L   TSTV	       yes, but is it followed by a variable?
+000D0E	654C		       BCS     IP4	       if not, branch
+000D10	2440		       MOVE.L  D0,A2	       put away the variable's address
+000D12	601A		       BRA     IP3	       if so, input to variable
+000D14	2F08	       IP2     MOVE.L  A0,-(SP)        save for 'PRTSTG'
+000D16	6100 025A	       BSR.L   TSTV	       must be a variable now
+000D1A	6500 03BA	       BCS.L   QWHAT	       "What?" it isn't?
+000D1E	2440		       MOVE.L  D0,A2	       put away the variable's address
+000D20	1410		       MOVE.B  (A0),D2	       get ready for 'PRTSTG'
+000D22	4200		       CLR.B   D0
+000D24	1080		       MOVE.B  D0,(A0)
+000D26	225F		       MOVE.L  (SP)+,A1
+000D28	6100 051E	       BSR.L   PRTSTG	       print string as prompt
+000D2C	1082		       MOVE.B  D2,(A0)	       restore text
+000D2E	2F08	       IP3     MOVE.L  A0,-(SP)        save in case of error
+000D30	2F38 1496	       MOVE.L  CURRNT,-(SP)    also save 'CURRNT'
+000D34	21FC FFFFFFFF	       MOVE.L  #-1,CURRNT      flag that we are in INPUT
+	1496
+000D3C	21CF 149E	       MOVE.L  SP,STKINP       save the stack pointer too
+000D40	2F0A		       MOVE.L  A2,-(SP)        save the variable address
+000D42	103C 003A	       MOVE.B  #':',D0         print a colon first
+000D46	6100 03DE	       BSR.L   GETLN	       then get an input line
+000D4A	41F8 14C2	       LEA     BUFFER,A0       point to the buffer
+000D4E	6100 0138	       BSR.L   EXPR	       evaluate the input
+000D52	245F		       MOVE.L  (SP)+,A2        restore the variable address
+000D54	2480		       MOVE.L  D0,(A2)	       save value in variable
+000D56	21DF 1496	       MOVE.L  (SP)+,CURRNT    restore old 'CURRNT'
+000D5A	205F		       MOVE.L  (SP)+,A0        and the old text pointer
+000D5C	588F	       IP4     ADDQ.L  #4,SP	       clean up the stack
+000D5E	6100 05D0	       BSR.L   TSTC	       is the next thing a comma?
+000D62	2C 03		       DC.B    ',',IP5-*
+000D64	609C		       BRA     INPUT	       yes, more items
+000D66	6000 FE6C      IP5     BRA     FINISH
+
+000D6A	0C10 000D      DEFLT   CMP.B   #CR,(A0)        empty line is OK
+000D6E	670C		       BEQ     LT1	       else it is 'LET'
+
+000D70	6100 0324      LET     BSR.L   SETVAL	       do the assignment
+000D74	6100 05BA	       BSR.L   TSTC	       check for more 'LET' items
+000D78	2C 03		       DC.B    ',',LT1-*
+000D7A	60F4		       BRA     LET
+000D7C	6000 FE56      LT1     BRA     FINISH	       until we are finished.
+
+		       *
+		       *******************************************************************
+		       *
+		       * *** LOAD *** & SAVE ***
+		       *
+		       * These two commands transfer a program to/from an auxiliary
+		       * device such as a cassette, another computer, etc.  The program
+		       * is converted to an easily-stored format: each line starts with
+		       * a colon, the line no. as 4 hex digits, and the rest of the line.
+		       * At the end, a line starting with an '@' sign is sent.  This
+		       * format can be read back with a minimum of processing time by
+		       * the 68000.
+		       *
+000D80	2078 091C      LOAD    MOVE.L  TXTBGN,A0       set pointer to start of prog. area
+000D84	103C 000D	       MOVE.B  #CR,D0	       For a CP/M host, tell it we're ready...
+000D88	6100 FB86	       BSR     GOAUXO	       by sending a CR to finish PIP command.
+000D8C	6100 FB86      LOD1    BSR     GOAUXI	       look for start of line
+000D90	67FA		       BEQ     LOD1
+000D92	0C00 0040	       CMP.B   #'@',D0         end of program?
+000D96	671E		       BEQ     LODEND
+000D98	0C00 003A	       CMP.B   #':',D0         if not, is it start of line?
+000D9C	66EE		       BNE     LOD1	       if not, wait for it
+000D9E	611E		       BSR     GBYTE	       get first byte of line no.
+000DA0	10C1		       MOVE.B  D1,(A0)+        store it
+000DA2	611A		       BSR     GBYTE	       get 2nd bye of line no.
+000DA4	10C1		       MOVE.B  D1,(A0)+        store that, too
+000DA6	6100 FB6C      LOD2    BSR     GOAUXI	       get another text char.
+000DAA	67FA		       BEQ     LOD2
+000DAC	10C0		       MOVE.B  D0,(A0)+        store it
+000DAE	0C00 000D	       CMP.B   #CR,D0	       is it the end of the line?
+000DB2	66F2		       BNE     LOD2	       if not, go back for more
+000DB4	60D6		       BRA     LOD1	       if so, start a new line
+000DB6	21C8 14B6      LODEND  MOVE.L  A0,TXTUNF       set end-of program pointer
+000DBA	6000 FB92	       BRA     WSTART	       back to direct mode
+
+000DBE	7401	       GBYTE   MOVEQ   #1,D2	       get two hex characters from auxiliary
+000DC0	4241		       CLR     D1	       and store them as a byte in D1
+000DC2	6100 FB50      GBYTE1  BSR     GOAUXI	       get a char.
+000DC6	67FA		       BEQ     GBYTE1
+000DC8	0C00 0041	       CMP.B   #'A',D0
+000DCC	6502		       BCS     GBYTE2
+000DCE	5F00		       SUBQ.B  #7,D0	       if greater than 9, adjust
+000DD0	0200 000F      GBYTE2  AND.B   #$F,D0	       strip ASCII
+000DD4	E909		       LSL.B   #4,D1	       put nybble into the result
+000DD6	8200		       OR.B    D0,D1
+000DD8	51CA FFE8	       DBRA    D2,GBYTE1       get another char.
+000DDC	4E75		       RTS
+
+000DDE	2078 091C      SAVE    MOVE.L  TXTBGN,A0       set pointer to start of prog. area
+000DE2	2278 14B6	       MOVE.L  TXTUNF,A1       set pointer to end of prog. area
+000DE6	103C 000D      SAVE1   MOVE.B  #CR,D0	       send out a CR & LF (CP/M likes this)
+000DEA	6100 FB24	       BSR     GOAUXO
+000DEE	103C 000A	       MOVE.B  #LF,D0
+000DF2	6100 FB1C	       BSR     GOAUXO
+000DF6	B3C8		       CMP.L   A0,A1	       are we finished?
+000DF8	631E		       BLS     SAVEND
+000DFA	103C 003A	       MOVE.B  #':',D0         if not, start a line
+000DFE	6100 FB10	       BSR     GOAUXO
+000E02	1218		       MOVE.B  (A0)+,D1        send first half of line no.
+000E04	6136		       BSR     PBYTE
+000E06	1218		       MOVE.B  (A0)+,D1        and send 2nd half
+000E08	6132		       BSR     PBYTE
+000E0A	1018	       SAVE2   MOVE.B  (A0)+,D0        get a text char.
+000E0C	0C00 000D	       CMP.B   #CR,D0	       is it the end of the line?
+000E10	67D4		       BEQ     SAVE1	       if so, send CR & LF and start new line
+000E12	6100 FAFC	       BSR     GOAUXO	       send it out
+000E16	60F2		       BRA     SAVE2	       go back for more text
+000E18	103C 0040      SAVEND  MOVE.B  #'@',D0         send end-of-program indicator
+000E1C	6100 FAF2	       BSR     GOAUXO
+000E20	103C 000D	       MOVE.B  #CR,D0	       followed by a CR & LF
+000E24	6100 FAEA	       BSR     GOAUXO
+000E28	103C 000A	       MOVE.B  #LF,D0
+000E2C	6100 FAE2	       BSR     GOAUXO
+000E30	103C 001A	       MOVE.B  #$1A,D0	       and a control-Z to end the CP/M file
+000E34	6100 FADA	       BSR     GOAUXO
+000E38	6000 FB14	       BRA     WSTART	       then go do a warm start
+
+000E3C	7401	       PBYTE   MOVEQ   #1,D2	       send two hex characters from D1's low byte
+000E3E	E919	       PBYTE1  ROL.B   #4,D1	       get the next nybble
+000E40	1001		       MOVE.B  D1,D0
+000E42	0200 000F	       AND.B   #$F,D0	       strip off garbage
+000E46	0600 0030	       ADD.B   #'0',D0         make it into ASCII
+000E4A	0C00 0039	       CMP.B   #'9',D0
+000E4E	6302		       BLS     PBYTE2
+000E50	5E00		       ADDQ.B  #7,D0	       adjust if greater than 9
+000E52	6100 FABC      PBYTE2  BSR     GOAUXO	       send it out
+000E56	51CA FFE6	       DBRA    D2,PBYTE1       then send the next nybble
+000E5A	4E75		       RTS
+
+		       *
+		       *******************************************************************
+		       *
+		       * *** POKE *** & CALL ***
+		       *
+		       * 'POKE expr1,expr2' stores the byte from 'expr2' into the memory
+		       * address specified by 'expr1'.
+		       *
+		       * 'CALL expr' jumps to the machine language subroutine whose
+		       * starting address is specified by 'expr'.  The subroutine can use
+		       * all registers but must leave the stack the way it found it.
+		       * The subroutine returns to the interpreter by executing an RTS.
+		       *
+000E5C	612A	       POKE    BSR     EXPR	       get the memory address
+000E5E	6100 04D0	       BSR.L   TSTC	       it must be followed by a comma
+000E62	2C 0D		       DC.B    ',',PKER-*
+000E64	2F00		       MOVE.L  D0,-(SP)        save the address
+000E66	6120		       BSR     EXPR	       get the byte to be POKE'd
+000E68	225F		       MOVE.L  (SP)+,A1        get the address back
+000E6A	1280		       MOVE.B  D0,(A1)	       store the byte in memory
+000E6C	6000 FD66	       BRA     FINISH
+000E70	6000 0264      PKER    BRA.L   QWHAT	       if no comma, say "What?"
+
+000E74	6112	       CALL    BSR     EXPR	       get the subroutine's address
+000E76	4A80		       TST.L   D0	       make sure we got a valid address
+000E78	6700 02A4	       BEQ.L   QHOW	       if not, say "How?"
+000E7C	2F08		       MOVE.L  A0,-(SP)        save the text pointer
+000E7E	2240		       MOVE.L  D0,A1
+000E80	4E91		       JSR     (A1)	       jump to the subroutine
+000E82	205F		       MOVE.L  (SP)+,A0        restore the text pointer
+000E84	6000 FD4E	       BRA     FINISH
+		       *
+		       *******************************************************************
+		       *
+		       * *** EXPR ***
+		       *
+		       * 'EXPR' evaluates arithmetical or logical expressions.
+		       * <EXPR>::=<EXPR2>
+		       *	  <EXPR2><rel.op.><EXPR2>
+		       * where <rel.op.> is one of the operators in TAB8 and the result
+		       * of these operations is 1 if true and 0 if false.
+		       * <EXPR2>::=(+ or -)<EXPR3>(+ or -)<EXPR3>(...
+		       * where () are optional and (... are optional repeats.
+		       * <EXPR3>::=<EXPR4>( <* or /><EXPR4> )(...
+		       * <EXPR4>::=<variable>
+		       *	   <function>
+		       *	   (<EXPR>)
+		       * <EXPR> is recursive so that the variable '@' can have an <EXPR>
+		       * as an index, functions can have an <EXPR> as arguments, and
+		       * <EXPR4> can be an <EXPR> in parenthesis.
+		       *
+000E88	6152	       EXPR    BSR     EXPR2
+000E8A	2F00		       MOVE.L  D0,-(SP)        save <EXPR2> value
+000E8C	43F8 0A4D	       LEA     TAB8,A1	       look up a relational operator
+000E90	45F8 0A92	       LEA     TAB8.1,A2
+000E94	6000 FC12	       BRA     EXEC	       go do it
+
+000E98	6132	       XP11    BSR     XP18	       is it ">="?
+000E9A	6D24		       BLT     XPRT0	       no, return D0=0
+000E9C	6026		       BRA     XPRT1	       else return D0=1
+
+000E9E	612C	       XP12    BSR     XP18	       is it "<>"?
+000EA0	671E		       BEQ     XPRT0	       no, return D0=0
+000EA2	6020		       BRA     XPRT1	       else return D0=1
+
+000EA4	6126	       XP13    BSR     XP18	       is it ">"?
+000EA6	6F18		       BLE     XPRT0	       no, return D0=0
+000EA8	601A		       BRA     XPRT1	       else return D0=1
+
+000EAA	6120	       XP14    BSR     XP18	       is it "<="?
+000EAC	6E12		       BGT     XPRT0	       no, return D0=0
+000EAE	6014		       BRA     XPRT1	       else return D0=1
+
+000EB0	611A	       XP15    BSR     XP18	       is it "="?
+000EB2	660C		       BNE     XPRT0	       if not, return D0=0
+000EB4	600E		       BRA     XPRT1	       else return D0=1
+000EB6	4E75	       XP15RT  RTS
+
+000EB8	6112	       XP16    BSR     XP18	       is it "<"?
+000EBA	6C04		       BGE     XPRT0	       if not, return D0=0
+000EBC	6006		       BRA     XPRT1	       else return D0=1
+000EBE	4E75	       XP16RT  RTS
+
+000EC0	4280	       XPRT0   CLR.L   D0	       return D0=0 (false)
+000EC2	4E75		       RTS
+
+000EC4	7001	       XPRT1   MOVEQ   #1,D0	       return D0=1 (true)
+000EC6	4E75		       RTS
+
+000EC8	201F	       XP17    MOVE.L  (SP)+,D0        it's not a rel. operator
+000ECA	4E75		       RTS		       return D0=<EXPR2>
+
+000ECC	201F	       XP18    MOVE.L  (SP)+,D0        reverse the top two stack items
+000ECE	221F		       MOVE.L  (SP)+,D1
+000ED0	2F00		       MOVE.L  D0,-(SP)
+000ED2	2F01		       MOVE.L  D1,-(SP)
+000ED4	6106		       BSR     EXPR2	       do second <EXPR2>
+000ED6	221F		       MOVE.L  (SP)+,D1
+000ED8	B280		       CMP.L   D0,D1	       compare with the first result
+000EDA	4E75		       RTS		       return the result
+
+000EDC	6100 0452      EXPR2   BSR.L   TSTC	       negative sign?
+000EE0	2D 05		       DC.B    '-',XP21-*
+000EE2	4280		       CLR.L   D0	       yes, fake '0-'
+000EE4	6022		       BRA     XP26
+000EE6	6100 0448      XP21    BSR.L   TSTC	       positive sign? ignore it
+000EEA	2B 01		       DC.B    '+',XP22-*
+000EEC	6124	       XP22    BSR     EXPR3	       first <EXPR3>
+000EEE	6100 0440      XP23    BSR.L   TSTC	       add?
+000EF2	2B 0F		       DC.B    '+',XP25-*
+000EF4	2F00		       MOVE.L  D0,-(SP)        yes, save the value
+000EF6	611A		       BSR     EXPR3	       get the second <EXPR3>
+000EF8	221F	       XP24    MOVE.L  (SP)+,D1
+000EFA	D081		       ADD.L   D1,D0	       add it to the first <EXPR3>
+000EFC	6900 0220	       BVS.L   QHOW	       branch if there's an overflow
+000F00	60EC		       BRA     XP23	       else go back for more operations
+000F02	6100 042C      XP25    BSR.L   TSTC	       subtract?
+000F06	2D 65		       DC.B    '-',XP42-*
+000F08	2F00	       XP26    MOVE.L  D0,-(SP)        yes, save the result of 1st <EXPR3>
+000F0A	6106		       BSR     EXPR3	       get second <EXPR3>
+000F0C	4480		       NEG.L   D0	       change its sign
+000F0E	4EF8 0EF8	       JMP     XP24	       and do an addition
+
+000F12	6126	       EXPR3   BSR     EXPR4	       get first <EXPR4>
+000F14	6100 041A      XP31    BSR.L   TSTC	       multiply?
+000F18	2A 0D		       DC.B    '*',XP34-*
+000F1A	2F00		       MOVE.L  D0,-(SP)        yes, save that first result
+000F1C	611C		       BSR     EXPR4	       get second <EXPR4>
+000F1E	221F		       MOVE.L  (SP)+,D1
+000F20	6100 009E	       BSR.L   MULT32	       multiply the two
+000F24	60EE		       BRA     XP31	       then look for more terms
+000F26	6100 0408      XP34    BSR.L   TSTC	       divide?
+000F2A	2F 41		       DC.B    '/',XP42-*
+000F2C	2F00		       MOVE.L  D0,-(SP)        save result of 1st <EXPR4>
+000F2E	610A		       BSR     EXPR4	       get second <EXPR4>
+000F30	221F		       MOVE.L  (SP)+,D1
+000F32	C141		       EXG     D0,D1
+000F34	6100 00CC	       BSR.L   DIV32	       do the division
+000F38	60DA		       BRA     XP31	       go back for any more terms
+
+000F3A	43F8 0A36      EXPR4   LEA     TAB4,A1	       find possible function
+000F3E	45F8 0A80	       LEA     TAB4.1,A2
+000F42	6000 FB64	       BRA     EXEC
+000F46	612A	       XP40    BSR     TSTV	       nope, not a function
+000F48	6508		       BCS     XP41	       nor a variable
+000F4A	2240		       MOVE.L  D0,A1
+000F4C	4280		       CLR.L   D0
+000F4E	2011		       MOVE.L  (A1),D0	       if a variable, return its value in D0
+000F50	4E75	       EXP4RT  RTS
+000F52	6100 03F4      XP41    BSR.L   TSTNUM	       or is it a number?
+000F56	2001		       MOVE.L  D1,D0
+000F58	4A42		       TST     D2	       (if not, # of digits will be zero)
+000F5A	66F4		       BNE     EXP4RT	       if so, return it in D0
+000F5C	6100 03D2      PARN    BSR.L   TSTC	       else look for ( EXPR )
+000F60	28 0D		       DC.B    '(',XP43-*
+000F62	6100 FF24	       BSR     EXPR
+000F66	6100 03C8	       BSR.L   TSTC
+000F6A	29 03		       DC.B    ')',XP43-*
+000F6C	4E75	       XP42    RTS
+000F6E	6000 0166      XP43    BRA.L   QWHAT	       else say "What?"
+
+		       *
+		       * ===== Test for a valid variable name.	Returns Carry=1 if not
+		       *       found, else returns Carry=0 and the address of the
+		       *       variable in D0.
+
+000F72	6100 040A      TSTV    BSR.L   IGNBLK
+000F76	4280		       CLR.L   D0
+000F78	1010		       MOVE.B  (A0),D0	       look at the program text
+000F7A	0400 0040	       SUB.B   #'@',D0
+000F7E	653E		       BCS     TSTVRT	       C=1: not a variable
+000F80	6626		       BNE     TV1	       branch if not "@" array
+000F82	5248		       ADDQ    #1,A0	       If it is, it should be
+000F84	61D6		       BSR     PARN	       followed by (EXPR) as its index.
+000F86	D080		       ADD.L   D0,D0
+000F88	6500 0194	       BCS.L   QHOW	       say "How?" if index is too big
+000F8C	D080		       ADD.L   D0,D0
+000F8E	6500 018E	       BCS.L   QHOW
+000F92	2F00		       MOVE.L  D0,-(SP)        save the index
+000F94	6100 00F6	       BSR.L   SIZE	       get amount of free memory
+000F98	221F		       MOVE.L  (SP)+,D1        get back the index
+000F9A	B081		       CMP.L   D1,D0	       see if there's enough memory
+000F9C	6300 0178	       BLS.L   QSORRY	       if not, say "Sorry"
+000FA0	2038 14BA	       MOVE.L  VARBGN,D0       put address of array element...
+000FA4	9081		       SUB.L   D1,D0	       into D0
+000FA6	4E75		       RTS
+000FA8	0C00 001B      TV1     CMP.B   #27,D0	       if not @, is it A through Z?
+000FAC	0A3C 0001	       EOR     #1,CCR
+000FB0	650C		       BCS     TSTVRT	       if not, set Carry and return
+000FB2	5248		       ADDQ    #1,A0	       else bump the text pointer
+000FB4	D040		       ADD     D0,D0	       compute the variable's address
+000FB6	D040		       ADD     D0,D0
+000FB8	2238 14BA	       MOVE.L  VARBGN,D1
+000FBC	D041		       ADD     D1,D0	       and return it in D0 with Carry=0
+000FBE	4E75	       TSTVRT  RTS
+
+		       *
+		       * ===== Multiplies the 32 bit values in D0 and D1, returning
+		       *       the 32 bit result in D0.
+		       *
+000FC0	2801	       MULT32  MOVE.L  D1,D4
+000FC2	B184		       EOR.L   D0,D4	       see if the signs are the same
+000FC4	4A80		       TST.L   D0	       take absolute value of D0
+000FC6	6A02		       BPL     MLT1
+000FC8	4480		       NEG.L   D0
+000FCA	4A81	       MLT1    TST.L   D1	       take absolute value of D1
+000FCC	6A02		       BPL     MLT2
+000FCE	4481		       NEG.L   D1
+000FD0	0C81 0000FFFF  MLT2    CMP.L   #$FFFF,D1       is second argument <= 16 bits?
+000FD6	630C		       BLS     MLT3	       OK, let it through
+000FD8	C141		       EXG     D0,D1	       else swap the two arguments
+000FDA	0C81 0000FFFF	       CMP.L   #$FFFF,D1       and check 2nd argument again
+000FE0	6200 013C	       BHI.L   QHOW	       one of them MUST be 16 bits
+000FE4	3400	       MLT3    MOVE    D0,D2	       prepare for 32 bit X 16 bit multiply
+000FE6	C4C1		       MULU    D1,D2	       multiply low word
+000FE8	4840		       SWAP    D0
+000FEA	C0C1		       MULU    D1,D0	       multiply high word
+000FEC	4840		       SWAP    D0
+		       *** Rick Murray's bug correction follows:
+000FEE	4A40		       TST     D0	       if lower word not 0, then overflow
+000FF0	6600 012C	       BNE.L   QHOW	       if overflow, say "How?"
+000FF4	D082		       ADD.L   D2,D0	       D0 now holds the product
+000FF6	6B00 0126	       BMI.L   QHOW	       if sign bit set, it's an overflow
+000FFA	4A84		       TST.L   D4	       were the signs the same?
+000FFC	6A02		       BPL     MLTRET
+000FFE	4480		       NEG.L   D0	       if not, make the result negative
+001000	4E75	       MLTRET  RTS
+
+		       *
+		       * ===== Divide the 32 bit value in D0 by the 32 bit value in D1.
+		       *       Returns the 32 bit quotient in D0, remainder in D1.
+		       *
+001002	4A81	       DIV32   TST.L   D1	       check for divide-by-zero
+001004	6700 0118	       BEQ.L   QHOW	       if so, say "How?"
+001008	2401		       MOVE.L  D1,D2
+00100A	2801		       MOVE.L  D1,D4
+00100C	B184		       EOR.L   D0,D4	       see if the signs are the same
+00100E	4A80		       TST.L   D0	       take absolute value of D0
+001010	6A02		       BPL     DIV1
+001012	4480		       NEG.L   D0
+001014	4A81	       DIV1    TST.L   D1	       take absolute value of D1
+001016	6A02		       BPL     DIV2
+001018	4481		       NEG.L   D1
+00101A	761F	       DIV2    MOVEQ   #31,D3	       iteration count for 32 bits
+00101C	2200		       MOVE.L  D0,D1
+00101E	4280		       CLR.L   D0
+001020	D281	       DIV3    ADD.L   D1,D1	       (This algorithm was translated from
+001022	D180		       ADDX.L  D0,D0	       the divide routine in Ron Cain's
+001024	6708		       BEQ     DIV4	       Small-C run time library.)
+001026	B082		       CMP.L   D2,D0
+001028	6B04		       BMI     DIV4
+00102A	5281		       ADDQ.L  #1,D1
+00102C	9082		       SUB.L   D2,D0
+00102E	51CB FFF0      DIV4    DBRA    D3,DIV3
+001032	C141		       EXG     D0,D1	       put rem. & quot. in proper registers
+001034	4A84		       TST.L   D4	       were the signs the same?
+001036	6A04		       BPL     DIVRT
+001038	4480		       NEG.L   D0	       if not, results are negative
+00103A	4481		       NEG.L   D1
+00103C	4E75	       DIVRT   RTS
+
+		       *
+		       * ===== The PEEK function returns the byte stored at the address
+		       *       contained in the following expression.
+		       *
+00103E	6100 FF1C      PEEK    BSR     PARN	       get the memory address
+001042	2240		       MOVE.L  D0,A1
+001044	4280		       CLR.L   D0	       upper 3 bytes will be zero
+001046	1011		       MOVE.B  (A1),D0	       get the addressed byte
+001048	4E75		       RTS		       and return it
+
+		       *
+		       * ===== The RND function returns a random number from 1 to
+		       *       the value of the following expression in D0.
+		       *
+00104A	6100 FF10      RND     BSR     PARN	       get the upper limit
+00104E	4A80		       TST.L   D0	       it must be positive and non-zero
+001050	6700 00CC	       BEQ.L   QHOW
+001054	6B00 00C8	       BMI.L   QHOW
+001058	2200		       MOVE.L  D0,D1
+00105A	2278 1492	       MOVE.L  RANPNT,A1       get memory as a random number
+00105E	B3FC 00001492	       CMP.L   #LSTROM,A1
+001064	6504		       BCS     RA1
+001066	43F8 0900	       LEA     START,A1        wrap around if end of program
+00106A	2019	       RA1     MOVE.L  (A1)+,D0        get the slightly random number
+00106C	0880 001F	       BCLR    #31,D0	       make sure it's positive
+001070	21C9 1492	       MOVE.L  A1,RANPNT       (even I can do better than this!)
+001074	618C		       BSR     DIV32	       RND(n)=MOD(number,n)+1
+001076	2001		       MOVE.L  D1,D0	       MOD is the remainder of the div.
+001078	5280		       ADDQ.L  #1,D0
+00107A	4E75		       RTS
+
+		       *
+		       * ===== The ABS function returns an absolute value in D0.
+		       *
+00107C	6100 FEDE      ABS     BSR     PARN	       get the following expr.'s value
+001080	4A80		       TST.L   D0
+001082	6A06		       BPL     ABSRT
+001084	4480		       NEG.L   D0	       if negative, complement it
+001086	6B00 0096	       BMI.L   QHOW	       if still negative, it was too big
+00108A	4E75	       ABSRT   RTS
+
+		       *
+		       * ===== The SIZE function returns the size of free memory in D0.
+		       *
+00108C	2038 14BA      SIZE    MOVE.L  VARBGN,D0       get the number of free bytes...
+001090	90B8 14B6	       SUB.L   TXTUNF,D0       between 'TXTUNF' and 'VARBGN'
+001094	4E75		       RTS		       return the number in D0
+
+		       *
+		       *******************************************************************
+		       *
+		       * *** SETVAL *** FIN *** ENDCHK *** ERROR (& friends) ***
+		       *
+		       * 'SETVAL' expects a variable, followed by an equal sign and then
+		       * an expression.  It evaluates the expression and sets the variable
+		       * to that value.
+		       *
+		       * 'FIN' checks the end of a command.  If it ended with ":",
+		       * execution continues.  If it ended with a CR, it finds the
+		       * the next line and continues from there.
+		       *
+		       * 'ENDCHK' checks if a command is ended with a CR. This is
+		       * required in certain commands, such as GOTO, RETURN, STOP, etc.
+		       *
+		       * 'ERROR' prints the string pointed to by A0. It then prints the
+		       * line pointed to by CURRNT with a "?" inserted at where the
+		       * old text pointer (should be on top of the stack) points to.
+		       * Execution of Tiny BASIC is stopped and a warm start is done.
+		       * If CURRNT is zero (indicating a direct command), the direct
+		       * command is not printed. If CURRNT is -1 (indicating
+		       * 'INPUT' command in progress), the input line is not printed
+		       * and execution is not terminated but continues at 'INPERR'.
+		       *
+		       * Related to 'ERROR' are the following:
+		       * 'QWHAT' saves text pointer on stack and gets "What?" message.
+		       * 'AWHAT' just gets the "What?" message and jumps to 'ERROR'.
+		       * 'QSORRY' and 'ASORRY' do the same kind of thing.
+		       * 'QHOW' and 'AHOW' also do this for "How?".
+		       *
+001096	6100 FEDA      SETVAL  BSR     TSTV	       variable name?
+00109A	653A		       BCS     QWHAT	       if not, say "What?"
+00109C	2F00		       MOVE.L  D0,-(SP)        save the variable's address
+00109E	6100 0290	       BSR.L   TSTC	       get past the "=" sign
+0010A2	3D 0B		       DC.B    '=',SV1-*
+0010A4	6100 FDE2	       BSR     EXPR	       evaluate the expression
+0010A8	2C5F		       MOVE.L  (SP)+,A6
+0010AA	2C80		       MOVE.L  D0,(A6)	       and save its value in the variable
+0010AC	4E75		       RTS
+0010AE	6026	       SV1     BRA     QWHAT	       if no "=" sign
+
+0010B0	6100 027E      FIN     BSR.L   TSTC	       *** FIN ***
+0010B4	3A 07		       DC.B    ':',FI1-*
+0010B6	588F		       ADDQ.L  #4,SP	       if ":", discard return address
+0010B8	6000 FA66	       BRA     RUNSML	       continue on the same line
+0010BC	6100 0272      FI1     BSR.L   TSTC	       not ":", is it a CR?
+0010C0	0D 07		       DC.B    CR,FI2-*
+0010C2	588F		       ADDQ.L  #4,SP	       yes, purge return address
+0010C4	6000 FA3E	       BRA     RUNNXL	       execute the next line
+0010C8	4E75	       FI2     RTS		       else return to the caller
+
+0010CA	6100 02B2      ENDCHK  BSR.L   IGNBLK
+0010CE	0C10 000D	       CMP.B   #CR,(A0)        does it end with a CR?
+0010D2	6602		       BNE     QWHAT	       if not, say "WHAT?"
+0010D4	4E75		       RTS
+
+0010D6	2F08	       QWHAT   MOVE.L  A0,-(SP)
+0010D8	4DF8 1480      AWHAT   LEA     WHTMSG,A6
+0010DC	6100 030C      ERROR   BSR.L   PRMESG	       display the error message
+0010E0	205F		       MOVE.L  (SP)+,A0        restore the text pointer
+0010E2	2038 1496	       MOVE.L  CURRNT,D0       get the current line number
+0010E6	6700 F866	       BEQ     WSTART	       if zero, do a warm start
+0010EA	0C80 FFFFFFFF	       CMP.L   #-1,D0	       is the line no. pointer = -1?
+0010F0	6700 FC04	       BEQ     INPERR	       if so, redo input
+0010F4	1F10		       MOVE.B  (A0),-(SP)      save the char. pointed to
+0010F6	4210		       CLR.B   (A0)	       put a zero where the error is
+0010F8	2278 1496	       MOVE.L  CURRNT,A1       point to start of current line
+0010FC	6100 0218	       BSR.L   PRTLN	       display the line in error up to the 0
+001100	109F		       MOVE.B  (SP)+,(A0)      restore the character
+001102	103C 003F	       MOVE.B  #'?',D0         display a "?"
+001106	6100 F800	       BSR     GOOUT
+00110A	4240		       CLR     D0
+00110C	5389		       SUBQ.L  #1,A1	       point back to the error char.
+00110E	6100 0138	       BSR.L   PRTSTG	       display the rest of the line
+001112	6000 F83A	       BRA     WSTART	       and do a warm start
+001116	2F08	       QSORRY  MOVE.L  A0,-(SP)
+001118	4DF8 1488      ASORRY  LEA     SRYMSG,A6
+00111C	60BE		       BRA     ERROR
+00111E	2F08	       QHOW    MOVE.L  A0,-(SP)        Error: "How?"
+001120	4DF8 1479      AHOW    LEA     HOWMSG,A6
+001124	60B6		       BRA     ERROR
+		       *
+		       *******************************************************************
+		       *
+		       * *** GETLN *** FNDLN (& friends) ***
+		       *
+		       * 'GETLN' reads in input line into 'BUFFER'. It first prompts with
+		       * the character in D0 (given by the caller), then it fills the
+		       * buffer and echos. It ignores LF's but still echos
+		       * them back. Control-H is used to delete the last character
+		       * entered (if there is one), and control-X is used to delete the
+		       * whole line and start over again. CR signals the end of a line,
+		       * and causes 'GETLN' to return.
+		       *
+		       * 'FNDLN' finds a line with a given line no. (in D1) in the
+		       * text save area.  A1 is used as the text pointer. If the line
+		       * is found, A1 will point to the beginning of that line
+		       * (i.e. the high byte of the line no.), and flags are NC & Z.
+		       * If that line is not there and a line with a higher line no.
+		       * is found, A1 points there and flags are NC & NZ. If we reached
+		       * the end of the text save area and cannot find the line, flags
+		       * are C & NZ.
+		       * 'FNDLN' will initialize A1 to the beginning of the text save
+		       * area to start the search. Some other entries of this routine
+		       * will not initialize A1 and do the search.
+		       * 'FNDLNP' will start with A1 and search for the line no.
+		       * 'FNDNXT' will bump A1 by 2, find a CR and then start search.
+		       * 'FNDSKP' uses A1 to find a CR, and then starts the search.
+		       *
+001126	6100 F7E0      GETLN   BSR     GOOUT	       display the prompt
+00112A	103C 0020	       MOVE.B  #' ',D0         and a space
+00112E	6100 F7D8	       BSR     GOOUT
+001132	41F8 14C2	       LEA     BUFFER,A0       A0 is the buffer pointer
+001136	6100 029C      GL1     BSR.L   CHKIO	       check keyboard
+00113A	67FA		       BEQ     GL1	       wait for a char. to come in
+00113C	0C00 0008	       CMP.B   #CTRLH,D0       delete last character?
+001140	6726		       BEQ     GL3	       if so
+001142	0C00 0018	       CMP.B   #CTRLX,D0       delete the whole line?
+001146	6744		       BEQ     GL4	       if so
+001148	0C00 000D	       CMP.B   #CR,D0	       accept a CR
+00114C	6706		       BEQ     GL2
+00114E	0C00 0020	       CMP.B   #' ',D0         if other control char., discard it
+001152	65E2		       BCS     GL1
+001154	10C0	       GL2     MOVE.B  D0,(A0)+        save the char.
+001156	6100 F7B0	       BSR     GOOUT	       echo the char back out
+00115A	0C00 000D	       CMP.B   #CR,D0	       if it's a CR, end the line
+00115E	675C		       BEQ     GL7
+001160	B1FC 00001511	       CMP.L   #(BUFFER+BUFLEN-1),A0   any more room?
+001166	65CE		       BCS     GL1	       yes: get some more, else delete last char.
+001168	103C 0008      GL3     MOVE.B  #CTRLH,D0       delete a char. if possible
+00116C	6100 F79A	       BSR     GOOUT
+001170	103C 0020	       MOVE.B  #' ',D0
+001174	6100 F792	       BSR     GOOUT
+001178	B1FC 000014C2	       CMP.L   #BUFFER,A0      any char.'s left?
+00117E	63B6		       BLS     GL1	       if not
+001180	103C 0008	       MOVE.B  #CTRLH,D0       if so, finish the BS-space-BS sequence
+001184	6100 F782	       BSR     GOOUT
+001188	5388		       SUBQ.L  #1,A0	       decrement the text pointer
+00118A	60AA		       BRA     GL1	       back for more
+00118C	2208	       GL4     MOVE.L  A0,D1	       delete the whole line
+00118E	0481 000014C2	       SUB.L   #BUFFER,D1      figure out how many backspaces we need
+001194	671E		       BEQ     GL6	       if none needed, branch
+001196	5341		       SUBQ    #1,D1	       adjust for DBRA
+001198	103C 0008      GL5     MOVE.B  #CTRLH,D0       and display BS-space-BS sequences
+00119C	6100 F76A	       BSR     GOOUT
+0011A0	103C 0020	       MOVE.B  #' ',D0
+0011A4	6100 F762	       BSR     GOOUT
+0011A8	103C 0008	       MOVE.B  #CTRLH,D0
+0011AC	6100 F75A	       BSR     GOOUT
+0011B0	51C9 FFE6	       DBRA    D1,GL5
+0011B4	41F8 14C2      GL6     LEA     BUFFER,A0       reinitialize the text pointer
+0011B8	6000 FF7C	       BRA     GL1	       and go back for more
+0011BC	103C 000A      GL7     MOVE.B  #LF,D0	       echo a LF for the CR
+0011C0	6100 F746	       BSR     GOOUT
+0011C4	4E75		       RTS
+
+0011C6	0C81 0000FFFF  FNDLN   CMP.L   #$FFFF,D1       line no. must be < 65535
+0011CC	6400 FF50	       BCC     QHOW
+0011D0	2278 091C	       MOVE.L  TXTBGN,A1       init. the text save pointer
+
+0011D4	2478 14B6      FNDLNP  MOVE.L  TXTUNF,A2       check if we passed the end
+0011D8	538A		       SUBQ.L  #1,A2
+0011DA	B4C9		       CMP     A1,A2
+0011DC	650C		       BCS     FNDRET	       if so, return with Z=0 & C=1
+0011DE	1419		       MOVE.B  (A1)+,D2        if not, get a line no.
+0011E0	E14A		       LSL     #8,D2
+0011E2	1411		       MOVE.B  (A1),D2
+0011E4	5389		       SUBQ.L  #1,A1
+0011E6	B441		       CMP     D1,D2	       is this the line we want?
+0011E8	6502		       BCS     FNDNXT	       no, not there yet
+0011EA	4E75	       FNDRET  RTS		       return the cond. codes
+
+0011EC	5489	       FNDNXT  ADDQ.L  #2,A1	       find the next line
+
+0011EE	0C19 000D      FNDSKP  CMP.B   #CR,(A1)+       try to find a CR
+0011F2	66FA		       BNE     FNDSKP	       keep looking
+0011F4	60DE		       BRA     FNDLNP	       check if end of text
+
+		       *
+		       *******************************************************************
+		       *
+		       * *** MVUP *** MVDOWN *** POPA *** PUSHA ***
+		       *
+		       * 'MVUP' moves a block up from where A1 points to where A2 points
+		       * until A1=A3
+		       *
+		       * 'MVDOWN' moves a block down from where A1 points to where A3
+		       * points until A1=A2
+		       *
+		       * 'POPA' restores the 'FOR' loop variable save area from the stack
+		       *
+		       * 'PUSHA' stacks for 'FOR' loop variable save area onto the stack
+		       *
+0011F6	B7C9	       MVUP    CMP.L   A1,A3	       see the above description
+0011F8	6704		       BEQ     MVRET
+0011FA	14D9		       MOVE.B  (A1)+,(A2)+
+0011FC	60F8		       BRA     MVUP
+0011FE	4E75	       MVRET   RTS
+
+001200	B5C9	       MVDOWN  CMP.L   A1,A2	       see the above description
+001202	67FA		       BEQ     MVRET
+001204	1721		       MOVE.B  -(A1),-(A3)
+001206	60F8		       BRA     MVDOWN
+
+001208	2C5F	       POPA    MOVE.L  (SP)+,A6        A6 = return address
+00120A	21DF 14A2	       MOVE.L  (SP)+,LOPVAR    restore LOPVAR, but zero means no more
+00120E	6710		       BEQ     PP1
+001210	21DF 14A6	       MOVE.L  (SP)+,LOPINC    if not zero, restore the rest
+001214	21DF 14AA	       MOVE.L  (SP)+,LOPLMT
+001218	21DF 14AE	       MOVE.L  (SP)+,LOPLN
+00121C	21DF 14B2	       MOVE.L  (SP)+,LOPPT
+001220	4ED6	       PP1     JMP     (A6)	       return
+
+001222	2238 14BE      PUSHA   MOVE.L  STKLMT,D1       Are we running out of stack room?
+001226	928F		       SUB.L   SP,D1
+001228	6400 FEEC	       BCC     QSORRY	       if so, say we're sorry
+00122C	2C5F		       MOVE.L  (SP)+,A6        else get the return address
+00122E	2238 14A2	       MOVE.L  LOPVAR,D1       save loop variables
+001232	6710		       BEQ     PU1	       if LOPVAR is zero, that's all
+001234	2F38 14B2	       MOVE.L  LOPPT,-(SP)     else save all the others
+001238	2F38 14AE	       MOVE.L  LOPLN,-(SP)
+00123C	2F38 14AA	       MOVE.L  LOPLMT,-(SP)
+001240	2F38 14A6	       MOVE.L  LOPINC,-(SP)
+001244	2F01	       PU1     MOVE.L  D1,-(SP)
+001246	4ED6		       JMP     (A6)	       return
+
+		       *
+		       *******************************************************************
+		       *
+		       * *** PRTSTG *** QTSTG *** PRTNUM *** PRTLN ***
+		       *
+		       * 'PRTSTG' prints a string pointed to by A1. It stops printing
+		       * and returns to the caller when either a CR is printed or when
+		       * the next byte is the same as what was passed in D0 by the
+		       * caller.
+		       *
+		       * 'QTSTG' looks for an underline (back-arrow on some systems),
+		       * single-quote, or double-quote.  If none of these are found, returns
+		       * to the caller.  If underline, outputs a CR without a LF.  If single
+		       * or double quote, prints the quoted string and demands a matching
+		       * end quote.  After the printing, the next 2 bytes of the caller are
+		       * skipped over (usually a short branch instruction).
+		       *
+		       * 'PRTNUM' prints the 32 bit number in D1, leading blanks are added if
+		       * needed to pad the number of spaces to the number in D4.
+		       * However, if the number of digits is larger than the no. in
+		       * D4, all digits are printed anyway. Negative sign is also
+		       * printed and counted in, positive sign is not.
+		       *
+		       * 'PRTLN' prints the saved text line pointed to by A1
+		       * with line no. and all.
+		       *
+001248	1200	       PRTSTG  MOVE.B  D0,D1	       save the stop character
+00124A	1019	       PS1     MOVE.B  (A1)+,D0        get a text character
+00124C	B200		       CMP.B   D0,D1	       same as stop character?
+00124E	6712		       BEQ     PRTRET	       if so, return
+001250	6100 F6B6	       BSR     GOOUT	       display the char.
+001254	0C00 000D	       CMP.B   #CR,D0	       is it a C.R.?
+001258	66F0		       BNE     PS1	       no, go back for more
+00125A	103C 000A	       MOVE.B  #LF,D0	       yes, add a L.F.
+00125E	6100 F6A8	       BSR     GOOUT
+001262	4E75	       PRTRET  RTS		       then return
+
+001264	6100 00CA      QTSTG   BSR.L   TSTC	       *** QTSTG ***
+001268	22 19		       DC.B    '"',QT3-*
+00126A	103C 0022	       MOVE.B  #'"',D0         it is a "
+00126E	2248	       QT1     MOVE.L  A0,A1
+001270	61D6		       BSR     PRTSTG	       print until another
+001272	2049		       MOVE.L  A1,A0
+001274	225F		       MOVE.L  (SP)+,A1        pop return address
+001276	0C00 000A	       CMP.B   #LF,D0	       was last one a CR?
+00127A	6700 F888	       BEQ     RUNNXL	       if so, run next line
+00127E	5489	       QT2     ADDQ.L  #2,A1	       skip 2 bytes on return
+001280	4ED1		       JMP     (A1)	       return
+001282	6100 00AC      QT3     BSR.L   TSTC	       is it a single quote?
+001286	27 07		       DC.B    '''',QT4-*
+001288	103C 0027	       MOVE.B  #'''',D0        if so, do same as above
+00128C	60E0		       BRA     QT1
+00128E	6100 00A0      QT4     BSR.L   TSTC	       is it an underline?
+001292	5F 0D		       DC.B    '_',QT5-*
+001294	103C 000D	       MOVE.B  #CR,D0	       if so, output a CR without LF
+001298	6100 F66E	       BSR.L   GOOUT
+00129C	225F		       MOVE.L  (SP)+,A1        pop return address
+00129E	60DE		       BRA     QT2
+0012A0	4E75	       QT5     RTS		       none of the above
+
+0012A2	2601	       PRTNUM  MOVE.L  D1,D3	       save the number for later
+0012A4	3F04		       MOVE    D4,-(SP)        save the width value
+0012A6	1F3C 00FF	       MOVE.B  #$FF,-(SP)      flag for end of digit string
+0012AA	4A81		       TST.L   D1	       is it negative?
+0012AC	6A04		       BPL     PN1	       if not
+0012AE	4481		       NEG.L   D1	       else make it positive
+0012B0	5344		       SUBQ    #1,D4	       one less for width count
+0012B2	82FC 000A      PN1     DIVU    #10,D1	       get the next digit
+0012B6	690A		       BVS     PNOV	       overflow flag set?
+0012B8	2001		       MOVE.L  D1,D0	       if not, save remainder
+0012BA	0281 0000FFFF	       AND.L   #$FFFF,D1       strip the remainder
+0012C0	601A		       BRA     TOASCII	       skip the overflow stuff
+0012C2	3001	       PNOV    MOVE    D1,D0	       prepare for long word division
+0012C4	4241		       CLR.W   D1	       zero out low word
+0012C6	4841		       SWAP    D1	       high word into low
+0012C8	82FC 000A	       DIVU    #10,D1	       divide high word
+0012CC	3401		       MOVE    D1,D2	       save quotient
+0012CE	3200		       MOVE    D0,D1	       low word into low
+0012D0	82FC 000A	       DIVU    #10,D1	       divide low word
+0012D4	2001		       MOVE.L  D1,D0	       D0 = remainder
+0012D6	4841		       SWAP    D1	       R/Q becomes Q/R
+0012D8	3202		       MOVE    D2,D1	       D1 is low/high
+0012DA	4841		       SWAP    D1	       D1 is finally high/low
+0012DC	4840	       TOASCII SWAP    D0	       get remainder
+0012DE	1F00		       MOVE.B  D0,-(SP)        stack it as a digit
+0012E0	4840		       SWAP    D0
+0012E2	5344		       SUBQ    #1,D4	       decrement width count
+0012E4	4A81		       TST.L   D1	       if quotient is zero, we're done
+0012E6	66CA		       BNE     PN1
+0012E8	5344		       SUBQ    #1,D4	       adjust padding count for DBRA
+0012EA	6B0C		       BMI     PN4	       skip padding if not needed
+0012EC	103C 0020      PN3     MOVE.B  #' ',D0         display the required leading spaces
+0012F0	6100 F616	       BSR     GOOUT
+0012F4	51CC FFF6	       DBRA    D4,PN3
+0012F8	4A83	       PN4     TST.L   D3	       is number negative?
+0012FA	6A08		       BPL     PN5
+0012FC	103C 002D	       MOVE.B  #'-',D0         if so, display the sign
+001300	6100 F606	       BSR     GOOUT
+001304	101F	       PN5     MOVE.B  (SP)+,D0        now unstack the digits and display
+001306	6B0A		       BMI     PNRET	       until the flag code is reached
+001308	0600 0030	       ADD.B   #'0',D0         make into ASCII
+00130C	6100 F5FA	       BSR     GOOUT
+001310	60F2		       BRA     PN5
+001312	381F	       PNRET   MOVE    (SP)+,D4        restore width value
+001314	4E75		       RTS
+
+001316	4281	       PRTLN   CLR.L   D1
+001318	1219		       MOVE.B  (A1)+,D1        get the binary line number
+00131A	E149		       LSL     #8,D1
+00131C	1219		       MOVE.B  (A1)+,D1
+00131E	7805		       MOVEQ   #5,D4	       display a 5 digit line no.
+001320	6180		       BSR     PRTNUM
+001322	103C 0020	       MOVE.B  #' ',D0         followed by a blank
+001326	6100 F5E0	       BSR     GOOUT
+00132A	4240		       CLR     D0	       stop char. is a zero
+00132C	6000 FF1A	       BRA     PRTSTG	       display the rest of the line
+
+		       *
+		       * ===== Test text byte following the call to this subroutine. If it
+		       *       equals the byte pointed to by A0, return to the code following
+		       *       the call. If they are not equal, branch to the point
+		       *       indicated by the offset byte following the text byte.
+		       *
+001330	614C	       TSTC    BSR     IGNBLK	       ignore leading blanks
+001332	225F		       MOVE.L  (SP)+,A1        get the return address
+001334	1219		       MOVE.B  (A1)+,D1        get the byte to compare
+001336	B210		       CMP.B   (A0),D1	       is it = to what A0 points to?
+001338	6708		       BEQ     TC1	       if so
+00133A	4281		       CLR.L   D1	       If not, add the second
+00133C	1211		       MOVE.B  (A1),D1	       byte following the call to
+00133E	D3C1		       ADD.L   D1,A1	       the return address.
+001340	4ED1		       JMP     (A1)	       jump to the routine
+001342	5288	       TC1     ADDQ.L  #1,A0	       if equal, bump text pointer
+001344	5289		       ADDQ.L  #1,A1	       Skip the 2 bytes following
+001346	4ED1		       JMP     (A1)	       the call and continue.
+
+		       *
+		       * ===== See if the text pointed to by A0 is a number. If so,
+		       *       return the number in D1 and the number of digits in D2,
+		       *       else return zero in D1 and D2.
+		       *
+001348	4281	       TSTNUM  CLR.L   D1	       initialize return parameters
+00134A	4242		       CLR     D2
+00134C	6130		       BSR     IGNBLK	       skip over blanks
+00134E	0C10 0030      TN1     CMP.B   #'0',(A0)       is it less than zero?
+001352	6528		       BCS     TSNMRET	       if so, that's all
+001354	0C10 0039	       CMP.B   #'9',(A0)       is it greater than nine?
+001358	6222		       BHI     TSNMRET	       if so, return
+00135A	0C81 0CCCCCCC	       CMP.L   #214748364,D1   see if there's room for new digit
+001360	6400 FDBC	       BCC     QHOW	       if not, we've overflowd
+001364	2001		       MOVE.L  D1,D0	       quickly multiply result by 10
+001366	D281		       ADD.L   D1,D1
+001368	D281		       ADD.L   D1,D1
+00136A	D280		       ADD.L   D0,D1
+00136C	D281		       ADD.L   D1,D1
+00136E	1018		       MOVE.B  (A0)+,D0        add in the new digit
+001370	0280 0000000F	       AND.L   #$F,D0
+001376	D280		       ADD.L   D0,D1
+001378	5242		       ADDQ    #1,D2	       increment the no. of digits
+00137A	60D2		       BRA     TN1
+00137C	4E75	       TSNMRET RTS
+
+		       *
+		       * ===== Skip over blanks in the text pointed to by A0.
+		       *
+00137E	0C10 0020      IGNBLK  CMP.B   #' ',(A0)       see if it's a space
+001382	6604		       BNE     IGBRET	       if so, swallow it
+001384	5288	       IGB1    ADDQ.L  #1,A0	       increment the text pointer
+001386	60F6		       BRA     IGNBLK
+001388	4E75	       IGBRET  RTS
+
+		       *
+		       * ===== Convert the line of text in the input buffer to upper
+		       *       case (except for stuff between quotes).
+		       *
+00138A	41F8 14C2      TOUPBUF LEA     BUFFER,A0       set up text pointer
+00138E	4201		       CLR.B   D1	       clear quote flag
+001390	1018	       TOUPB1  MOVE.B  (A0)+,D0        get the next text char.
+001392	0C00 000D	       CMP.B   #CR,D0	       is it end of line?
+001396	6718		       BEQ     TOUPBRT	       if so, return
+001398	0C00 0022	       CMP.B   #'"',D0         a double quote?
+00139C	6714		       BEQ     DOQUO
+00139E	0C00 0027	       CMP.B   #'''',D0        or a single quote?
+0013A2	670E		       BEQ     DOQUO
+0013A4	4A01		       TST.B   D1	       inside quotes?
+0013A6	66E8		       BNE     TOUPB1	       if so, do the next one
+0013A8	6118		       BSR     TOUPPER	       convert to upper case
+0013AA	1100		       MOVE.B  D0,-(A0)        store it
+0013AC	5288		       ADDQ.L  #1,A0
+0013AE	60E0		       BRA     TOUPB1	       and go back for more
+0013B0	4E75	       TOUPBRT RTS
+
+0013B2	4A01	       DOQUO   TST.B   D1	       are we inside quotes?
+0013B4	6604		       BNE     DOQUO1
+0013B6	1200		       MOVE.B  D0,D1	       if not, toggle inside-quotes flag
+0013B8	60D6		       BRA     TOUPB1
+0013BA	B200	       DOQUO1  CMP.B   D0,D1	       make sure we're ending proper quote
+0013BC	66D2		       BNE     TOUPB1	       if not, ignore it
+0013BE	4201		       CLR.B   D1	       else clear quote flag
+0013C0	60CE		       BRA     TOUPB1
+
+		       *
+		       * ===== Convert the character in D0 to upper case
+		       *
+0013C2	0C00 0061      TOUPPER CMP.B   #'a',D0         is it < 'a'?
+0013C6	650A		       BCS     TOUPRET
+0013C8	0C00 007A	       CMP.B   #'z',D0         or > 'z'?
+0013CC	6204		       BHI     TOUPRET
+0013CE	0400 0020	       SUB.B   #32,D0	       if not, make it upper case
+0013D2	4E75	       TOUPRET RTS
+
+		       *
+		       * 'CHKIO' checks the input. If there's no input, it will return
+		       * to the caller with the Z flag set. If there is input, the Z
+		       * flag is cleared and the input byte is in D0. However, if a
+		       * control-C is read, 'CHKIO' will warm-start BASIC and will not
+		       * return to the caller.
+		       *
+0013D4	6100 F536      CHKIO   BSR.L   GOIN	       get input if possible
+0013D8	670A		       BEQ     CHKRET	       if Zero, no input
+0013DA	0C00 0003	       CMP.B   #CTRLC,D0       is it control-C?
+0013DE	6604		       BNE     CHKRET	       if not
+0013E0	6000 F56C	       BRA.L   WSTART	       if so, do a warm start
+0013E4	4E75	       CHKRET  RTS
+
+		       *
+		       * ===== Display a CR-LF sequence
+		       *
+0013E6	4DF8 148E      CRLF    LEA     CLMSG,A6
+
+		       *
+		       * ===== Display a zero-ended string pointed to by register A6
+		       *
+0013EA	101E	       PRMESG  MOVE.B  (A6)+,D0        get the char.
+0013EC	6706		       BEQ     PRMRET	       if it's zero, we're done
+0013EE	6100 F518	       BSR     GOOUT	       else display it
+0013F2	60F6		       BRA     PRMESG
+0013F4	4E75	       PRMRET  RTS
+
+		       ******************************************************
+		       * The following routines are the only ones that need *
+		       * to be changed for a different I/O environment.     *
+		       ******************************************************
+
+		       *
+		       * ===== Output character to the console (Port 1) from register D0
+		       *       (Preserves all registers.)
+		       *
+0013F6	0839 0001      OUTC    BTST    #1,$10040       is port 1 ready for a character?
+	00010040
+0013FE	67F6		       BEQ     OUTC	       if not, wait for it
+001400	13C0 00010042	       MOVE.B  D0,$10042       out it goes.
+001406	4E75		       RTS
+
+		       *
+		       * ===== Input a character from the console into register D0 (or
+		       *       return Zero status if there's no character available).
+		       *
+001408	0839 0000      INC     BTST    #0,$10040       is character ready?
+	00010040
+001410	670A		       BEQ     INCRET	       if not, return Zero status
+001412	1039 00010042	       MOVE.B  $10042,D0       else get the character
+001418	0200 007F	       AND.B   #$7F,D0	       zero out the high bit
+00141C	4E75	       INCRET  RTS
+
+		       *
+		       * ===== Output character to the host (Port 2) from register D0
+		       *       (Preserves all registers.)
+		       *
+00141E	0839 0001      AUXOUT  BTST    #1,$10041       is port 2 ready for a character?
+	00010041
+001426	67F6		       BEQ     AUXOUT	       if not, wait for it
+001428	13C0 00010043	       MOVE.B  D0,$10043       out it goes.
+00142E	4E75		       RTS
+
+		       *
+		       * ===== Input a character from the host into register D0 (or
+		       *       return Zero status if there's no character available).
+		       *
+001430	0839 0000      AUXIN   BTST    #0,$10041       is character ready?
+	00010041
+001438	670A		       BEQ     AXIRET	       if not, return Zero status
+00143A	1039 00010043	       MOVE.B  $10043,D0       else get the character
+001440	0200 007F	       AND.B   #$7F,D0	       zero out the high bit
+001444	4E75	       AXIRET  RTS
+
+		       *
+		       * ===== Return to the resident monitor, operating system, etc.
+		       *
+001446	1E3C 00E4      BYEBYE  MOVE.B  #228,D7	       return to Tutor
+00144A	4E4E		       TRAP    #14
+
+00144C	0D 0A 47 6F    INITMSG DC.B    CR,LF,'Gordo''s MC68000 Tiny BASIC, v1.2',CR,LF,LF,0
+	72 64 6F 27 73
+	20 4D 43 36 38
+	30 30 30 20 54
+	69 6E 79 20 42
+	41 53 49 43 2C
+	20 76 31 2E 32
+	0D 0A 0A 00
+001472	0D 0A 4F 4B    OKMSG   DC.B    CR,LF,'OK',CR,LF,0
+	0D 0A 00
+001479	48 6F 77 3F    HOWMSG  DC.B    'How?',CR,LF,0
+	0D 0A 00
+001480	57 68 61 74    WHTMSG  DC.B    'What?',CR,LF,0
+	3F 0D 0A 00
+001488	53 6F 72 72    SRYMSG  DC.B    'Sorry.'
+	79 2E
+00148E	0D 0A 00       CLMSG   DC.B    CR,LF,0
+001491	00		       DC.B    0       <- for aligning on a word boundary
+      00001492	       LSTROM  EQU     *	       end of possible ROM area
+		       *
+		       * Internal variables follow:
+		       *
+001492	00000900       RANPNT  DC.L    START	       random number pointer
+001496		       CURRNT  DS.L    1	       Current line pointer
+00149A		       STKGOS  DS.L    1	       Saves stack pointer in 'GOSUB'
+00149E		       STKINP  DS.L    1	       Saves stack pointer during 'INPUT'
+0014A2		       LOPVAR  DS.L    1	       'FOR' loop save area
+0014A6		       LOPINC  DS.L    1	       increment
+0014AA		       LOPLMT  DS.L    1	       limit
+0014AE		       LOPLN   DS.L    1	       line number
+0014B2		       LOPPT   DS.L    1	       text pointer
+0014B6		       TXTUNF  DS.L    1	       points to unfilled text area
+0014BA		       VARBGN  DS.L    1	       points to variable area
+0014BE		       STKLMT  DS.L    1	       holds lower limit for stack growth
+0014C2		       BUFFER  DS.B    BUFLEN	       Keyboard input buffer
+      00001512	       TXT     EQU     *	       Beginning of program area
+   36 Errors detected
+			       END
+

@@ -1,0 +1,445 @@
+			     NOTICE
+     The  following  is  the  original	manuscript  for  the
+     article  'Tiny  BASIC comes to the 68000' published  in
+     the February 1985 issue of Dr.  Dobbs's Journal.   This
+     manuscript is copyright (c) 1984 by Gordon Brandly  and
+     is  distributed  with the permission of Gordon  Brandly
+     and Dr. Dobb's Journal.
+
+
+
+		  Tiny BASIC Comes to the 68000
+
+				     by Gordon Brandly
+					12147 - 51 Street
+					Edmonton AB  T5W 3G8
+					CANADA
+				     [1996 updated address]
+
+
+     Remember  the good old days?   When the 8080  microprocessor
+reigned  supreme,  8K of memory cost an arm and a leg,	ah yes...
+Well the years went by,  microcomputers got bigger, software grew
+more  sophisticated,  and prices went up.   This is just fine  of
+course,  if you can afford the higher prices.  The less fortunate
+among us, however, must build or buy smaller 16-bit "educational"
+systems.   This is fine too,  if you don't mind having hardly any
+software.   This is the just the sort of situation that gave rise
+to Dr.	Dobb's Journal in the 'good old days'.  The solution back
+then  was  to  publish a tiny BASIC  interpreter  that	could  be
+adapted  to  just  about any  8080  microcomputer  around.   This
+solution  worked  fabulously and gave many a hobby  computer  its
+first  taste of useful software.   Well,  if the solution  worked
+once, why not again?  I therefore decided to produce a tiny BASIC
+interpreter  for  all  of  you who have  relatively  small  68000
+systems  such as the Motorola Education Computer Board,  the  EMS
+68000 board, etc.
+     To produce this BASIC I took one of the most successful 8080
+Tiny  BASICs,  Li Chen Wang's Palo Alto Tiny BASIC (published  in
+the  May 1976 Dr.  Dobb's Journal) and translated it  into  68000
+code.	I  then  added	a few features and optimized the  code	a
+little bit, producing a surprisingly usable interpreter.
+     First, I'll describe the differences between my interpreter,
+Palo  Alto Tiny BASIC,	and the ubiquitous Microsoft  BASICs.	I
+will  then  describe how you can install this  software  on  your
+68000	system.    Finally,   I'll  give  my  evaluation  of  the
+interpreter's present performance and how it can be improved.
+
+
+
+Features
+
+     For those who know the original Palo Alto Tiny BASIC (or the
+Sherry	Brothers' version on CP/M User's Group  Volume  11),  you
+will  find  this interpreter very similar.   I have made  two  or
+three  changes to the interpreter's syntax to bring it closer  to
+the  de  facto	Microsoft 'standard'.   The colon (":")  is  used
+instead  of the semi-colon (";") to separate multiple  statements
+on a line.   The inequality operator "#" has been changed to  the
+more standard "<>" .   I also added the PEEK,  POKE,  CALL,  BYE,
+LOAD, and SAVE commands, described later.
+     For those of you used to a bigger BASIC, such as the various
+Microsoft  interpreters,  you'll  find  that this  version  works
+almost	the  same within its  limitations.   Following	are  some
+excerpts  from Li Chen Wang's original documentation,  mixed with
+descriptions of my extensions:
+
+
+
+The Language
+
+
+Numbers:
+
+In this Tiny BASIC,  all numbers are 32-bit integers and must  be
+in  the range 2,147,483,647 to -2,147,483,648.	 I decided to use
+32  bits  so  that the PEEK and POKE commands  could  access  the
+entire	address range of the 68000.   This slows down  arithmetic
+operations somewhat,  but sticking to 16 bits would have produced
+unneccessary complications.
+
+
+Variables:
+
+There are 26 variables denoted by the letters A through Z.  There
+is also a single array @(I).  The dimension of this array  (i.e.,
+the  range of value of the index I) is set automatically to  make
+use  of  all the memory space that is left unused by the  program
+(i.e.,	0  through SIZE/4,  see the SIZE  function  below).   All
+variables and array elements are 4 bytes long.
+
+
+Functions:
+
+There are 4 functions:
+
+     ABS(X) gives the absolute value of X.
+
+     RND(X) gives a random number between 1 and X (inclusive).
+
+     SIZE gives the number of bytes left unused by the program.
+
+     PEEK(X) gives the value of the byte at memory location X.
+
+
+LET Command:
+
+     LET A=234-5*6, A=A/2, X=A-100, @(X+9)=A-1
+
+Will  set  the variable A to the value of the expression  234-5*6
+(i.e.  204),  set  the	variable A (again) to the  value  of  the
+expression A/2 (i.e. 102), set the variable X to the value of the
+expression A-100 (i.e. 2), and then set the variable @(11) to 101
+(where 11 is the value of the expression X+9 and 101 is the value
+of the expression A-1).
+
+
+Print Command:
+
+     PRINT A*3+1, "abc 123 !@#", ' cba '
+
+Will  print  the value of the expression A*3+1	(i.e.  307),  the
+string	of characters "abc 123 !@#" and the string"  cba  ",  and
+then  a CR-LF (carriage return and line feed).	Note that  either
+single	or double quotes can be used to quote strings,	but pairs
+must  be  matched.  If there is a comma at the end of  the  print
+command,  the  final CR-LF will not be printed.   Note also  that
+commas are used to separate adjacent items (most other BASICs use
+the semi-colon to perform this function.)
+
+     PRINT A, B, #3, C, D, E, #10, F, G
+
+Will print the values of A and B in 11 spaces,	the values of  C,
+D,  and E in 3 spaces, and the values of F and G in 10 spaces. If
+there  aren't  enough  spaces specified for a given value  to  be
+printed, the value will be printed in full anyway.
+
+     PRINT 'abc',_,'xxx'
+
+Will  print the string "abc",  a CR without a LF,  and  then  the
+string "xxx" (over the "abc") followed by a CR-LF.
+
+
+INPUT Command:
+
+     INPUT A, B
+
+When  this  command is executed,  Tiny BASIC will print "A:"  and
+wait  to read in an expression from the console.  The variable	A
+will be set to the value of this expression, then "B:" is printed
+and  variable B is set to the value of the next  expression  read
+in.  Note  that  complete expressions as well as numbers  can  be
+entered.   This  gives rise to an interesting trick:  you can set
+the variable Y to an unusual value,  e.g. 9999, and use it to get
+the answer to a yes-or-no question, such as
+
+     10 Y=9999 : INPUT 'Are you sleepy?'A : IF A=Y GOTO 100
+
+This  works  because the user can answer the  question	with  the
+expression  'Y',  which  puts the numeric value of Y into  the  A
+variable.
+
+
+     INPUT 'What is the weight'A, "and size"B
+
+This  is  the  same as the first INPUT example	except	that  the
+prompt	"A:" is replaced by "What is the weight:" and the  prompt
+"B:" is replaced with "and size:".  Again, both single and double
+quotes can be used as long as they are matched.
+
+     INPUT A, 'string',_, "another string", B
+
+The strings and the "_" have the same effect as in "PRINT".
+
+
+POKE Command:
+
+     POKE 4000+X,Y
+
+This  command puts the value produced by expression "Y" into  the
+byte memory location specified by the expression "4000+X".
+
+
+CALL Command:
+
+     CALL X
+
+This  command  will  call a machine language  subroutine  at  the
+address  specified  by	the  expression "X".  All  of  the  CPU's
+registers except the stack pointer can be used in the subroutine.
+
+
+BYE Command:
+
+Will return control to the resident monitor program or	operating
+system.
+
+
+SAVE Command:
+
+Will  save your BASIC program on the storage device you  provide.
+Details  on installing this device are given in the source  code.
+As  set up for the Educational Computer Board,	this command will
+send  the  program out to the host computer in	an  easily-stored
+text form.  It isn't,  however, human-readable program text since
+the line numbers are stored in hexadecimal.
+
+
+LOAD Command:
+
+Will delete the program in memory and load in a program from your
+storage device.
+
+
+Stopping Program Execution:
+
+The  execution	of the program or listing of the program  can  be
+stopped   by   pressing  the  control-C  key  on   the	 console.
+Additionally,  a  program  listing  can  be  paused  by  pressing
+control-S, and then pressing any key to continue.
+
+
+Abbreviations and Blanks:
+
+You  may use blanks freely within a program except that  numbers,
+command  key  words,  and  function names  cannot  have  embedded
+blanks.
+     You may abbreviate all command key words and function  names
+and follow each by a period.   For instance, "P.", "PR.", "PRI.",
+and  "PRIN."  all  stand  for "PRINT".   The word  "LET"  in  LET
+commands may also be omitted.  The shortest abbreviations for all
+the key words are as follows:
+
+A.=ABS	  C.=CALL   F.=FOR    GOS.=GOSUB     G.=GOTO
+
+IF=IF	  I.=INPUT  L.=LIST   LO.=LOAD	     N.=NEW
+
+N.=NEXT   P.=PEEK   PO.=POKE  P.=PRINT	     REM=REMARK
+
+R.=RETURN R.=RND    R.=RUN    S.=SAVE	     S.=SIZE
+
+S.=STEP   S.=STOP   TO=TO
+
+no key word = LET
+
+Take note that,  in some cases, the same abbreviation can be used
+for  different key words.   The interpreter is 'smart' enough  to
+use  the  correct  key word  for  a  particular  situation.   For
+instance,  if the abbreviation "P." appears at the beginning of a
+line,  it can only mean PRINT.	In a statement like "A=P.(8)" the
+"P." only makes sense if it stands for PEEK.
+
+
+Error Reports:
+
+There  are  only three error conditions in Tiny BASIC.	The  line
+containing the error is printed out with a question mark inserted
+at the point where the error is detected.
+
+(1) "What?" means that there is an error in a statement's syntax.
+
+For example:
+
+     What?
+
+     260 LET A=B+3, C=(3+4?. X=4
+
+(2)  "How?" means that the statement in question is OK,  but  for
+some reason the command can't be carried out.
+
+     How?
+
+     310 LET A=B*C?+2	 <- where B*C is larger than 2147483647
+
+     How?
+
+     380 GOTO 412?	 <- where line 412 does not exist
+
+(3) "Sorry." means that the interpreter understands the statement
+and knows how to do it,  but there isn't enough memory  available
+to accomplish the task.
+
+
+Error Corrections:
+
+If you notice an error in your entry before you press RETURN, you
+can  delete  characters  with the backspace  (control-H)  key  or
+delete	the  entire line with control-X.   To delete an  existing
+program line, just type the line number and press RETURN.
+
+
+
+
+Installation
+
+     Now,  how	do  you get this wonderful(?) piece  of  software
+running  on  your computer?   Very easily,  if you have  a  setup
+similar to mine.   Other systems should also be fairly easy going
+if you have access to a 68000 assembler of some kind.	My  setup
+is  a  Motorola  MEX68KECB Educational Computer  Board	connected
+between  my  terminal and my CP/M system.   The source	code  was
+assembled  with the Quelo version 1.9 public domain 68000  cross-
+assembler for CP/M.   (By the way,  if you use this assembler you
+will get 36 "trim16 address" errors, which is normal.  You do get
+what you pay for...)  Tiny BASIC is then loaded into the ECB  and
+executed at the 'cold start' address of hex 900.   BASIC programs
+are  saved  and loaded by setting up an appropriate CP/M  command
+before	using  SAVE  or  LOAD.	  For  example	(user  input   is
+underlined):
+
+     After a program is written, exit to the monitor:
+
+	  > BYE
+
+     Enter transparent mode:
+
+	  TUTOR 1.x> TM
+
+     Issue a PIP command to the CP/M host:
+
+	  A> PIP PROGRAM.BAS=CON:
+
+     Exit transparent mode and do a BASIC warm start:
+
+	  TUTOR 1.x> GO 904
+
+     Do the actual save:
+
+	  SAVE
+
+     The  'warm start' mentioned above is an entry point into the
+interpreter  that will preserve any program you may have  already
+entered.
+     Program  LOADs are done similarly except  that,  instead  of
+PIP,  you  must  run a small program that will wait to receive	a
+carriage return before sending the program to the ECB.	Here is a
+sample program in Microsoft BASIC:
+
+     10 INPUT "Program to send?";F$
+
+     20 OPEN "I",1,F$
+
+     30 INPUT "Now exit Transparent Mode and do a LOAD.";Z$
+
+     40 WHILE NOT EOF(1):LINE INPUT #1,A$:PRINT A$:WEND
+
+
+     Admittedly  this  way  of LOADing and SAVEing  is	a  fairly
+complex  procedure,  but it allows you to keep your  programs  on
+disk  while  keeping the interpreter itself small.   If your  ECB
+isn't connected to another computer you could probably change the
+AUXIN  and AUXOUT subroutines to use the cassette  interface.  (I
+haven't tried it, though.  Caveat emptor!)
+     For  other 68000 systems,	you will probably have to  modify
+only the OUTC, INC, AUXOUT, AUXIN, and BYEBYE routines at the end
+of  the  interpreter program.	In addition,  you  must  put  the
+address of the first unavailable memory location above BASIC into
+the location 'ENDMEM'.   BASIC programs are SAVEd in a form which
+can  be stored as ASCII text and read back quickly by the  68000.
+If  your storage device can't handle the present format or if you
+would like the program saved in a human-readable form,	you  need
+only modify the SAVE and LOAD subroutines.
+     One  warning:  the  DIRECT  and EXEC routines  were  written
+assuming  that the interpreter itself would be somewhere  in  the
+first 64K of memory ($0 to $FFFF).  If you move it above 64K, you
+will  have  to modify the EXEC routine and check the rest of  the
+code carefully to make sure the addressing modes are correct.
+
+
+
+Evaluation
+
+     I	am  quite pleased with how the	interpreter  turned  out.
+Even though I added extra error checking,  lower case conversion,
+more  commands,  and extended the variable size to 32  bits,  the
+whole thing will still fit inside 3K bytes of memory.	I ran the
+Sieve  of  Eratosthenes  benchmark program  (included  with  this
+article) on this interpreter and on the Sherry Brothers CP/M tiny
+BASIC with the following result:
+
+68000 at 4 MHz		 Z80 at 4 MHz
+
+2670 seconds		 3000 seconds
+
+     The  results are adjusted for the usual 10 iterations of the
+basic  algorithm,  but the program was actually only run for  one
+iteration to keep running times within a practical  limit.   This
+tiny  BASIC may not be a speed demon,  but it does beat Applesoft
+and PET BASIC at running the Sieve benchmark.	I should add that
+the Sieve program listing was compressed to the maximum for speed
+considerations.   I normally use more spaces and some comments so
+that  I can figure out later on what the program was supposed  to
+do!
+     Of course there are many, many improvements that can be made
+given more available memory.   My Educational Computer Board  has
+32K  bytes of memory,  so I will probably add such things as more
+variables,  strings,  and  keyword tokenization.   The last is	a
+method used by most BASIC interpreters to compress key words such
+as LET,  PRINT, etc. into single bytes.  This would greatly speed
+up  the  interpreter while using less memory to store  the  BASIC
+program.  Who says you can't have your cake and eat it too?
+
+
+
+Availability
+
+[1996: the Meadowlark and Edmonton RCP/M BBSes no longer exist.]
+
+     By the time you read this,  the interpreter source code  and
+some  example  programs  should be available on a couple  of  the
+RCP/M bulletin board systems in my area:
+
+	  Meadowlark RCP/M - (403) 484-5981
+
+	  Edmonton RCP/M - (403) 454-6093
+
+     The Edmonton RCP/M accepts both 300 and 1200 baud,  and  the
+Meadowlark  system  only allows access to its CP/M area  at  1200
+baud.	Both systems run 24 hours a day.   The interpreter source
+code is known as TBI68K.AQM, which is a 'squeezed' text file.  If
+you  don't have a MODEM7 type program and a way to unsqueeze this
+file,  you  can use these systems' LIST command to list  out  the
+source	code  while  you  capture it  with  a  telecommunications
+program.  A short documentation file, TBI68K.DQC, and some sample
+programs, TBIPROGS.LBR, are also available.  The latter is a CP/M
+library file,  which contains several programs.  You can list the
+libary's contents with the LDIR command,  and extract  individual
+programs using either the systems' XMODEM or LTYPE commands.  The
+Quelo  cross-assembler	is  also  sometimes  available	on  these
+systems under the names A68K.COM and A68K.DOC.
+     Though  I'd prefer that you obtain the source code from  one
+of the above sources,  for $20 I can also provide the code in the
+following  forms:   8-inch CP/M SSSD diskette,	5-inch Osborne or
+Apple CP/M diskettes, or a paper listing.
+
+[1996: most of these formats are no longer available. Contact me
+ at the updated address at the beginning of this article or the
+ e-mail addresses below for more information.]
+
+     If  you  find  any  bugs in  the  interpreter  or	have  any
+questions,  please  write to me or contact me on the above  RCP/M
+systems.  Enjoy!
+
+[1996: the best way to contact me now is through the Internet at
+ gordo@datanet.ab.ca or my Compuserve address: 70147,1612]
+

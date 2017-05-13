@@ -1,0 +1,52 @@
+_
+:000AREM  Equation plotting program from April 1977 BYTE magazine
+:000FP.:P."Equation plotting program - enter equation in program line 1010":P.
+:0014P.:INPUT "Enter 1- end program, 2- show data values, 3-plot" X
+:001EIF (X<1)+(X>3) GOTO 20
+:0028GOTO X*100
+:0064STOP
+:00C8INPUT "Enter starting X value" T:INPUT "Enter step interval" V
+:00CDX=T
+:00D2PRINT "      X          Y"
+:00D7PRINT "     ---        ---"
+:00DCGOSUB 1000
+:00E6PRINT X,Y
+:00F0X=X+5*V
+:00FAIF X<T+75*V GOTO 220
+:010EIF Y<0 GOTO 490
+:0122P.:P.:GOTO 20
+:012CINPUT "Enter starting X value" T
+:012DINPUT "Enter X increment" V
+:012EINPUT "Enter lower end of Y value's range" U
+:012FINPUT "Enter increment for Y axis of graph" W
+:0136PRINT
+:0140PRINT "Y=",U,"                   ",U+35*W,"                   ",U+70*W
+:014APRINT "      |    *    |    *    |    *    |    *    |    *    |    *",
+:014BPRINT "    |    *    |"
+:0154PRINT " X=   ",:F.I=1 TO 70:P."-",:NEXT I:P.
+:015EX=T
+:0168GOSUB 1000
+:016DY=(Y-U+W/2)/W
+:0172IF Y<0 GOTO 490
+:0177IF Y=0 GOTO 500
+:017CPRINT #5,X,"|",
+:0186IF Y<=70 GOTO 430
+:0190PRINT
+:019AGOTO 510
+:01AEY=Y-1
+:01B8IF Y=0 GOTO 470
+:01C2PRINT " ",
+:01CCGOTO 430
+:01D6PRINT "+"
+:01E0GOTO 510
+:01EAPRINT #5,X,"<"
+:01EFGOTO 510
+:01F4PRINT #5,X,"+"
+:01FEX=X+V
+:0208IF X<T+71*V GOTO 360
+:024EGOTO 20
+:03E8REM  The equation to be plotted is:
+:03F2Y=X*X*X/10+X*X/4+X
+:07CFRETURN
+@
+

@@ -1,0 +1,88 @@
+
+	     Update on 68000 Tiny BASIC - April 1993
+
+
+Since my article was first published in the February 1985 issue
+of Dr. Dobb's Journal I've received some interesting feedback
+from several of Dr. Dobb's readers. Unfortunately I haven't had
+time to implement most of the suggested improvements so far.
+(Looking back at this in 1993, my feeling is that it is probably
+sufficient as it is. Since no one has asked me to extend it
+further, I assume that it adequately fills the need it was
+originally designed for.)
+
+
+Software Updates
+
+I have managed to put two improvements into the interpreter.
+Version 1.1 included a change made by Marvin Lipford of Edmonton,
+Alberta that improves the PRINT statement. You can now use the
+'$' character to send control codes to your terminal. This is
+usually used to move the terminal's cursor around. For instance:
+
+	  PRINT $27,'=',$32+Y,$32+X,
+
+will move the cursor to the position indicated by the X and Y
+variables on most Lear-Siegler and TeleVideo terminals. The
+number following the $ sign is the control code's decimal value.
+For instance, $27 sends an ASCII ESCape character.
+
+Version 1.2 (the version published here) also contains a bug fix
+provided by Rick Murray of Sacramento, California that fixes a
+problem in the interpreter's multiplication subroutine.
+
+There is also a version 1.3 produced by S. Haraguchi of Japan
+that works with the CP/M-68K operating system. This version was
+published in the February 1986 issue of I/O Magazine, a Japanese
+computer magazine. (This issue also contained a reprint of my
+original Dr. Dobb's Journal article.) Since I don't have
+CP/M-68K, I haven't been able to try out this version.
+
+
+Suggested Improvements
+
+Mr. John Byrns pointed out in a letter in the July 1985 issue of
+Dr. Dobb's Journal that the RND function doesn't work very well.
+The original random number generator is, quite frankly, atrocious
+(as you can see in my comments in the source code). This should
+be replaced by a generator such as the one by Dr. Michael
+McLaughlin published in the November 1985 Dr. Dobb's Journal.
+
+The letters column in the August 1985 Dr. Dobb's Journal contains
+an excellent analysis by Mr. Robert Grappel of some of the
+interpreter's workings (Mr. Grappel's name was familiar to many
+in the early days of microcomputers). He suggests many good ways
+to speed up the interpreter's operation without increasing its
+size significantly.
+
+I hope to add both Mr. Byrns' and Mr. Grappel's improvements
+sometime in the future, but other projects are keeping me busy
+for the moment. (This comment was made in 1986; I doubt now that
+I will ever expend any more effort on it.  Anyone else is quite
+welcome to improve the code -- I'd love to hear about any
+improvements!)
+
+
+Availability
+
+The bulletin board systems listed in the original article still
+exist but I don't think they carry this software any longer. The
+only bulletin board I know of that carries this software is the
+Circuit Cellar Ink BBS at 203-871-1988. If you have access to
+Compuserve you can send mail to my Compuserve ID (see below), and
+I could then send you the files by return Compuserve Mail. (I
+haven't checked recently, but the code used to be available in
+the Computer Language Forum.) Although I still prefer that you
+get the interpreter source code from a bulletin board system or
+Compuserve, you can still get the code from me in IBM-PC 3.5"
+format [1996].
+
+	  Gordon Brandly
+	  12147 - 51 Street
+	  Edmonton AB  T5W 3G8
+	  Canada
+	[address updated in 1996]
+
+	  Compuserve: 70147,1612
+	  Internet:   gordo@datanet.ab.ca
+

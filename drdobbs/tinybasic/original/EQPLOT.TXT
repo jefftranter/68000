@@ -1,0 +1,49 @@
+ 10 REM  Equation plotting program from April 1977 BYTE magazine
+ 15 P.:P."Equation plotting program - enter equation in program line 1010":P.
+ 20 P.:INPUT "Enter 1- end program, 2- show data values, 3-plot" X
+ 30 IF (X<1)+(X>3) GOTO 20
+ 40 GOTO X*100
+ 100 STOP
+ 200 INPUT "Enter starting X value" T:INPUT "Enter step interval" V
+ 205 X=T
+ 210 PRINT "      X          Y"
+ 215 PRINT "     ---        ---"
+ 220 GOSUB 1000
+ 230 PRINT X,Y
+ 240 X=X+5*V
+ 250 IF X<T+75*V GOTO 220
+ 270 IF Y<0 GOTO 490
+ 290 P.:P.:GOTO 20
+ 300 INPUT "Enter starting X value" T
+ 301 INPUT "Enter X increment" V
+ 302 INPUT "Enter lower end of Y value's range" U
+ 303 INPUT "Enter increment for Y axis of graph" W
+ 310 PRINT
+ 320 PRINT "Y=",U,"                   ",U+35*W,"                   ",U+70*W
+ 330 PRINT "      |    *    |    *    |    *    |    *    |    *    |    *",
+ 331 PRINT "    |    *    |"
+ 340 PRINT " X=   ",:F.I=1 TO 70:P."-",:NEXT I:P.
+ 350 X=T
+ 360 GOSUB 1000
+ 365 Y=(Y-U+W/2)/W
+ 370 IF Y<0 GOTO 490
+ 375 IF Y=0 GOTO 500
+ 380 PRINT #5,X,"|",
+ 390 IF Y<=70 GOTO 430
+ 400 PRINT
+ 410 GOTO 510
+ 430 Y=Y-1
+ 440 IF Y=0 GOTO 470
+ 450 PRINT " ",
+ 460 GOTO 430
+ 470 PRINT "+"
+ 480 GOTO 510
+ 490 PRINT #5,X,"<"
+ 495 GOTO 510
+ 500 PRINT #5,X,"+"
+ 510 X=X+V
+ 520 IF X<T+71*V GOTO 360
+ 590 GOTO 20
+ 1000 REM  The equation to be plotted is:
+ 1010 Y=X*X*X/10+X*X/4+X
+ 1999 RETURN

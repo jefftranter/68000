@@ -1,0 +1,18 @@
+ 1 S=8190
+ 2 F=8192
+ 3 P."Only 1 iteration:"
+ 5 C=0
+ 6 F.I=FTOF+S
+ 7 PO.I,1
+ 8 N.I
+ 9 F.I=0TOS
+ 10 IFPE.(I+F)=0G.18
+ 11 P=I+I+3
+ 12 K=I+P
+ 13 IFK>SG.17
+ 14 PO.K+F,0
+ 15 K=K+P
+ 16 G.13
+ 17 C=C+1
+ 18 N.I
+ 19 P.C," primes."
