@@ -57,4 +57,3 @@ DIV1           ADD        D4,D4               ;line up quotient
                ADDQ       #1,D4               ;put 1 in quotient
 DIV2           DBRA       D3,DIV1             ;decrement counter and loop
                RTS
-               END
