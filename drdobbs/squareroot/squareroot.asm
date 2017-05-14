@@ -94,7 +94,7 @@ done    rts             (16)
 *************************************************************************
 
 *                       Cycles
-gsqrt   movem.w d1-d4,-(sp) (24)
+gsqrt   movem.l d1-d4,-(sp) (24)
         move.w #7,d4    (8)     ; Loop count (bits-1 of result).
         clr.w d1        (4)     ; Error term in D1.
         clr.w d2        (4)
@@ -112,7 +112,7 @@ sqrt1   add.w d0,d0     (4)     ; Get 2 leading bits a time and add
         sub.w d3,d1     (4)
 sqrt2   dbra d4,sqrt1   (10/14) ; Do all 8 bit-pairs.
         move.w d2,d0    (4)
-        movem.w (sp)+,d1-d4 (28)
+        movem.l (sp)+,d1-d4 (28)
         rts             (16)
 
 *************************************************************************
@@ -147,7 +147,7 @@ sqrt2   dbra d4,sqrt1   (10/14) ; Do all 8 bit-pairs.
 *************************************************************************
 
 *                       Cycles
-glsqrt  movem.w d1-d4,-(sp) (40)
+glsqrt  movem.l d1-d4,-(sp) (40)
         moveq #13,d4    (4)     ; Loop count (bits-1 of result).
         moveq #0,d1     (4)     ; Error term in D1.
         moveq #0,d2     (4)
@@ -190,5 +190,3 @@ lsqrt3  add.l d0,d0     (8)     ; Do 16-th bit-pair.
 lsqrt4  move.w d2,d0    (4)
         movem.l (sp)+,d1-d4 (44)
         rts             (16)
-
-        end
