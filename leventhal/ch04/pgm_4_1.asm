@@ -13,4 +13,3 @@ PGM_4_1 MOVE.W  VALUE,D0        GET DATA TO BE MOVED
         RTS
 
         END     PGM_4_1
-

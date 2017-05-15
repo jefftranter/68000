@@ -1,0 +1,15 @@
+DATA    EQU     $6000
+PROGRAM EQU     $4000
+
+        ORG     DATA
+VALUE   DS.W    1               VALUE TO BE COMPLEMENTED
+
+        ORG     PROGRAM
+
+PGM_4_2 MOVE.W  VALUE,D0        FETCH VALUE
+        NOT.W   D0              LOGICAL COMPLEMENT OF VALUE
+        MOVE.W  D0,VALUE        STORE COMPLEMENTED RESULT
+
+        RTS
+
+        END     PGM_4_2
