@@ -1,0 +1,17 @@
+DATA     EQU     $6000
+PROGRAM  EQU     $4000
+
+         ORG     DATA
+VALUE1   DS.W    1               FIRST VALUE
+VALUE2   DS.W    1               SECOND VALUE
+RESULT   DS.W    1               16 BIT STORAGE FOR ADDITION RESULT
+
+         ORG     PROGRAM
+
+PGM_4_3A MOVE.W  VALUE1,D0       GET FIRST VALUE
+         ADD.W   VALUE2,D0       ADD SECOND VALUE TO FIRST VALUE
+         MOVE.W  D0,RESULT       STORE RESULT OF ADDITION
+
+         RTS
+
+         END     PGM_4_3A
