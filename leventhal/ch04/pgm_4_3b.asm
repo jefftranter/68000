@@ -1,0 +1,20 @@
+DATA     EQU     $6000
+PROGRAM  EQU     $4000
+
+         ORG     DATA
+VALUE1   DS.W    1               FIRST VALUE
+VALUE2   DS.W    1               SECOND VALUE
+RESULT   DS.W    1               16 BIT STORAGE FOR ADDITION RESULT
+
+         ORG     PROGRAM
+
+PGM_4_3A MOVEA.L #VALUE1,A0      INITIALIZE A0 WITH ADDRESS OF VALUE
+         MOVE.W  (A0),D0         GET FIRST VALUE IN D0
+         ADDA.L  #2,A0           INCREMENT ADDRESS REGISTER A0 BY 2
+         ADD.W   (A0),D0         ADD SECOND VALUE TO FIRST VALUE
+         ADDA.L  #2,A0           INCREMENT A0 BY 2 AGAIN
+         MOVE.W  D0,(A0)         STORE RESULT OF DIVISION
+
+         RTS
+
+         END     PGM_4_3B
