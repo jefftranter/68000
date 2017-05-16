@@ -1,0 +1,21 @@
+DATA     EQU     $6000
+PROGRAM  EQU     $4000
+
+         ORG     DATA
+MASK     EQU     $000F           MASK FOR LOWER NIBBLE
+VALUE    DS.B    1               BYTE TO BE DISASSEMBLED
+         DS.B    1               ALIGN RESULT ON WORD BOUNDARY
+RESULT   DS.W    1               STORAGE FOR DISASSEMBLED BYTE        
+
+         ORG     PROGRAM
+
+PGM_4_5A MOVE.B  VALUE,D0        GET BYTE TO BE DISASSEMBLED
+         AND.B   #MASK,D0        ISOLATE LOWER NIBBLE OF BYTE
+         MOVE.B  D0,RESULT+1     SAVE LOWER ORDER NIBBLE
+         MOVE.B  VALUE,D0        GET BYTE TO BE DISASSEMBLED
+         LSR.B   #4,D0           ISOLATE HIGH NIBBLE
+         MOVE.B  D0,RESULT       SAVE HIGH ORDER NIBBLE
+
+         RTS
+
+         END     PGM_4_5A
