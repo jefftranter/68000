@@ -1,0 +1,18 @@
+DATA     EQU     $6000
+PROGRAM  EQU     $4000
+
+         ORG     DATA
+VALUE1   DS.L    1               FIRST VALUE
+VALUE2   DS.L    1               SECOND VALUE
+RESULT   DS.L    1               RESERVE LONG WORD STORAGE
+
+         ORG     PROGRAM
+
+PGM_4_7  MOVEM.L VALUE1,D0-D3    D0-D1 := VALUE1 AND D2-D3 := VALUE2
+         ADD.L   D3,D1           ADD LEAST SIGNIFICANT LONG WORD
+         ADDX.L  D2,D0           ADD MOST SIG. LONG WORD WITH EXTEND
+         MOVEM.L D0-D1,RESULT    STORE 64 BIT ADDITION RESULT
+
+         RTS
+
+         END     PGM_4_7
