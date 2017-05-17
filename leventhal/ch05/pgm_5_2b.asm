@@ -1,0 +1,28 @@
+DATA     EQU     $6000
+PROGRAM  EQU     $4000
+
+         ORG     DATA
+LENGTH   DS.W    1               NUMBER OF DATA ELEMENTS
+START    DS.L    1               ADDRESS OF DATA ELEMENTS
+TOTAL    DS.L    1               SUM OF DATA ELEMENTS
+CARRYBIT EQU     $10000          CARRY BIT VALUE
+
+         ORG     PROGRAM
+
+PGM_5_2B MOVEA.L START,A0        INITIALIZE POINTER REGISTER
+         MOVEQ   #0,D0           INITIALIZE SUM TO ZERO
+         MOVE.L  D0,D2           CLEAR TEMPORARY REGISTER
+         MOVE.W  LENGTH,D1       INITIALIZE ELEMENT COUNT
+
+         BEQ.S   DONE            IF LENGTH = 0 THEN DONE
+
+LOOP     MOVE.W  (A0)+,D2        D2[15-0] := DATA ELEMENT
+         ADD.L   D2,D0           ADD DATA ELEMENT TO SUM
+         SUBQ.W  #1,D1           UPDATE ELEMENT COUNT
+         BNE     LOOP            IF COUNT NOT ZERO THEN GOTO LOOP
+
+DONE     MOVE.L  D0,TOTAL        STORE SUMMATION
+
+         RTS
+
+         END     PGM_5_2B
