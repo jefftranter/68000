@@ -1,0 +1,24 @@
+DATA     EQU     $6000
+PROGRAM  EQU     $4000
+
+         ORG     DATA
+START    DS.L    1               ADDRESS OF STRING
+LENGTH   DS.W    1               NUMBER OF CHARACTERS IN STRING
+
+CR       EQU     $0D             ASCII VALUE FOR CARRIAGE RETURN
+
+         ORG     PROGRAM
+
+PGM_6_1B MOVEA.L START,A0        POINTER TO START OF STRING
+         MOVEQ   #-1,D0          INITIALIZE LENGTH COUNT
+         MOVEQ   #CR,D1          INITIALIZE WITH ASCII VALUE OF CR
+
+LOOP     ADDQ.W  #1,D0           INCREMENT LENGTH COUNT
+         CMP.B   (A0)+,D1        IS CURRENT CHAR A CARRIAGE RETURN?
+         BNE     LOOP            IF NO THEN CONTINUE SCAN
+
+         MOVE.W  D0,LENGTH       ...ELSE DONE, SAVE STRING COUNT
+
+         RTS
+
+         END     PGM_6_1B

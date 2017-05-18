@@ -3,7 +3,7 @@ PROGRAM  EQU     $4000
 
          ORG     DATA
 START    DS.L    1               ADDRESS OF STRING
-LENGTH   DS.L    1               NUMBER OF CHARACTERS IN STRING
+LENGTH   DS.W    1               NUMBER OF CHARACTERS IN STRING
 
 CR       EQU     $0D             ASCII VALUE FOR CARRIAGE RETURN
 
