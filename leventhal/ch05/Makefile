@@ -8,4 +8,3 @@ all:	pgm_5_1a.run pgm_5_1b.run pgm_5_2a.run pgm_5_2b.run pgm_5_3.run pgm_5_4a.ru
 
 clean:
 	$(RM) *.run *.lst
-

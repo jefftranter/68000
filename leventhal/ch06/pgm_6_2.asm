@@ -1,0 +1,23 @@
+DATA     EQU     $6000
+PROGRAM  EQU     $4000
+
+         ORG     DATA
+START    DS.L    1               ADDRESS OF STRING
+POINTER  DS.L    1               ADDRESS OF FIRST NON-BLANK
+
+BLANK    EQU     ' '             ASCII VALUE FOR BLANK/SPACE
+
+         ORG     PROGRAM
+
+PGM_6_2  MOVEA.L START,A0        POINTER TO START OF STRING
+         MOVEQ   #BLANK,D1       INITIALIZE WITH ASCII VALUE FOR ' '
+
+LOOP     CMP.B   (A0)+,D1        IS CURRENT CHAR A BLANK?
+         BEQ     LOOP            IF YES THEN CONTINUE SCAN
+
+         SUBQ.L  #1,A0           ..ELSE ADJUST POINTER TO CURRENT CHAR
+         MOVE.L  A0,POINTER      SAVE ADDRESS OF FIRST NON-BLANK
+
+         RTS
+
+         END     PGM_6_2
