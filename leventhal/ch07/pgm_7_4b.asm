@@ -1,0 +1,25 @@
+DATA     EQU     $6000
+PROGRAM  EQU     $4000
+
+STRING   EQU     $6001           ADDRESS OF FOUR DIGIT BCD STRING
+CODE     EQU     $6004           ADDRESS OF RESULT
+
+         ORG     PROGRAM
+
+PGM_7_4B MOVEA.W #STRING,A0      POINTER TO FIRST BCD DIGIT
+         MOVEQ   #4-1,D0         NUMBER OF DIGITS(-1) TO PROCESS
+         CLR.L   D1              CLEAR FINAL RESULT - D1
+         CLR.L   D2              CLEAR DIGIT REGISTER
+         BRA.S   NOMULT          SKIP MULTIPLY FIRST TIME
+
+LOOP     MULU.W  #10,D1          D1 = D1 * 10
+
+NOMULT   MOVE.B  (A0)+,D2        NEXT BCD DIGIT,(D2[15-8] UNCHANGED)
+         ADD.W   D2,D1           ADD NEXT DIGIT
+         DBRA    D0,LOOP         CONTINUE PROCESSING IF STILL DIGITS
+
+         MOVE.W  D1,CODE         STORE RESULT
+
+         RTS
+
+         END     PGM_7_4B
