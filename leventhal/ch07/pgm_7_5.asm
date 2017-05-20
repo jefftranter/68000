@@ -1,0 +1,24 @@
+DATA     EQU     $6000
+PROGRAM  EQU     $4000
+
+NUMBER   EQU     $6000           ADDRESS OF 16 BIT NUMBER
+STRING   EQU     $6002           ADDRESS OF EQUIVALENT ASCII STRING
+
+         ORG     PROGRAM
+
+PGM_7_5  MOVEA.L #STRING+16,A0   POINTER TO END OF STRING(+1)
+         MOVEQ   #15,D0          LOOP COUNTER(-1)
+         MOVE.B  #'0',D1
+         MOVE.W  NUMBER,D2       GET NUMERIC DATA
+
+LOOP     MOVE.B  D1,-(A0)        ASSUME LSB IS ZERO
+         ROR.W   #1,D2           TEST CURRENT LSB
+         BCC.S   LOOPEND         IF ZERO THEN TRY NEXT BIT
+
+         ADDI.B  #1,(A0)         CHANGE ASCII '0' TO ASCII '1'
+
+LOOPEND  DBRA    D0,LOOP         PROCESS ALL BITS
+
+         RTS
+
+         END     PGM_7_5
