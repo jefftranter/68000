@@ -1,6 +1,8 @@
 DATA     EQU     $6000
 PROGRAM  EQU     $4000
 
+         ORG     DATA
+
 NUM1     DS.W    1                      16-BIT MULTIPLICANT
 NUM2     DS.W    1                      16-BIT MULTIPLIER
 RESULT   DS.L    1                      32-BIT MULTIPLICATION RESULT
