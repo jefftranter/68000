@@ -1,4 +1,4 @@
-SUBDIRS = ch04 ch05 ch06 ch07 ch08
+SUBDIRS = ch04 ch05 ch06 ch07 ch08 ch09
 
 all:
 	@for i in $(SUBDIRS); do \
