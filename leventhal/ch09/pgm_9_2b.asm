@@ -7,7 +7,7 @@ LIST     EQU     $6004
 
          ORG     PROGRAM
 
-PGM_9_2A MOVE.W  ITEM,D0                GET SEARCH OBJECT
+PGM_9_2B MOVE.W  ITEM,D0                GET SEARCH OBJECT
          MOVEA.L LIST,A0                GET START ADDRESS OF LIST
          MOVEQ   #0,D1                  CLEAR THE ELEMENT COUNT
          MOVE.W  (A0),D1                GET THE ELEMENT COUNT
@@ -17,13 +17,14 @@ PGM_9_2A MOVE.W  ITEM,D0                GET SEARCH OBJECT
          SUBQ.W  #2,D1                  INDEX RANGE = 0 - (LENGTH*2 -2) !
 
 LOOP     CMP.W   2(A0,D1.W),D0          SEARCH FROM END OF LIST TO START
-         BEQ.S   DONE                   OBJECT IS IN LIST, D1 HOLDS INDEX
-         BHI.S   MISSING                LIST ELEMENT SMALLER, OBJ NOT IN LIST
+         BCS.S   LPEXIT                 DONE IF FOUND OR ITEM > LIST ELEM.
          SUBQ.W  #2,D1                  INDEX FOR NEXT SMALLER ELEMENT
          BCC     LOOP                   INDEX >= 0 - CONTINUE
 
-MISSING  MOVEQ   #-1,D1                 "NOT FOUND"-INDEX
+LPEXIT   BEQ.S   DONE                   OBJECT IS IN LIST, D1 HOLDS INDEX
+
+MISSING  MOVE.W  D1,INDEX               SAVE INDEX
 
 DONE     RTS
 
-         END     PGM_9_2A
+         END     PGM_9_2B

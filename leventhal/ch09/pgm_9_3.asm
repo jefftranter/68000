@@ -1,0 +1,17 @@
+DATA     EQU     $6000
+PROGRAM  EQU     $4000
+
+QUEUE    EQU     $6000
+POINTER  EQU     $6004
+
+         ORG     PROGRAM
+
+PGM_9_3  MOVE.L  QUEUE,POINTER          SAVE OLD HEAD OF QUEUE
+         BEQ.S   DONE                   IF QUEUE EMPTY THEN DONE
+
+         MOVE.L  POINTER,A0             ...ELSE REMOVE FIRST ELEMENT
+         MOVE.L  (A0),QUEUE             AND REPLACE WITH SECOND
+
+DONE     RTS
+
+         END     PGM_9_3
