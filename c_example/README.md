@@ -75,6 +75,11 @@ TUTOR  1.3 > MD 1000 8B ;DI
 001088    4E5E                 UNLK    A6 
 00108A    4E75                 RTS
 
+Before running you should set the stack pointer to a valid
+location in RAM, e.g.
+
+.A7 4000
+
 The program produces no output because there are no i/o routines, so
 it is more useful to trace or single step.
 

@@ -20,7 +20,6 @@ int main()
     short j = 2;
     char  c = 'A';
     long  l = 1234;
-    char *s = "Hello";
 
     for (i = 1; i < 8; i++) {
         j = factorial(i);
