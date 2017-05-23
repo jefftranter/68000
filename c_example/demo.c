@@ -14,6 +14,12 @@ short factorial(short n) {
     }
 }
 
+// Go to the TUTOR monitor using trap 14 function. Does not return.
+void tutor() {
+    asm("move.b #228,%d7\n\t"
+        "trap #14");
+}
+
 int main()
 {
     short i = 1;
@@ -24,5 +30,7 @@ int main()
     for (i = 1; i < 8; i++) {
         j = factorial(i);
     }
+
+    tutor();
     return j;
 }
