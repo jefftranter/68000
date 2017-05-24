@@ -469,7 +469,7 @@ If you build the board, I would suggest constructing it in this order:
 3. Connect the 8 MHz crystal oscillator and verify the presence of the
    clock signal.
 
-4. Wire up the baud rate generator made up of U23, crystal, resistor
+4. Wire up the baud rate generator made up of U31, crystal, resistor
    and two caps. Verify the baud rate clock which should be a 153.6 KHz
    square wave.
 
@@ -510,6 +510,13 @@ versions, e.g. plastic packages, can be 0.8" spacing.
 
 It is recommended to install ICs using sockets. The 64-pin socket can
 be hard to find -- two 40-pin sockets can be cut and used instead.
+
+Rev 2.1 PCB Issues
+------------------
+
+The holes for D3 are too small for a 1N5404. You can use a 1N4001,
+1N4004, 1N4007 or similar. You may still need to make the holes a
+little larger.
 
 Possible Future Enhancements
 ----------------------------
