@@ -5,11 +5,10 @@ demo.run: demo.c
 	m68k-elf-ld --defsym=_start=main -Ttext=0x2000 -Tdata=0x3000 -Tbss=0x4000 --section-start=.rodata=0x5000 demo.o
 	m68k-elf-objcopy -I coff-m68k -O srec a.out demo.run
 
-demo.asm: demo.run
-	m68k-elf-objdump -D a.out >demo.asm
-
+demo.s: demo.c
+	m68k-elf-gcc -Wall -nostdlib -nodefaultlibs -m68000 -S demo.c
 clean:
-	$(RM) a.out demo.o demo.run demo.asm
+	$(RM) a.out demo.o demo.run demo.s
 
 upload: demo.run
 	/bin/echo -e "LO1\r\n" >/dev/ttyUSB0

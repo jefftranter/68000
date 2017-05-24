@@ -1,17 +1,18 @@
 /*
 
   Example of compiling C code for 68000. Doesn't require any C library
-  or other run-time code.
+  or other run-time code. Relies on the Motorola TUTOR monitor
+  program.
 
 */
 
 
 // Forward references so we can put main() first at a known start
 // address.
-short factorial(short n);
+short factorial(const short n);
 void tutor();
-void outch(char c);
-void printString(char *s);
+void outch(const char c);
+void printString(const char *s);
 void printNumber(unsigned short n);
 
 
@@ -20,13 +21,17 @@ int main()
 {
     asm("move.l #0x1000,%sp"); // Set up initial stack pointer
 
-    short i, j;
-    
     printString("Start\r\n");
+    printString("n  n^2  n^4  n!\r\n");
     
-    for (i = 1; i < 8; i++) {
-        j = factorial(i);
-        printNumber(i); outch(' '); printNumber(j);
+    for (short i = 1; i < 8; i++) {
+        printNumber(i);
+        outch(' ');
+        printNumber(i*i);
+        outch(' ');
+        printNumber(i*i*i);
+        outch(' ');
+        printNumber(factorial(i));
         printString("\r\n");
     }
 
@@ -64,32 +69,32 @@ void outch(char c) {
 
 
 // Print a string.
-void printString(char *s) {
+void printString(const char *s) {
     while (*s != 0) {
         outch(*s);
         s++;
     }
 }
 
-// Quick and dirty routine to print decimal number up to 5 digits long.
+// Quick and dirty routine to print decimal number up to 5 digits
+// long. Suppresses leading zeros.
 void printNumber(unsigned short n) {
     unsigned short d;
+    short digitPrinted = 0;
+    unsigned short mult = 10000;
 
-    d = n / 10000;
-    outch(d + '0');
-    n = n - d * 10000;
-
-    d = n / 1000;
-    outch(d + '0');
-    n = n - d * 1000;
-
-    d = n / 100;
-    outch(d + '0');
-    n = n - d * 100;
-
-    d = n / 10;
-    outch(d + '0');
-    n = n - d * 10;
-
+    while (mult > 1) {
+        d = n / mult;
+        if (d == 0) {
+            if (digitPrinted) {
+                outch(d + '0');
+            }
+        } else {
+            outch(d + '0');
+            digitPrinted = 1;
+        }
+        n = n - d * mult;
+        mult = mult / 10;
+    }
     outch(n + '0');
 }
