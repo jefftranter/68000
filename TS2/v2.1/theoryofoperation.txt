@@ -518,6 +518,8 @@ The holes for D3 are too small for a 1N5404. You can use a 1N4001,
 1N4004, 1N4007 or similar. You may still need to make the holes a
 little larger.
 
+The silkscreen markings for R20 and Y1 are switched.
+
 Possible Future Enhancements
 ----------------------------
 
