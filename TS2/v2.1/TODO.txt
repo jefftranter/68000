@@ -1,2 +1,1 @@
-Verify new circuit to replace 25LS2548.
-Verify new baud rate generator circuit.
+Build unit on PCB and verify operation.

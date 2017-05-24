@@ -527,3 +527,4 @@ Prototype area?
 Support either RAM or EPROM/EEPROM in all sockets.
 Optionally (jumper) allow EEPROM to be written to.
 Support larger RAM and ROM chips (e.g. 27128, 27256, etc. Impacts memory map).
+Add a 68881/68882 FPU.
