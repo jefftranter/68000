@@ -18,14 +18,25 @@ You can now run the program from TUTOR using GO 2000. Output should
 look like the following:
 
 TUTOR  1.3 > GO 2000
+
 PHYSICAL ADDRESS=00002000
+
 Start
+
 n  n^2  n^4  n!
+
 1 1 1 1
+
 2 4 8 2
+
 3 9 27 6
+
 4 16 64 24
+
 5 25 125 120
+
 6 36 216 720
+
 7 49 343 5040
+
 Done
