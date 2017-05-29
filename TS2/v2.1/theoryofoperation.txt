@@ -533,6 +533,9 @@ caps.
 The UDS* and LDS* signal connections to the 68000 were reversed. You
 need to cut the tracks near the 68000 and add jumpers to switch them.
 
+Minor improvement: label switch contacts (C/NO/NC) and LEDs polarity
+(+/-) on silkscreen.
+
 Possible Future Enhancements
 ----------------------------
 
