@@ -497,9 +497,8 @@ Some good sources for parts include eBay and Unicorn Electronics.
 PCB Layout Notes
 ----------------
 
-A printed circuit board layout is provided. At the time of writing it
-had not yet been tested. It is a double-sided board with soldermask
-and silkscreen.
+A printed circuit board layout is provided. It is a double-sided board
+with soldermask and silkscreen.
 
 The layout is slightly different from the wirewrap prototype. The
 front panel switches and LEDs are intended to be mounted in a case and
@@ -514,11 +513,25 @@ be hard to find -- two 40-pin sockets can be cut and used instead.
 Rev 2.1 PCB Issues
 ------------------
 
+The following issues were found with the intial rev 2.1 PCBs. They
+will be corrected in revision 2.1.1.
+
 The holes for D3 are too small for a 1N5404. You can use a 1N4001,
 1N4004, 1N4007 or similar. You may still need to make the holes a
 little larger.
 
 The silkscreen markings for R20 and Y1 are switched.
+
+The +5V POWER node did not get connected from the USB ports to the
+rest of the circuitry. A jumper wire is needed to connect it in order
+for the board to support being powered from USB.
+
+The VDD and GND pin connections of the two 6850 UARTS were omitted.
+They need to need to be connected with wires, e.g. to nearby bypass
+caps.
+
+The UDS* and LDS* signal connections to the 68000 were reversed. You
+need to cut the tracks near the 68000 and add jumpers to switch them.
 
 Possible Future Enhancements
 ----------------------------
