@@ -1,19 +1,19 @@
 /*
 
   Example of compiling C code for 68000. Doesn't require any C library
-  or other run-time code. Relies on the Motorola TUTOR monitor
-  program.
+  or other run-time code except libgcc. Relies on the Motorola TUTOR
+  monitor program.
 
 */
 
 
 // Forward references so we can put main() first at a known start
 // address.
-short factorial(const short n);
+int factorial(const int n);
 void tutor();
 void outch(const char c);
 void printString(const char *s);
-void printNumber(unsigned short n);
+void printNumber(unsigned int n);
 
 
 // Main program.
@@ -24,7 +24,7 @@ int main()
     printString("Start\r\n");
     printString("n  n^2  n^4  n!\r\n");
     
-    for (short i = 1; i < 8; i++) {
+    for (int i = 1; i < 12; i++) {
         printNumber(i);
         outch(' ');
         printNumber(i*i);
@@ -42,7 +42,7 @@ int main()
 
 
 // Calculate factorial of a number.
-short factorial(short n) {
+int factorial(int n) {
     if (n <= 0) {
         return 1;
     } else {
@@ -76,12 +76,12 @@ void printString(const char *s) {
     }
 }
 
-// Quick and dirty routine to print decimal number up to 5 digits
+// Quick and dirty routine to print decimal number up to 10 digits
 // long. Suppresses leading zeros.
-void printNumber(unsigned short n) {
-    unsigned short d;
+void printNumber(unsigned int n) {
+    unsigned int d;
     short digitPrinted = 0;
-    unsigned short mult = 10000;
+    unsigned int mult = 1000000000;
 
     while (mult > 1) {
         d = n / mult;
