@@ -323,7 +323,7 @@ CPU to generate an infinite stream of wait states.
 
 Two positive-edge triggered D flip-flops, U20A and U23A, control
 INHIBIT_DTACK. U20A acts as a debounced switch and produces an SS/RUN*
-signal fro its Q output, depending only on the state of the
+signal from its Q output, depending only on the state of the
 single-step/run switch. Unfortunately, it would be unwise to use the
 output of U20A to inhibit DTACK*, because changing from run to
 single-step mode in mid bus cycle might lead to unpredictable results.
@@ -462,7 +462,7 @@ If you build the board, I would suggest constructing it in this order:
 
 1. Install all IC sockets, connector headers, and bypass caps.
 
-2. wire up the front panel switches and LEDs. Verify that the power
+2. Wire up the front panel switches and LEDs. Verify that the power
    switch and power LED are working when powered by USB or with
    external +5V power.
 
@@ -504,6 +504,11 @@ The layout is slightly different from the wirewrap prototype. The
 front panel switches and LEDs are intended to be mounted in a case and
 connected to the PCB using wires. Four mounting holes are provided.
 
+The front panel connections are as follows (left to right):
+
+ STEP    STEP/RUN  RESET  HALT LED  POWER  POWER LED  ABORT
+NO/C/NC  NO/C/NC  NC/C/NO   -/+     S/S/NC  +/-      NC/C/NO
+
 The board is layed out for a 68000 chip with 0.9" spacing. Some
 versions, e.g. plastic packages, can be 0.8" spacing.
 
@@ -514,13 +519,13 @@ Rev 2.1 PCB Issues
 ------------------
 
 The following issues were found with the intial rev 2.1 PCBs. They
-will be corrected in revision 2.1.1.
+have been corrected in revision 2.1.1.
 
 The holes for D3 are too small for a 1N5404. You can use a 1N4001,
 1N4004, 1N4007 or similar. You may still need to make the holes a
 little larger.
 
-The silkscreen markings for R20 and Y1 are switched.
+The silkscreen markings for R20 and Y1 are interchanged.
 
 The +5V POWER node did not get connected from the USB ports to the
 rest of the circuitry. A jumper wire is needed to connect it in order
@@ -532,9 +537,6 @@ caps.
 
 The UDS* and LDS* signal connections to the 68000 were reversed. You
 need to cut the tracks near the 68000 and add jumpers to switch them.
-
-Minor improvement: label switch contacts (C/NO/NC) and LEDs polarity
-(+/-) on silkscreen.
 
 Possible Future Enhancements
 ----------------------------
@@ -553,3 +555,5 @@ Support either RAM or EPROM/EEPROM in all sockets.
 Optionally (jumper) allow EEPROM to be written to.
 Support larger RAM and ROM chips (e.g. 27128, 27256, etc. Impacts memory map).
 Add a 68881/68882 FPU.
+Minor improvement: label switch contacts (C/NO/NC) and LEDs polarity
+(+/-) on silkscreen.
