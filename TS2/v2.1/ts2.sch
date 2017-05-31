@@ -17,8 +17,8 @@ $Descr A 11000 8500
 encoding utf-8
 Sheet 1 9
 Title "TS2 68000 Single Board Computer"
-Date "2017-02-17"
-Rev "2.1"
+Date "2017-05-29"
+Rev "2.1.1"
 Comp "Jeff Tranter"
 Comment1 "Top Level Schematic"
 Comment2 ""
@@ -389,23 +389,23 @@ $EndComp
 $Comp
 L SPST SW5
 U 1 1 587B85F6
-P 2650 5450
-F 0 "SW5" H 2650 5550 50  0000 C CNN
-F 1 "POWER" H 2650 5350 50  0000 C CNN
-F 2 "Connect:PINHEAD1-3" H 2650 5450 50  0001 C CNN
-F 3 "" H 2650 5450 50  0000 C CNN
-	1    2650 5450
+P 2850 5450
+F 0 "SW5" H 2850 5550 50  0000 C CNN
+F 1 "POWER" H 2850 5350 50  0000 C CNN
+F 2 "Connect:PINHEAD1-3" H 2850 5450 50  0001 C CNN
+F 3 "" H 2850 5450 50  0000 C CNN
+	1    2850 5450
 	1    0    0    -1  
 $EndComp
 $Comp
 L VCC #PWR019
 U 1 1 587B86B5
-P 3150 5450
-F 0 "#PWR019" H 3150 5300 50  0001 C CNN
-F 1 "VCC" H 3150 5600 50  0000 C CNN
-F 2 "" H 3150 5450 50  0000 C CNN
-F 3 "" H 3150 5450 50  0000 C CNN
-	1    3150 5450
+P 3350 5450
+F 0 "#PWR019" H 3350 5300 50  0001 C CNN
+F 1 "VCC" H 3350 5600 50  0000 C CNN
+F 2 "" H 3350 5450 50  0000 C CNN
+F 3 "" H 3350 5450 50  0000 C CNN
+	1    3350 5450
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -419,13 +419,8 @@ F 3 "" H 2150 5550 50  0000 C CNN
 	1    2150 5550
 	1    0    0    -1  
 $EndComp
-Text GLabel 2550 6000 2    60   Input ~ 0
+Text GLabel 2500 5850 2    60   Input ~ 0
 POWER
-Wire Wire Line
-	2550 6000 2250 6000
-Wire Wire Line
-	2250 6000 2250 5450
-Connection ~ 2250 5450
 $Comp
 L C C6
 U 1 1 588680EB
@@ -1049,4 +1044,11 @@ Wire Wire Line
 	5000 6200 8300 6200
 Wire Wire Line
 	8300 6500 5000 6500
+Wire Wire Line
+	2150 5450 2350 5450
+Wire Wire Line
+	2300 5850 2300 5450
+Connection ~ 2300 5450
+Wire Wire Line
+	2500 5850 2300 5850
 $EndSCHEMATC

@@ -17,8 +17,8 @@ $Descr A 11000 8500
 encoding utf-8
 Sheet 5 9
 Title "TS2 68000 Single Board Computer"
-Date "2017-02-17"
-Rev "2.1"
+Date "2017-05-29"
+Rev "2.1.1"
 Comp "Jeff Tranter"
 Comment1 "RAM and ROM (1 of 2)"
 Comment2 ""

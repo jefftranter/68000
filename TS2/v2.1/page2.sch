@@ -17,8 +17,8 @@ $Descr A 11000 8500
 encoding utf-8
 Sheet 3 9
 Title "TS2 68000 Single Board Computer"
-Date "2017-02-17"
-Rev "2.1"
+Date "2017-05-29"
+Rev "2.1.1"
 Comp "Jeff Tranter"
 Comment1 "Address Decoding"
 Comment2 ""

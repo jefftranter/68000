@@ -13,12 +13,12 @@ LIBS:xilinx
 LIBS:ts2-cache
 EELAYER 25 0
 EELAYER END
-$Descr A4 11693 8268
+$Descr A 11000 8500
 encoding utf-8
 Sheet 9 9
 Title "TS2 68000 Single Board Computer"
-Date "2017-02-17"
-Rev "2.1"
+Date "2017-05-29"
+Rev "2.1.1"
 Comp "Jeff Tranter"
 Comment1 "Interrupt Control Circuitry (optional)"
 Comment2 ""
@@ -509,7 +509,7 @@ Text GLabel 1300 4950 2    60   Input ~ 0
 IRQ5*
 Text GLabel 1300 5050 2    60   Input ~ 0
 IRQ6*
-Text GLabel 5400 6750 2    60   Input ~ 0
+Text GLabel 5400 6750 2    60   Output ~ 0
 IRQ7*
 $Comp
 L 74LS00 U34

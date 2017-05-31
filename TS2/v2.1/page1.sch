@@ -17,8 +17,8 @@ $Descr A 11000 8500
 encoding utf-8
 Sheet 2 9
 Title "TS2 68000 Single Board Computer"
-Date "2017-02-17"
-Rev "2.1"
+Date "2017-05-29"
+Rev "2.1.1"
 Comp "Jeff Tranter"
 Comment1 "Reset, Halt, and Clock Control Circuits"
 Comment2 ""
@@ -53,7 +53,7 @@ U 1 1 57B64881
 P 2800 4100
 F 0 "U3" H 2800 4150 60  0000 C CNN
 F 1 "74LS00" H 2800 4000 60  0000 C CNN
-F 2 "Housings_DIP:DIP-14_W7.62mm" H 2800 4100 60  0000 C CNN
+F 2 "Housings_DIP:DIP-14_W7.62mm" V 2800 4100 60  0001 C CNN
 F 3 "~" H 2800 4100 60  0000 C CNN
 	1    2800 4100
 	1    0    0    -1  
@@ -64,7 +64,7 @@ U 2 1 57B64890
 P 2800 4900
 F 0 "U3" H 2800 4950 60  0000 C CNN
 F 1 "74LS00" H 2800 4800 60  0000 C CNN
-F 2 "Housings_DIP:DIP-14_W7.62mm" H 2800 4900 60  0000 C CNN
+F 2 "Housings_DIP:DIP-14_W7.62mm" H 2800 4900 60  0001 C CNN
 F 3 "~" H 2800 4900 60  0000 C CNN
 	2    2800 4900
 	1    0    0    -1  
@@ -130,7 +130,7 @@ U 1 1 57B64B74
 P 1450 1100
 F 0 "R1" V 1530 1100 40  0000 C CNN
 F 1 "1M" V 1457 1101 40  0000 C CNN
-F 2 "Resistors_ThroughHole:Resistor_Horizontal_RM7mm" V 1380 1100 30  0000 C CNN
+F 2 "Resistors_ThroughHole:Resistor_Horizontal_RM7mm" V 1380 1100 30  0001 C CNN
 F 3 "~" H 1450 1100 30  0000 C CNN
 	1    1450 1100
 	1    0    0    -1  
@@ -152,7 +152,7 @@ U 1 1 57B64B92
 P 1150 2450
 F 0 "C1" H 1150 2550 40  0000 L CNN
 F 1 "0.1uF" H 1156 2365 40  0000 L CNN
-F 2 "Capacitors_ThroughHole:C_Disc_D3_P2.5" H 1188 2300 30  0000 C CNN
+F 2 "Capacitors_ThroughHole:C_Disc_D3_P2.5" H 1500 1700 30  0001 C CNN
 F 3 "~" H 1150 2450 60  0000 C CNN
 	1    1150 2450
 	1    0    0    -1  
@@ -163,7 +163,7 @@ U 1 1 57B64BA1
 P 1450 2450
 F 0 "C2" H 1450 2550 40  0000 L CNN
 F 1 "0.1uF" H 1456 2365 40  0000 L CNN
-F 2 "Capacitors_ThroughHole:C_Disc_D3_P2.5" H 1488 2300 30  0000 C CNN
+F 2 "Capacitors_ThroughHole:C_Disc_D3_P2.5" H 1488 2300 30  0001 C CNN
 F 3 "~" H 1450 2450 60  0000 C CNN
 	1    1450 2450
 	1    0    0    -1  
@@ -382,9 +382,9 @@ A02
 Text GLabel 10000 1500 2    60   3State ~ 0
 A01
 Text GLabel 10000 5800 2    60   Output ~ 0
-UDS*
-Text GLabel 10000 5700 2    60   Output ~ 0
 LDS*
+Text GLabel 10000 5700 2    60   Output ~ 0
+UDS*
 Text GLabel 10000 5900 2    60   Output ~ 0
 R/W*
 Text GLabel 10000 5600 2    60   Output ~ 0
