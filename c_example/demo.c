@@ -21,6 +21,12 @@ int main()
 {
     asm("move.l #0x1000,%sp"); // Set up initial stack pointer
 
+    // Uncomment to try some floating point math. Makes executable
+    // much larger.
+    //float f;
+    //f = (1.0 / 3.0) * 1000.0;
+    //printNumber(f);
+
     printString("Start\r\n");
     printString("n  n^2  n^4  n!\r\n");
     
