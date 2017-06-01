@@ -11,7 +11,7 @@
     (via_costs 50)
     (plane_via_costs 5)
     (start_ripup_costs 100)
-    (start_pass_no 88286)
+    (start_pass_no 16362)
     (layer_rule F.Cu
       (active on)
       (preferred_direction vertical)
