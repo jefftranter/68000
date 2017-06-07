@@ -146,4 +146,8 @@ SYM (_start):
  * control back to the ROM monitor, if there is one. This calls the
  * exit() from the C library so the C++ tables get cleaned up right.
  */
+
+/* Currently working around a problem with atexit handlers and
+ * destructors in exit() by directly calling _exit().
+ */
 	PICCALL	SYM (_exit)

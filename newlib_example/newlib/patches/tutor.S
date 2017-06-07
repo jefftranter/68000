@@ -34,12 +34,14 @@
 	.text
 	.align	2
 SYM (_exit):
-        move.b  #START,d7
-        trap	IMM(14)
+	move.b	#START,d7
+	trap	IMM(14)
 
 /*
  * inbyte -- get a byte from the console serial port
  *	d0 - contains the byte read in
+ *
+ * Converts a carriage return character to newline.
  */
 	.text
 	.align	2
@@ -49,19 +51,29 @@ SYM (inbyte):
 	trap	#14			// Call TUTOR function
 	extw	d0			// Extend byte result to word
 	extl	d0			// ...and longword
-	movem.l	(sp)+,d1/a0		// Restore registers
+	cmp	#'\r',d0		// Is it newline?
+	bne	notnl1			// Branch if not
+	move.b	#'\n',d0		// Convert to newline
+notnl1:	movem.l	(sp)+,d1/a0		// Restore registers
 	rts
 
 /*
  * outbyte -- sends a byte out the serial port
  *	d0 - contains the byte to be sent
+ *
+ * Converts a newline to carriage return and newline.
  */
 	.text
 	.align	2
 SYM (outbyte):
 	movem.l	d0/d1/a0,-(sp)		// Save modified registers
 	move.b	#OUTCH,d7		// Trap function code
+	cmp	#'\n',d0		// Is it newline?
+	bne	notnl2			// Branch if not
+	move.b  #'\r',d0		// Carriage return
 	trap	#14			// Call TUTOR function
+	move.b  #'\n',d0		// Newline
+notnl2:	trap	#14			// Call TUTOR function
 	movem.l	(sp)+,d0/d1/a0		// Restore registers
 	rts
 
@@ -74,15 +86,15 @@ SYM (outbyte):
 	.align	2
 SYM (outln):
 	movem.l	d0/d1/a0/a5/a6,-(sp)	// Save modified registers
-        move.l  a0,a5                   // Start of string
-        move.l  a1,a6                   // End of string
-        addq.l	#1,a6			// Adjust to point to end + 1
+	move.l	a0,a5			// Start of string
+	move.l	a1,a6			// End of string
+	addq.l	#1,a6			// Adjust to point to end + 1
 	move.b	#OUT1CR,d7		// Trap function code
 	trap	#14			// Call TUTOR function
 	movem.l	(sp)+,d0/d1/a0/a5/a6	// Restore registers
 	rts
 
-        
+
 /*
  * outstr -- sends a string of bytes out the serial port without a CR/LF
  *	a0 - contains the address of the string's first byte
@@ -92,9 +104,9 @@ SYM (outln):
 	.align	2
 SYM (outstr):
 	movem.l	d0/d1/a0/a5/a6,-(sp)	// Save modified registers
-        move.l  a0,a5                   // Start of string
-        move.l  a1,a6                   // End of string
-        addq.l	#1,a6			// Adjust to point to end + 1
+	move.l	a0,a5			// Start of string
+	move.l	a1,a6			// End of string
+	addq.l	#1,a6			// Adjust to point to end + 1
 	move.b	#OUTPUT,d7		// Trap function code
 	trap	#14			// Call TUTOR function
 	movem.l	(sp)+,d0/d1/a0/a5/a6	// Restore registers
@@ -118,5 +130,5 @@ SYM (havebyte):
 	rts				// Return
 RXNOTREADY:
 	move.l	#0,d0			// Return 0 to indicate no data available
-	movem.l (a7)+,a0/d1     	// Restore working registers
+	movem.l (a7)+,a0/d1		// Restore working registers
 	rts

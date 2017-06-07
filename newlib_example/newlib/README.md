@@ -20,6 +20,10 @@ therefore be slow and generate a lot of code. The smaller version of
 printf() in newlib is used which does not support printing floating
 point values.
 
+The linker map file is set up to generate an S record run file. If you
+want an object file (e.g. for disassembly), see the comments near the
+top of the file ts2.ld.
+
 Known issues:
 
 Most newlib functions have not been tested. Only a few very small,

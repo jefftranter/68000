@@ -92,4 +92,11 @@ cd ..
 
 fi
 
+# Uncomment if you want to clean up build files.
+# rm -rf gcc-5.4.0 gcc-build m68k-elf-none newlib-2.5.0
+
+# Uncomment if you want to remove downloaded files.
+#rm -f gcc-${GCC_VER}.tar.gz
+#rm -f newlib-${NEWLIB_VER}.tar.gz
+
 echo "*** Done ***"
