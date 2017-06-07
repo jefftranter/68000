@@ -18,18 +18,23 @@ int main()
 {
     int i;
 
-    printf("Hello, world!\r\n");
+    printf("Hello, world!\n");
 
-    for (i = 1; i <= 100; i++) {
+    for (i = 1; i <= 10; i++) {
 #ifdef FP
-        printf("%d %d %d\r\n", i, i*i, (int) sqrt(i * i));
+        printf("%d %d %d\n", i, i*i, (int) sqrt(i * i));
 #else
-        printf("%d %d %d\r\n", i, i*i, i*i*i);
+        printf("%d %d %d\n", i, i*i, i*i*i);
 #endif
     }
 
-    printf("Press <Enter> to exit... ");
-    getchar();
+    printf("Press a key, X to exit...\n");
+    while (1) {
+        int c = getchar();
+        printf("Key was %02x\n", c);
+        if (c == 'X' || c == 'x')
+            break;
+    }
 
     return 0;
 }
