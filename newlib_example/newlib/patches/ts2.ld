@@ -6,7 +6,7 @@ OUTPUT_ARCH(m68k)
 OUTPUT_FORMAT(srec)
 
 SEARCH_DIR(.)
-GROUP(-lmvme162 -lc -lgcc)
+GROUP(-lts2 -lc -lgcc)
 __DYNAMIC  =  0;
 
 /*
@@ -36,8 +36,9 @@ __DYNAMIC  =  0;
 
 MEMORY
 {
-  monitor   : ORIGIN = 0x8000, LENGTH = 32K
-  ram (rwx) : ORIGIN = 0x0800, LENGTH = 30K
+  ram (rwx) : ORIGIN = 0x0800, LENGTH = 32K-2K
+  rom0            : ORIGIN = 0x008000, LENGTH = 16K
+  rom1            : ORIGIN = 0x00C000, LENGTH = 16K
 }
 
 /*
