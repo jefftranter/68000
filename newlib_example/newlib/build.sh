@@ -65,7 +65,7 @@ fi
 echo "*** Building newlib ***"
 
 echo "*** Removing old build ***"
-rm -rf newlib-${NEWLIB_VER} m68k-elf-none
+rm -rf newlib-${NEWLIB_VER} newlib-build
 
 echo "*** Extracting newlib source ***"
 tar xzf newlib-${NEWLIB_VER}.tar.gz
@@ -79,8 +79,8 @@ done
 cd ..
 
 echo "*** Configuring newlib ***"
-mkdir m68k-elf-none
-cd m68k-elf-none
+mkdir newlib-build
+cd newlib-build
 ../newlib-${NEWLIB_VER}/configure -q --target=m68k-elf --enable-newlib-nano-formatted-io --enable-newlib-nano-malloc --enable-lite-exit
 
 echo "*** Building newlib ***"
@@ -93,7 +93,7 @@ cd ..
 fi
 
 # Uncomment if you want to clean up build files.
-# rm -rf gcc-5.4.0 gcc-build m68k-elf-none newlib-2.5.0
+# rm -rf gcc-5.4.0 gcc-build newlib-2.5.0 newlib-build
 
 # Uncomment if you want to remove downloaded files.
 #rm -f gcc-${GCC_VER}.tar.gz
