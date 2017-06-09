@@ -4,12 +4,13 @@ the TS2 68000 single board computer.
 The script build.sh will download, build and install a suitable
 cross-compiler version of gcc and then build and install newlib.
 
+The version of gcc, 5.4.0, is the last one that supported the m68k
+platform.
+
 The i/o routines for the TS2 use the TUTOR monitor trap 14 functions.
-
-Control returns, via _exit(), to the TUTOR monitor.
-
-The only i/o functions supported are standard input and output which
-use the console serial port.
+Control returns, via _exit(), to the TUTOR monitor. The only i/o
+functions supported are standard input and output which use the
+console serial port.
 
 The program, data, heap, and stack cannot exceed the 32K of available
 memory (actually 30K as the first 2K are used by exception vectors and
