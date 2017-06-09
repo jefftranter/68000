@@ -2,8 +2,6 @@
 
 #include <stdio.h>
 
-
-
 #define MAX_N 8
 
 long tries      = 0;
