@@ -507,13 +507,27 @@ connected to the PCB using wires. Four mounting holes are provided.
 The front panel connections are as follows (left to right):
 
  STEP    STEP/RUN  RESET  HALT LED  POWER  POWER LED  ABORT
-NO/C/NC  NO/C/NC  NC/C/NO   -/+     S/S/NC  +/-      NC/C/NO
+NO/C/NC  NO/C/NC  NC/C/NO   -/+     S/S/X    +/-     NC/C/NO
 
-The board is layed out for a 68000 chip with 0.9" spacing. Some
+Where the connections are indicated by:
+
+NO - normally open                  NC - normally closed
+C - common                          X - unused
+S - switch contact
+
+An alternative to a case is to simply cut a piece of plexiglass and
+mount it over the board using nylon standoffs. Use additional
+standoffs under the board for feet. You can make the cover about 3/4"
+longer at the front and mount the switches there. The LEDs can be
+mounted on the PCB. I used 0.093" Lexan material for the cover.
+
+The board is laid out for a 68000 chip with 0.9" spacing. Some
 versions, e.g. plastic packages, can be 0.8" spacing.
 
-It is recommended to install ICs using sockets. The 64-pin socket can
-be hard to find -- two 40-pin sockets can be cut and used instead.
+It is recommended to install ICs using sockets. Use machined sockets
+for the ROMs if you anticipate removing them periodically. The 64-pin
+CPU socket can be hard to find -- two 40-pin sockets can be cut and
+used instead.
 
 Rev 2.1 PCB Issues
 ------------------
@@ -552,7 +566,7 @@ Add a seven segment LED display for diagnostics? (see Clements book
 p.649 for possible approach)
 Prototype area?
 Support either RAM or EPROM/EEPROM in all sockets.
-Optionally (jumper) allow EEPROM to be written to.
+Optionally (via jumper) allow EEPROM to be written to.
 Support larger RAM and ROM chips (e.g. 27128, 27256, etc. Impacts memory map).
 Add a 68881/68882 FPU.
 Minor improvement: label switch contacts (C/NO/NC) and LEDs polarity
