@@ -1,5 +1,5 @@
 nqueens.run:	nqueens.c
-	m68k-elf-gcc -Wall -m68000 nqueens.c -o nqueens.run -T /usr/local/m68k-elf/lib/m68000/ts2.ld -Xlinker -Map=nqueens.map
+	m68k-elf-gcc -Wall -m68000 -O nqueens.c -o nqueens.run -T /usr/local/m68k-elf/lib/m68000/ts2.ld -Xlinker -Map=nqueens.map
 
 clean:
 	$(RM) nqueens.run nqueens.map
