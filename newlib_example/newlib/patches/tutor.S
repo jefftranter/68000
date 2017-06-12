@@ -41,6 +41,7 @@ SYM (_exit):
  * inbyte -- get a byte from the console serial port
  *	d0 - contains the byte read in
  *
+ * Echoes the character the the console.
  * Converts a carriage return character to newline.
  */
 	.text
@@ -54,7 +55,8 @@ SYM (inbyte):
 	cmp	#'\r',d0		// Is it newline?
 	bne	notnl1			// Branch if not
 	move.b	#'\n',d0		// Convert to newline
-notnl1:	movem.l	(sp)+,d1/a0		// Restore registers
+notnl1: bsr	outbyte			// Echo it
+	movem.l	(sp)+,d1/a0		// Restore registers
 	rts
 
 /*
