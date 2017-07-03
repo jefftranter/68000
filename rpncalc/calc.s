@@ -19,15 +19,38 @@ LF      EQU     $0A                     Line feed
 
 ; TUTOR TRAP 14 functions
 TUTOR   EQU     228                     Go to TUTOR; print prompt.
+PORTIN1 EQU     241                     Input string from port 1.
 OUTPUT  EQU     243                     Output string to port 1.
-INCH    EQU     247                     Input single character from port 1.
+INCHE   EQU     247                     Input single character from port 1.
 OUTCH   EQU     248                     Output single character to port 1.
+FIXBUF  EQU     251                     Initialize A5 and A6 to BUFFER.
 
         ORG     $2000                   Located in RAM.
 
 start:
-        lea.l   HELLO,a0                Get address of string to print.
-        jsr     printstring
+
+; Initialize stack
+
+; Display startup message
+        lea.l   VERSION,a0              Get startup message.
+        bsr     printstring             Display it.
+
+; Start of main command polling loop.
+mainloop:
+
+; Display stack in current base
+
+; Display prompt
+        lea.l   PROMPT,a0               Get prompt string.
+        bsr     printstring             Display it.
+
+; Get line of input
+        bsr     getstring
+
+; Figure out what command was typed and then call appropriate routine.
+
+; Go back and get next command
+        bra     mainloop
 
         jmp     tutor
 
@@ -68,28 +91,60 @@ printchar:
 *
 *************************************************************************
 printstring:
-        movem.l a5/a6,-(sp)             Preserve registers that are changed here or by TUTOR.
+        movem.l d7/a5/a6,-(sp)          Preserve registers that are changed here or by TUTOR.
         move.l  a0,a5                   TUTOR routine wants start of string in A5.
         move.l  a0,a6                   This will be a pointer to the end of string + 1.
 loop1:  cmp.b   #0,(a6)+                Find terminating null.
         bne     loop1                   Loop until found.
         subq    #1,a6                   Undo last increment.
+
 ; A5 now points to start of string and A6 points to one past end of string.
+
         move.b  #OUTPUT,d7              Output string function.
         trap    #14                     Call TRAP14 handler.
-        movem.l (sp)+,a5/a6             Restore registers.
+        movem.l (sp)+,d7/a5/a6          Restore registers.
         rts
 
 ************************************************************************
 * Get character from the console.
 *
+* Gets character and returns it in low order byte of D0.
+*
+* Inputs: none
+* Outputs: D0 - character input (in low byte).
+* Registers changed: D0
+*
+************************************************************************
 getchar:
+        movem.l a0/d1/d7,-(sp)          Preserve registers that are changed here or by TUTOR.
+        move.b  #INCHE,d7               Input char function.
+        trap    #14                     Call TRAP14 handler.
+        movem.l (sp)+,a0/d1/d7          Restore registers.
         rts
 
 ************************************************************************
 * Get a string from the console, terminated in newline.
 *
+* Input a string from the console and returns pointer in A0.
+*
+* Inputs: none
+* Outputs: A0 - pointer to start of null-terminated string.
+* Registers changed: A0
+*
+************************************************************************
 getstring:
+        movem.l d7/a5/a6,-(sp)          Preserve registers that are changed here or by TUTOR.
+
+        move.B  #FIXBUF,d7              Initialize A5 and A6 to point to BUFFER.
+        trap    #14                     Call TRAP14 handler.
+
+        move.b  #PORTIN1,d7             Input string function.
+        trap    #14                     Call TRAP14 handler.
+
+        clr.b   (a6)                    Write null to end of string (A5 points to end+1).
+        move.l  a5,a0                   Point pointer to start of string in A0.
+
+        movem.l (sp)+,d7/a5/a6          Restore registers.
         rts
 
 ************************************************************************
@@ -125,4 +180,5 @@ tutor:
 * Strings
 *
 ************************************************************************
-HELLO   DC.B                           "Hello, world!",0
+VERSION  DC.B                          "RPN Calculator v0.1",CR,LF,0
+PROMPT   DC.B                          "? "
