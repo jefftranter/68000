@@ -10,7 +10,7 @@
 ;
 ; Copyright (C) 2017 Jeff Tranter <tranter@pobox.com>
 
-; Stack size (in elements)
+; Stack size (number of elements)
 STKSIZE EQU   5
 
 ; Constants
@@ -19,15 +19,21 @@ LF      EQU     $0A                     Line feed
 
 ; TUTOR TRAP 14 functions
 TUTOR   EQU     228                     Go to TUTOR; print prompt.
+PNT8HX  EQU     230                     Convert 8 hex digits to ASCII.
+HEX2DEC EQU     236                     Convert hex value to ASCII encoded decimal.
 PORTIN1 EQU     241                     Input string from port 1.
 OUTPUT  EQU     243                     Output string to port 1.
 INCHE   EQU     247                     Input single character from port 1.
 OUTCH   EQU     248                     Output single character to port 1.
 FIXBUF  EQU     251                     Initialize A5 and A6 to BUFFER.
 
+; Start address
         ORG     $2000                   Located in RAM.
 
 start:
+
+; Initialize base to hex
+        move.b #16,base
 
 ; Initialize stack
 
@@ -125,7 +131,11 @@ getchar:
 ************************************************************************
 * Get a string from the console, terminated in newline.
 *
-* Input a string from the console and returns pointer in A0.
+* Input a string from the console until the user enters newline
+* (Enter) and return pointer in A0. String does not include the
+* newline character. The same internal buffer is used on each call, so
+* copy the string if you need to to be persistent before calling the
+* routine again.
 *
 * Inputs: none
 * Outputs: A0 - pointer to start of null-terminated string.
@@ -150,13 +160,51 @@ getstring:
 ************************************************************************
 * Print a number to the console in hexadecimal.
 *
+* Prints hexadecimal value of a 32-bit number on the console.
+*
+* Inputs: DO - the number to display (longword)
+* Outputs: none
+* Registers changed: none
+*
+************************************************************************
 printhex:
+        movem.l d0/d1/d2/d7/a5/a6,-(sp) Preserve registers that are changed here or by TUTOR.
+
+        move.b  #FIXBUF,d7              Initialize A5 and A6 to point to BUFFER.
+        trap    #14                     Call TRAP14 handler.
+
+        move.b  #PNT8HX,d7              Hex to ASCII conversion function.
+        trap    #14                     Call TRAP14 handler.
+
+        move.b  #OUTPUT,d7              String output function.
+        trap    #14                     Call TRAP14 handler.
+
+        movem.l (sp)+,d0/d1/d2/d7/a5/a6 Restore registers.
         rts
 
 ************************************************************************
 * Print a number to the console in decimal.
 *
+* Prints decimal value of a 32-bit number on the console.
+*
+* Inputs: DO - the number to display (longword)
+* Outputs: none
+* Registers changed: none
+*
+************************************************************************
 printdec:
+        movem.l d0/d7/a5/a6,-(sp)       Preserve registers that are changed here or by TUTOR.
+
+        move.b  #FIXBUF,d7              Initialize A5 and A6 to point to BUFFER.
+        trap    #14                     Call TRAP14 handler.
+
+        move.b  #HEX2DEC,d7             Hex to decimal conversion function.
+        trap    #14                     Call TRAP14 handler.
+
+        move.b  #OUTPUT,d7              String output function.
+        trap    #14                     Call TRAP14 handler.
+
+        movem.l (sp)+,d0/d7/a5/a6       Restore registers.
         rts
 
 ************************************************************************
@@ -180,5 +228,18 @@ tutor:
 * Strings
 *
 ************************************************************************
-VERSION  DC.B                          "RPN Calculator v0.1",CR,LF,0
-PROMPT   DC.B                          "? "
+VERSION  dc.b                          "RPN Calculator v0.1",CR,LF,0
+PROMPT   dc.b                          "? ",0
+
+************************************************************************
+*
+* Storage
+*
+************************************************************************
+
+; The current base for input/output. Only 10 (decimal) and 16 (hex)
+; are currently supported.
+
+base    ds.b    1
+
+stack:
