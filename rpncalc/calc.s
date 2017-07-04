@@ -8,6 +8,10 @@
 ;
 ; It is written for the VASM cross-assembler.
 ;
+; Known issues:
+; Multiply and divide are done as 16-bit.
+; Entering negative decimal numbers is not supported.
+;
 ; Copyright (C) 2017 Jeff Tranter <tranter@pobox.com>
 
 ; Stack size (number of elements)
@@ -253,7 +257,19 @@ trydig:  cmp.b   #10,base               Is base set to 10?
         blt     tryq                    Branch if lower.
         cmp.b   #'9',(a0)               Does it start with '9' ?
         bgt     tryq                    Branch if higher.
-        bsr     dec2bin                 Convert decimal string to 32-bit binary value.
+        bsr     validdec                Check for valid decimal number
+        bvc     okay                    Branch if okay.
+        move.l  a0,a1                   Save pointer to string.
+        lea.l   BADDEC,a0               Bad number error message.
+        bsr     printstring             Display it.
+        move.l  a1,a0                   Get pointer to string.
+        bsr     printstring             Display it.
+        move.b  #"'",d0                 Display closing quote.
+        bsr     printchar
+        bsr     crlf                    And CRLF
+        bra     mainloop
+
+okay:   bsr     dec2bin                 Convert decimal string to 32-bit binary value.
         bsr     stack_push              Push it on the stack.
         bra     mainloop
 
@@ -274,7 +290,22 @@ tryhex:
         bra     tryq                    Otherwise not a digit.
 
 ishex:
-        bsr     hex2bin                 Convert hex string to 32-bit binary value.
+
+; Convert any lowercase digits a-f to A-F, otherwise reports error and goes to TUTOR monitor.
+        bsr     uppercase
+        bsr     validhex                Check for valid hex number.
+        bvc     okay1                   Branch if okay.
+        move.l  a0,a1                   Save pointer to string.
+        lea.l   BADHEX,a0               Bad number error message.
+        bsr     printstring             Display it.
+        move.l  a1,a0                   Get pointer to string.
+        bsr     printstring             Display it.
+        move.b  #"'",d0                 Display closing quote.
+        bsr     printchar
+        bsr     crlf                    And CRLF
+        bra     mainloop
+
+okay1:  bsr     hex2bin                 Convert hex string to 32-bit binary value.
         bsr     stack_push              Push it on the stack.
         bra     mainloop
 
@@ -471,7 +502,7 @@ printstring:
         move.l  a0,a6                   This will be a pointer to the end of string + 1.
 loop1:  cmp.b   #0,(a6)+                Find terminating null.
         bne     loop1                   Loop until found.
-        subq    #1,a6                   Undo last increment.
+        subq.l  #1,a6                   Undo last increment.
 
 ; A5 now points to start of string and A6 points to one past end of string.
 
@@ -621,7 +652,7 @@ crlf:
 *
 * Convert decimal string to 32-bit value.
 *
-* Inputs: A0 point to string, which must be terminated in a null.
+* Inputs: A0 points to string, which must be terminated in a null.
 * Outputs: D0 contains the binary value
 * Registers changed: D0
 *
@@ -630,8 +661,6 @@ dec2bin:
         movem.l d7/a1/a5/a6,-(sp)       Preserve registers that are changed here or by TUTOR.
 
 ; Change null (0) indicating end of string to EOT (4), as required by TUTOR GETNUMD function.
-
-; TODO: Report error if any characters other than 0-9.
 
         move.l  a0,a1                   Initialize index to start of string.
 find1:  cmp.b   #0,(a1)+                Is it a null?
@@ -653,8 +682,7 @@ find1:  cmp.b   #0,(a1)+                Is it a null?
 *
 * Convert hexadecimal string to 32-bit value.
 *
-*
-* Inputs: A0 point to string, which must be terminated in a null.
+* Inputs: A0 points to string, which must be terminated in a null.
 * Outputs: D0 contains the binary value
 * Registers changed: D0
 *
@@ -663,9 +691,6 @@ hex2bin:
         movem.l d7/a1/a5/a6,-(sp)       Preserve registers that are changed here or by TUTOR.
 
 ; Change null (0) indicating end of string to EOT (4), as required by TUTOR GETNUMD function.
-
-; TODO: Convert any lowercase digits a-f to A-F, otherwise reports error and goes to TUTOR monitor.
-; TODO: Report error if any characters other than 0-9 and A-F.
 
         move.l  a0,a1                   Initialize index to start of string.
 find2:  cmp.b   #0,(a1)+                Is it a null?
@@ -681,6 +706,91 @@ find2:  cmp.b   #0,(a1)+                Is it a null?
         trap    #14                     Call TRAP14 handler.
 
         movem.l (sp)+,d7/a1/a5/a6       Restore registers.
+        rts
+
+************************************************************************
+*
+* validdec
+*
+* Check for string being a valid decimal number, i.e. only the
+* characters 0-9.
+*
+* Inputs: A0 points to string, which must be terminated in a null.
+* Outputs: Sets overflow bit if invalid, clears if valid.
+* Registers changed: none
+*
+************************************************************************
+validdec:
+        movem.l a0,-(sp)                Preserve registers.
+
+scan:   tst.b   (a0)                    Have we reached end of string?
+        beq     good                    If so, we're done and string is valid.
+        cmp.b   #'0',(a0)               Does it start with '0' ?
+        blt     bad                     Invalid character if lower.
+        cmp.b   #'9',(a0)+              Does it start with '9' ?
+        bgt     bad                     Invalid character if higher.
+        bra     scan                    go back and continue.
+
+bad:    or      #$02,CCR                Set overflow bit to indicate error.
+        bra     ret
+
+good:   and     #$02,CCR                Clear overflow bit to indicate good.
+ret:    movem.l (sp)+,a0                Restore registers.
+        rts
+
+************************************************************************
+*
+* validhdex
+*
+* Check for string being a valid hex number, i.e. only the
+* characters 0-9 and A-F.
+*
+* Inputs: A0 points to string, which must be terminated in a null.
+* Outputs: Sets overflow bit if invalid, clears if valid.
+* Registers changed: none
+*
+************************************************************************
+validhex:
+        movem.l a0,-(sp)                Preserve registers.
+scan1:  tst.b   (a0)                    Have we reached end of string?
+        beq     good                    If so, we're done and string is valid.
+        cmp.b   #'0',(a0)               Is it '0' ?
+        blt     bad                     Invalid character if lower.
+        cmp.b   #'9',(a0)               Is it '9' ?
+        ble     isgood                  If lower or equal, then it is a valid digit.
+        cmp.b   #'A',(a0)               Is it 'A' ?
+        blt     bad                     If lower, then not a valid hex digit.
+        cmp.b   #'F',(a0)               Is it 'F' ?
+        ble     isgood                  If lower or equal, then it is a valid digit.
+        bra     bad                     Otherwise not a digit.
+isgood: addq.l  #1,a0                   Advance pointer to next character.
+        bra     scan1                   And continue scanning.
+
+************************************************************************
+*
+* uppercase
+*
+* Convert a string to all uppercase. Converts characters a-z to A-Z.
+*
+* Inputs: A0 points to string, which must be terminated in a null.
+* Outputs: String is updated in place.
+* Registers changed: none
+*
+************************************************************************
+uppercase:
+        movem.l a0,-(sp)                Preserve registers.
+scan2:  tst.b   (a0)                    Have we reached end of string?
+        beq     done                    If so, we're done.
+        cmp.b   #'a',(a0)               Is it 'A' ?
+        blt     nochange                No change if less than.
+        cmp.b   #'z',(a0)               Is it 'z' ?
+        bgt     nochange                No change if greater than.
+        sub.b   #$20,(a0)               Convert lower to uppercase ASCII character.
+nochange:
+        addq.l  #1,a0                   Advance pointer to next character.
+        bra     scan2                   And continue scanning.
+
+done:   movem.l (sp)+,a0                Restore registers.
         rts
 
 ************************************************************************
@@ -703,6 +813,10 @@ DEC      dc.b                          "Base set to decimal",CR,LF,0
 DIVZERO  dc.b                          "Error: divide by zero",CR,LF,0
 
 OVERFLOW dc.b                          "Warning: overflow",CR,LF,0
+
+BADDEC   dc.b                          "Invalid decimal number: '",0
+
+BADHEX   dc.b                          "Invalid hex number: '",0
 
 HELP     dc.b                          "Valid commands:",CR,LF
          dc.b                          "[number]  Put number on stack",CR,LF
