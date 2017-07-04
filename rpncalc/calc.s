@@ -73,7 +73,8 @@ next1:  cmp.b   #'0',(a0)               Does it start with '0' ?
         cmp.b   #'9',(a0)               Does it start with '9' ?
         bgt     next1a                  Branch if higher.
 
-        bsr     dec2bin                 Convert decimal string to 32-bit binary value.
+;        bsr     dec2bin                 Convert decimal string to 32-bit binary value.
+        bsr     hex2bin                 Convert decimal string to 32-bit binary value.
         bsr     stack_push              Push it on the stack.
         bra     mainloop
 
@@ -85,6 +86,8 @@ next1a:
         bra     mainloop
 
 ; + - add
+; TODO: Handle decimal number with leading plus sign
+; TODO: Check for overflow
 next2:
         cmp.b   #'+',(a0)               Command is '+' ?
         bne     next3
@@ -96,6 +99,8 @@ next2:
         bra     mainloop
 
 ; - - subtract
+; TODO: Handle decimal number with leading minus sign
+; TODO: Check for overflow
 next3:
         cmp.b   #'-',(a0)               Command is '-' ?
         bne     next4
@@ -541,8 +546,8 @@ dec2bin:
 ; Change null (0) indicating end of string to EOT (4), as required by TUTOR GETNUMD function.
 
         move.l  a0,a1                   Initialize index to start of string.
-find:   cmp.b   #0,(a1)+                Is it a null?
-        bne     find
+find1:  cmp.b   #0,(a1)+                Is it a null?
+        bne     find1
         subq.l  #1,a1                   Go back to position of null.
         move.b  #4,(a1)                 Change it to EOT.
 
@@ -567,6 +572,24 @@ find:   cmp.b   #0,(a1)+                Is it a null?
 *
 ************************************************************************
 hex2bin:
+        movem.l d7/a1/a5/a6,-(sp)       Preserve registers that are changed here or by TUTOR.
+
+; Change null (0) indicating end of string to EOT (4), as required by TUTOR GETNUMD function.
+
+        move.l  a0,a1                   Initialize index to start of string.
+find2:  cmp.b   #0,(a1)+                Is it a null?
+        bne     find2
+        subq.l  #1,a1                   Go back to position of null.
+        move.b  #4,(a1)                 Change it to EOT.
+
+        move.l  a0,a5                   Put string start in A5.
+        move.b  #FIXDATA,d7             Copy string to buffer function.
+        trap    #14                     Call TRAP14 handler.
+
+        move.b  #GETNUMA,d7             Hex to binary function.
+        trap    #14                     Call TRAP14 handler.
+
+        movem.l (sp)+,d7/a1/a5/a6       Restore registers.
         rts
 
 ************************************************************************
