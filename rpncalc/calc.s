@@ -11,7 +11,6 @@
 ; Copyright (C) 2017 Jeff Tranter <tranter@pobox.com>
 
 ; Stack size (number of elements)
-; TODO: Test with large stack.
 STKSIZE EQU   5
 
 ; Constants
@@ -50,6 +49,7 @@ start:
 mainloop:
 
 ; Display stack in current base
+        bsr     stack_print
 
 ; Display prompt
         lea.l   PROMPT,a0               Get prompt string.
@@ -62,81 +62,52 @@ mainloop:
 
 ; Help - '?'
         cmp.b   #'?',(a0)               Is command '?'
-        bne     next1
-
+        bne     tryequals
         lea.l   HELP,a0                 Get help string.
         bsr     printstring             Display it.
         bra     mainloop
 
-; decimal digit 0-9
-next1:  cmp.b   #10,base                Is base set to 10?
-        bne     tryhex                  Branch if not.
-        cmp.b   #'0',(a0)               Does it start with '0' ?
-        blt     next1a                  Branch if lower.
-        cmp.b   #'9',(a0)               Does it start with '9' ?
-        bgt     next1a                  Branch if higher.
-        bsr     dec2bin                 Convert decimal string to 32-bit binary value.
-        bsr     stack_push              Push it on the stack.
-        bra     mainloop
-
-; hex digit 0-9 a-f A-F
-tryhex:
-        cmp.b   #'0',(a0)               Does it start with '0' ?
-        blt     next1a                  If lower, then not a valid digit.
-        cmp.b   #'9',(a0)               Does it start with '9' ?
-        ble     ishex                   If lower or equal, then it is a valid digit.
-        cmp.b   #'A',(a0)               Does it start with 'A' ?
-        blt     next1a                  If lower, then not a valid hex digit.
-        cmp.b   #'F',(a0)               Does it start with 'F' ?
-        ble     ishex                   If lower or equal, then it is a valid digit.
-        cmp.b   #'a',(a0)               Does it start with 'a' ?
-        blt     next1a                  If lower, then not a valid hex digit.
-        cmp.b   #'f',(a0)               Does it start with 'f' ?
-        ble     ishex r                 If lower or equal, then it is a valid digit.
-        bra     next1a                  Otherwise not a digit.
-
-ishex:
-        bsr     hex2bin                 Convert hex string to 32-bit binary value.
-        bsr     stack_push              Push it on the stack.
-        bra     mainloop
-
 ; = - print stack
-next1a:
+tryequals:
         cmp.b   #'=',(a0)               Is command '=' ?
-        bne     next2
+        bne     tryadd
         bsr     stack_print
         bra     mainloop
 
 ; + - add
-; TODO: Handle decimal number with leading plus sign
-; TODO: Check for overflow
-next2:
+tryadd:
         cmp.b   #'+',(a0)               Is command '+' ?
-        bne     next3
+        bne     trysub
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
         add.l   d1,d0                   Add.
-        bsr     stack_push              Push result.
+        bvc     nov1                    Branch if no overflow
+        lea.l   OVERFLOW,a0             Get overflow error string.
+        bsr     printstring             Display it.
+nov1:   bsr     stack_push              Push result.
         bra     mainloop
 
 ; - - subtract
-; TODO: Handle decimal number with leading minus sign
-; TODO: Check for overflow
-next3:
+trysub:
         cmp.b   #'-',(a0)               Is command '-' ?
-        bne     next4
+        bne     trymul
+        cmp.b   #0,1(a0)                Is next character null?
+        bne     trymul                  If not, then assume this is a minus sign for a decimal number.
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
         sub.l   d1,d0                   Subtract.
-        bsr     stack_push              Push result.
+        bvc     nov2                    Branch if no overflow
+        lea.l   OVERFLOW,a0             Get overflow error string.
+        bsr     printstring             Display it.
+nov2:   bsr     stack_push              Push result.
         bra     mainloop
 
 ; * - multiply
-next4:
+trymul:
         cmp.b   #'*',(a0)               Is command '*' ?
-        bne     next5
+        bne     trydiv
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
@@ -145,9 +116,9 @@ next4:
         bra     mainloop
 
 ; / - divide
-next5:
+trydiv:
         cmp.b   #'/',(a0)               Is command '/' ?
-        bne     next6
+        bne     tryrem
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
@@ -165,9 +136,9 @@ dividebyzero:
         bra     mainloop
 
 ; % - remainder (modulus)
-next6:
+tryrem:
         cmp.b   #'%',(a0)               Is command '%' ?
-        bne     next7
+        bne     trycomp2
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
@@ -180,27 +151,27 @@ next6:
         bra     mainloop
 
 ; ! - 2's complement
-next7:
+trycomp2:
         cmp.b   #'!',(a0)               Is command '!' ?
-        bne     next8
+        bne     trycomp1
         bsr     stack_pop               Get TOS in D0.
         neg.l   d0                      2's complement
         bsr     stack_push              Push result.
         bra     mainloop
 
 ; ~ - 1's complement
-next8:
+trycomp1:
         cmp.b   #'~',(a0)               Is command '~' ?
-        bne     next16
+        bne     tryand
         bsr     stack_pop               Get TOS in D0.
         not.l   d0                      1's complement
         bsr     stack_push              Push result.
         bra     mainloop
 
 ; & - logical AND
-next16:
+tryand:
         cmp.b   #'&',(a0)               Is command '&' ?
-        bne     next11
+        bne     tryor
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
@@ -209,9 +180,9 @@ next16:
         bra     mainloop
 
 ; | - logical OR
-next11:
+tryor:
         cmp.b   #'|',(a0)               Is command '|' ?
-        bne     next12
+        bne     tryexor
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
@@ -220,9 +191,9 @@ next11:
         bra     mainloop
 
 ; ^ - logical exclusive OR
-next12:
+tryexor:
         cmp.b   #'^',(a0)               Is command '^' ?
-        bne     next13
+        bne     tryshiftl
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
@@ -231,9 +202,9 @@ next12:
         bra     mainloop
 
 ; < -shift left
-next13:
+tryshiftl:
         cmp.b   #'<',(a0)               Is command '<' ?
-        bne     next14
+        bne     tryshiftr
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
@@ -242,9 +213,9 @@ next13:
         bra     mainloop
 
 ; > - shift right
-next14:
+tryshiftr:
         cmp.b   #'>',(a0)               Is command '>' ?
-        bne     next15
+        bne     tryh
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
@@ -253,28 +224,62 @@ next14:
         bra     mainloop
 
 ; h - set base to hex
-next15:
+tryh:
         cmp.b   #'h',(a0)               Is command 'h' ?
         beq     hex
         cmp.b   #'H',(a0)               Is command 'H' ?
-        bne     next9
+        bne     trydec
 hex:    move.b  #16,base
         lea.l   HEX,a0                  Base set to hex message.
         bsr     printstring             Display it.
         bra     mainloop
 
 ; n - set base to decimal
-next9:  cmp.b   #'n',(a0)               Is command 'n' ?
+trydec:
+        cmp.b   #'n',(a0)               Is command 'n' ?
         beq     dec
         cmp.b   #'N',(a0)               Is command 'N' ?
-        bne     next10
+        bne     trydig
 dec:    move.b  #10,base
         lea.l   DEC,a0                  Base set to decimal message.
         bsr     printstring             Display it.
         bra     mainloop
 
+; decimal digit 0-9
+; TODO: Handle decimal number with leading minus sign
+trydig:  cmp.b   #10,base               Is base set to 10?
+        bne     tryhex                  Branch if not.
+        cmp.b   #'0',(a0)               Does it start with '0' ?
+        blt     tryq                    Branch if lower.
+        cmp.b   #'9',(a0)               Does it start with '9' ?
+        bgt     tryq                    Branch if higher.
+        bsr     dec2bin                 Convert decimal string to 32-bit binary value.
+        bsr     stack_push              Push it on the stack.
+        bra     mainloop
+
+; hex digit 0-9 a-f A-F
+tryhex:
+        cmp.b   #'0',(a0)               Does it start with '0' ?
+        blt     tryq                    If lower, then not a valid digit.
+        cmp.b   #'9',(a0)               Does it start with '9' ?
+        ble     ishex                   If lower or equal, then it is a valid digit.
+        cmp.b   #'A',(a0)               Does it start with 'A' ?
+        blt     tryq                    If lower, then not a valid hex digit.
+        cmp.b   #'F',(a0)               Does it start with 'F' ?
+        ble     ishex                   If lower or equal, then it is a valid digit.
+        cmp.b   #'a',(a0)               Does it start with 'a' ?
+        blt     tryq                    If lower, then not a valid hex digit.
+        cmp.b   #'f',(a0)               Does it start with 'f' ?
+        ble     ishex r                 If lower or equal, then it is a valid digit.
+        bra     tryq                    Otherwise not a digit.
+
+ishex:
+        bsr     hex2bin                 Convert hex string to 32-bit binary value.
+        bsr     stack_push              Push it on the stack.
+        bra     mainloop
+
 ; q - quit
-next10: cmp.b   #'q',(a0)               Is command 'q' ?
+tryq:   cmp.b   #'q',(a0)               Is command 'q' ?
         beq     quit
         cmp.b   #'Q',(a0)               Is command 'Q' ?
         bne     invalid
@@ -311,8 +316,7 @@ invalid:
 stack_init:
         move.l  #STKSIZE-1,d0           Get size of stack (number of elements).
         lea.l   stack,a0                Get address of start of stack.
-;clear:  move.l  #0,(a0)+                Clear stack element.
-clear:  move.l  d0,(a0)+                Clear stack element.
+clear:  move.l  #0,(a0)+                Clear stack element.
         tst.l   d0                      Is D0 zero?
         dbeq    d0,clear                Branch and continue until it is.
         rts
@@ -684,7 +688,7 @@ find2:  cmp.b   #0,(a1)+                Is it a null?
 * Strings
 *
 ************************************************************************
-VERSION  dc.b                          "RPN Calculator v0.1",CR,LF,0
+VERSION  dc.b                          "RPN Calculator v1.0",CR,LF,0
 
 PROMPT   dc.b                          "? ",0
 
@@ -697,6 +701,8 @@ HEX      dc.b                          "Base set to hex",CR,LF,0
 DEC      dc.b                          "Base set to decimal",CR,LF,0
 
 DIVZERO  dc.b                          "Error: divide by zero",CR,LF,0
+
+OVERFLOW dc.b                          "Warning: overflow",CR,LF,0
 
 HELP     dc.b                          "Valid commands:",CR,LF
          dc.b                          "[number]  Put number on stack",CR,LF
