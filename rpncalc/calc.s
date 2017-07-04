@@ -91,11 +91,8 @@ tryhex:
         cmp.b   #'a',(a0)               Does it start with 'a' ?
         blt     next1a                  If lower, then not a valid hex digit.
         cmp.b   #'f',(a0)               Does it start with 'f' ?
-        ble     toupper                 If lower or equal, then it is a valid digit.
+        ble     ishex r                 If lower or equal, then it is a valid digit.
         bra     next1a                  Otherwise not a digit.
-
-toupper:
-        sub.b   #$20,(a0)               Convert lowercase a-f to A-F
 
 ishex:
         bsr     hex2bin                 Convert hex string to 32-bit binary value.
@@ -180,22 +177,41 @@ next6:
         bsr     stack_push              Push result.
         bra     mainloop
 
-; !
+; ! - 2s complement
 next7:
+        cmp.b   #'!',(a0)               Command is '!' ?
+        bne     next8
+        bsr     stack_pop               Get TOS in D0.
+        neg.l   d0                      2's complement
+        bsr     stack_push              Push result.
+        bra     mainloop
 
 ; ~
+next8:
+        cmp.b   #'~',(a0)               Command is '~' ?
+        bne     next16
+        bsr     stack_pop               Get TOS in D0.
+        not.l   d0                      1's complement
+        bsr     stack_push              Push result.
+        bra     mainloop
 
 ; &
+next16:
 
 ; |
+next11:
 
 ; ^
+next12:
 
 ; <
+next13:
 
 ; >
+next14:
 
 ; h - set base to hex
+next15:
         cmp.b   #'h',(a0)               Command is 'h' ?
         beq     hex
         cmp.b   #'H',(a0)               Command is 'H' ?
@@ -569,6 +585,8 @@ dec2bin:
 
 ; Change null (0) indicating end of string to EOT (4), as required by TUTOR GETNUMD function.
 
+; TODO: Report error if any characters other than 0-9.
+
         move.l  a0,a1                   Initialize index to start of string.
 find1:  cmp.b   #0,(a1)+                Is it a null?
         bne     find1
@@ -599,6 +617,10 @@ hex2bin:
         movem.l d7/a1/a5/a6,-(sp)       Preserve registers that are changed here or by TUTOR.
 
 ; Change null (0) indicating end of string to EOT (4), as required by TUTOR GETNUMD function.
+
+; TODO: Convert any lowercase digits a-f to A-F, otherwise reports error and goes to TUTOR monitor.
+
+; TODO: Report error if any characters other than 0-9 and A-F.
 
         move.l  a0,a1                   Initialize index to start of string.
 find2:  cmp.b   #0,(a1)+                Is it a null?
