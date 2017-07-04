@@ -11,6 +11,7 @@
 ; Copyright (C) 2017 Jeff Tranter <tranter@pobox.com>
 
 ; Stack size (number of elements)
+; TODO: Test with large stack.
 STKSIZE EQU   5
 
 ; Constants
@@ -60,7 +61,7 @@ mainloop:
 ; Figure out what command was typed and then call appropriate routine.
 
 ; Help - '?'
-        cmp.b   #'?',(a0)               Command is '?'
+        cmp.b   #'?',(a0)               Is command '?'
         bne     next1
 
         lea.l   HELP,a0                 Get help string.
@@ -101,7 +102,7 @@ ishex:
 
 ; = - print stack
 next1a:
-        cmp.b   #'=',(a0)               Command is '=' ?
+        cmp.b   #'=',(a0)               Is command '=' ?
         bne     next2
         bsr     stack_print
         bra     mainloop
@@ -110,7 +111,7 @@ next1a:
 ; TODO: Handle decimal number with leading plus sign
 ; TODO: Check for overflow
 next2:
-        cmp.b   #'+',(a0)               Command is '+' ?
+        cmp.b   #'+',(a0)               Is command '+' ?
         bne     next3
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
@@ -123,7 +124,7 @@ next2:
 ; TODO: Handle decimal number with leading minus sign
 ; TODO: Check for overflow
 next3:
-        cmp.b   #'-',(a0)               Command is '-' ?
+        cmp.b   #'-',(a0)               Is command '-' ?
         bne     next4
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
@@ -134,7 +135,7 @@ next3:
 
 ; * - multiply
 next4:
-        cmp.b   #'*',(a0)               Command is '*' ?
+        cmp.b   #'*',(a0)               Is command '*' ?
         bne     next5
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
@@ -145,7 +146,7 @@ next4:
 
 ; / - divide
 next5:
-        cmp.b   #'/',(a0)               Command is '/' ?
+        cmp.b   #'/',(a0)               Is command '/' ?
         bne     next6
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
@@ -157,6 +158,7 @@ next5:
         bsr     stack_push              Push result.
         bra     mainloop
 
+; Handle divide by zero error.
 dividebyzero:
         lea.l   DIVZERO,a0              Divide by zero error message.
         bsr     printstring             Display it.
@@ -164,7 +166,7 @@ dividebyzero:
 
 ; % - remainder (modulus)
 next6:
-        cmp.b   #'%',(a0)               Command is '%' ?
+        cmp.b   #'%',(a0)               Is command '%' ?
         bne     next7
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
@@ -177,44 +179,84 @@ next6:
         bsr     stack_push              Push result.
         bra     mainloop
 
-; ! - 2s complement
+; ! - 2's complement
 next7:
-        cmp.b   #'!',(a0)               Command is '!' ?
+        cmp.b   #'!',(a0)               Is command '!' ?
         bne     next8
         bsr     stack_pop               Get TOS in D0.
         neg.l   d0                      2's complement
         bsr     stack_push              Push result.
         bra     mainloop
 
-; ~
+; ~ - 1's complement
 next8:
-        cmp.b   #'~',(a0)               Command is '~' ?
+        cmp.b   #'~',(a0)               Is command '~' ?
         bne     next16
         bsr     stack_pop               Get TOS in D0.
         not.l   d0                      1's complement
         bsr     stack_push              Push result.
         bra     mainloop
 
-; &
+; & - logical AND
 next16:
+        cmp.b   #'&',(a0)               Is command '&' ?
+        bne     next11
+        bsr     stack_pop               Get TOS in D0.
+        move.l  d0,d1                   Put in D1.
+        bsr     stack_pop               Get TOS in D0.
+        and.l   d1,d0                   AND values.
+        bsr     stack_push              Push result.
+        bra     mainloop
 
-; |
+; | - logical OR
 next11:
+        cmp.b   #'|',(a0)               Is command '|' ?
+        bne     next12
+        bsr     stack_pop               Get TOS in D0.
+        move.l  d0,d1                   Put in D1.
+        bsr     stack_pop               Get TOS in D0.
+        or.l   d1,d0                    OR values.
+        bsr     stack_push              Push result.
+        bra     mainloop
 
-; ^
+; ^ - logical exclusive OR
 next12:
+        cmp.b   #'^',(a0)               Is command '^' ?
+        bne     next13
+        bsr     stack_pop               Get TOS in D0.
+        move.l  d0,d1                   Put in D1.
+        bsr     stack_pop               Get TOS in D0.
+        eor.l   d1,d0                   EXOR values.
+        bsr     stack_push              Push result.
+        bra     mainloop
 
-; <
+; < -shift left
 next13:
+        cmp.b   #'<',(a0)               Is command '<' ?
+        bne     next14
+        bsr     stack_pop               Get TOS in D0.
+        move.l  d0,d1                   Put in D1.
+        bsr     stack_pop               Get TOS in D0.
+        asl.l   d1,d0                   Shift right.
+        bsr     stack_push              Push result.
+        bra     mainloop
 
-; >
+; > - shift right
 next14:
+        cmp.b   #'>',(a0)               Is command '>' ?
+        bne     next15
+        bsr     stack_pop               Get TOS in D0.
+        move.l  d0,d1                   Put in D1.
+        bsr     stack_pop               Get TOS in D0.
+        asr.l   d1,d0                   Shift right.
+        bsr     stack_push              Push result.
+        bra     mainloop
 
 ; h - set base to hex
 next15:
-        cmp.b   #'h',(a0)               Command is 'h' ?
+        cmp.b   #'h',(a0)               Is command 'h' ?
         beq     hex
-        cmp.b   #'H',(a0)               Command is 'H' ?
+        cmp.b   #'H',(a0)               Is command 'H' ?
         bne     next9
 hex:    move.b  #16,base
         lea.l   HEX,a0                  Base set to hex message.
@@ -222,9 +264,9 @@ hex:    move.b  #16,base
         bra     mainloop
 
 ; n - set base to decimal
-next9:  cmp.b   #'n',(a0)               Command is 'n' ?
+next9:  cmp.b   #'n',(a0)               Is command 'n' ?
         beq     dec
-        cmp.b   #'N',(a0)               Command is 'N' ?
+        cmp.b   #'N',(a0)               Is command 'N' ?
         bne     next10
 dec:    move.b  #10,base
         lea.l   DEC,a0                  Base set to decimal message.
@@ -232,9 +274,9 @@ dec:    move.b  #10,base
         bra     mainloop
 
 ; q - quit
-next10: cmp.b   #'q',(a0)               Command is 'q' ?
+next10: cmp.b   #'q',(a0)               Is command 'q' ?
         beq     quit
-        cmp.b   #'Q',(a0)               Command is 'Q' ?
+        cmp.b   #'Q',(a0)               Is command 'Q' ?
         bne     invalid
 quit:   jmp     tutor
 
@@ -619,7 +661,6 @@ hex2bin:
 ; Change null (0) indicating end of string to EOT (4), as required by TUTOR GETNUMD function.
 
 ; TODO: Convert any lowercase digits a-f to A-F, otherwise reports error and goes to TUTOR monitor.
-
 ; TODO: Report error if any characters other than 0-9 and A-F.
 
         move.l  a0,a1                   Initialize index to start of string.
