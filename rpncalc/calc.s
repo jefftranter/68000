@@ -199,6 +199,7 @@ invalid:
 *
 * Stack functions
 *
+************************************************************************
 
 ************************************************************************
 *
@@ -209,7 +210,6 @@ invalid:
 * Registers changed: none
 *
 ************************************************************************
-
 stack_init:
         move.l  #STKSIZE-1,d0           Get size of stack (number of elements).
         lea.l   stack,a0                Get address of start of stack.
@@ -245,7 +245,6 @@ clear:  move.l  d0,(a0)+                Clear stack element.
 * Registers changed: none
 *
 ************************************************************************
-
 stack_push:
         movem.l d1/a0,-(sp)             Preserve registers.
         move.l  #STKSIZE-2,d1           Get size of stack (number of elements) less two.
@@ -284,7 +283,6 @@ up:     move.l  4(a0),(a0)+             Copy element to previous stack entry.
 * Registers changed: D0
 *
 ************************************************************************
-
 stack_pop:
         movem.l d1/a0,-(sp)             Preserve registers.
         move.l  #STKSIZE-1,d1           Get size of stack (number of elements) less one.
@@ -311,7 +309,6 @@ down:   move.l  -4(a0),(a0)             Copy element to next stack entry.
 * Registers changed: none
 *
 ************************************************************************
-
 stack_print:
         movem.l d0/d1/a0,-(sp)          Preserve registers that are changed here or by TUTOR.
         move.l  #STKSIZE-1,d1           Get size of stack (number of elements).
@@ -338,6 +335,7 @@ pnt2:   bsr     crlf                    Print CR/LF.
 ************************************************************************
 
 ************************************************************************
+*
 * Print a character to the console.
 *
 * Output the character in D0 to the console.
@@ -355,6 +353,7 @@ printchar:
         rts
 
 ************************************************************************
+*
 * Print a string to the console.
 *
 * Outputs null-terminated string pointed to by A0 to the console.
@@ -380,6 +379,7 @@ loop1:  cmp.b   #0,(a6)+                Find terminating null.
         rts
 
 ************************************************************************
+*
 * Get character from the console.
 *
 * Gets character and returns it in low order byte of D0.
@@ -397,6 +397,7 @@ getchar:
         rts
 
 ************************************************************************
+*
 * Get a string from the console, terminated in newline.
 *
 * Input a string from the console until the user enters newline
@@ -426,6 +427,7 @@ getstring:
         rts
 
 ************************************************************************
+*
 * Print a number to the console in hexadecimal.
 *
 * Prints hexadecimal value of a 32-bit number on the console.
@@ -451,6 +453,7 @@ printhex:
         rts
 
 ************************************************************************
+*
 * Print a number to the console in decimal.
 *
 * Prints decimal value of a 32-bit number on the console.
@@ -476,6 +479,7 @@ printdec:
         rts
 
 ************************************************************************
+*
 * Go to TUTOR monitor.
 *
 * Go to the TUTOR monitor and display prompt. Does not do full
@@ -492,6 +496,7 @@ tutor:
         trap    #14                     Call TRAP14 handler.
 
 ************************************************************************
+*
 * Send CRLF to the console.
 *
 * Send carriage return, line feed to the console.
