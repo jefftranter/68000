@@ -140,9 +140,17 @@ invalid:
 *
 * Stack functions
 *
+
+************************************************************************
+*
+* Initialize stack to all zero values.
+*
+* Inputs: none
+* Outputs: none
+* Registers changed: none
+*
 ************************************************************************
 
-; Initialize stack to all zero values.
 stack_init:
         move.l  #STKSIZE-1,d0           Get size of stack (number of elements).
         lea.l   stack,a0                Get address of start of stack.
@@ -151,16 +159,81 @@ clear:  move.l  #0,(a0)+                Clear stack element.
         dbeq    d0,clear                Branch and continue until it is.
         rts
 
-; Push a value on the top of stack.
+************************************************************************
+*
+* Stack Push
+*
+* Push a value on the top of stack. Moves all elements up, throwing
+* away bottom of stack, and adds new value to top. e.g. pushing 9 on
+* the stack:
+*
+* Before:  After:
+* +-----+ +-----+
+* |  5  | |  4  |
+* +-----+ +-----+
+* |  4  | |  3  |
+* +-----+ +-----+
+* |  3  | |  2  |
+* +-----+ +-----+
+* |  2  | |  1  |
+* +-----+ +-----+
+* |  1  | |  9  |
+* +-----+ +-----+
+*
+* Inputs: D0 - value to push (longword)
+* Outputs: none
+* Registers changed: none
+*
+************************************************************************
+
 stack_push:
+        
         rts
 
-; Pull a value from the top of the stack.
+************************************************************************
+*
+* Stack Pull
+*
+* Pull a value from the top of the stack.
+* Puts zero on bottom of stack and moves all elements up. Returns
+* original top of stack, e.g.:
+*
+* Before:  After:
+* +-----+ +-----+
+* |  5  | |  0  |
+* +-----+ +-----+
+* |  4  | |  5  |
+* +-----+ +-----+
+* |  3  | |  4  |
+* +-----+ +-----+
+* |  2  | |  3  |
+* +-----+ +-----+
+* |  1  | |  2  |
+* +-----+ +-----+
+* Returns 1
+*
+* Inputs: none
+* Outputs: D0 - value pulled (longword)
+* Registers changed: D0
+*
+************************************************************************
+
 stack_pull:
+
         rts
 
-; Print the values on the stack.
+************************************************************************
+*
+* Print the values on the stack.
+*
+* Inputs: none
+* Outputs: none
+* Registers changed: none
+*
+************************************************************************
+
 stack_print:
+        movem.l d0/d1/a0,-(sp)          Preserve registers that are changed here or by TUTOR.
         move.l  #STKSIZE-1,d1           Get size of stack (number of elements).
         lea.l   stack,a0                Get address of start of stack.
 pnt:    move.l  (a0)+,d0                Put next stack value in d0.
@@ -168,6 +241,7 @@ pnt:    move.l  (a0)+,d0                Put next stack value in d0.
         bsr     crlf                    Print CR/LF.
         tst.l   d1                      Is loop counter zero?
         dbeq    d1,pnt                  Branch and continue until it is.
+        movem.l (sp)+,d0/d1/a0          Restore registers.
         rts
 
 ************************************************************************
@@ -399,4 +473,9 @@ HELP     dc.b                          "Valid commands:",CR,LF
 
 base    ds.b    1
 
-stack:  ds.l    STKSIZE                           One longword for each element.
+; Stack
+; One longword for each element.
+; First (lowest address) entry is bottom of stack
+; Last (highest address) entry is top of stack
+
+stack:  ds.l    STKSIZE
