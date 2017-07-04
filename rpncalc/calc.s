@@ -304,7 +304,7 @@ down:   move.l  -4(a0),(a0)             Copy element to next stack entry.
 
 ************************************************************************
 *
-* Print the values on the stack.
+* Print the values on the stack. Uses current base.
 *
 * Inputs: none
 * Outputs: none
@@ -316,11 +316,15 @@ stack_print:
         movem.l d0/d1/a0,-(sp)          Preserve registers that are changed here or by TUTOR.
         move.l  #STKSIZE-1,d1           Get size of stack (number of elements).
         lea.l   stack,a0                Get address of start of stack.
-pnt:    move.l  (a0)+,d0                Put next stack value in d0.
-        bsr     printhex                Print it.
-        bsr     crlf                    Print CR/LF.
+pnt1:   move.l  (a0)+,d0                Put next stack value in d0.
+        cmp.b   #10,base                Base set to decimal?
+        bne     phex                    Branch if not.
+        bsr     printdec                Print it in decimal.
+        bra     pnt2
+phex:   bsr     printhex                Print it in hex.
+pnt2:   bsr     crlf                    Print CR/LF.
         tst.l   d1                      Is loop counter zero?
-        dbeq    d1,pnt                  Branch and continue until it is.
+        dbeq    d1,pnt1                 Branch and continue until it is.
         movem.l (sp)+,d0/d1/a0          Restore registers.
         rts
 
