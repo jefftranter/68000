@@ -33,9 +33,10 @@ FIXBUF  EQU     251                     Initialize A5 and A6 to BUFFER.
 start:
 
 ; Initialize base to hex
-        move.b #16,base
+        move.b  #16,base
 
 ; Initialize stack
+         bsr    stack_init
 
 ; Display startup message
         lea.l   VERSION,a0              Get startup message.
@@ -66,9 +67,14 @@ mainloop:
 ; decimal or hex digit
 next1:
 
-; =
+; = - print stack
+        cmp.b   #'=',(a0)               Command is '=' ?
+        bne     next2
+        bsr     stack_print
+        bra     mainloop
 
 ; +
+next2:
 
 ; -
 
@@ -129,6 +135,43 @@ invalid:
 
 ; Go back and get next command
         bra     mainloop
+
+************************************************************************
+*
+* Stack functions
+*
+************************************************************************
+
+; Initialize stack to all zero values.
+stack_init:
+        move.l  #STKSIZE-1,d0           Get size of stack (number of elements).
+        lea.l   stack,a0                Get address of start of stack.
+clear:  move.l  #0,(a0)+                Clear stack element.
+        tst.l   d0                      Is D0 zero?
+        dbeq    d0,clear                Branch and continue until it is.
+        rts
+
+; Push a value on the top of stack.
+stack_push:
+        rts
+
+; Pull a value from the top of the stack.
+stack_pull:
+        rts
+
+; Print the values on the stack.
+stack_print:
+        move.l  #STKSIZE-1,d1           Get size of stack (number of elements).
+        lea.l   stack,a0                Get address of start of stack.
+pnt:    move.l  (a0)+,d0                Put next stack value in d0
+        bsr     printhex                Print it.
+        move.b  #CR,d0                  Print CR
+        bsr     printchar
+        move.b  #LF,d0                  Print LF
+        bsr     printchar
+        tst.l   d1                      Is loop counter zero?
+        dbeq    d1,pnt                  Branch and continue until it is.
+        rts
 
 ************************************************************************
 *
@@ -340,4 +383,4 @@ HELP     dc.b                          "Valid commands:",CR,LF
 
 base    ds.b    1
 
-stack:
+stack:  ds.l    STKSIZE                           One longword for each element.
