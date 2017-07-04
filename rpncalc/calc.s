@@ -67,14 +67,38 @@ mainloop:
         bsr     printstring             Display it.
         bra     mainloop
 
-; decimal or hex digit
-next1:  cmp.b   #'0',(a0)               Does it start with '0' ?
+; decimal digit 0-9
+next1:  cmp.b   #10,base                Is base set to 10?
+        bne     tryhex                  Branch if not.
+        cmp.b   #'0',(a0)               Does it start with '0' ?
         blt     next1a                  Branch if lower.
         cmp.b   #'9',(a0)               Does it start with '9' ?
         bgt     next1a                  Branch if higher.
+        bsr     dec2bin                 Convert decimal string to 32-bit binary value.
+        bsr     stack_push              Push it on the stack.
+        bra     mainloop
 
-;        bsr     dec2bin                 Convert decimal string to 32-bit binary value.
-        bsr     hex2bin                 Convert decimal string to 32-bit binary value.
+; hex digit 0-9 a-f A-F
+tryhex:
+        cmp.b   #'0',(a0)               Does it start with '0' ?
+        blt     next1a                  If lower, then not a valid digit.
+        cmp.b   #'9',(a0)               Does it start with '9' ?
+        ble     ishex                   If lower or equal, then it is a valid digit.
+        cmp.b   #'A',(a0)               Does it start with 'A' ?
+        blt     next1a                  If lower, then not a valid hex digit.
+        cmp.b   #'F',(a0)               Does it start with 'F' ?
+        ble     ishex                   If lower or equal, then it is a valid digit.
+        cmp.b   #'a',(a0)               Does it start with 'a' ?
+        blt     next1a                  If lower, then not a valid hex digit.
+        cmp.b   #'f',(a0)               Does it start with 'f' ?
+        ble     toupper                 If lower or equal, then it is a valid digit.
+        bra     next1a                  Otherwise not a digit.
+
+toupper:
+        sub.b   #$20,(a0)               Convert lowercase a-f to A-F
+
+ishex:
+        bsr     hex2bin                 Convert hex string to 32-bit binary value.
         bsr     stack_push              Push it on the stack.
         bra     mainloop
 
