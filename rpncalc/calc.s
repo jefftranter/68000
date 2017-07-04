@@ -83,8 +83,13 @@ next2:
 
 ; -
 next3:
+        cmp.b   #'-',(a0)               Command is '-' ?
+        bne     next4
+        bsr     stack_pop
+        bra     mainloop
 
 ; *
+next4:
 
 ; /
 
@@ -160,8 +165,7 @@ invalid:
 stack_init:
         move.l  #STKSIZE-1,d0           Get size of stack (number of elements).
         lea.l   stack,a0                Get address of start of stack.
-;clear:  move.l  #0,(a0)+                Clear stack element.
-clear:  move.l  d0,(a0)+                Clear stack element.
+clear:  move.l  #0,(a0)+                Clear stack element.
         tst.l   d0                      Is D0 zero?
         dbeq    d0,clear                Branch and continue until it is.
         rts
@@ -206,9 +210,9 @@ up:     move.l  4(a0),(a0)+             Copy element to previous stack entry.
 
 ************************************************************************
 *
-* Stack Pull
+* Stack Pop
 *
-* Pull a value from the top of the stack.
+* Pop a value from the top of the stack.
 * Puts zero on bottom of stack and moves all elements up. Returns
 * original top of stack, e.g.:
 *
@@ -232,8 +236,21 @@ up:     move.l  4(a0),(a0)+             Copy element to previous stack entry.
 *
 ************************************************************************
 
-stack_pull:
+stack_pop:
+        movem.l d1/a0,-(sp)             Preserve registers.
+        move.l  #STKSIZE-1,d1           Get size of stack (number of elements) less one.
+        asl.l   #2,d1                   Multiply by element size (4).
+        lea.l   stack,a0                Get address of bottom of stack.
+        add.l   d1,a0                   Calculate address of top of stack.
+        move.l  (a0),d0                 Get top of stack as return value.
 
+        move.l  #STKSIZE-2,d1           Get size of stack (number of elements) less two.
+down:   move.l  -4(a0),(a0)             Copy element to next stack entry.
+        subq.l  #4,a0                   Advance pointer to previous entry.
+        tst.l   d1                      Is loop counter zero?
+        dbeq    d1,down                 Branch and continue until it is.
+        move.l  #0,(a0)                 Write zero value to bottom of stack
+        movem.l (sp)+,d1/a0             Restore registers.
         rts
 
 ************************************************************************
