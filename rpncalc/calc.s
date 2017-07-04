@@ -55,10 +55,80 @@ mainloop:
 
 ; Figure out what command was typed and then call appropriate routine.
 
-; Go back and get next command
+; Help - '?'
+        cmp.b   #'?',(a0)               Command is '?'
+        bne     next1
+
+        lea.l   HELP,a0                 Get help string.
+        bsr     printstring             Display it.
         bra     mainloop
 
-        jmp     tutor
+; decimal or hex digit
+next1:
+
+; =
+
+; +
+
+; -
+
+; *
+
+; /
+
+; !
+
+; ~
+
+; &
+
+; |
+
+; ^
+
+; <
+
+; >
+
+; h - set base to hex
+        cmp.b   #'h',(a0)               Command is 'h' ?
+        beq     hex
+        cmp.b   #'H',(a0)               Command is 'H' ?
+        bne     next9
+hex:    move.b  #16,base
+        lea.l   HEX,a0                  Base set to hex message.
+        bsr     printstring             Display it.
+        bra     mainloop
+
+; n - set base to decimal
+next9:  cmp.b   #'n',(a0)               Command is 'n' ?
+        beq     dec
+        cmp.b   #'N',(a0)               Command is 'N' ?
+        bne     next10
+dec:    move.b  #10,base
+        lea.l   DEC,a0                  Base set to decimal message.
+        bsr     printstring             Display it.
+        bra     mainloop
+
+; q - quit
+next10: cmp.b   #'q',(a0)               Command is 'q' ?
+        beq     quit
+        cmp.b   #'Q',(a0)               Command is 'Q' ?
+        bne     invalid
+quit:   jmp     tutor
+
+; Invalid command
+invalid:
+        move.l  a0,a1                   Save command string in A1.
+        lea.l   INVALID1,a0             Invalid command message.
+        bsr     printstring             Display it.
+        move.l  a1,a0                   Put command string back in A0.
+        bsr     printstring             Display it.
+        lea.l   INVALID2,a0             Invalid command message.
+        bsr     printstring             Display it.
+
+; Go back and get next command
+        bra     mainloop
 
 ************************************************************************
 *
@@ -229,7 +299,35 @@ tutor:
 *
 ************************************************************************
 VERSION  dc.b                          "RPN Calculator v0.1",CR,LF,0
+
 PROMPT   dc.b                          "? ",0
+
+INVALID1 dc.b                          "Invalid command '",0
+
+INVALID2 dc.b                          "', type ? for help",CR,LF,0
+
+HEX      dc.b                          "Base set to hex.",CR,LF,0
+
+DEC      dc.b                          "Base set to decimal.",CR,LF,0
+
+HELP     dc.b                          "Valid commands:",CR,LF
+         dc.b                          "[number]  Put number on stack",CR,LF
+         dc.b                          "=         Display stack",CR,LF
+         dc.b                          "+         Add",CR,LF
+         dc.b                          "-         Subtract",CR,LF
+         dc.b                          "*         Multiply",CR,LF
+         dc.b                          "/         Divide",CR,LF
+         dc.b                          "!         2's complement",CR,LF
+         dc.b                          "~         1's complement",CR,LF
+         dc.b                          "&         Bitwise AND",CR,LF
+         dc.b                          "|         Bitwise inclusive OR",CR,LF
+         dc.b                          "^         Bitwise exclusive OR",CR,LF
+         dc.b                          "<         Shift left",CR,LF
+         dc.b                          ">         Shift right",CR,LF
+         dc.b                          "h         Set base to hex",CR,LF
+         dc.b                          "n         Set base to decimal",CR,LF
+         dc.b                          "q         Quit",CR,LF
+         dc.b                          "?         Help",CR,LF,0
 
 ************************************************************************
 *

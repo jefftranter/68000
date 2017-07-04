@@ -42,7 +42,9 @@ number <Enter>          Enter number (32-bit signed), put on top of stack
 
 h                       Set input and output base to hexadecimal.
 
-d                       Set input and output base to decimal.
+n                       Set input and output base to decimal.
+
+q                       Quit to TUTOR monitor.
 
 ?                       Help (Show summary of commands)
 
