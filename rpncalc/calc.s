@@ -75,8 +75,14 @@ next1:
 
 ; +
 next2:
+        cmp.b   #'+',(a0)               Command is '+' ?
+        bne     next3
+        move.l  #9,d0
+        bsr     stack_push
+        bra     mainloop
 
 ; -
+next3:
 
 ; *
 
@@ -154,7 +160,8 @@ invalid:
 stack_init:
         move.l  #STKSIZE-1,d0           Get size of stack (number of elements).
         lea.l   stack,a0                Get address of start of stack.
-clear:  move.l  #0,(a0)+                Clear stack element.
+;clear:  move.l  #0,(a0)+                Clear stack element.
+clear:  move.l  d0,(a0)+                Clear stack element.
         tst.l   d0                      Is D0 zero?
         dbeq    d0,clear                Branch and continue until it is.
         rts
@@ -169,7 +176,7 @@ clear:  move.l  #0,(a0)+                Clear stack element.
 *
 * Before:  After:
 * +-----+ +-----+
-* |  5  | |  4  |
+* |  5  | |  4  | <-stack
 * +-----+ +-----+
 * |  4  | |  3  |
 * +-----+ +-----+
@@ -187,7 +194,14 @@ clear:  move.l  #0,(a0)+                Clear stack element.
 ************************************************************************
 
 stack_push:
-        
+        movem.l d1/a0,-(sp)             Preserve registers.
+        move.l  #STKSIZE-2,d1           Get size of stack (number of elements) less two.
+        lea.l   stack,a0                Get address of bottom of stack.
+up:     move.l  4(a0),(a0)+             Copy element to previous stack entry.
+        tst.l   d1                      Is loop counter zero?
+        dbeq    d1,up                   Branch and continue until it is.
+        move.l  d0,(a0)                 Write new value to top of stack
+        movem.l (sp)+,d1/a0             Restore registers.
         rts
 
 ************************************************************************
@@ -200,7 +214,7 @@ stack_push:
 *
 * Before:  After:
 * +-----+ +-----+
-* |  5  | |  0  |
+* |  5  | |  0  | <-stack
 * +-----+ +-----+
 * |  4  | |  5  |
 * +-----+ +-----+
@@ -473,9 +487,21 @@ HELP     dc.b                          "Valid commands:",CR,LF
 
 base    ds.b    1
 
-; Stack
-; One longword for each element.
-; First (lowest address) entry is bottom of stack
-; Last (highest address) entry is top of stack
+* Stack
+* One longword for each element.
+* First (lowest address) entry is bottom of stack
+* Last (highest address) entry is top of stack
+*
+* +-----+
+* | BOS | <-stack
+* +-----+
+* |     |
+* +-----+
+* |     |
+* +-----+
+* |     |
+* +-----+
+* | TOS |
+* +-----+
 
 stack:  ds.l    STKSIZE
