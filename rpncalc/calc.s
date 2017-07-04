@@ -163,12 +163,9 @@ stack_pull:
 stack_print:
         move.l  #STKSIZE-1,d1           Get size of stack (number of elements).
         lea.l   stack,a0                Get address of start of stack.
-pnt:    move.l  (a0)+,d0                Put next stack value in d0
+pnt:    move.l  (a0)+,d0                Put next stack value in d0.
         bsr     printhex                Print it.
-        move.b  #CR,d0                  Print CR
-        bsr     printchar
-        move.b  #LF,d0                  Print LF
-        bsr     printchar
+        bsr     crlf                    Print CR/LF.
         tst.l   d1                      Is loop counter zero?
         dbeq    d1,pnt                  Branch and continue until it is.
         rts
@@ -335,6 +332,25 @@ printdec:
 tutor:
         move.b  #TUTOR,d7               Go to TUTOR function.
         trap    #14                     Call TRAP14 handler.
+
+************************************************************************
+* Send CRLF to the console.
+*
+* Send carriage return, line feed to the console.
+*
+* Inputs: none
+* Outputs: none
+* Registers changed: none
+*
+************************************************************************
+crlf:
+        movem.l d0,-(sp)                Preserve registers that are changed here or by TUTOR.
+        move.b  #CR,d0                  Print CR
+        bsr     printchar
+        move.b  #LF,d0                  Print LF
+        bsr     printchar
+        movem.l (sp)+,d0                Restore registers.
+        rts
 
 ************************************************************************
 *
