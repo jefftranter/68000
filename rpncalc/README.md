@@ -24,7 +24,9 @@ number <Enter>          Enter number (32-bit signed), put on top of stack
 
 *                       Multiply two numbers on stack, pop them, push result ( i j | i*j )
 
-/                       Divide two numbers on stack, pop them, push result (and remainder?)  ( i j | i%j i*j )
+/                       Divide two numbers on stack, pop them, push result ( i j | i/j )
+
+%                       Divide two numbers on stack, pop them, push remainder ( i j | i%j )
 
 !                       2's complement ( n | -n )
 

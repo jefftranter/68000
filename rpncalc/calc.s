@@ -73,27 +73,75 @@ next1:
         bsr     stack_print
         bra     mainloop
 
-; +
+; + - add
 next2:
         cmp.b   #'+',(a0)               Command is '+' ?
         bne     next3
-        move.l  #9,d0
-        bsr     stack_push
+        bsr     stack_pop               Get TOS in D0.
+        move.l  d0,d1                   Put in D1.
+        bsr     stack_pop               Get TOS in D0.
+        add.l   d1,d0                   Add.
+        bsr     stack_push              Push result.
         bra     mainloop
 
-; -
+; - - subtract
 next3:
         cmp.b   #'-',(a0)               Command is '-' ?
         bne     next4
-        bsr     stack_pop
+        bsr     stack_pop               Get TOS in D0.
+        move.l  d0,d1                   Put in D1.
+        bsr     stack_pop               Get TOS in D0.
+        sub.l   d1,d0                   Subtract.
+        bsr     stack_push              Push result.
         bra     mainloop
 
-; *
+; * - multiply
 next4:
+        cmp.b   #'*',(a0)               Command is '*' ?
+        bne     next5
+        bsr     stack_pop               Get TOS in D0.
+        move.l  d0,d1                   Put in D1.
+        bsr     stack_pop               Get TOS in D0.
+        muls.w  d1,d0                   Multiply (only uses lower 16-bits).
+        bsr     stack_push              Push result.
+        bra     mainloop
 
-; /
+; / - divide
+next5:
+        cmp.b   #'/',(a0)               Command is '/' ?
+        bne     next6
+        bsr     stack_pop               Get TOS in D0.
+        move.l  d0,d1                   Put in D1.
+        bsr     stack_pop               Get TOS in D0.
+        tst.w   d1                      Check for divide by zero.
+        beq     dividebyzero
+        divs.w  d1,d0                   Divide (remainder in upper word, quotient in lower word).
+        ext.l   d0                      Extend quotient to 32 bits.
+        bsr     stack_push              Push result.
+        bra     mainloop
+
+dividebyzero:
+        lea.l   DIVZERO,a0              Divide by zero error message.
+        bsr     printstring             Display it.
+        bra     mainloop
+
+; % - remainder (modulus)
+next6:
+        cmp.b   #'%',(a0)               Command is '%' ?
+        bne     next7
+        bsr     stack_pop               Get TOS in D0.
+        move.l  d0,d1                   Put in D1.
+        bsr     stack_pop               Get TOS in D0.
+        tst.w   d1                      Check for divide by zero.
+        beq     dividebyzero
+        divs.w  d1,d0                   Divide (remainder in upper word, quotient in lower word).
+        swap    d0                      Move remainder into low word.
+        ext.l   d0                      Extend remainder to 32 bits.
+        bsr     stack_push              Push result.
+        bra     mainloop
 
 ; !
+next7:
 
 ; ~
 
@@ -165,7 +213,8 @@ invalid:
 stack_init:
         move.l  #STKSIZE-1,d0           Get size of stack (number of elements).
         lea.l   stack,a0                Get address of start of stack.
-clear:  move.l  #0,(a0)+                Clear stack element.
+;clear:  move.l  #0,(a0)+                Clear stack element.
+clear:  move.l  d0,(a0)+                Clear stack element.
         tst.l   d0                      Is D0 zero?
         dbeq    d0,clear                Branch and continue until it is.
         rts
@@ -470,9 +519,11 @@ INVALID1 dc.b                          "Invalid command '",0
 
 INVALID2 dc.b                          "', type ? for help",CR,LF,0
 
-HEX      dc.b                          "Base set to hex.",CR,LF,0
+HEX      dc.b                          "Base set to hex",CR,LF,0
 
-DEC      dc.b                          "Base set to decimal.",CR,LF,0
+DEC      dc.b                          "Base set to decimal",CR,LF,0
+
+DIVZERO  dc.b                          "Error: divide by zero",CR,LF,0
 
 HELP     dc.b                          "Valid commands:",CR,LF
          dc.b                          "[number]  Put number on stack",CR,LF
@@ -481,6 +532,7 @@ HELP     dc.b                          "Valid commands:",CR,LF
          dc.b                          "-         Subtract",CR,LF
          dc.b                          "*         Multiply",CR,LF
          dc.b                          "/         Divide",CR,LF
+         dc.b                          "%         Remainder",CR,LF
          dc.b                          "!         2's complement",CR,LF
          dc.b                          "~         1's complement",CR,LF
          dc.b                          "&         Bitwise AND",CR,LF
@@ -521,4 +573,6 @@ base    ds.b    1
 * | TOS |
 * +-----+
 
-stack:  ds.l    STKSIZE
+        align   1
+stack:
+        ds.l    STKSIZE
