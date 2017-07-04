@@ -18,6 +18,8 @@ CR      EQU     $0D                     Carriage return
 LF      EQU     $0A                     Line feed
 
 ; TUTOR TRAP 14 functions
+GETNUMD EQU     225                     Convert ASCII encoded decimal to hex.
+GETNUMA EQU     226                     Convert ASCII encoded hex to hex.
 TUTOR   EQU     228                     Go to TUTOR; print prompt.
 PNT8HX  EQU     230                     Convert 8 hex digits to ASCII.
 HEX2DEC EQU     236                     Convert hex value to ASCII encoded decimal.
@@ -25,6 +27,7 @@ PORTIN1 EQU     241                     Input string from port 1.
 OUTPUT  EQU     243                     Output string to port 1.
 INCHE   EQU     247                     Input single character from port 1.
 OUTCH   EQU     248                     Output single character to port 1.
+FIXDATA EQU     250                     Initialize A6 to BUFFER and append string.
 FIXBUF  EQU     251                     Initialize A5 and A6 to BUFFER.
 
 ; Start address
@@ -65,9 +68,17 @@ mainloop:
         bra     mainloop
 
 ; decimal or hex digit
-next1:
+next1:  cmp.b   #'0',(a0)               Does it start with '0' ?
+        blt     next1a                  Branch if lower.
+        cmp.b   #'9',(a0)               Does it start with '9' ?
+        bgt     next1a                  Branch if higher.
+
+        bsr     dec2bin                 Convert decimal string to 32-bit binary value.
+        bsr     stack_push              Push it on the stack.
+        bra     mainloop
 
 ; = - print stack
+next1a:
         cmp.b   #'=',(a0)               Command is '=' ?
         bne     next2
         bsr     stack_print
@@ -513,6 +524,49 @@ crlf:
         move.b  #LF,d0                  Print LF
         bsr     printchar
         movem.l (sp)+,d0                Restore registers.
+        rts
+
+************************************************************************
+*
+* Convert decimal string to 32-bit value.
+*
+* Inputs: A0 point to string, which must be terminated in a null.
+* Outputs: D0 contains the binary value
+* Registers changed: D0
+*
+************************************************************************
+dec2bin:
+        movem.l d7/a1/a5/a6,-(sp)       Preserve registers that are changed here or by TUTOR.
+
+; Change null (0) indicating end of string to EOT (4), as required by TUTOR GETNUMD function.
+
+        move.l  a0,a1                   Initialize index to start of string.
+find:   cmp.b   #0,(a1)+                Is it a null?
+        bne     find
+        subq.l  #1,a1                   Go back to position of null.
+        move.b  #4,(a1)                 Change it to EOT.
+
+        move.l  a0,a5                   Put string start in A5.
+        move.b  #FIXDATA,d7             Copy string to buffer function.
+        trap    #14                     Call TRAP14 handler.
+
+        move.b  #GETNUMD,d7             Decimal to binary function.
+        trap    #14                     Call TRAP14 handler.
+
+        movem.l (sp)+,d7/a1/a5/a6       Restore registers.
+        rts
+
+************************************************************************
+*
+* Convert hexadecimal string to 32-bit value.
+*
+*
+* Inputs: A0 point to string, which must be terminated in a null.
+* Outputs: D0 contains the binary value
+* Registers changed: D0
+*
+************************************************************************
+hex2bin:
         rts
 
 ************************************************************************
