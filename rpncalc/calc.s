@@ -122,8 +122,7 @@ trydiv:
         bsr     stack_pop               Get TOS in D0.
         tst.w   d1                      Check for divide by zero.
         beq.s   dividebyzero
-        divs.w  d1,d0                   Divide (remainder in upper word, quotient in lower word).
-        ext.l   d0                      Extend quotient to 32 bits.
+        bsr     DIV32                   Call 32-bit divide routine.
         bsr     stack_push              Push result.
         bra     mainloop
 
@@ -142,9 +141,8 @@ tryrem:
         bsr     stack_pop               Get TOS in D0.
         tst.w   d1                      Check for divide by zero.
         beq.s   dividebyzero
-        divs.w  d1,d0                   Divide (remainder in upper word, quotient in lower word).
-        swap    d0                      Move remainder into low word.
-        ext.l   d0                      Extend remainder to 32 bits.
+        bsr     DIV32                   Call 32-bit divide routine.
+        move.l  d1,d0                   Put remainder in D0.
         bsr     stack_push              Push result.
         bra     mainloop
 
@@ -865,8 +863,7 @@ OVFLOW: bsr     overflow
 * ===== Divide the 32 bit value in D0 by the 32 bit value in D1.
 *       Returns the 32 bit quotient in D0, remainder in D1.
 *
-DIV32   TST.L   D1              check for divide-by-zero
-;       BEQ.W   QHOW            if so, say "How?"
+DIV32   movem.l d2/d3/d4,-(sp)  Save registers.
         MOVE.L  D1,D2
         MOVE.L  D1,D4
         EOR.L   D0,D4           see if the signs are the same
@@ -892,7 +889,8 @@ DIV4    DBRA    D3,DIV3
         BPL     DIVRT
         NEG.L   D0              if not, results are negative
         NEG.L   D1
-DIVRT   RTS
+DIVRT   movem.l (sp)+,d2/d3/d4  Restore registers.
+        RTS
 
 ************************************************************************
 *
