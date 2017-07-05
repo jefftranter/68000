@@ -65,52 +65,52 @@ mainloop:
 
 ; Help - '?'
         cmp.b   #'?',(a0)               Is command '?'
-        bne     tryequals
+        bne.s   tryequals
         lea.l   HELP,a0                 Get help string.
         bsr     printstring             Display it.
-        bra     mainloop
+        bra.s   mainloop
 
 ; = - print stack
 tryequals:
         cmp.b   #'=',(a0)               Is command '=' ?
-        bne     tryadd
+        bne.s   tryadd
         bsr     stack_print
-        bra     mainloop
+        bra.s   mainloop
 
 ; + - add
 tryadd:
         cmp.b   #'+',(a0)               Is command '+' ?
-        bne     trysub
+        bne.s   trysub
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
         add.l   d1,d0                   Add.
-        bvc     nov1                    Branch if no overflow
+        bvc.s   nov1                    Branch if no overflow
         lea.l   OVERFLOW,a0             Get overflow error string.
         bsr     printstring             Display it.
 nov1:   bsr     stack_push              Push result.
-        bra     mainloop
+        bra.s   mainloop
 
 ; - - subtract
 trysub:
         cmp.b   #'-',(a0)               Is command '-' ?
-        bne     trymul
+        bne.s   trymul
         cmp.b   #0,1(a0)                Is next character null?
-        bne     trymul                  If not, then assume this is a minus sign for a decimal number.
+        bne.s   trymul                  If not, then assume this is a minus sign for a decimal number.
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
         sub.l   d1,d0                   Subtract.
-        bvc     nov2                    Branch if no overflow
+        bvc.s   nov2                    Branch if no overflow
         lea.l   OVERFLOW,a0             Get overflow error string.
         bsr     printstring             Display it.
 nov2:   bsr     stack_push              Push result.
-        bra     mainloop
+        bra.s   mainloop
 
 ; * - multiply
 trymul:
         cmp.b   #'*',(a0)               Is command '*' ?
-        bne     trydiv
+        bne.s   trydiv
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
@@ -121,12 +121,12 @@ trymul:
 ; / - divide
 trydiv:
         cmp.b   #'/',(a0)               Is command '/' ?
-        bne     tryrem
+        bne.s   tryrem
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
         tst.w   d1                      Check for divide by zero.
-        beq     dividebyzero
+        beq.s   dividebyzero
         divs.w  d1,d0                   Divide (remainder in upper word, quotient in lower word).
         ext.l   d0                      Extend quotient to 32 bits.
         bsr     stack_push              Push result.
@@ -141,12 +141,12 @@ dividebyzero:
 ; % - remainder (modulus)
 tryrem:
         cmp.b   #'%',(a0)               Is command '%' ?
-        bne     trycomp2
+        bne.s   trycomp2
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
         tst.w   d1                      Check for divide by zero.
-        beq     dividebyzero
+        beq.s   dividebyzero
         divs.w  d1,d0                   Divide (remainder in upper word, quotient in lower word).
         swap    d0                      Move remainder into low word.
         ext.l   d0                      Extend remainder to 32 bits.
@@ -156,7 +156,7 @@ tryrem:
 ; ! - 2's complement
 trycomp2:
         cmp.b   #'!',(a0)               Is command '!' ?
-        bne     trycomp1
+        bne.s   trycomp1
         bsr     stack_pop               Get TOS in D0.
         neg.l   d0                      2's complement
         bsr     stack_push              Push result.
@@ -165,7 +165,7 @@ trycomp2:
 ; ~ - 1's complement
 trycomp1:
         cmp.b   #'~',(a0)               Is command '~' ?
-        bne     tryand
+        bne.s   tryand
         bsr     stack_pop               Get TOS in D0.
         not.l   d0                      1's complement
         bsr     stack_push              Push result.
@@ -174,7 +174,7 @@ trycomp1:
 ; & - logical AND
 tryand:
         cmp.b   #'&',(a0)               Is command '&' ?
-        bne     tryor
+        bne.s   tryor
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
@@ -185,18 +185,18 @@ tryand:
 ; | - logical OR
 tryor:
         cmp.b   #'|',(a0)               Is command '|' ?
-        bne     tryexor
+        bne.s   tryexor
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
-        or.l   d1,d0                    OR values.
+        or.l    d1,d0                   OR values.
         bsr     stack_push              Push result.
         bra     mainloop
 
 ; ^ - logical exclusive OR
 tryexor:
         cmp.b   #'^',(a0)               Is command '^' ?
-        bne     tryshiftl
+        bne.s   tryshiftl
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
@@ -207,7 +207,7 @@ tryexor:
 ; < -shift left
 tryshiftl:
         cmp.b   #'<',(a0)               Is command '<' ?
-        bne     tryshiftr
+        bne.s   tryshiftr
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
@@ -218,7 +218,7 @@ tryshiftl:
 ; > - shift right
 tryshiftr:
         cmp.b   #'>',(a0)               Is command '>' ?
-        bne     tryh
+        bne.s   tryh
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
@@ -229,9 +229,9 @@ tryshiftr:
 ; h - set base to hex
 tryh:
         cmp.b   #'h',(a0)               Is command 'h' ?
-        beq     hex
+        beq.s   hex
         cmp.b   #'H',(a0)               Is command 'H' ?
-        bne     trydec
+        bne.s   trydec
 hex:    move.b  #16,base
         lea.l   HEX,a0                  Base set to hex message.
         bsr     printstring             Display it.
@@ -240,9 +240,9 @@ hex:    move.b  #16,base
 ; n - set base to decimal
 trydec:
         cmp.b   #'n',(a0)               Is command 'n' ?
-        beq     dec
+        beq.s   dec
         cmp.b   #'N',(a0)               Is command 'N' ?
-        bne     trydig
+        bne.s   trydig
 dec:    move.b  #10,base
         lea.l   DEC,a0                  Base set to decimal message.
         bsr     printstring             Display it.
@@ -250,10 +250,10 @@ dec:    move.b  #10,base
 
 ; decimal digit 0-9
 trydig: cmp.b   #10,base                Is base set to 10?
-        bne     tryhex                  Branch if not.
+        bne.s   tryhex                  Branch if not.
         move.b  #0,d1                   Clear flag indicating negative number.
         cmp.b   #'-',(a0)               Does it start with '-' ?
-        bne     plus                    Branch if not.
+        bne.s   plus                    Branch if not.
         add.l   #1,a0                   Skip over minus sign.
         move.b  #1,d1                   Set flag to make result negative later.
 plus:   cmp.b   #'0',(a0)               Does it start with '0' ?
@@ -261,7 +261,7 @@ plus:   cmp.b   #'0',(a0)               Does it start with '0' ?
         cmp.b   #'9',(a0)               Does it start with '9' ?
         bgt     tryq                    Branch if higher.
         bsr     validdec                Check for valid decimal number
-        bvc     okay                    Branch if okay.
+        bvc.s   okay                    Branch if okay.
         move.l  a0,a1                   Save pointer to string.
         lea.l   BADDEC,a0               Bad number error message.
         bsr     printstring             Display it.
@@ -274,7 +274,7 @@ plus:   cmp.b   #'0',(a0)               Does it start with '0' ?
 
 okay:   bsr     dec2bin                 Convert decimal string to 32-bit binary value.
         tst.b   d1                      Did we set flag for negative number?
-        beq     noneg                   Branch if not.
+        beq.s   noneg                   Branch if not.
         neg.l   d0                      Make number negative (2's complement).
 noneg:  bsr     stack_push              Push it on the stack.
         bra     mainloop
@@ -282,25 +282,25 @@ noneg:  bsr     stack_push              Push it on the stack.
 ; hex digit 0-9 a-f A-F
 tryhex:
         cmp.b   #'0',(a0)               Does it start with '0' ?
-        blt     tryq                    If lower, then not a valid digit.
+        blt.s   tryq                    If lower, then not a valid digit.
         cmp.b   #'9',(a0)               Does it start with '9' ?
-        ble     ishex                   If lower or equal, then it is a valid digit.
+        ble.s   ishex                   If lower or equal, then it is a valid digit.
         cmp.b   #'A',(a0)               Does it start with 'A' ?
-        blt     tryq                    If lower, then not a valid hex digit.
+        blt.s   tryq                    If lower, then not a valid hex digit.
         cmp.b   #'F',(a0)               Does it start with 'F' ?
-        ble     ishex                   If lower or equal, then it is a valid digit.
+        ble.s   ishex                   If lower or equal, then it is a valid digit.
         cmp.b   #'a',(a0)               Does it start with 'a' ?
-        blt     tryq                    If lower, then not a valid hex digit.
+        blt.s   tryq                    If lower, then not a valid hex digit.
         cmp.b   #'f',(a0)               Does it start with 'f' ?
-        ble     ishex r                 If lower or equal, then it is a valid digit.
-        bra     tryq                    Otherwise not a digit.
+        ble.s   ishex r                 If lower or equal, then it is a valid digit.
+        bra.s   tryq                    Otherwise not a digit.
 
 ishex:
 
 ; Convert any lowercase digits a-f to A-F, otherwise reports error and goes to TUTOR monitor.
         bsr     uppercase
         bsr     validhex                Check for valid hex number.
-        bvc     okay1                   Branch if okay.
+        bvc.s   okay1                   Branch if okay.
         move.l  a0,a1                   Save pointer to string.
         lea.l   BADHEX,a0               Bad number error message.
         bsr     printstring             Display it.
@@ -312,14 +312,14 @@ ishex:
         bra     mainloop
 
 okay1:  bsr     hex2bin                 Convert hex string to 32-bit binary value.
-        bsr     stack_push              Push it on the stack.
+        bsr.s   stack_push              Push it on the stack.
         bra     mainloop
 
 ; q - quit
 tryq:   cmp.b   #'q',(a0)               Is command 'q' ?
-        beq     quit
+        beq.s   quit
         cmp.b   #'Q',(a0)               Is command 'Q' ?
-        bne     invalid
+        bne.s   invalid
 quit:   jmp     tutor
 
 ; Invalid command
@@ -454,10 +454,10 @@ stack_print:
         lea.l   stack,a0                Get address of start of stack.
 pnt1:   move.l  (a0)+,d0                Put next stack value in d0.
         cmp.b   #10,base                Base set to decimal?
-        bne     phex                    Branch if not.
+        bne.s   phex                    Branch if not.
         bsr     printdec                Print it in decimal.
-        bra     pnt2
-phex:   bsr     printhex                Print it in hex.
+        bra.s   pnt2
+phex:   bsr.s   printhex                Print it in hex.
 pnt2:   bsr     crlf                    Print CR/LF.
         tst.l   d1                      Is loop counter zero?
         dbeq    d1,pnt1                 Branch and continue until it is.
@@ -507,7 +507,7 @@ printstring:
         move.l  a0,a5                   TUTOR routine wants start of string in A5.
         move.l  a0,a6                   This will be a pointer to the end of string + 1.
 loop1:  cmp.b   #0,(a6)+                Find terminating null.
-        bne     loop1                   Loop until found.
+        bne.s   loop1                   Loop until found.
         subq.l  #1,a6                   Undo last increment.
 
 ; A5 now points to start of string and A6 points to one past end of string.
@@ -670,7 +670,7 @@ dec2bin:
 
         move.l  a0,a1                   Initialize index to start of string.
 find1:  cmp.b   #0,(a1)+                Is it a null?
-        bne     find1
+        bne.s   find1
         subq.l  #1,a1                   Go back to position of null.
         move.b  #4,(a1)                 Change it to EOT.
 
@@ -700,7 +700,7 @@ hex2bin:
 
         move.l  a0,a1                   Initialize index to start of string.
 find2:  cmp.b   #0,(a1)+                Is it a null?
-        bne     find2
+        bne.s   find2
         subq.l  #1,a1                   Go back to position of null.
         move.b  #4,(a1)                 Change it to EOT.
 
@@ -730,15 +730,15 @@ validdec:
         movem.l a0,-(sp)                Preserve registers.
 
 scan:   tst.b   (a0)                    Have we reached end of string?
-        beq     good                    If so, we're done and string is valid.
+        beq.s   good                    If so, we're done and string is valid.
         cmp.b   #'0',(a0)               Does it start with '0' ?
-        blt     bad                     Invalid character if lower.
+        blt.s   bad                     Invalid character if lower.
         cmp.b   #'9',(a0)+              Does it start with '9' ?
-        bgt     bad                     Invalid character if higher.
-        bra     scan                    go back and continue.
+        bgt.s   bad                     Invalid character if higher.
+        bra.s   scan                    go back and continue.
 
 bad:    or      #$02,CCR                Set overflow bit to indicate error.
-        bra     ret
+        bra.s   ret
 
 good:   and     #$02,CCR                Clear overflow bit to indicate good.
 ret:    movem.l (sp)+,a0                Restore registers.
@@ -759,18 +759,18 @@ ret:    movem.l (sp)+,a0                Restore registers.
 validhex:
         movem.l a0,-(sp)                Preserve registers.
 scan1:  tst.b   (a0)                    Have we reached end of string?
-        beq     good                    If so, we're done and string is valid.
+        beq.s   good                    If so, we're done and string is valid.
         cmp.b   #'0',(a0)               Is it '0' ?
-        blt     bad                     Invalid character if lower.
+        blt.s   bad                     Invalid character if lower.
         cmp.b   #'9',(a0)               Is it '9' ?
-        ble     isgood                  If lower or equal, then it is a valid digit.
+        ble.s   isgood                  If lower or equal, then it is a valid digit.
         cmp.b   #'A',(a0)               Is it 'A' ?
-        blt     bad                     If lower, then not a valid hex digit.
+        blt.s   bad                     If lower, then not a valid hex digit.
         cmp.b   #'F',(a0)               Is it 'F' ?
-        ble     isgood                  If lower or equal, then it is a valid digit.
-        bra     bad                     Otherwise not a digit.
+        ble.s   isgood                  If lower or equal, then it is a valid digit.
+        bra.s   bad                     Otherwise not a digit.
 isgood: addq.l  #1,a0                   Advance pointer to next character.
-        bra     scan1                   And continue scanning.
+        bra.s   scan1                   And continue scanning.
 
 ************************************************************************
 *
@@ -786,15 +786,15 @@ isgood: addq.l  #1,a0                   Advance pointer to next character.
 uppercase:
         movem.l a0,-(sp)                Preserve registers.
 scan2:  tst.b   (a0)                    Have we reached end of string?
-        beq     done                    If so, we're done.
+        beq.s   done                    If so, we're done.
         cmp.b   #'a',(a0)               Is it 'A' ?
-        blt     nochange                No change if less than.
+        blt.s   nochange                No change if less than.
         cmp.b   #'z',(a0)               Is it 'z' ?
-        bgt     nochange                No change if greater than.
+        bgt.s   nochange                No change if greater than.
         sub.b   #$20,(a0)               Convert lower to uppercase ASCII character.
 nochange:
         addq.l  #1,a0                   Advance pointer to next character.
-        bra     scan2                   And continue scanning.
+        bra.s   scan2                   And continue scanning.
 
 done:   movem.l (sp)+,a0                Restore registers.
         rts
