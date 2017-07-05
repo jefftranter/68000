@@ -10,7 +10,6 @@
 ;
 ; Known issues:
 ; Multiply and divide are done as 16-bit.
-; Entering negative decimal numbers is not supported.
 ;
 ; Copyright (C) 2017 Jeff Tranter <tranter@pobox.com>
 
@@ -250,10 +249,14 @@ dec:    move.b  #10,base
         bra     mainloop
 
 ; decimal digit 0-9
-; TODO: Handle decimal number with leading minus sign
-trydig:  cmp.b   #10,base               Is base set to 10?
+trydig: cmp.b   #10,base                Is base set to 10?
         bne     tryhex                  Branch if not.
-        cmp.b   #'0',(a0)               Does it start with '0' ?
+        move.b  #0,d1                   Clear flag indicating negative number.
+        cmp.b   #'-',(a0)               Does it start with '-' ?
+        bne     plus                    Branch if not.
+        add.l   #1,a0                   Skip over minus sign.
+        move.b  #1,d1                   Set flag to make result negative later.
+plus:   cmp.b   #'0',(a0)               Does it start with '0' ?
         blt     tryq                    Branch if lower.
         cmp.b   #'9',(a0)               Does it start with '9' ?
         bgt     tryq                    Branch if higher.
@@ -270,7 +273,10 @@ trydig:  cmp.b   #10,base               Is base set to 10?
         bra     mainloop
 
 okay:   bsr     dec2bin                 Convert decimal string to 32-bit binary value.
-        bsr     stack_push              Push it on the stack.
+        tst.b   d1                      Did we set flag for negative number?
+        beq     noneg                   Branch if not.
+        neg.l   d0                      Make number negative (2's complement).
+noneg:  bsr     stack_push              Push it on the stack.
         bra     mainloop
 
 ; hex digit 0-9 a-f A-F
