@@ -8,9 +8,6 @@
 ;
 ; It is written for the VASM cross-assembler.
 ;
-; Known issues:
-; Multiply and divide are done as 16-bit.
-;
 ; Copyright (C) 2017 Jeff Tranter <tranter@pobox.com>
 
 ; Stack size (number of elements)
@@ -86,8 +83,7 @@ tryadd:
         bsr     stack_pop               Get TOS in D0.
         add.l   d1,d0                   Add.
         bvc.s   nov1                    Branch if no overflow
-        lea.l   OVERFLOW,a0             Get overflow error string.
-        bsr     printstring             Display it.
+        bsr     overflow                Display overflow warning message.
 nov1:   bsr     stack_push              Push result.
         bra.s   mainloop
 
@@ -102,8 +98,7 @@ trysub:
         bsr     stack_pop               Get TOS in D0.
         sub.l   d1,d0                   Subtract.
         bvc.s   nov2                    Branch if no overflow
-        lea.l   OVERFLOW,a0             Get overflow error string.
-        bsr     printstring             Display it.
+        bsr     overflow                Display overflow warning message.
 nov2:   bsr     stack_push              Push result.
         bra.s   mainloop
 
@@ -114,7 +109,7 @@ trymul:
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
-        muls.w  d1,d0                   Multiply (only uses lower 16-bits).
+        bsr     MULT32                  32-bit multiply D0 = D0 * D1
         bsr     stack_push              Push result.
         bra     mainloop
 
@@ -798,6 +793,106 @@ nochange:
 
 done:   movem.l (sp)+,a0                Restore registers.
         rts
+
+
+************************************************************************
+*
+* uppercase
+*
+* Display "Warning: overflow" message.
+*
+* Inputs: none.
+* Outputs: none.
+* Registers changed: none
+*
+************************************************************************
+overflow:
+        movem.l a0,-(sp)                Preserve registers.
+        lea.l   OVERFLOW,a0             Get overflow error string.
+        bsr     printstring             Display it.
+        movem.l (sp)+,a0                Restore registers.
+        rts
+
+************************************************************************
+*
+* The multiply and divide routines below were adapted from "Tiny BASIC
+* for the Motorola MC68000" by Gordon Brandly.
+*
+* Copyright (C) 1984 by Gordon Brandly. This program may be freely
+* distributed for personal use only. All commercial rights are
+* reserved.
+*
+************************************************************************
+
+*
+* ===== Multiplies the 32 bit values in D0 and D1, returning
+*       the 32 bit result in D0.
+*
+MULT32
+        movem.l d2/d4,-(sp)     Save registers.
+        MOVE.L  D1,D4
+        EOR.L   D0,D4           see if the signs are the same
+        TST.L   D0              take absolute value of D0
+        BPL     MLT1
+        NEG.L   D0
+MLT1    TST.L   D1              take absolute value of D1
+        BPL     MLT2
+        NEG.L   D1
+MLT2    CMP.L   #$FFFF,D1       is second argument <= 16 bits?
+        BLS     MLT3            OK, let it through
+        EXG     D0,D1           else swap the two arguments
+        CMP.L   #$FFFF,D1       and check 2nd argument again
+        BHI.W   OVFLOW          one of them MUST be 16 bits
+MLT3    MOVE    D0,D2           prepare for 32 bit X 16 bit multiply
+        MULU    D1,D2           multiply low word
+        SWAP    D0
+        MULU    D1,D0           multiply high word
+        SWAP    D0
+*** Rick Murray's bug correction follows:
+        TST     D0              if lower word not 0, then overflow
+        BNE.W   OVFLOW          if overflow, say "How?"
+        ADD.L   D2,D0           D0 now holds the product
+        BMI.W   OVFLOW          if sign bit set, it's an overflow
+        TST.L   D4              were the signs the same?
+        BPL     MLTRET
+        NEG.L   D0              if not, make the result negative
+MLTRET  movem.l (sp)+,d2/d4     Restore registers.
+        RTS
+
+OVFLOW: bsr     overflow
+        bra     MLTRET
+*
+* ===== Divide the 32 bit value in D0 by the 32 bit value in D1.
+*       Returns the 32 bit quotient in D0, remainder in D1.
+*
+DIV32   TST.L   D1              check for divide-by-zero
+;       BEQ.W   QHOW            if so, say "How?"
+        MOVE.L  D1,D2
+        MOVE.L  D1,D4
+        EOR.L   D0,D4           see if the signs are the same
+        TST.L   D0              take absolute value of D0
+        BPL     DIV1
+        NEG.L   D0
+DIV1    TST.L   D1              take absolute value of D1
+        BPL     DIV2
+        NEG.L   D1
+DIV2    MOVEQ   #31,D3          iteration count for 32 bits
+        MOVE.L  D0,D1
+        CLR.L   D0
+DIV3    ADD.L   D1,D1           (This algorithm was translated from
+        ADDX.L  D0,D0           the divide routine in Ron Cain's
+        BEQ     DIV4            Small-C run time library.)
+        CMP.L   D2,D0
+        BMI     DIV4
+        ADDQ.L  #1,D1
+        SUB.L   D2,D0
+DIV4    DBRA    D3,DIV3
+        EXG     D0,D1           put rem. & quot. in proper registers
+        TST.L   D4              were the signs the same?
+        BPL     DIVRT
+        NEG.L   D0              if not, results are negative
+        NEG.L   D1
+DIVRT   RTS
 
 ************************************************************************
 *
