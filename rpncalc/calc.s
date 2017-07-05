@@ -254,7 +254,7 @@ trydig: cmp.b   #10,base                Is base set to 10?
         move.b  #0,d1                   Clear flag indicating negative number.
         cmp.b   #'-',(a0)               Does it start with '-' ?
         bne.s   plus                    Branch if not.
-        add.l   #1,a0                   Skip over minus sign.
+        addq.l  #1,a0                   Skip over minus sign.
         move.b  #1,d1                   Set flag to make result negative later.
 plus:   cmp.b   #'0',(a0)               Does it start with '0' ?
         blt     tryq                    Branch if lower.
