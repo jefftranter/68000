@@ -235,10 +235,66 @@ trydec:
         cmp.b   #'n',(a0)               Is command 'n' ?
         beq.s   dec
         cmp.b   #'N',(a0)               Is command 'N' ?
-        bne.s   trydig
+        bne.s   trydrop
 dec:    move.b  #10,base
         lea.l   DEC,a0                  Base set to decimal message.
         bsr     printstring             Display it.
+        bra     mainloop
+
+
+; DROP - Removes the number from top of stack ( a -- )
+trydrop:
+        cmp.l   #"DROP",(a0)            Is command "DROP" ?
+        beq.s   drop
+        cmp.l   #"drop",(a0)            Is command "drop" ?
+        bne.s   tryswap
+drop:   bsr     stack_pop
+        bra     mainloop
+
+; SWAP - Exchanges the top 2 numbers on the stack ( a b -- b a )
+tryswap:
+        cmp.l   #"SWAP",(a0)            Is command "SWAP" ?
+        beq.s   swap
+        cmp.l   #"swap",(a0)            Is command "swap" ?
+        bne.s   trydup
+swap:   bsr     stack_pop               Get TOS in D0.
+        move.l  d0,d1                   Put in D1.
+        bsr     stack_pop               Get TOS in D0.
+        exg.l   d0,d1                   Swap values.
+        bsr     stack_push              Push D0 on stack.
+        move.l  d1,d0                   Get other value.
+        bsr     stack_push              Push D0 on stack.
+        bra     mainloop
+
+; DUP - Duplicates the value on the top of stack ( a -- a a )
+trydup:
+        cmp.l   #"DUP\0",(a0)           Is command "DUP" ?
+        beq.s   dup
+        cmp.l   #"dup\0",(a0)           Is command "dup" ?
+        bne.s   tryrot
+dup:    bsr     stack_pop               Get TOS.
+        bsr     stack_push              Push it back.
+        bsr     stack_push              And push it again.
+        bra     mainloop
+
+; ROT - Rotates the top 3 numbers on the top of the stack ( a b c -- b c a )
+tryrot:
+        cmp.l   #"ROT\0",(a0)            Is command "ROT" ?
+        beq.s   rot
+        cmp.l   #"rot\0",(a0)            Is command "rot" ?
+        bne.s   trydig
+rot:    bsr     stack_pop               Get TOS in D0.
+        move.l  d0,d1                   Put in D1.
+        bsr     stack_pop               Get TOS in D0.
+        move.l  d0,d2                   Put in D2.
+        bsr     stack_pop               Get TOS in D0.
+        move.l  d0,d3                   Put in D3.
+        move.l  d2,d0                   Now get D2.
+        bsr     stack_push              Push on stack.
+        move.l  d1,d0                   Now get D1.
+        bsr     stack_push              Push on stack.
+        move.l  d3,d0                   Now get D3.
+        bsr     stack_push              Push on stack.
         bra     mainloop
 
 ; decimal digit 0-9

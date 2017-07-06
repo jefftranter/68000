@@ -18,29 +18,29 @@ number <Enter>          Enter number (32-bit signed), put on top of stack
 
 =                       Display stack
 
-+                       Add two numbers on stack, pop them, push result ( i j | i+j )
++                       Add two numbers on stack, pop them, push result ( i j -- i+j )
 
--                       Subtract two numbers on stack, pop them, push result ( i j | i-j )
+-                       Subtract two numbers on stack, pop them, push result ( i j -- i-j )
 
-*                       Multiply two numbers on stack, pop them, push result ( i j | i*j )
+*                       Multiply two numbers on stack, pop them, push result ( i j -- i*j )
 
-/                       Divide two numbers on stack, pop them, push result ( i j | i/j )
+/                       Divide two numbers on stack, pop them, push result ( i j -- i/j )
 
-%                       Divide two numbers on stack, pop them, push remainder ( i j | i%j )
+%                       Divide two numbers on stack, pop them, push remainder ( i j -- i%j )
 
-!                       2's complement ( n | -n )
+!                       2's complement ( n -- -n )
 
-~                       1's complement ( n | ~n )
+~                       1's complement ( n -- ~n )
 
-&                       Bitwise AND ( i j | i^j )
+&                       Bitwise AND ( i j -- i^j )
 
-|                       Bitwise inclusive OR ( i j | i|j )
+|                       Bitwise inclusive OR ( i j -- i|j )
 
-^                       Bitwise exclusive OR ( i j | i^j )
+^                       Bitwise exclusive OR ( i j -- i^j )
 
-<                       Shift left ( i j | i<<j )
+<                       Shift left ( i j -- i<<j )
 
->                       Shift right ( i j | i>>j )
+>                       Shift right ( i j -- i>>j )
 
 h                       Set input and output base to hexadecimal.
 
@@ -49,6 +49,16 @@ n                       Set input and output base to decimal.
 q                       Quit to TUTOR monitor.
 
 ?                       Help (Show summary of commands)
+
+The next four commands are inspired by the FORTH programming language:
+
+DROP                    Removes the number from top of stack ( a -- )
+
+SWAP                    Exchanges the top 2 numbers on the stack ( a b -- b a )
+
+DUP                     Duplicates the value on the top of stack ( a -- a a )
+
+ROT                     Rotates the top 3 numbers on the top of the stack ( a b c -- b c a )
 
 Example:
 
