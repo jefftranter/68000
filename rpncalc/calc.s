@@ -62,14 +62,14 @@ mainloop:
 
 ; Help - '?'
         cmp.b   #'?',(a0)               Is command '?'
-        bne.s   tryequals
+        bne.s   trydot
         lea.l   HELP,a0                 Get help string.
         bsr     printstring             Display it.
         bra.s   mainloop
 
-; = - print stack
-tryequals:
-        cmp.b   #'=',(a0)               Is command '=' ?
+; . - print stack
+trydot:
+        cmp.b   #'.',(a0)               Is command '.' ?
         bne.s   tryadd
         bsr     stack_print
         bra.s   mainloop
@@ -211,11 +211,27 @@ tryshiftl:
 ; > - shift right
 tryshiftr:
         cmp.b   #'>',(a0)               Is command '>' ?
-        bne.s   tryh
+        bne.s   tryequals
         bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
         asr.l   d1,d0                   Shift right.
+        bsr     stack_push              Push result.
+        bra     mainloop
+
+; = - Compare two values. Push 1 if they are same, otherwise 0.
+tryequals:
+        cmp.b   #'=',(a0)               Is command '=' ?
+        bne.s   tryh
+        bsr     stack_pop               Get TOS in D0.
+        move.l  d0,d1                   Put in D1.
+        bsr     stack_pop               Get TOS in D0.
+        cmp.l   d0,d1                   Compare them.
+        beq     same                    Are they the same?
+        move.l  #0,D0                   Not the same.
+        bsr     stack_push              Push 0.
+        bra     mainloop
+same:   move.l  #1,D0                   They are the same, push 1.
         bsr     stack_push              Push result.
         bra     mainloop
 
@@ -953,45 +969,50 @@ DIVRT   movem.l (sp)+,d2/d3/d4  Restore registers.
 * Strings
 *
 ************************************************************************
-VERSION  dc.b                          "RPN Calculator v1.0",CR,LF,0
+VERSION  dc.b   "RPN Calculator v1.0",CR,LF,0
 
-PROMPT   dc.b                          "? ",0
+PROMPT   dc.b   "? ",0
 
-INVALID1 dc.b                          "Invalid command '",0
+INVALID1 dc.b   "Invalid command '",0
 
-INVALID2 dc.b                          "', type ? for help",CR,LF,0
+INVALID2 dc.b   "', type ? for help",CR,LF,0
 
-HEX      dc.b                          "Base set to hex",CR,LF,0
+HEX      dc.b   "Base set to hex",CR,LF,0
 
-DEC      dc.b                          "Base set to decimal",CR,LF,0
+DEC      dc.b   "Base set to decimal",CR,LF,0
 
-DIVZERO  dc.b                          "Error: divide by zero",CR,LF,0
+DIVZERO  dc.b   "Error: divide by zero",CR,LF,0
 
-OVERFLOW dc.b                          "Warning: overflow",CR,LF,0
+OVERFLOW dc.b   "Warning: overflow",CR,LF,0
 
-BADDEC   dc.b                          "Invalid decimal number: '",0
+BADDEC   dc.b   "Invalid decimal number: '",0
 
-BADHEX   dc.b                          "Invalid hex number: '",0
+BADHEX   dc.b   "Invalid hex number: '",0
 
-HELP     dc.b                          "Valid commands:",CR,LF
-         dc.b                          "[number]  Put number on stack",CR,LF
-         dc.b                          "=         Display stack",CR,LF
-         dc.b                          "+         Add",CR,LF
-         dc.b                          "-         Subtract",CR,LF
-         dc.b                          "*         Multiply",CR,LF
-         dc.b                          "/         Divide",CR,LF
-         dc.b                          "%         Remainder",CR,LF
-         dc.b                          "!         2's complement",CR,LF
-         dc.b                          "~         1's complement",CR,LF
-         dc.b                          "&         Bitwise AND",CR,LF
-         dc.b                          "|         Bitwise inclusive OR",CR,LF
-         dc.b                          "^         Bitwise exclusive OR",CR,LF
-         dc.b                          "<         Shift left",CR,LF
-         dc.b                          ">         Shift right",CR,LF
-         dc.b                          "h         Set base to hex",CR,LF
-         dc.b                          "n         Set base to decimal",CR,LF
-         dc.b                          "q         Quit",CR,LF
-         dc.b                          "?         Help",CR,LF,0
+HELP     dc.b   "Valid commands:",CR,LF
+         dc.b   "[number]  Put number on stack",CR,LF
+         dc.b   ".         Display stack",CR,LF
+         dc.b   "+         Add",CR,LF
+         dc.b   "-         Subtract",CR,LF
+         dc.b   "*         Multiply",CR,LF
+         dc.b   "/         Divide",CR,LF
+         dc.b   "%         Remainder",CR,LF
+         dc.b   "!         2's complement",CR,LF
+         dc.b   "~         1's complement",CR,LF
+         dc.b   "&         Bitwise AND",CR,LF
+         dc.b   "|         Bitwise inclusive OR",CR,LF
+         dc.b   "^         Bitwise exclusive OR",CR,LF
+         dc.b   "<         Shift left",CR,LF
+         dc.b   ">         Shift right",CR,LF
+         dc.b   "=         Compare",CR,LF
+         dc.b   "DROP      Remove top of stack",CR,LF
+         dc.b   "SWAP      Exchange top 2 numbers on stack",CR,LF
+         dc.b   "DUP       Duplicate top of stack",CR,LF
+         dc.b   "ROT       Rotate 3 numbers on stack",CR,LF
+         dc.b   "h         Set base to hex",CR,LF
+         dc.b   "n         Set base to decimal",CR,LF
+         dc.b   "q         Quit",CR,LF
+         dc.b   "?         Help",CR,LF,0
 
 ************************************************************************
 *
