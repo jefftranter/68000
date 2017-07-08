@@ -16,7 +16,7 @@ Operation               Description
 
 number <Enter>          Enter number (32-bit signed), put on top of stack
 
-=                       Display stack
+.                       Display stack
 
 +                       Add two numbers on stack, pop them, push result ( i j -- i+j )
 
@@ -41,6 +41,8 @@ number <Enter>          Enter number (32-bit signed), put on top of stack
 <                       Shift left ( i j -- i<<j )
 
 >                       Shift right ( i j -- i>>j )
+
+=                       Pop and compare two values on top of stack. Push 1 if they are same, otherwise 0 ( i j -- k )
 
 h                       Set input and output base to hexadecimal.
 
