@@ -36,13 +36,14 @@ FIXBUF  EQU     251                     Initialize A5 and A6 to BUFFER.
 start:
 
 ; Initialize base to hex
-        move.b  #16,base
+        lea.l   (base,pc),a1            Get address using position independent code.
+        move.b  #16,(a1)
 
 ; Initialize stack
          bsr    stack_init
 
 ; Display startup message
-        lea.l   VERSION,a0              Get startup message.
+        lea.l   (VERSION,pc),a0         Get startup message.
         bsr     printstring             Display it.
 
 ; Start of main command polling loop.
@@ -52,7 +53,7 @@ mainloop:
         bsr     stack_print
 
 ; Display prompt
-        lea.l   PROMPT,a0               Get prompt string.
+        lea.l   (PROMPT,pc),a0          Get prompt string.
         bsr     printstring             Display it.
 
 ; Get line of input
@@ -63,7 +64,7 @@ mainloop:
 ; Help - '?'
         cmp.b   #'?',(a0)               Is command '?'
         bne.s   trydot
-        lea.l   HELP,a0                 Get help string.
+        lea.l   (HELP,pc),a0            Get help string.
         bsr     printstring             Display it.
         bra.s   mainloop
 
@@ -128,7 +129,7 @@ trydiv:
 
 ; Handle divide by zero error.
 dividebyzero:
-        lea.l   DIVZERO,a0              Divide by zero error message.
+        lea.l   (DIVZERO,pc),a0         Divide by zero error message.
         bsr     printstring             Display it.
         bra     mainloop
 
@@ -241,8 +242,9 @@ tryh:
         beq.s   hex
         cmp.b   #'H',(a0)               Is command 'H' ?
         bne.s   trydec
-hex:    move.b  #16,base
-        lea.l   HEX,a0                  Base set to hex message.
+hex:    lea.l   (base,pc),a1            Get address using position independent code.
+        move.b  #16,(a1)                Set base to 16.
+        lea.l   (HEX,pc),a0             Base set to hex message.
         bsr     printstring             Display it.
         bra     mainloop
 
@@ -252,8 +254,9 @@ trydec:
         beq.s   dec
         cmp.b   #'N',(a0)               Is command 'N' ?
         bne.s   trydrop
-dec:    move.b  #10,base
-        lea.l   DEC,a0                  Base set to decimal message.
+dec:    lea.l   (base,pc),a1            Get address using position independent code.
+        move.b  #10,(a1)                Set base to 10.
+        lea.l   (DEC,pc),a0             Base set to decimal message.
         bsr     printstring             Display it.
         bra     mainloop
 
@@ -314,7 +317,8 @@ rot:    bsr     stack_pop               Get TOS in D0.
         bra     mainloop
 
 ; decimal digit 0-9
-trydig: cmp.b   #10,base                Is base set to 10?
+trydig: lea.l   (base,pc),a1            Get address using position independent code.
+        cmp.b   #10,(a1)                Is base set to 10?
         bne.s   tryhex                  Branch if not.
         move.b  #0,d1                   Clear flag indicating negative number.
         cmp.b   #'-',(a0)               Does it start with '-' ?
@@ -328,7 +332,7 @@ plus:   cmp.b   #'0',(a0)               Does it start with '0' ?
         bsr     validdec                Check for valid decimal number
         bvc.s   okay                    Branch if okay.
         move.l  a0,a1                   Save pointer to string.
-        lea.l   BADDEC,a0               Bad number error message.
+        lea.l   (BADDEC,pc),a0          Bad number error message.
         bsr     printstring             Display it.
         move.l  a1,a0                   Get pointer to string.
         bsr     printstring             Display it.
@@ -367,7 +371,7 @@ ishex:
         bsr     validhex                Check for valid hex number.
         bvc.s   okay1                   Branch if okay.
         move.l  a0,a1                   Save pointer to string.
-        lea.l   BADHEX,a0               Bad number error message.
+        lea.l   (BADHEX,pc),a0          Bad number error message.
         bsr     printstring             Display it.
         move.l  a1,a0                   Get pointer to string.
         bsr     printstring             Display it.
@@ -385,16 +389,16 @@ tryq:   cmp.b   #'q',(a0)               Is command 'q' ?
         beq.s   quit
         cmp.b   #'Q',(a0)               Is command 'Q' ?
         bne.s   invalid
-quit:   jmp     tutor
+quit:   bra     tutor
 
 ; Invalid command
 invalid:
         move.l  a0,a1                   Save command string in A1.
-        lea.l   INVALID1,a0             Invalid command message.
+        lea.l   (INVALID1,pc),a0        Invalid command message.
         bsr     printstring             Display it.
         move.l  a1,a0                   Put command string back in A0.
         bsr     printstring             Display it.
-        lea.l   INVALID2,a0             Invalid command message.
+        lea.l   (INVALID2,pc),a0        Invalid command message.
         bsr     printstring             Display it.
 
 ; Go back and get next command
@@ -417,7 +421,7 @@ invalid:
 ************************************************************************
 stack_init:
         move.l  #STKSIZE-1,d0           Get size of stack (number of elements).
-        lea.l   stack,a0                Get address of start of stack.
+        lea.l   (stack,pc),a0           Get address of start of stack.
 clear:  move.l  #0,(a0)+                Clear stack element.
         tst.l   d0                      Is D0 zero?
         dbeq    d0,clear                Branch and continue until it is.
@@ -452,7 +456,7 @@ clear:  move.l  #0,(a0)+                Clear stack element.
 stack_push:
         movem.l d1/a0,-(sp)             Preserve registers.
         move.l  #STKSIZE-2,d1           Get size of stack (number of elements) less two.
-        lea.l   stack,a0                Get address of bottom of stack.
+        lea.l   (stack,pc),a0           Get address of bottom of stack.
 up:     move.l  4(a0),(a0)+             Copy element to previous stack entry.
         tst.l   d1                      Is loop counter zero?
         dbeq    d1,up                   Branch and continue until it is.
@@ -491,7 +495,7 @@ stack_pop:
         movem.l d1/a0,-(sp)             Preserve registers.
         move.l  #STKSIZE-1,d1           Get size of stack (number of elements) less one.
         asl.l   #2,d1                   Multiply by element size (4).
-        lea.l   stack,a0                Get address of bottom of stack.
+        lea.l   (stack,pc),a0           Get address of bottom of stack.
         add.l   d1,a0                   Calculate address of top of stack.
         move.l  (a0),d0                 Get top of stack as return value.
 
@@ -514,11 +518,12 @@ down:   move.l  -4(a0),(a0)             Copy element to next stack entry.
 *
 ************************************************************************
 stack_print:
-        movem.l d0/d1/a0,-(sp)          Preserve registers that are changed here or by TUTOR.
+        movem.l d0/d1/a0/a1,-(sp)       Preserve registers that are changed here or by TUTOR.
         move.l  #STKSIZE-1,d1           Get size of stack (number of elements).
-        lea.l   stack,a0                Get address of start of stack.
+        lea.l   (stack,pc),a0           Get address of start of stack.
 pnt1:   move.l  (a0)+,d0                Put next stack value in d0.
-        cmp.b   #10,base                Base set to decimal?
+        lea.l   (base,pc),a1            Get address using position independent code.
+        cmp.b   #10,(a1)                Base set to decimal?
         bne.s   phex                    Branch if not.
         bsr     printdec                Print it in decimal.
         bra.s   pnt2
@@ -526,7 +531,7 @@ phex:   bsr.s   printhex                Print it in hex.
 pnt2:   bsr     crlf                    Print CR/LF.
         tst.l   d1                      Is loop counter zero?
         dbeq    d1,pnt1                 Branch and continue until it is.
-        movem.l (sp)+,d0/d1/a0          Restore registers.
+        movem.l (sp)+,d0/d1/a0/a1       Restore registers.
         rts
 
 ************************************************************************
@@ -878,7 +883,7 @@ done:   movem.l (sp)+,a0                Restore registers.
 ************************************************************************
 overflow:
         movem.l a0,-(sp)                Preserve registers.
-        lea.l   OVERFLOW,a0             Get overflow error string.
+        lea.l   (OVERFLOW,pc),a0        Get overflow error string.
         bsr     printstring             Display it.
         movem.l (sp)+,a0                Restore registers.
         rts
@@ -1043,5 +1048,4 @@ base    ds.b    1
 * +-----+
 
         align   1
-stack:
-        ds.l    STKSIZE
+stack   ds.l    STKSIZE
