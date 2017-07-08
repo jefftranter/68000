@@ -1,0 +1,32 @@
+* Sample program for Quelo 68000 cross-assembler.
+*
+* Based on Laboratory 4 from "68000 Microcomputer Experiments, Using
+* the Motorola Educational Computer Board" by Alan D. Wilcox.
+*
+*       Program to display the
+*       message 'Hi There' on
+*       console. Uses the
+*       TUTOR TRAP #14 routines.
+
+PROGRAM EQU     $900            * Start of program
+DATA    EQU     $1000           * Start data area
+
+OUT1CR  EQU     227             * Start of program
+TUTOR   EQU     228             * Start data area
+
+        ORG     PROGRAM
+
+START   LEA     MSG,A5          * Msg adr --> A5
+        LEA     ENDMSG,A6       * End+1   --> A6
+        MOVE.B  #OUT1CR,D7
+        TRAP    #14             * Send message
+
+FINISH  MOVE.B  #TUTOR,D7
+        TRAP    #14             * Go to TUTOR
+
+        ORG     DATA
+
+MSG     DC.B    'Hi There'
+ENDMSG  *
+
+        END

@@ -1,0 +1,5 @@
+*               PROG1.LNK
+*               Link the program
+
+                LINK PROG1
+                END
