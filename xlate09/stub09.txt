@@ -1,0 +1,200 @@
+********************************************************************
+*             MC6809 TO MC68000 CONVERSION FRONT END STUB
+*
+*                           ***STUB09***
+*
+*        THIS CODE CONTAINS SUBROUTINES THAT SUPPORT THE TRANSLATION
+*        PROCESS. THEY CAN BE CLASSIFIED INTO 3 AREAS :
+*                  1) INSTRUCTION SIMULATION
+*                  2) DATA REGISTER MANIPULATON
+*                  3) CONDITION CODE CONTROL
+ 
+*        THE TRAN09 PROGRAM WILL REPLACE ANY END STATMENT CONTAINING
+*        AN ENTRY POINT ADDRESS WITH THE SEQUENCE:
+*
+*                  ...START  EQU       <OLD.END.ENTRY>
+*                            END       ...INIT
+*
+*        THIS ALTERS INITIAL CONTROL TO THE CODE BELOW WHICH IS
+*        REQUIRED TO INITIALIZE THE SYSTEM STACK AND PSUEDO PROGRAM
+*        STACK BEFORE ACTUALLY ENTERING THE CONVERTED PROGRAM PROPER.
+ 
+         SECTION   0
+ 
+         DS.W      30        USER 68000 CODE STACK FOR STUB USE ETC.
+..STACK  DS.W      1         STACK UPPER LIMIT
+ 
+*      THE ABOVE STACK IS ONLY USED FOR INTERNAL SUBROUTINE CALLS
+*      AND POSSIBLE 68000 CODE ADDED BY THE USER.  USER ADDED
+*      CODE MUST REMEMBER THAT SP DOES NOT POINT TO THE CONVERTED
+*      PROGRAM'S OPERATIVE STACK (S) WHICH INSTEAD IS BASED ON A6.
+ 
+         XDEF      ..DIN,..DOUT,..JSR,..RTS,..CTOX,..CREP,..VREP
+         XDEF      ..DPR,..DPW,..CLRAB,..MUL,..INIT
+ 
+..INIT   LEA       ..STACK,SP      STACK FOR INTERNAL AND USER 68000 CODE USE
+ 
+*                        INITIALISE REGISTERS
+ 
+         MOVEQ.L   #0,D0     ACCA
+         MOVEQ.L   #0,D1     ACCB
+         MOVEQ.L   #0,D2     ACCD  (A+B CONCATENATED WHEN NECESSARY)
+         MOVEQ.L   #0,D3     TEMPORARY REG
+         MOVEQ.L   #0,D4     ADDRESS PASS REGISTER (TO UPDATE CONDITION CODES)
+         MOVEQ.L   #0,D5     CCR TEMP REG
+         MOVEA.L   D0,A0     X
+         MOVEA.L   D0,A1     Y
+         MOVEA.L   D0,A2     PC (LOAD WHEN NEEDED FOR PCR ADDR MODE EMULATION)
+         MOVEA.L   D0,A3     TEMPORARY REGISTER
+         MOVEA.L   D0,A4     DP (BITS 8 TO 15)
+         MOVEA.L   D0,A5     U
+         MOVEA.L   D0,A6     S
+         JMP       ..START(PC)         START USER CODE
+ 
+*        A TYPICAL STACK CONFIGURATION MIGHT BE :-
+*
+*                     WORDS
+*                  |_________|         ..STACK-30
+*                  |_________|             ^
+*                  |_________|             !          SYSTEM USER STACK (A7)
+*                  ~_________~             !
+*                  |_________|             !
+*        __________|_________|_______  ..STACK
+*                  |_________|             ^
+*                  |_________|             !       6809 PSEUDO S STACK (A6)
+*                  ~_________~             !
+*                  |_________|             !
+*        __________|_________|_______  ..STAK09
+*                  |_________|             |
+*                  ~_________~             |       6809 GLOBAL VARIABLES (A5)
+*                  |_________|             |
+*                  |_________|             V
+*
+*        COMMON PRACTICE IS TO USE U AS A STACK MARK TO REFERENCE GLOBAL
+*        VARIABLES PLACED IN MEMORY HIGHER THAN THE S STACK.
+ 
+ 
+*********************
+* SIMULATION ASSIST *
+*     SUBROUTINES   *
+*********************
+ 
+**********
+* SET 'X' BIT SAME AS 'C' BIT. CALL BEFORE 68K INSTRUCTIONS WHICH USE THE
+* 'X' BIT.
+ 
+..CTOX   MOVE.W    (A7)+,SR  RESTORE STACK
+         ORI.B     #$10,CCR  SETR X BIT
+         BCS.S     ..XOK     IF CARRY SET, FINISH
+         ANDI.B    #$EF,CCR  ELSE CLEAR X BIT
+..XOK    RTS                 RETURN TO CALLER
+ 
+**********
+* JSR CAN ONLY OPERATE WITH A7. TO MAINTAIN COMPATIBLITY WITH 6809 CODE
+* THE 6809 PSEUDO S STACK MUST BE UPDATED ACCORDINGLY.
+ 
+..JSR    MOVE.W    SR,-(A7)  SAVE CCR
+         MOVE.L    2(A7),-(A6)  TRANSFER RETURN ADDRESS TO 6809 S STACK
+         MOVE.L    A3,2(A7)     TRANSFER CALL ADDRESS TO SYSTEM STACK
+         RTR                 RETURN TO CALLED ROUTINE WITH ORIGINAL CCR
+ 
+**********
+* RTS CAN ONLY OPERATE WITH A7. TO MAINTAIN COMPATIBILITY WITH 6809 CODE
+* THE RETURN ADDRESS WILL BE ON THE PSEUDO S STACK AND MUST BE TRANSFERED
+* BACK TO THE SYSTEM STACK.
+ 
+..RTS    MOVE.W    SR,-(A7)  SAVE CCR
+         MOVE.L    (A6)+,2(A7)  TRANSFER RETURN ADDRESS TO SYSTEM STACK
+         RTR                 RETURN TO CALLING ROUTINE
+ 
+**********
+* PSUEDO ACCD IS REG D2. ACCA (D0) AND ACCB (D1) MUST THEREFORE BE CONCATENATED
+* TO FORM ACCD. CALL BEFORE INSTRUCTIONS OPERATING ON ACCD. MUST BE COUPLED
+* WITH A CALL TO ..DOUT BEFORE FURTHER ACCA/B OPERATIONS.
+ 
+..DIN    MOVE.W    SR,-(A7)  SAVE CCR
+         MOVE.W    D0,D2     ACCA TO D LS BYTE
+         LSL.W     #8,D2     MOVE TO MS BYTE, CLEAR D LS BYTE
+         OR.W      D1,D2     ACCB TO D LS BYTE
+         RTR                 RETURN & RESTORE CCR
+ 
+**********
+* PSUEDO ACCD IS REG D2. AFTER ACCD OPERATION, D2 MUST BE SPLIT TO FORM THE
+* NEW ACCA (D0) AND ACCB (D1).
+ 
+..DOUT   MOVE.W    SR,-(A7)  SAVE CCR
+         MOVE.W    D2,D1     D TO B
+         ANDI.W    #$00FF,D1 CLEAR MS BYTE
+         LSR.W     #8,D2     MOVE MS BYTE TO LS BYTE, CLEAR MS BYTE
+         MOVE.W    D2,D0     D TO A
+         RTR
+ 
+**********
+* PSUEDO DP REG IS MS BYTE (FOR EASY CONCATENATION) OF A4.W . BEFORE READING
+* DP (I.E. BY EXG OR TFR), IT MUST BE TRANSFERED AND ADJUSTED TO LS BYTE.
+* NOTE : CCR SAVE NOT NECESSARY. SUBSEQUENT CODE WILL CORRUPT IT.
+ 
+..DPR    MOVE.W    A4,D3     DP TO TEMP
+         LSR.W     #8,D3     SHIFT INTO LS BYTE
+         AND.L     #$000000FF,D3   ENSURE EVERYTHING ELSE IS CLEAR!
+         RTS
+ 
+**********
+* PSUEDO DP REG IS MS BYTE (FOR EASY CONCATENATION) OF A4. BEFORE WRITING
+* DP (I.E. BY EXG OR TFR), IT MUST BE TRANSFERED AND ADJUSTED TO MS BYTE.
+* TO AVOID PROBLEMS WITH SIGN EXTENSION, DURING MANIPULATION DP IS CONSIDERED
+* AS A4.L .
+ 
+..DPW    MOVE.W    SR,-(A7)  SAVE CCR
+         LSL.W     #8,D3     SHIFT INTO MS BYTE, CLEAR LS BYTE
+*                            MS WORD SHOULD ALREADY BE CLEAR.
+         MOVE.L    D3,A4     MOVE TEMP TO DP
+         RTR
+ 
+**********
+* TO SIMULATE MUL, MS BYTE OF RESULT FROM MULU MUST BE MOVED INTO D0 (ACCA)
+* AND ADJUSTED. MS BYTE OF D1 (ACCB) SHOULD ALSO BE CLEARED.
+ 
+..MUL    MULU.W    D0,D1     A x B TO B
+         MOVE.W    D1,D0     COPY B TO A
+         LSR.W     #8,D0     SHIFT MS BYTE TO LS BYTE OF A, CLEAR MS BYTE
+         AND.W     #$00FF,D1 CLEAR MS BYTE OF B
+         RTS
+ 
+**********
+* SOME 68K CODE WILL CORRUPT THE MS BYTES OF D0 (ACCA) AND D1 (ACCB). TO
+* MAINTAIN INTEGRITY, THESE BYTES SHOULD BE CLEARED. SOME OPERATIONS
+* WILL ASSUME THIS TO BE THE CASE (E.G. INSTRUCTIONS AFFECTING ACCA/B
+* WHICH DO NOT SUPPORT BYTE SIZE OPERATIONS).
+ 
+..CLRAB  MOVE.W    SR,-(A7)  SAVE CCR
+         ANDI.L    #$000000FF,D0 CLEAR MS BYTE A
+         ANDI.L    #$000000FF,D1 CLEAR MS BYTE B
+         RTR
+ 
+*************************************************************************
+*
+*   OPTIONAL ROUTINES TO CORRECT CLEARING OF THE C AND V BITS
+*   (SEE USERS GUIDE FOR IMPLIMENTATION). D5 ASSUMED TO CONTAIN OLD CCR.
+
+..CREP   ANDI.B    #$FE,CCR  CLEAR CARRY
+         MOVE.W    SR,-(A7)  SAVE CCR
+         LSR.W     #1,D5     OLD C BIT TO C
+         BCC.S     ..CSROK   QUIT IF C CLEAR
+         ORI.B     #$01,1(A7) ELSE SET C IN STACKED CCR
+..CSROK  RTR                 RETURN AND RESTORE CORRECTED CCR
+
+..VREP   ANDI.B    #$FD,CCR  CLEAR V BIT
+         MOVE.W    SR,-(A7)  SAVE CCR
+         LSR.W     #2,D5     OLD V BIT TO C
+         BCC.S     ..VSROK   QUIT IF C CLEAR
+         ORI.B     #$02,1(A7) ELSE SET V IN STACKED CCR
+..VSROK  RTR                 RETURN AND RESTORE CORRECTED CCR
+
+         OPT       A,FRS     ABSOLUTE EXPRESSIONS AND 16-BIT FORWARDS
+
+*********** END OF CONVERSION FRONT-END CODE***********
+
+..START  EQU       *         DEFAULT ENTRY TO PROGRAM IF NO END STMT OPERAND
+
+         END

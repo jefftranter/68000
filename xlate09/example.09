@@ -1,0 +1,20 @@
+* Sample input program
+NULL     EQU   0
+         CMPA  #9
+         BLS   CB1HX1           branch if number is 0-9
+         ADDA  #7               number is 10-15 so add 7 to make it A-F
+
+CB1HX1   ADDA  #'0              add the ASCII offset
+         RTS
+
+OP1HEX   PSHS   A               save the binary number
+         BSR    CB1HEX          convert the number to its ASCII equivalent
+         LBSR   OPCHAR          and output it to the system terminal
+         PULS   A,PC            restore the binary number and exit
+         EXG    A,B             save the l.s. ASCII character in B; original 8-bit number to A
+         LSRA                   shift the m.s. half byte into the l.s half byte
+         LSRA
+         LSRA
+         LSRA
+         NOP
+         RTS                    leave the m.s. ASCII character in A

@@ -1,0 +1,1647 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+                                 Users Manual
+                                 ------------
+                               VERSAdos Ver 1.2
+                               MS-DOS   Ver 1.2
+
+
+
+
+
+
+
+                                                       Author : Mike Catherwood
+
+                                                                 Motorola Ltd.,
+                                                                 East Kilbride
+                                                       Ver 1.0 : June 1986
+                                                       Ver 1.1 : Jan  1987
+                                                       Ver 1.2 : Feb  1987
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+
+
+                             CHAPTER  1
+
+                            INTRODUCTION
+
+
+1.1  INTRODUCTION
+=================
+
+
+          The M6809 to M68000 assembly language source translator is  a  Pascal
+
+utility  which  is  available  in versions to run under VERSAdos and MS-DOS.  It
+
+accepts as input a legal M6809 source program and produces as output an  M68000
+
+source file and a file containing a list of translation errors.  In addition to
+
+the errors, warnings are also appended to the output file, indicating  possible
+
+problem  areas.   The  original M6809 source may also be optionally interleaved
+
+with the output M68000 code.  Standard Motorola assembler  syntax  is  assumed,
+
+however,  modification  for use with other assemblers may be possible (refer to
+
+Chapter 5).
+
+
+          Subsequent  to  translation,  the  M68000  source  may  be  optimised
+
+manually or subjected to an optimisation utility which will  identify  some  of
+
+the  more  obvious  redundant code constructs.  Customisation to the new target
+
+enviroment will ofcourse need to be performed manually.
+
+
+          The objectives of the translator were as follows :
+
+
+
+a) To provide around a 90% translation capability.
+
+b) To flag constructs which are not translatable and/or may be problematic.
+
+c) To maximise efficiency through the use of complex addressing modes wherever
+
+   possible.
+
+d) To provide the user with some translation flexiblity to allow a degree
+
+   of customisation, and to simplify the development of future versions.
+
+
+
+                                      -2-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+e) To allow the utility to be easily ported onto alternative hosts.
+
+
+
+
+
+
+1.2 OPERATION DESCRIPTION
+=========================
+
+
+          The M6809 registers are represented in the M68000 as data and address
+
+registers  as  defined  in  Section  3.3  .   Some temporary registers are also
+
+reserved for use by translated code.  The remainder may be freely used  by  any
+
+other  resident  user  code.  Notice that the the M68000 stack pointers are not
+
+used by the translated program except for  calls  to  small  subroutines  which
+
+simulate  untranslatable  instructions and/or correct translation inaccuracies.
+
+This code is refered to as the stub and must  be  linked  with  the  translated
+
+code.   The  translator  will  automatically include external references to the
+
+stub.
+
+
+          The  program  operates  with  two  ascii  files which are essentially
+
+tables that act as databases for the translator.  They are user alterable  (see
+
+Chapter 5).  The first (CODES) contains a list of grouped M6809 opcodes and the
+
+corresponding M68000 fundamental translations (plus warnings  if  appropriate).
+
+For  example,  COMA and COMB are grouped as "*COM", the * indicating the opcode
+
+may be associated with  different  registers.   Instruction  ABX,  however,  is
+
+represented  in  the CODES database as "ABX" as it is inherent.  The associated
+
+translation string contains one or more lines of translated code and  warnings.
+
+Details such as operation size, destination/source effective addresses and code
+
+to compensate for translation inadequacies, are  appended  by  the  translator.
+
+For example, the AND opcode is represented as follows (the  reader should refer
+
+to Chapter 5 for a description of the tokens used  and  how  to  customise  the
+
+databases) :
+
+
+
+                                      -3-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+
+
+
+
+                 *AND
+                 AND. o,D\;* C-BIT CLEARED *
+
+          The warning is enclosed within '*' delimiters.  This example shows an
+
+incompatibility  between  the  6809  and  68000  status  register  carry  bits.
+
+Warnings are issued when there is a minor incompatibility for which -
+
+
+
+
+        a) A problematic situation may arise,
+and/or  b) the amount of code required to correct it was not considered
+           justifiable for all occurances of the instruction.
+
+
+          Should  these  differences create a problem, the user may selectively
+
+append corrective M68000 code,  or  may  opt  to  add  this  code  globally  by
+
+modifying the corresponding database.
+
+
+          The second file (CODES2) contains a list of opcodes which -
+
+
+
+
+(1) Have no operand associated with them and translate without an operand
+    (e.g. RTI translates to RTE),
+
+(2) Contains an operand which will not require modification
+    (e.g. RMB 256 translates to DS.B 256),
+
+(3) Translate to an opcode with a predetermined operand
+    (e.g. RTS translates to BSR ..RTS).
+
+
+          The  translator  does  not  differentiate  between  instructions  and
+
+assembler directives.   Consequently,  CODES2  comprises  mainly  of  directive
+
+translations.
+
+
+          Translator directives may be added to the 6809 source file to control
+
+the translation process, allowing the user to insert additional 68000 code into
+
+the original 6809 source code prior to  translation  (refer  to  Section  2.2).
+
+
+                                      -4-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+Provided  the  translator  is  active and the input line is not a comment, each
+
+source line is parsed and the label, opcode, operand  and  comment  fields  are
+
+identified.  The operand is then examined to determine the addressing mode used
+
+and is modified accordingly.  The databases are then scanned to attempt to find
+
+an  opcode  match  after  which the corresponding root translation is obtained.
+
+Any  necessary  additional  instructions  are  then  appended  and   size   and
+
+source/destination  effective  addresses  are  inserted prior to the code being
+
+sent to the output file.   The  output  file format may leave insufficient room
+
+for an existing comment.  Should this situation arise, the translator will
+
+insert an additional comment line and continue the comment in the comment field
+
+of the new line.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                      -5-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+
+
+                             CHAPTER  2
+
+                        USING THE TRANSLATOR
+
+
+2.1  COMMAND
+============
+
+
+          The  translator is invoked by entering the VERSAdos or MS-DOS commands
+
+of the following form:
+
+
+
+a) VERSAdos -
+
+         TRANS09 <file1>,<file2>;<options>
+
+where:
+
+         <file1>    is the name of the file containing the M6809 source
+                    program. The default extension is .SA .
+
+         <file2>    is the name of the file that will contain the M68000
+                    source program produced by the translator. The default
+                    extension is .SA . If <file2> is omitted, then no output
+                    file will be generated.
+
+                    NOTE : 1) If <file2> already exists it will be overwritten
+                    ----      with the new output from the translator.
+
+         <options>  may be one of the following :
+
+                    I : Interleave original source lines into translated
+                        output file as comments.
+
+                   -I : Do not interleave original source into output file.
+                        Default is condition is -I.
+
+             Z=<size> : where <size> is the number of Kbytes to be used in
+                        the data area of the translator. Default is Z=24.
+
+                       NOTE : If an "Error: heap overflow" message appears
+                       ----   during execution, the Z parameter should be
+                              increased.
+
+
+
+
+
+
+
+
+
+                                      -6-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+b) MS-DOS -
+
+         TRANS09 <file1> <file2> <options>
+
+where:
+
+         <file1>    is the name of the file containing the M6809 source
+                    program. Any file extension may be used.
+
+         <file2>    is the name of the file that will contain the M68000
+                    source program produced by the translator. The extension
+                    will be as specified. If <file2> is omitted, the program
+                    will be aborted.
+
+                    NOTE : 1) If <file2> already exists it will be overwritten
+                    ----      with the new output from the translator.
+
+         <options>  may be one of the following :
+
+                    I : Interleave original source lines into translated
+                        output file as comments.
+
+                   -I : Do not interleave original source into output file.
+                        Default is condition is -I.
+
+
+2.2 GENERAL USE
+===============
+
+
+          The following points should be noted before  attempting  to  use  the
+
+translator :
+
+
+
+a) The user should be totally familiar with both the target and host hardware
+   and software (operating system/executive) enviroments.
+
+b) The user should be familiar with the limitations and restrictions that
+   apply to this translator, and their implications in his system.
+
+
+          When the translator is invoked, there will be a short delay while  it
+
+reads the databases into an array structure.  It will then proceed to translate
+
+each input source line, periodically  updating  the  screen  with  the  current
+
+status.   This  includes  a  count  of  the  number  of  input and output lines
+
+(excluding  comments)  which  provides  an  approximate  idea  of   translation
+
+efficiency.   A  running total of the number of errors encountered and warnings
+
+produced are also displayed.  During operation, the translator will  produce  a
+
+
+                                      -7-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+file  containing  a  list  of any errors called ERRORS.SA (VERSAdos)/ERRORS.TXT
+
+(MS-DOS). Should the error count not be zero after translation, this file  will
+
+contain  the  problem  source  lines  and  their position in both the input and
+
+output files (to assist subsequent editing).  The output file will also contain
+
+an error message at the line where the error was encountered :
+
+
+
+
+        ** ERROR   <message>
+         *         <source line>
+
+
+          The source line comment directive is indented by one column to  force
+
+an  error should this file be inadvertantly assembled.  Refer to appendix A for
+
+a list of error conditions.
+
+
+          Warnings  are  inserted into the translator output file only and take
+
+the following form.
+
+
+
+       ** WARNING **         <message>
+
+
+
+2.3  TRANSLATOR CONTROL
+=======================
+
+
+          Operation of the translator may be controlled through the use of  the
+
+following directives when encountered in the input source file.
+
+
+
+       **PASS                Turn translator off
+
+       **PASSOFF             Turn translator on
+
+
+          The contents of the file sandwiched between these directives will  be
+
+treated  as comment lines.  The first character of the directives must occur in
+
+column 1.  This feature allows the user to enter a block of M68000 source  code
+
+
+
+                                      -8-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+into  the  input  source  file  which will be passed through to the output file
+
+(less the control directives) by the translator.
+
+
+
+
+2.4  POST-TRANSLATION PROCEDURE
+===============================
+
+
+          After  translation,  the output file should be checked for errors and
+
+warning.  Errors must be corrected  or  compensated  for.   Warning  should  be
+
+examined  for  their  significance  and  the code modified where necessary.  It
+
+is likely that the vast majority of warnings will not  require  any  code
+
+modification.   The  user  may  consider  it  useful to make a note of any such
+
+changes or additions.
+
+
+
+
+
+
+         NOTE : 1)  Special attention must be paid to code which relies
+         ----   on parameter passing through the U or S stacks. To reduce
+                the M68000 code overhead, the translator will not attempt
+                to compensate for any differences which may arise. See
+                Chapter 4 for details.
+
+                2)  To minimise software overhead, the translator assumes
+                that indirect addressing mode operands lie between $0 to
+                $7FFF. The user must append additional code as necessary to
+                correct for this anomoly (see Chapter 3). Failure to do so
+                will cause the automatic sign extension performed by the
+                M68000 to form an invalid effective address for the instuction.
+
+
+The  module may now be assembled.  The object code produced must then be linked
+
+with the stub file (STUB09.RO {VERSAdos}/STUB09.BIN  {MS-DOS}).   If  necessary,
+
+the stub source can be modified and reassembled before linking.
+
+
+
+
+
+
+
+
+
+
+
+                                      -9-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+
+
+                             CHAPTER  3
+
+                          TRANSLATION RULES
+
+
+3.1  COMMENTS
+=============
+
+
+          Comments are identified by an asterisk in column  1  and  are  copied
+
+without modification to the output file.
+
+
+
+
+3.2 LABELS
+==========
+
+Labels may be up to 8 characters long and are assumed to be upper case.
+
+
+3.3 REGISTERS
+=============
+
+
+          The translator assigns the following M68000 registers as pseudo M6809
+
+registers.   In addition, it also reserves some temporary registers for its own
+
+use.  Any user code added after translation must preserve these registers where
+
+necessary.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                     -10-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+
+
+
+         M6809          M68000           comments
+         -----          ------           --------
+           A             D0.B
+           B             D1.B
+           D             D2.W    <---- only created when required
+           X             A0.W
+           Y             A1.W
+          DP             A4.W    <---- bits 8 to 15
+           U             A5.W
+           S             A6.W
+
+                         D3.L          scratch data register
+                         D4.L          address pass through register
+                         D5.W          SR temporary holding register
+                         A2.L          PC for PCR simulation when needed
+                         A3.L          scratch address register
+                         A7.L          system stack pointer
+
+
+          All  operations are byte or word sized except when sign extention may
+
+cause a problem (for example, when loading  address  registers,  pulling  words
+
+from  a  stack  (using MOVEM) or as a consequence of the translation of certain
+
+addressing  modes).   It  is  therefore  necessary  to  ensure  that  the  most
+
+significant  (essentially  unused)  bits  of  the  data registers remain clear,
+
+otherwise invalid data may be transfered.  For example :
+
+
+
+
+1)  TFR  D,X  ------>   BSR    ..DIN          create D reg
+                        MOVE.L D2,A0          move to X
+                        BSR    ..DOUT         update A & B
+
+    The last line is redundant and would be removed by the optimiser (if
+    called).
+
+2)  LDA  [B,Y] ----->   MOVE.L (A1,D1.W),A2   get effective address
+                        MOVE.B (A2),D0        get data
+
+
+          In example (1), the D  reg  is  created  by  concatenating  A  and  B
+
+registers  (refer  to stub listing file).  Note that the MOVE operation is long
+
+word to avoid sign extension.  Any invalid data in unused parts  of  D0  or  D2
+
+will  therefore  cause an incorrect value to be loaded into A0 (X).  In example
+
+
+                                     -11-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+(2), during the effective address calculation, the D1 (B) register  has  to  be
+
+word  sized.   It will also be sign extended to 32 bits.  Consequently, invalid
+
+data in bits 8 to 15 of D1 may produce an incorrect effective address.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                     -12-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+
+
+
+3.4 CONSTANTS
+=============
+
+
+          Constants  are  generally  not  modified by the translator.  The only
+
+exception to this rule  is  the  checking  of  string  and  character  constant
+
+delimiters.   The  only  delimiters  permitted  are  '  and  " characters.  The
+
+translator ensures that all occurances of string and  character  constants  are
+
+delimited  (at  both  ends) with a ' character to ensure compatibility with the
+
+Motorola M68000 assembler.
+
+
+
+
+3.5 EXPRESSIONS
+===============
+
+Expressions are not modified by the translator.
+
+
+3.6 MACROS
+==========
+
+
+          The  translator  supports  M6809  assembler  macro  calls.   As macro
+
+definitions are encountered by the translator, their names  are  stored  in  an
+
+table.   Should the translator be subsequently unable to match an opcode to any
+
+database entry, it will scan the macro name table for a match before issuing an
+
+"Unable to translate" error message.  The translator is able to store up to 100
+
+macro identifiers.  Exceeding this limit will produce an error.
+
+
+
+
+3.7 ADDRESSING MODES
+====================
+
+
+          The  translator  supports  all M6809 addressing modes.  The following
+
+paragraphs provide typical examples for  the  translation  of  each  addressing
+
+
+
+                                     -13-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+mode.
+
+
+
+3.7.1  Inherent
+
+         COMA      ===============>    NOT.B   D0
+                                       ORI.B   $01,CCR
+
+3.7.2  Immediate
+
+         ORA   $FE  =============>    OR.B    $FE,D0
+                                    ** WARNING       C-BIT CLEARED
+
+3.7.3  Extended
+
+         INC  $2000  =============>    ADDQ.B  1,$2000
+                                    ** WARNING       C-BIT MODIFIED
+
+3.7.4  Direct
+
+         STA  <TEMP  =============>    MOVE.B   D0,TEMP(A4)
+                                    ** WARNING       C-BIT CLEARED
+
+3.7.5  Indexed
+
+3.7.5.1  Constant offset from register
+
+         CMPA  10,X  =============>    CMP.B    10(A0),D0
+
+         LDA   Y     =============>    MOVE.B   0(A1),D0
+
+3.7.5.2  Accumulator offset from register
+
+         CMPA  B,X   =============>    CMP.B    (A0,D1.W),D0
+
+3.7.5.3  Autoincrement/decrement from register
+
+         LDA   ,X++  =============>    MOVE.B   (A0),D0
+                                       ADDQ.L   2,A0
+
+         LDA   ,-X   =============>    MOVE.B   -(A0),D0
+
+         JSR   ,X+   =============>    LEA.L    (A0),A3
+                                       ADDQ.L   2,A0      [NOTE ORDER OF
+                                       BSR      ..JSR       OPERATION]
+
+3.7.5.4  Indirection
+
+                                 NOTE
+                                 ====
+             To minimise code overhead, the translator assumes that
+          indirect addresses reside within the range $0 to $7FFF.
+          Ofcourse, this may not be true, in which case additional code
+          must be selectively added after translation to avoid sign
+          extension of the indirect effective address.
+
+                                     -14-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+
+
+         LDA   [,X]   ============>    MOVE.W   (A0),A2    0 <= X <= $7FFF
+                                       MOVE.B   (A2),D0
+
+         LDA   [$6000,Y]  ========>    MOVE.W   $6000(A1),A2    Y <= $1FFF
+                                       MOVE.B   (A2),D0
+
+                          ========>    CLR.L    D4           |  Y >= $2000
+                                       MOVE.W   $6000(A1),D4 |-- USER
+                                       MOVE.L   D4,A2        |   MODIFIED
+                                       MOVE.B   (A2),D0
+
+3.7.5.5  Extended Indirect
+
+         CMPA  [$2000] ===========>    MOVE.W   $2000,A2
+                                       CMP.B    (A2),D0
+
+         CMPA  [$A000] ===========>    CLR.L    D4       |
+                                       MOVE.W   $A000,D4 |-- USER MODIFIED
+                                       MOVE.L   D4,A2    |
+                                       CMP.B    (A2),D0
+
+
+3.7.5.6  Program counter relative
+
+         LDX   MESS,PCR  =========>    CLR.L     D4
+                                       MOVE.W    MESS(PC),D4
+                                       MOVE.L    D4,A0
+                                    ** WARNING   C-BIT CLEARED
+3.7.6  Branch relative
+
+         LBNE  LOOPY  ============>    BNE       LOOPY
+
+
+3.8  OPCODES
+============
+
+
+          The opcode translations may be obtained through an examination of the
+
+database files CODES and CODES2.
+
+
+
+
+3.9  CONDITION CODES
+====================
+
+
+          Fortunately, most M68000 instructions modify the condition codes in a
+
+manner compatible with the M6809.  However, 100%  compatibility is not possible
+
+without  an  unacceptable  corrective  code  overhead.  Consequently, for those
+
+
+                                     -15-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+instructions where a difference occurs, a warning will  be  issued.   The  user
+
+should examine all warnings and modify the translator output code if necessary.
+
+Note that the M6809 H-bit is not supported.
+
+
+          Code  is  added  to  correct  the  following  common  condition  code
+
+incompatibilities.
+
+
+
+
+1)  A call to stub subroutine "..CTOX" should be inserted before M68000
+    instructions that use the X-bit to copy the C-bit into the X-bit. The
+    translator database includes these calls.
+
+2)  A call to stub subroutines "..CREP" and "..VREP" may be inserted after
+    an instruction which corrupts the C or V flags. These routines require
+    the original status register contents to be placed into register D5
+    prior to execution of the instruction that corrupts the flags. The
+    translator database does not include references to these calls but may
+    be modified to do so if required (see Chapter 5).
+
+
+          All  operands  of instructions operating with an index register (i.e.
+
+M68000 address register) are passed through data register D3 in order to modify
+
+the  condition  codes.  This additional instruction may be removed at the users
+
+discretion after translation.
+
+
+
+
+3.10  DIRECTIVES
+================
+
+
+          The  translator  will  accept  and translate most commonly used M6809
+
+assembler directives.  The CODES2 database file should be examined for  a  list
+
+of   those  supported.   Additional  directives  (or  those  from  non-Motorola
+
+compatible M6809 assemblers) may be added  (see  Chapter  5).   The  translator
+
+handles the "NAM" and "END" directives in the following manner.
+
+
+
+
+         NAM    <name>    =====>  <name>    IDNT  1,1
+
+
+                                     -16-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+         END              =====>            END
+
+         END    <label>   =====>  ..START   EQU    <label>
+                                            XDEF  ..START
+                                            END
+
+
+          The  label  ..START  is  an external reference for the initialisation
+
+stub which must be linked with the final translated code  after  assembly.   It
+
+defines  the  address  to  which  the initialisation stub must jump in order to
+
+commence execution of the users code.  The program should  start  execution  at
+
+the label ..INIT.
+
+
+
+
+3.11 HINTS
+==========
+
+
+          The following hints will improve the translation efficiency  and  may
+
+help avoid translation bugs/anomolies.
+
+
+
+
+1) Avoid using the RTS instruction; use PULS PC instead.
+2) Minimise direct access of the DP register.
+3) Minimise use of instructions which use the D register and/or ...
+4) Group all D register instructions together and remove redundant D register
+   manipulation stub calls.
+5) Minimise the use of the accumulator indexed addressing mode using the D
+   register.
+6) Attempt to ensure, wherever practical, that indirect addressing mode
+   operands lie within the address range $0 to $7FFF. The user must append
+   additional code if this is not the case.
+7) All instructions which modify program flow will translate to instructions
+   with long word operands.
+8) Calls to stub subroutines are relative with 16-bit offsets.
+9) The addressing mode for single character operands of characters X,Y,U or S
+   is assumed to be indexed (e.g. LDA X =====> LDA 0,X)
+10) Byte field labels cannot be externally defined (XDEF).
+11) The translator will swop the register order in the operand of the EXG
+    instruction if the 2nd register specified is D (M68000 EXG Ay,Dy is
+    not allowed).
+
+
+
+
+
+
+
+                                     -17-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+
+
+                             CHAPTER  4
+
+                            RESTRICTIONS
+
+
+4.1  GENERAL
+============
+
+
+          The following general points should  be  observed  before  using  the
+
+translator.
+
+
+
+
+a) The M6809 to be translated must assemble error free.
+b) Change of flow instructions must not have absolute operands (labels only).
+c) Constant strings can only use " or ' delimiters.
+d) Constant string delimiter combinations of '" and "' are not allowed.
+   Replace with "'" or '"' .
+e) The M6809 H-bit is not supported.
+f) The M6809 instruction DAA is not supported. The user should modify his
+   code to utilise the M68000 BCD arithmetic instructions.
+g) Some code translations will not modify all condition codes correctly.
+h) Unlike an assembler, the translator does not operate with a pseudo PC.
+   Consequently, the direct addressing mode must always be forced by preceding
+   the operand with a < character. The "force extended" character > and all
+   other occurances of the < character (with other addressing modes) are
+   ignored.
+i) PSH and PUL instruction operands must contain the appropriate register
+   list - label references are not allowed.
+
+
+4.2  STACK FRAME
+================
+
+
+          In order to minimise any software overhead, little attempt  has  been
+
+made  to  effect a compatible stack frame structure.  Consequently, the user is
+
+responsible for reorganising any parameter passing or  other  operations  which
+
+use the M6809 U or S stacks.
+
+
+
+
+
+
+
+
+
+
+                                     -18-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+
+
+
+
+                                         MSB     LSB
+                                       ======= ========
+                                       |  -   |   -   |
+                  PUSH    PULL         |  -   |  ACCB |
+         =======                       |  -   |   -   |
+         | CCR |   ^        |          |  -   |  ACCA |
+         | ACCA|   |        |          |  -   |   -   |
+         | ACCB|   |        |          | IXH  |  IXL  |    - = NOT USED
+         | DPR |   |        |          |  -   |  -    |    x = STACK POINTER
+         | IXH |   |        |          | IYH  |  IYL  |
+         | IXL |   |        |          |  -   |  -    |
+         | IYH |   |        |          | DPR  |  -    |
+         | IYL |   !        |          |  -   |  -    |
+         | xSH |   !        |          | xSH  |  xSL  |
+         | xSL |   !        v          |  -   |  CCR  |
+         | PCH |                       | PCH  |  PCMU |
+         | PCL |                       | PCML |  PCL  |
+
+
+   M6809 STACKING ORDER           M68000 (PSUEDO) STACKING ORDER
+   оооооооооооооооооооо           оооооооооооооооооооооооооооооо
+
+
+          To avoid possible problems with sign extension, all stack  operations
+
+are  long  words, with the exception of the CCR (LSB of SR) which is moved as a
+
+word.  The D register may be specified as  either  A,B  or  D  in  the  PSH/PUL
+
+register  list,  but will always be considered as separate A and B registers by
+
+the translator.
+
+
+
+
+
+
+4.3 TFR/EXG INSTRUCTIONS
+========================
+
+
+          EXG or TFR of the PC with a register is not supported.   EXG  of  the
+
+CCR  with  another (8 bit) register, is also not supported.  These instructions
+
+should be replaced with alternative M6809/M68000 code prior to translation,  as
+
+shown below.  Failure to do so will produce an error.
+
+
+
+
+                                     -19-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+                          Replace with
+         TFR    X,PC      ============>     JMP    ,X
+
+         TFR    PC,Y      ============>     LEAY   0,PCR
+
+         EXG    PC,X      ============>     MOVEA.L A0,A3    |
+                                            LEA.L  2(PC),A0  |- disable
+                                            JMP    (A3)      |  translator
+
+
+          TFR  of  the  DP  register  to/from an (8-bit) register is permitted,
+
+however, the CCR is modified (as per the M68000 MOVE instruction).
+
+
+
+4.4  (MEMORY) INDIRECT ADDRESSING
+=================================
+
+
+          The  M68000  will automatically sign extend word size data moved into
+
+an address  register  to  32  bits.   Consider  the  indirect  addressing  mode
+
+translation example shown below.
+
+
+
+         STA       [0,Y]     =============>      MOVE.W   (A1),A2
+                                                 MOVE.B   D0,(A2)
+
+
+          To avoid the  sign  extension  problem,  it  is  necessary  that  the
+
+contents  of  the word that A1 points to lie between $0 and $7FFF.  Should this
+
+not be the case then the code must be modified in the  following  manner  after
+
+translation.
+
+
+
+
+         STA       [0,Y]    ------------->    |  CLR.L    D4   (optional)
+                                              |  MOVE.W   (A1),D4
+                                              |  MOVE.L   D4,A2
+                                                 MOVE.B   D0,(A2)
+
+
+          Note  that  the  move  through  the  data  register  will  effect the
+
+condition code register.
+
+
+
+
+
+                                     -20-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+
+
+
+
+                             CHAPTER  5
+
+                     MODIFYING THE DATABASE FILES
+
+
+5.1  GENERAL
+============
+
+
+          The database files used by the translator may be modified by the user
+
+to  support  additional   directives   or   provide   alternative   instruction
+
+translations.  The databases contain information relating to the translation of
+
+the instructions and directives.  They provide a fundamental translation  which
+
+the  translator  can  generally apply to all addressing modes.  Each ASCII file
+
+contains two entries (lines) for each instruction/directive.  The  first  is  a
+
+tag  (instruction  identifier),  the  second  an  associated  data  string (the
+
+translation).  The tags must reside on even numbered lines.
+
+
+
+
+5.2  TAG ENTRY
+==============
+
+
+          The  tag entry contains the root form of the instruction (e.g.  LD is
+
+the root form of LDA, LDB, LDS etc,.).  If the instruction refers to a register
+
+within  its opcode, then an asterix (*) is placed in column 1 of the tag field
+
+(e.g.  *LD ).
+
+
+
+
+5.3  DATA STRING
+================
+
+
+          The   data  string  contains  (1)  the  instruction(s)  necessary  to
+
+effectively translate the input instruction or (2)  a  corresponding  assembler
+
+
+
+                                     -21-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+directive.   Up to 6 instructions may be included within each data string.  The
+
+following special characters are used as control  characters  or  as  codes  to
+
+identify missing parameter positions.
+
+
+
+
+     o   Indicates the expected position of the (translated) operand.
+     p   Indicates that the translation cannot support the PC relative
+         addressing mode (so the translator must take special action).
+     \   Indicates the expected position of the implied register.
+     ;   Indicates end of translation line - more may follow.
+     ^   Separates alternative translations for registers A,B,D and U,S,X,Y.
+     *   Indicates that the next "instruction" (i.e. upto the next ; character)
+         is a warning.
+     .   If the next character is a space then this indicates that the
+         operation size attribute should be inserted by the translator.
+
+
+
+5.4  RULES
+==========
+
+
+1) Each translation data string must reside on one line of less than 100
+   characters.
+2) No more than 6 translation lines are allowed per M6809 instruction
+   (this includes additional lines added by the translator).
+3) Should a line contain the ^ character, then the string preceding the
+   ^ will be used if the implied register is A,B or D. The string after
+   the ^ will be used for implied registers U,S,X or Y.
+4) It is not generally necessary to terminate each data string entry with an
+   end of line character. However, if a control character is required as the
+   last character in a line, then it must be followed by a space and an
+   an end of line character (;).
+5) If the operation size (byte, word or long word) is not included in the
+   data string, then the translator will append it according to the
+   size of the implied register.
+6) When required, the 'p' character may appear at any point within the data
+   string.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                     -22-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+
+
+5.5 EXAMPLES
+============
+
+
+1) Load register from memory instruction
+
+
+ register flag       translation option
+   |                     delimiter                          warning
+   |    operand             |                                  |
+   *LD    |                 |                                  |
+   MOVE.  o,D\;* C-BIT CLR *^CLR.L D4;MOVE. o,D4;MOVEA.L D4,A\;* C-BIT CLR *
+        |    |                       |
+        |    |                       |
+  missing   register number     instruction
+   size                          delimiter
+
+
+2) Complement memory instruction
+
+      PC relative
+         flag
+          |
+   COM    |
+   NOT.B op;ORI.B $01,CCR
+
+
+3) Load effective address
+
+         space + delimiter
+              |
+   *LEA      ||
+   LEA.L o,A\ ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                     -23-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+
+
+
+                             APPENDIX  A
+
+                            ERROR MESSAGES
+
+
+1 -  Invalid Implied Register :
+
+     The translator does not recognise implied register
+
+     e.g.   LDZ  TEMP        {Z is not a valid register}
+
+2 -  Unable to translate :
+
+     The translator is unable to find a match for the opcode in either
+     database tag fields, or match it to a macro table entry.
+
+3 -  Too many macro names :
+
+     The translator has encountered more than 100 macro definitions in the
+     M6809 input source file.
+
+4 -  Invalid PSH/PUL register :
+
+     The translator has encountered an invalid register name within the
+     register list.
+
+     e.g.   PSHU  REGLIST    {register lists cannot be equated to labels}
+
+5 -  PC not supported :
+
+     The translator does not permit the PC register to be a valid register
+     in the TFR and EXG M6809 instructions. Alternative M6809 code should
+     be substituted.
+
+     e.g.   TFR  X,PC        {PC not allowed - substitute with JMP 0,X }
+
+6 -  CCR not supported :
+
+     The translator does not permit the CCR register to be a valid register
+     in the EXG instruction. Alternative M6809/M68000 code should be
+     substituted.
+
+     e.g.   EXG  A,CCR       {CCR not allowed}
+
+7 -  Invalid second (index) register :
+
+     The translator is umable to identify the index register within the
+     operand.
+
+     e.g.   LDA  TEMP,Z      {Z is not a valod register}
+
+
+
+
+                                     -24-
+
+
+
+              M6809 to M68000 Assembly Language Source Translator
+              ---------------------------------------------------
+
+
+
+8 -  Invalid first register :
+
+     The translator is unable to identify the first register encountered
+     in the operand of an EXG or TFR instruction.
+
+     e.g.   TFR  Z,A         {z is not a valid register}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                     -25-
