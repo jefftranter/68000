@@ -29,8 +29,8 @@ Included here is the following:
 A 6809 test file which can be converted to 68000 code using the tool.
 
 The original trans09.com executable will run under Linux the dosbox
-MS-DOS emulator on Linux. It may also run on Windows, I have not tried
-it.
+MS-DOS emulator on Linux. I was also able to run it under Windows 10,
+but I got a number of errors that I had to ignore.
 
 The Pascal source can be compiled to generate a Linux executable which
 will run. The data files must be in the same same directory where the
