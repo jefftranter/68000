@@ -26,7 +26,6 @@ var      image: string[imagelen];      { input image }
          comment: string[imagelen];    { comment }
          lines: integer;               { total input lines read }
          comm_in: integer;             { input comment line count }
-         reg  : integer;               { inherent register number}
          errors: integer;              { diagnostic count - errors }
          warnings: integer;            { diagnostic count - warnings }
          linesout: integer;            { code lines into output file }
@@ -36,17 +35,14 @@ var      image: string[imagelen];      { input image }
          passthis: boolean;            { pass this record thru unaltered }
          passflag: boolean;            { pass flag for general pass }
          indirect: boolean;            { indirect address mode flag }
-         pcr : boolean;                { pcr addr mode flag}
          direct: boolean;              { direct address mode flag }
          problem : boolean;            { fatal error flag}
-         xflag: boolean;               { indicates type of indirection }
          interleave : boolean;         { 6809 source interleave flag }
          t : char;
          X,Y,U,S,A,B,DP,CC,PC,D : boolean;  { partial register set }
          DPR,DPW  : boolean;   {DP reg read and write flags}
          label_flag : boolean;  {prevents multiple label prints}
          index : char;
-         first : char;
          t2 : chars;                   { temp}
          posi : integer;
          i : integer;
@@ -72,18 +68,17 @@ var      image: string[imagelen];      { input image }
           last1  : char;
           lenopc : integer;
           z      : integer;
-          delim  : char;
           optab  : opcodes;
           lenoptab:integer;
           tempop : opcodes;
           match  : boolean;
           match2 : boolean;
-          strg1,strg2,strg3 : chars;
+          strg1  : chars;
           auto : integer;
           esc  : char;
 
 procedure replace(strg1, strg2 :chars ; z : integer);
-                                   {swop two strings within a string}
+                                   {swap two strings within a string}
 begin
   pos2:=pos(strg1,oprln[z]);
   if pos2<> 0 then
@@ -373,7 +368,6 @@ begin
           opr:=concat(opr,'(A2)');   {replace (PC) with (A2)}
                                {add code to get address of next instruction}
           oprln[temp]:=concat('LEA.L 0(PC),A2;',oprln[temp]);
-          pcr:=true;
          end;
        end;
  
@@ -515,7 +509,6 @@ begin    lbl := '';
          direct:=false;
          match:=false;
          match2:=false;
-         pcr:=false;
          A := false;
          B := false;
          DP:= false;
@@ -771,7 +764,7 @@ endoperand : if opc='NAM' then         {special fudge for NAM (IDNT) }
                             else
                              begin
                               if opc='EXG' then
-                               begin     {swop operands }
+                               begin     {swap operands }
                                 delete(opr,j,1);
                                 delete(opr,j+2,1);
                                 opr:=concat(opr,',(D2)');

@@ -42,6 +42,12 @@ under dosbox and under Linux.
 Under Ubuntu Linux, dosbox is available in the package "dosbox" and
 the Free Pascal compiler in the package "fp-compiler".
 
+To actually use this tool you may need to modify it and/or the data
+files to work with your particular 68000 cross-assembler. For example,
+the VASM assembler I use does not like the stub routine names starting
+with two dots like "..RTS" but will accept them with only one dot
+(e.g. ".RTS").
+
 Description of files:
 
 README.md - This file.
