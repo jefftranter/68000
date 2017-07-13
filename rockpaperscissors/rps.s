@@ -59,14 +59,14 @@ COMPUTER equ    2
         move.b  #0,COMPUTERWON          Games won by computer.
         move.b  #0,HUMAN                Games won by human player.
 
-        lea.l   (WELCOME,pc),a0         Get startup message.
+        lea.l   (S_WELCOME,pc),a0       Get startup message.
         bsr     PrintString             Display it.
 enter
-        lea.l   (HOWMANY,pc),a0         "How many games do you want to play?"
+        lea.l   (S_HOWMANY,pc),a0       "How many games do you want to play?"
         bsr     PrintString             Display it.
 
         bsr     GetString               Get response.
-        bsr     ValidDec                Make sure it is a valid number
+        bsr     ValidDec                Make sure it is a valid number.
         bvs     invalid                 Complain if invalid.
         bsr     Dec2Bin                 Convert it to number.
 
@@ -76,7 +76,7 @@ enter
         ble     okay                    It is valid.
 
 invalid
-        lea.l   (INVALID1,pc),a0        "Please enter a number from 1 to 10."
+        lea.l   (S_INVALID1,pc),a0      "Please enter a number from 1 to 10."
         bsr     PrintString             Display it.
         bra     enter                   Try again.
 
@@ -87,18 +87,37 @@ gameloop
 
 ; Display "Game number: 1 of 10"
 
-        lea.l   (GAMENUMBER,pc),a0      "Game number: "
+        lea.l   (S_GAMENUMBER,pc),a0    "Game number: "
         bsr     PrintString             Display it.
         move.b  GAMENO,d0               Get game number
         bsr     PrintDec                Display it.
-        lea.l   (OF,pc),a0              " of "
+        lea.l   (S_OF,pc),a0            " of "
         bsr     PrintString             Display it.
         move.b  TOTALGAMES,d0           Get total games.
         bsr     PrintDec                Display it.
         bsr     CrLf                    Newline.
 
-; 1=Rock 2=Paper 3=Scissors
-; 1... 2... 3... What do you play? 1
+enter1
+        lea.l   (S_PLAY,pc),a0          "What do you play?"
+        bsr     PrintString             Display it.
+
+        bsr     GetString               Get response.
+        bsr     ValidDec                Make sure it is a valid number.
+        bvs     invalid1                Complain if invalid.
+        bsr     Dec2Bin                 Convert it to number.
+
+        cmp.l   #1,d0                   Make sure it is in range from 1 to 3.
+        blt     invalid1                Too small.
+        cmp.l   #3,d0
+        ble     okay1                   It is valid.
+
+invalid1
+        lea.l   (S_INVALID2,pc),a0      "Please enter a number from 1 to 3."
+        bsr     PrintString             Display it.
+        bra     enter1                  Try again.
+
+okay1
+        move.b  d0,HUMANPLAY            Save player's move.
 
 ; This is my choice... Paper
 
@@ -361,18 +380,18 @@ Random
 *
 *************************************************************************
 
-WELCOME        dc.b    "Welcome to Rock, Paper, Scissors\r\n================================\r\n",0
-HOWMANY        dc.b    "How many games do you want to play? ",0
-INVALID1       dc.b    "Please enter a number from 1 to 10.\r\n",0
-GAMENUMBER     dc.b    "Game number: ",0
-OF             dc.b    " of ",0
+S_WELCOME       dc.b    "Welcome to Rock, Paper, Scissors\r\n================================\r\n", 0
+S_HOWMANY       dc.b    "How many games do you want to play? ", 0
+S_INVALID1      dc.b    "Please enter a number from 1 to 10.\r\n", 0
+S_INVALID2      dc.b    "Please enter a number from 1 to 3.\r\n", 0
+S_GAMENUMBER    dc.b    "Game number: ", 0
+S_OF            dc.b    " of ", 0
+S_PLAY          dc.b    "1=Rock 2=Paper 3=Scissors\r\n1... 2... 3... What do you play? ", 0
 
 * "Rock"
 * "Paper"
 * "Scissors"
 
-* "1=Rock 2=Paper 3=Scissors"
-* "1... 2... 3... What do you play? "
 * "This is my choice... "
 * " beats "
 * ", I win."
@@ -404,3 +423,9 @@ COMPUTERWON    ds.b     1
 
 * Games won by human
 HUMANWON       ds.b     1
+
+* Human player's most recent play.
+HUMANPLAY      ds.b     1
+
+* Computer's most recent play.
+COMPUTERPLAY   ds.b     1
