@@ -1,3 +1,5 @@
+*************************************************************************
+*
 * This is a simple Rock, Paper, Scissors game implemented in 68000
 * assembler code to run on the TS2 single board computer with the
 * TUTOR ROM monitor.
@@ -9,6 +11,8 @@
 * To Do:
 *
 * Add alternative version for "rock-paper-scissors-Spock-lizard".
+*
+*************************************************************************
 
 *************************************************************************
 *
@@ -48,9 +52,72 @@ COMPUTER equ    2
 * Start address
         ORG     $1000                   Locate in RAM.
 
-start:
-        
-        bsr     PrintString
+* Initialize variables
+
+        move.b  #1,TOTALGAMES           Total number of games.
+        move.b  #1,GAMENO               Current game number.
+        move.b  #0,COMPUTERWON          Games won by computer.
+        move.b  #0,HUMAN                Games won by human player.
+
+        lea.l   (WELCOME,pc),a0         Get startup message.
+        bsr     PrintString             Display it.
+enter
+        lea.l   (HOWMANY,pc),a0         "How many games do you want to play?"
+        bsr     PrintString             Display it.
+
+        bsr     GetString               Get response.
+        bsr     ValidDec                Make sure it is a valid number
+        bvs     invalid                 Complain if invalid.
+        bsr     Dec2Bin                 Convert it to number.
+
+        cmp.l   #1,d0                   Make sure it is in range from 1 to 10.
+        blt     invalid                 Too small.
+        cmp.l   #10,d0
+        ble     okay                    It is valid.
+
+invalid
+        lea.l   (INVALID1,pc),a0        "Please enter a number from 1 to 10."
+        bsr     PrintString             Display it.
+        bra     enter                   Try again.
+
+okay
+        move.b  d0,TOTALGAMES           Set total games to play.
+
+gameloop
+
+; Display "Game number: 1 of 10"
+
+        lea.l   (GAMENUMBER,pc),a0      "Game number: "
+        bsr     PrintString             Display it.
+        move.b  GAMENO,d0               Get game number
+        bsr     PrintDec                Display it.
+        lea.l   (OF,pc),a0              " of "
+        bsr     PrintString             Display it.
+        move.b  TOTALGAMES,d0           Get total games.
+        bsr     PrintDec                Display it.
+        bsr     CrLf                    Newline.
+
+; 1=Rock 2=Paper 3=Scissors
+; 1... 2... 3... What do you play? 1
+
+; This is my choice... Paper
+
+; Paper beats Rock, I win.
+
+        add.b   #1,GAMENO               Increment game number.
+
+        move.b  GAMENO,d0               Get game number.
+        cmp.b   TOTALGAMES,d0           Last game played?
+        ble     gameloop                If not, play next game.
+
+; Final game score:
+; I have won 4 games.
+; You have won 6 games.
+; It's a tie!
+
+; Play again (y/n)? N
+
+
         bra     Tutor                   Return to TUTOR
 
 *************************************************************************
@@ -70,11 +137,11 @@ start:
 * Registers changed: none
 *
 *************************************************************************
-PrintString:
+PrintString
         movem.l d7/a5/a6,-(sp)          Preserve registers that are changed here or by TUTOR.
         move.l  a0,a5                   TUTOR routine wants start of string in A5.
         move.l  a0,a6                   This will be a pointer to the end of string + 1.
-loop1:  cmp.b   #0,(a6)+                Find terminating null.
+loop1   cmp.b   #0,(a6)+                Find terminating null.
         bne.s   loop1                   Loop until found.
         subq.l  #1,a6                   Undo last increment.
 
@@ -100,7 +167,7 @@ loop1:  cmp.b   #0,(a6)+                Find terminating null.
 * Registers changed: A0
 *
 ************************************************************************
-GetString:
+GetString
         movem.l d7/a5/a6,-(sp)          Preserve registers that are changed here or by TUTOR.
 
         move.B  #FIXBUF,d7              Initialize A5 and A6 to point to BUFFER.
@@ -126,7 +193,7 @@ GetString:
 * Registers changed: none
 *
 ************************************************************************
-PrintDec:
+PrintDec
         movem.l d0/d7/a5/a6,-(sp)       Preserve registers that are changed here or by TUTOR.
 
         move.b  #FIXBUF,d7              Initialize A5 and A6 to point to BUFFER.
@@ -152,7 +219,7 @@ PrintDec:
 * Registers changed: none
 *
 *************************************************************************
-printchar:
+PrintChar
         movem.l a0/d0/d1/d7,-(sp)       Preserve registers that are changed here or by TUTOR.
         move.b  #OUTCH,d7               Output character function.
         trap    #14                     Call TRAP14 handler.
@@ -169,12 +236,12 @@ printchar:
 * Registers changed: none
 *
 ************************************************************************
-crlf:
+CrLf
         movem.l d0,-(sp)                Preserve registers that are changed here or by TUTOR.
         move.b  #CR,d0                  Print CR
-        bsr     printchar
+        bsr     PrintChar
         move.b  #LF,d0                  Print LF
-        bsr     printchar
+        bsr     PrintChar
         movem.l (sp)+,d0                Restore registers.
         rts
 
@@ -188,13 +255,13 @@ crlf:
 * Registers changed: D0
 *
 ************************************************************************
-dec2bin:
+Dec2Bin
         movem.l d7/a1/a5/a6,-(sp)       Preserve registers that are changed here or by TUTOR.
 
 * Change null (0) indicating end of string to EOT (4), as required by TUTOR GETNUMD function.
 
         move.l  a0,a1                   Initialize index to start of string.
-find1:  cmp.b   #0,(a1)+                Is it a null?
+find1   cmp.b   #0,(a1)+                Is it a null?
         bne.s   find1
         subq.l  #1,a1                   Go back to position of null.
         move.b  #4,(a1)                 Change it to EOT.
@@ -209,8 +276,35 @@ find1:  cmp.b   #0,(a1)+                Is it a null?
         movem.l (sp)+,d7/a1/a5/a6       Restore registers.
         rts
 
-* random - generate 32-bit random number
-* rand(i,j) - return random number from i through j
+************************************************************************
+*
+* validdec
+*
+* Check for string being a valid decimal number, i.e. only the
+* characters 0-9.
+*
+* Inputs: A0 points to string, which must be terminated in a null.
+* Outputs: Sets overflow bit if invalid, clears if valid.
+* Registers changed: none
+*
+************************************************************************
+ValidDec
+        movem.l a0,-(sp)                Preserve registers.
+
+scan    tst.b   (a0)                    Have we reached end of string?
+        beq.s   good                    If so, we're done and string is valid.
+        cmp.b   #'0',(a0)               Does it start with '0' ?
+        blt.s   bad                     Invalid character if lower.
+        cmp.b   #'9',(a0)+              Does it start with '9' ?
+        bgt.s   bad                     Invalid character if higher.
+        bra.s   scan                    go back and continue.
+
+bad     or      #$02,CCR                Set overflow bit to indicate error.
+        bra.s   ret
+
+good    and     #$02,CCR                Clear overflow bit to indicate good.
+ret     movem.l (sp)+,a0                Restore registers.
+        rts
 
 ************************************************************************
 *
@@ -225,12 +319,29 @@ find1:  cmp.b   #0,(a1)+                Is it a null?
 * Registers used: n/a
 *
 ************************************************************************
-Tutor:
+Tutor
         move.b  #TUTOR,d7               Go to TUTOR function.
         trap    #14                     Call TRAP14 handler.
 
-* Table of Winning Rules
+************************************************************************
+*
+* Random
+*
+* Generate a random 32-bit number between i and j.
+*
+* Inputs: D0.l: minimum value, D1.l: maximum value
+* Outputs: D2.l: returned random number
+* Registers used: D2
+*
+************************************************************************
+Random
+        move.l  #0,d2
+        rts
 
+************************************************************************
+*
+* Table of Winning Rules
+*
 * Player 1      Player 2      Winner
 * (human)       (computer)
 * ------------  ------------  ------
@@ -244,21 +355,22 @@ Tutor:
 * 2 (scissors)  1 (paper)     2 (scissors)
 * 2 (scissors)  2 (scissors)  0 (tie)
 
-
 *************************************************************************
 *
 * Strings
 *
 *************************************************************************
 
-WELCOME        dc.b    "Welcome to Rock, Paper, Scissors\r\n================================",0
+WELCOME        dc.b    "Welcome to Rock, Paper, Scissors\r\n================================\r\n",0
+HOWMANY        dc.b    "How many games do you want to play? ",0
+INVALID1       dc.b    "Please enter a number from 1 to 10.\r\n",0
+GAMENUMBER     dc.b    "Game number: ",0
+OF             dc.b    " of ",0
 
 * "Rock"
 * "Paper"
 * "Scissors"
-* "How many games do you want to play? "
-* "Game number: "
-* " of "
+
 * "1=Rock 2=Paper 3=Scissors"
 * "1... 2... 3... What do you play? "
 * "This is my choice... "
@@ -274,7 +386,6 @@ WELCOME        dc.b    "Welcome to Rock, Paper, Scissors\r\n====================
 * "I win!"
 * "It's a tie!"
 * "Play again (y/n)? "
-
 
 *************************************************************************
 *
