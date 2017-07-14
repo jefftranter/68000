@@ -12,12 +12,14 @@ Game number: 1 of 10
 1=Rock 2=Paper 3=Scissors
 1... 2... 3... What do you play? 1
 This is my choice... Paper
+You played Rock.
 Paper beats Rock, I win.
 
 Game number: 2 of 10
 1=Rock 2=Paper 3=Scissors
 1... 2... 3... What do you play? 1
 This is my choice... Scissors
+You played Rock
 Rock beats Scissors, you win.
 
 Final game score:
