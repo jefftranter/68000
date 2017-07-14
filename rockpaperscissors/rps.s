@@ -34,9 +34,9 @@ FIXDATA equ     250                     Initialize A6 to BUFFER and append strin
 FIXBUF  equ     251                     Initialize A5 and A6 to BUFFER.
 
 * Items:
-ROCK     equ    0
-PAPER    equ    1
-SCISSORS equ    2
+ROCK     equ    1
+PAPER    equ    2
+SCISSORS equ    3
 
 * Players/Winner:
 TIE      equ    0
@@ -97,6 +97,16 @@ gameloop
         bsr     PrintDec                Display it.
         bsr     CrLf                    Newline.
 
+; Get computers's play. Do this before the human enters their play so
+; there can be no accusations of cheating!
+
+        move.b  #1,d0                   Want random number between 1 and 3.
+        move.b  #1,d1
+        bsr     Random
+        move.b  d2,COMPUTERPLAY         Save computers's move.
+
+; Get user's play.
+
 enter1
         lea.l   (S_PLAY,pc),a0          "What do you play?"
         bsr     PrintString             Display it.
@@ -119,7 +129,25 @@ invalid1
 okay1
         move.b  d0,HUMANPLAY            Save player's move.
 
-; This is my choice... Paper
+; Report computer's play.
+
+        lea.l   (S_MYCHOICE,pc),a0      "This is my choice..."
+        bsr     PrintString             Display it.
+        move.b  COMPUTERPLAY,d0         Get computers's move.
+        bsr     PrintPlay               Print name of play.
+        bsr     CrLf                    Then newline.
+
+; Report human's play.
+
+        lea.l   (S_YOUPLAYED,pc),a0     "You played "
+        bsr     PrintString             Display it.
+        move.b  HUMANPLAY,d0            Get computers's move.
+        bsr     PrintPlay               Print name of play.
+        bsr     CrLf                    Then newline.
+
+; Determine who won.
+
+; Report who won and update score.
 
 ; Paper beats Rock, I win.
 
@@ -129,13 +157,16 @@ okay1
         cmp.b   TOTALGAMES,d0           Last game played?
         ble     gameloop                If not, play next game.
 
+; Report final game score.
+
 ; Final game score:
 ; I have won 4 games.
 ; You have won 6 games.
 ; It's a tie!
 
-; Play again (y/n)? N
+; Ask if user wants to play again.
 
+; Play again (y/n)? N
 
         bra     Tutor                   Return to TUTOR
 
@@ -346,7 +377,7 @@ Tutor
 *
 * Random
 *
-* Generate a random 32-bit number between i and j.
+* Generate a random 32-bit number between two values.
 *
 * Inputs: D0.l: minimum value, D1.l: maximum value
 * Outputs: D2.l: returned random number
@@ -354,8 +385,40 @@ Tutor
 *
 ************************************************************************
 Random
-        move.l  #0,d2
+        move.l  #1,d2
         rts
+
+************************************************************************
+*
+* Print Play
+*
+* Print "Rock", "Paper", or "Scissors".
+*
+* Inputs: D0.b: value of ROCK, PAPER, or SCISSORS.
+* Outputs: none
+* Registers used: none
+*
+************************************************************************
+PrintPlay
+        movem.l a0,-(sp)                Preserve registers.
+        cmp.b   #ROCK,d0                Is it Rock?
+        bne     try1                    Branch if not.
+        lea.l   S_ROCK,a0               Get pointer to string.
+        bra     printit                 Print it.
+try1    cmp.b   #PAPER,d0               Is it Paper?
+        bne     try2                    Branch if not.
+        lea.l   S_PAPER,a0              Get pointer to string.
+        bra     printit                 Print it.
+try2    cmp.b   #SCISSORS,d0            Is it Scissors?
+        bne     oops                    Branch if not.
+        lea.l   S_SCISSORS,a0           Get pointer to string.
+printit
+        bsr     PrintString             Print the string.
+        movem.l (sp)+,a0                Restore registers.
+        rts
+oops:   
+        illegal                         Was not valid, should never happen,
+*                                       so cause exception if it does
 
 ************************************************************************
 *
@@ -364,15 +427,15 @@ Random
 * Player 1      Player 2      Winner
 * (human)       (computer)
 * ------------  ------------  ------
-* 0 (rock)      0 (rock)      0 (tie)
-* 0 (rock)      1 (paper)     1 (paper)
-* 0 (rock)      2 (scissors)  0 (rock)
-* 1 (paper)     0 (rock)      1 (paper)
-* 1 (paper)     1 (paper)     0 (tie)
-* 1 (paper)     2 (scissors)  2 (scissors)
-* 2 (scissors)  0 (rock)      0 (rock)
-* 2 (scissors)  1 (paper)     2 (scissors)
-* 2 (scissors)  2 (scissors)  0 (tie)
+* 1 (rock)      1 (rock)      0 (tie)
+* 1 (rock)      2 (paper)     2 (paper)
+* 1 (rock)      3 (scissors)  1 (rock)
+* 2 (paper)     1 (rock)      2 (paper)
+* 2 (paper)     2 (paper)     0 (tie)
+* 2 (paper)     3 (scissors)  3 (scissors)
+* 3 (scissors)  1 (rock)      1 (rock)
+* 3 (scissors)  2 (paper)     3 (scissors)
+* 3 (scissors)  3 (scissors)  0 (tie)
 
 *************************************************************************
 *
@@ -387,12 +450,12 @@ S_INVALID2      dc.b    "Please enter a number from 1 to 3.\r\n", 0
 S_GAMENUMBER    dc.b    "Game number: ", 0
 S_OF            dc.b    " of ", 0
 S_PLAY          dc.b    "1=Rock 2=Paper 3=Scissors\r\n1... 2... 3... What do you play? ", 0
+S_MYCHOICE      dc.b    "This is my choice... ", 0
+S_YOUPLAYED     dc.b    "You played ", 0
+S_ROCK          dc.b    "Rock", 0
+S_PAPER         dc.b    "Paper", 0
+S_SCISSORS      dc.b    "Scissors", 0
 
-* "Rock"
-* "Paper"
-* "Scissors"
-
-* "This is my choice... "
 * " beats "
 * ", I win."
 * ", you win."
