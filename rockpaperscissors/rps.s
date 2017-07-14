@@ -53,6 +53,9 @@ COMPUTER equ    2
         ORG     $1000                   Locate in RAM.
 
 * Initialize variables
+* TODO: Make random seed more random (e.g based on user input).
+
+        move.l  #1,SEED                 Random number seed
 
 start
         move.b  #1,TOTALGAMES           Total number of games.
@@ -98,13 +101,13 @@ gameloop
         bsr     PrintDec                Display it.
         bsr     CrLf                    Newline.
 
-; Get computers's play. Do this before the human enters their play so
+; Get computer's play. Do this before the human enters their play so
 ; there can be no accusations of cheating!
 
         move.b  #1,d0                   Want random number between 1 and 3.
-        move.b  #1,d1
+        move.b  #3,d1
         bsr     Random
-        move.b  d2,COMPUTERPLAY         Save computers's move.
+        move.b  d2,COMPUTERPLAY         Save computer's move.
 
 ; Get user's play.
 
@@ -134,7 +137,7 @@ okay1
 
         lea.l   (S_MYCHOICE,pc),a0      "This is my choice..."
         bsr     PrintString             Display it.
-        move.b  COMPUTERPLAY,d0         Get computers's move.
+        move.b  COMPUTERPLAY,d0         Get computer's move.
         bsr     PrintPlay               Print name of play.
         bsr     CrLf                    Then newline.
 
@@ -142,7 +145,7 @@ okay1
 
         lea.l   (S_YOUPLAYED,pc),a0     "You played "
         bsr     PrintString             Display it.
-        move.b  HUMANPLAY,d0            Get computers's move.
+        move.b  HUMANPLAY,d0            Get computer's move.
         bsr     PrintPlay               Print name of play.
         bsr     CrLf                    Then newline.
 
@@ -163,7 +166,7 @@ okay1
 
 next1   cmp.b  #COMPUTER,WINNER         Did computer win?
         bne     next2                   Branch if not
-        move.b  COMPUTERPLAY,d0         Get computers's move.
+        move.b  COMPUTERPLAY,d0         Get computer's move.
         bsr     PrintPlay               Print name of play.
         lea.l   (S_BEATS,pc),a0         " beats "
         bsr     PrintString             Display it.
@@ -179,7 +182,7 @@ next2                                   * Human won (rare, but it happens).
         bsr     PrintPlay               Print name of play.
         lea.l   (S_BEATS,pc),a0         " beats "
         bsr     PrintString             Display it.
-        move.b  COMPUTERPLAY,d0         Get computers's move.
+        move.b  COMPUTERPLAY,d0         Get computer's move.
         bsr     PrintPlay               Print name of play.
         lea.l   (S_YOUWIN,pc),a0        ", You win."
         bsr     PrintString             Display it.
@@ -472,8 +475,81 @@ Tutor
 *
 ************************************************************************
 Random
-        move.l  #1,d2
+        move.l  SEED,d7                 Random seed.
+again   movem.l d0-d6,-(sp)             Save registers.
+        jsr     RANDOM                  Calculate random number.
+        movem.l (sp)+,d0-d6             Restore registers
+        move.l  d7,d2                   Get random result.
+
+; TODO: Limit value to selected range.
+
+        and.l   #$000003,d2             Only allow 2 bits (0-3)
+        cmp.b   #0,d2                   If zero, try again.
+        beq     again
         rts
+
+* This is the source for "A Pseudo Random-Number Generator" by Michael
+* P. McLaughlin from Dr. Dobb's Toolbook of 68000 Programming.
+*
+* It has been modified slightly to compile with the VASM assembler.
+*
+;PSEUDO-RANDOM NUMBER GENERATOR -- (USES D2-D7)
+;GIVEN ANY SEED (1 TO 2**31-2) IN D7 (LONGWORDS), THIS GENERATOR YIELDS A
+;NON-REPEATING SEQUENCE (RAND(I)) USING ALL INTEGERS IN THE RANGE 1 TO
+;2**31-2. THE AVERAGE EXECUTION TIME IS 240 MICROSECONDS (AT 8 MHZ). THIS
+;GENERATOR, REFERRED TO IN THE LITERATURE AS "GGUBS", IS KNOWN TO POSSESS
+;GOOD STATISTICS. THE ALGORITHM IS:
+;
+;              RAND(I+1) = (16807*RAND(I)) MOD (2**31)-1)
+;
+;WHEN PROPERLY CODED, THIS ALGORITHM WILL TRANSFORM RAND (0) = 1 INTO
+;RAND(1000) = 522329230. THE FOLLOWING IMPLEMENTATION USES SYNTHETIC
+;DIVISION, VIZ.,
+;
+;              K1 = RAND(I) DIV 127773
+;              RAND(I+1) = 16807*RAND(I)-K1*127773)-K1*2836
+;              IF RAND(I+1)<0 THEN RAND(I+1) = RAND(I+1)+2147483647
+;
+;REFERENCE:
+;              BRATLEY, P., FOX, B.L. and L.E. SCHRAGE, 1983.
+;              A GUIDE TO SIMULATION. SPRINGER-VERLAG.
+;
+
+RANDOM         MOVE.L     D7,D6               ;copy RAND(I)
+               MOVE.L     #127773,D2          ;synthetic modulus
+               BSR.S      DIV                 ;divide D6 by 127773
+               MOVE.L     D4,D5               ;copy K1
+               MULS       #-2836,D5           ;D5 = -2836*K1
+               MULU       #42591,D4           ;multiply D4 by 12773
+               MOVE.L     D4,D6
+               ADD.L      D4,D4
+               ADD.L      D6,D4
+               SUB.L      D4,D7               ;D7 = RAND(I)-K1*12773
+               MOVEQ      #4,D4               ;counter
+RAN1           MOVE.L     D7,D6               ;multiply D7 by 16807
+               LSL.L      #3,D7
+               SUB.L      D6,D7
+               DBRA       D4,RAN1
+               ADD.L      D5,D7               ;D7 = RAND(I+1)
+               BPL.S      EXIT
+               ADD.L      #2147483647,D7      ;normalize negative result
+EXIT           RTS                            ;D7 = RAND(I+1)
+;RAND(I) (31 BITS) DIV 127773 (17 BITS)
+DIV            ADD.L      D6,D6               ;shift out unused bit
+               CLR.L      D4                  ;quotient
+               MOVEQ      #14,D3              ;counter
+               MOVE       D6,D5               ;save low word of RAND(I)
+               SWAP       D6
+               AND.L      #$0FFFF,D6          ;D6 = RAND(I) DIV 2**15
+DIV1           ADD        D4,D4               ;line up quotient
+               ADD        D5,D5               ;and dividend
+               ADDX.L     D6,D6               ;shift in bit of low word
+               CMP.L      D2,D6               ;trial subtraction
+               BMI.S      DIV2
+               SUB.L      D2,D6               ;real subtraction
+               ADDQ       #1,D4               ;put 1 in quotient
+DIV2           DBRA       D3,DIV1             ;decrement counter and loop
+               RTS
 
 ************************************************************************
 *
@@ -638,3 +714,7 @@ COMPUTERPLAY   ds.b     1
 
 * Most recent winner.
 WINNER         ds.b     1
+
+* Random number initial seed
+               align    1
+SEED           ds.l     1
