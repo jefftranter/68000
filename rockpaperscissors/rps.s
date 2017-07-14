@@ -147,9 +147,18 @@ okay1
 
 ; Determine who won.
 
+        move.b  HUMANPLAY,d0            Get human player's move
+        move.b  COMPUTERPLAY,d1         Get computer's move
+        bsr     DetermineWinner         Determine who won
+        move.b  d2,WINNER               Save value.
+
 ; Report who won and update score.
 
 ; Paper beats Rock, I win.
+* " beats "
+* ", I win."
+* ", you win."
+* "It's a tie."
 
         add.b   #1,GAMENO               Increment game number.
 
@@ -422,6 +431,51 @@ oops:
 
 ************************************************************************
 *
+* Determine Winner
+*
+* Determine who won.
+*
+* Inputs: D0.b: human's move, D1.b: computer's move
+* Outputs: D2.b: Winner (TIE, HUMAN, OR COMPUTER)
+* Registers used: D2
+*
+************************************************************************
+DetermineWinner
+        movem.l d0/d2,-(sp)             Preserve registers.
+
+* Check that input parameters are within range 1..3
+
+        move.b  d0,d2                   Get input value.
+        ext.w   d2                      CHK only supports word size, so need to extend from byte to word.
+        sub.w   #1,d2                   Add one so we can use CHK.
+        chk.w   #2,d2                   Will trap if outside the range of 0..2
+
+        move.b  d1,d2                   Now do the same for the value in D1.
+        ext.w   d2
+        sub.w   #1,d2
+        chk.w   #2,d2
+
+* Find entry in the rule table corresponding to the two input values.
+
+        lea.l   RuleTable,a0            Get address of start of table.
+search
+        cmp.b   (a0),d0                 Does entry match human player value?
+        bne     next                    Branch if not.
+        cmp.b   1(a0),d1                Does entry match computer player value?
+        bne     next                    Branch if not.
+
+* If here, then match was found.
+
+        move.b  2(a0),d2                Get result from table
+        movem.l (sp)+,d0/d1             Restore registers.
+        rts                             And return.
+
+next
+        addq.l  #3,a0                   Advance to next entry in table.
+        bra     search
+
+************************************************************************
+*
 * Table of Winning Rules
 *
 * Player 1      Player 2      Winner
@@ -436,6 +490,17 @@ oops:
 * 3 (scissors)  1 (rock)      1 (rock)
 * 3 (scissors)  2 (paper)     3 (scissors)
 * 3 (scissors)  3 (scissors)  0 (tie)
+
+RuleTable
+ dc.b ROCK,      ROCK,      TIE
+ dc.b ROCK,      PAPER,     PAPER
+ dc.b ROCK,      SCISSORS,  ROCK
+ dc.b PAPER,     ROCK,      PAPER
+ dc.b PAPER,     PAPER,     TIE
+ dc.b PAPER,     SCISSORS,  SCISSORS
+ dc.b SCISSORS,  ROCK,      ROCK
+ dc.b SCISSORS,  PAPER,     SCISSORS
+ dc.b SCISSORS,  SCISSORS,  TIE
 
 *************************************************************************
 *
@@ -459,7 +524,7 @@ S_SCISSORS      dc.b    "Scissors", 0
 * " beats "
 * ", I win."
 * ", you win."
-* ", a tie."
+* "It's a tie."
 * 
 * "Final game score:"
 * "I have won 4 games."
@@ -492,3 +557,6 @@ HUMANPLAY      ds.b     1
 
 * Computer's most recent play.
 COMPUTERPLAY   ds.b     1
+
+* Most recent winner.
+WINNER         ds.b     1
