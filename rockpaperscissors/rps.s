@@ -54,6 +54,7 @@ COMPUTER equ    2
 
 * Initialize variables
 
+start
         move.b  #1,TOTALGAMES           Total number of games.
         move.b  #1,GAMENO               Current game number.
         move.b  #0,COMPUTERWON          Games won by computer.
@@ -154,29 +155,105 @@ okay1
 
 ; Report who won and update score.
 
-; Paper beats Rock, I win.
-* " beats "
-* ", I win."
-* ", you win."
-* "It's a tie."
+        cmp.b   #TIE,WINNER             Was it a tie?
+        bne     next1                   Branch if not
+        lea.l   (S_TIE,pc),a0           "It's a tie."
+        bsr     PrintString             Display it.
+        bra     nextgame
 
+next1   cmp.b  #COMPUTER,WINNER         Did computer win?
+        bne     next2                   Branch if not
+        move.b  COMPUTERPLAY,d0         Get computers's move.
+        bsr     PrintPlay               Print name of play.
+        lea.l   (S_BEATS,pc),a0         " beats "
+        bsr     PrintString             Display it.
+        move.b  HUMANPLAY,d0            Get human's move.
+        bsr     PrintPlay               Print name of play.
+        lea.l   (S_IWIN,pc),a0          ", I win."
+        bsr     PrintString             Display it.
+        add.b   #1,COMPUTERWON          Update won games.
+        bra     nextgame
+
+next2                                   * Human won (rare, but it happens).
+        move.b  HUMANPLAY,d0            Get human's move.
+        bsr     PrintPlay               Print name of play.
+        lea.l   (S_BEATS,pc),a0         " beats "
+        bsr     PrintString             Display it.
+        move.b  COMPUTERPLAY,d0         Get computers's move.
+        bsr     PrintPlay               Print name of play.
+        lea.l   (S_YOUWIN,pc),a0        ", You win."
+        bsr     PrintString             Display it.
+        add.b   #1,HUMANWON             Update won games.
+
+nextgame
         add.b   #1,GAMENO               Increment game number.
 
         move.b  GAMENO,d0               Get game number.
         cmp.b   TOTALGAMES,d0           Last game played?
         ble     gameloop                If not, play next game.
 
-; Report final game score.
+; Report final game scores.
 
-; Final game score:
-; I have won 4 games.
-; You have won 6 games.
-; It's a tie!
+        lea.l   (S_FINALSCORE,pc),a0    "Final game score:"
+        bsr     PrintString             Display it.
+        lea.l   (S_IWON,pc),a0          "I have won "
+        bsr     PrintString             Display it.
+        move.b  COMPUTERWON,d0          Get computer won games.
+        bsr     PrintDec                Print it.
+        cmp     #1,d0                   Handle "game" versus "games".
+        beq     one1
+        lea.l   (S_GAMES,pc),a0         " games."
+        bra     disp1
+one1    lea.l   (S_GAME,pc),a0         " game."
+disp1   bsr     PrintString             Display it.
+        lea.l   (S_YOUWON,pc),a0        "You have won "
+        bsr     PrintString             Display it.
+        move.b  HUMANWON,d0             Get human won games.
+        bsr     PrintDec                Print it.
+        cmp     #1,d0                   Handle "game" versus "games".
+        beq     one2
+        lea.l   (S_GAMES,pc),a0         " games."
+        bra     disp2
+one2    lea.l   (S_GAME,pc),a0         " game."
+disp2   bsr     PrintString             Display it.
+
+; Print the winner
+
+        move.b  HUMANWON,d0
+        cmp.b   COMPUTERWON,d0          Compare scores.
+        blt     computerwon             Computer won.
+        bgt     humanwon                Human won.
+
+        lea.l   (S_TIE1,pc),a0          "It's a tie!"
+        bsr     PrintString             Display it.
+        bra     playagain
+
+computerwon
+        lea.l   (S_IWIN1,pc),a0         "I win!"
+        bsr     PrintString             Display it.
+        bra     playagain
+
+humanwon
+        lea.l   (S_YOUWIN1,pc),a0       "You win!"
+        bsr     PrintString             Display it.
 
 ; Ask if user wants to play again.
 
-; Play again (y/n)? N
+playagain
+        lea.l   (S_PLAYAGAIN,pc),a0     "Play again (y/n)? "
+        bsr     PrintString             Display it.
+        bsr     GetString               Get response.
+        cmp.b   #'y',(a0)               Did user enter 'y'?
+        beq     start                   If so, go to start
+        cmp.b   #'Y',(a0)               Did user enter 'Y'?
+        beq     start                   If so, go to start
+        cmp.b   #'n',(a0)               Did user enter 'n'?
+        beq     exit                    If so, exit
+        cmp.b   #'N',(a0)               Did user enter 'N'?
+        beq     exit                    If so, exit
+        bra     playagain               Otherwise invalid input, try again.
 
+exit
         bra     Tutor                   Return to TUTOR
 
 *************************************************************************
@@ -284,6 +361,7 @@ PrintChar
         trap    #14                     Call TRAP14 handler.
         movem.l (sp)+,a0/d0/d1/d7       Restore registers.
         rts
+
 ************************************************************************
 *
 * Send CRLF to the console.
@@ -520,19 +598,19 @@ S_YOUPLAYED     dc.b    "You played ", 0
 S_ROCK          dc.b    "Rock", 0
 S_PAPER         dc.b    "Paper", 0
 S_SCISSORS      dc.b    "Scissors", 0
-
-* " beats "
-* ", I win."
-* ", you win."
-* "It's a tie."
-* 
-* "Final game score:"
-* "I have won 4 games."
-* "You have won 6 games."
-* "You win!"
-* "I win!"
-* "It's a tie!"
-* "Play again (y/n)? "
+S_TIE           dc.b    "It's a tie.\r\n", 0
+S_BEATS         dc.b    " beats ", 0
+S_IWIN          dc.b    ", I win.\r\n", 0
+S_YOUWIN        dc.b    ", you win.\r\n", 0
+S_FINALSCORE    dc.b    "Final game score:\r\n", 0
+S_IWON          dc.b    "I have won ", 0
+S_YOUWON        dc.b    "You have won ", 0
+S_GAMES         dc.b    " games.\r\n", 0
+S_GAME          dc.b    " game.\r\n", 0
+S_YOUWIN1       dc.b    "You win!\r\n", 0
+S_IWIN1         dc.b    "I win!\r\n", 0
+S_TIE1          dc.b    "It's a tie!\r\n", 0
+S_PLAYAGAIN     dc.b    "Play again (y/n)? ", 0
 
 *************************************************************************
 *
