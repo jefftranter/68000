@@ -74,6 +74,9 @@ enter
         bvs     invalid                 Complain if invalid.
         bsr     Dec2Bin                 Convert it to number.
 
+; TODO: Make maximum number of games a compile time value.
+; TODO: Test for randomness with 100 games or more.
+
         cmp.l   #1,d0                   Make sure it is in range from 1 to 10.
         blt     invalid                 Too small.
         cmp.l   #10,d0
@@ -469,7 +472,7 @@ Tutor
 *
 * Generate a random 32-bit number between two values.
 *
-* Inputs: D0.l: minimum value, D1.l: maximum value
+* Inputs: D0.l: minimum value, D1.l: maximum value - as a bit mask of bits to use.
 * Outputs: D2.l: returned random number
 * Registers used: D2
 *
@@ -483,11 +486,11 @@ again   movem.l d0-d6,-(sp)             Save registers.
         move.l  d7,SEED                 Save as next seed.
         move.l  d7,d2                   Get random result.
 
-* TODO: Limit value to selected range.
+* Limit value to selected range.
 
-        and.l   #$000003,d2             Only allow 2 bits (0-3)
-        cmp.b   #0,d2                   If zero, try again.
-        beq     again
+        and.l   d1,d2                   Only allow bits set in D1.
+        cmp.b   d0,d2                   If below minimum, try again.
+        blt     again
         movem.l (sp)+,d7                Restore registers
         rts
 
