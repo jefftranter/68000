@@ -61,7 +61,7 @@ start
         move.b  #1,TOTALGAMES           Total number of games.
         move.b  #1,GAMENO               Current game number.
         move.b  #0,COMPUTERWON          Games won by computer.
-        move.b  #0,HUMAN                Games won by human player.
+        move.b  #0,HUMANWON             Games won by human player.
 
         lea.l   (S_WELCOME,pc),a0       Get startup message.
         bsr     PrintString             Display it.
@@ -89,7 +89,7 @@ okay
 
 gameloop
 
-; Display "Game number: 1 of 10"
+* Display "Game number: 1 of 10"
 
         lea.l   (S_GAMENUMBER,pc),a0    "Game number: "
         bsr     PrintString             Display it.
@@ -101,15 +101,15 @@ gameloop
         bsr     PrintDec                Display it.
         bsr     CrLf                    Newline.
 
-; Get computer's play. Do this before the human enters their play so
-; there can be no accusations of cheating!
+* Get computer's play. Do this before the human enters their play so
+* there can be no accusations of cheating!
 
-        move.b  #1,d0                   Want random number between 1 and 3.
-        move.b  #3,d1
-        bsr     Random
+        move.l  #1,d0                   Want random number between 1...
+        move.l  #3,d1                   and 3.
+        bsr     Random                  Generate number.
         move.b  d2,COMPUTERPLAY         Save computer's move.
 
-; Get user's play.
+* Get user's play.
 
 enter1
         lea.l   (S_PLAY,pc),a0          "What do you play?"
@@ -133,7 +133,7 @@ invalid1
 okay1
         move.b  d0,HUMANPLAY            Save player's move.
 
-; Report computer's play.
+* Report computer's play.
 
         lea.l   (S_MYCHOICE,pc),a0      "This is my choice..."
         bsr     PrintString             Display it.
@@ -141,7 +141,7 @@ okay1
         bsr     PrintPlay               Print name of play.
         bsr     CrLf                    Then newline.
 
-; Report human's play.
+* Report human's play.
 
         lea.l   (S_YOUPLAYED,pc),a0     "You played "
         bsr     PrintString             Display it.
@@ -149,14 +149,14 @@ okay1
         bsr     PrintPlay               Print name of play.
         bsr     CrLf                    Then newline.
 
-; Determine who won.
+* Determine who won.
 
         move.b  HUMANPLAY,d0            Get human player's move
         move.b  COMPUTERPLAY,d1         Get computer's move
         bsr     DetermineWinner         Determine who won
         move.b  d2,WINNER               Save value.
 
-; Report who won and update score.
+* Report who won and update score.
 
         cmp.b   #TIE,WINNER             Was it a tie?
         bne     next1                   Branch if not
@@ -195,7 +195,7 @@ nextgame
         cmp.b   TOTALGAMES,d0           Last game played?
         ble     gameloop                If not, play next game.
 
-; Report final game scores.
+* Report final game scores.
 
         lea.l   (S_FINALSCORE,pc),a0    "Final game score:"
         bsr     PrintString             Display it.
@@ -220,7 +220,7 @@ disp1   bsr     PrintString             Display it.
 one2    lea.l   (S_GAME,pc),a0         " game."
 disp2   bsr     PrintString             Display it.
 
-; Print the winner
+* Print the winner
 
         move.b  HUMANWON,d0
         cmp.b   COMPUTERWON,d0          Compare scores.
@@ -240,7 +240,7 @@ humanwon
         lea.l   (S_YOUWIN1,pc),a0       "You win!"
         bsr     PrintString             Display it.
 
-; Ask if user wants to play again.
+* Ask if user wants to play again.
 
 playagain
         lea.l   (S_PLAYAGAIN,pc),a0     "Play again (y/n)? "
@@ -475,17 +475,20 @@ Tutor
 *
 ************************************************************************
 Random
+        movem.l d7,-(sp)                Save registers.
         move.l  SEED,d7                 Random seed.
 again   movem.l d0-d6,-(sp)             Save registers.
-        jsr     RANDOM                  Calculate random number.
+        bsr     RANDOM                  Calculate random number.
         movem.l (sp)+,d0-d6             Restore registers
+        move.l  d7,SEED                 Save as next seed.
         move.l  d7,d2                   Get random result.
 
-; TODO: Limit value to selected range.
+* TODO: Limit value to selected range.
 
         and.l   #$000003,d2             Only allow 2 bits (0-3)
         cmp.b   #0,d2                   If zero, try again.
         beq     again
+        movem.l (sp)+,d7                Restore registers
         rts
 
 * This is the source for "A Pseudo Random-Number Generator" by Michael
@@ -635,25 +638,15 @@ next
 * Player 1      Player 2      Winner
 * (human)       (computer)
 * ------------  ------------  ------
-* 1 (rock)      1 (rock)      0 (tie)
-* 1 (rock)      2 (paper)     2 (paper)
-* 1 (rock)      3 (scissors)  1 (rock)
-* 2 (paper)     1 (rock)      2 (paper)
-* 2 (paper)     2 (paper)     0 (tie)
-* 2 (paper)     3 (scissors)  3 (scissors)
-* 3 (scissors)  1 (rock)      1 (rock)
-* 3 (scissors)  2 (paper)     3 (scissors)
-* 3 (scissors)  3 (scissors)  0 (tie)
-
 RuleTable
  dc.b ROCK,      ROCK,      TIE
- dc.b ROCK,      PAPER,     PAPER
- dc.b ROCK,      SCISSORS,  ROCK
- dc.b PAPER,     ROCK,      PAPER
+ dc.b ROCK,      PAPER,     COMPUTER
+ dc.b ROCK,      SCISSORS,  HUMAN
+ dc.b PAPER,     ROCK,      HUMAN
  dc.b PAPER,     PAPER,     TIE
- dc.b PAPER,     SCISSORS,  SCISSORS
- dc.b SCISSORS,  ROCK,      ROCK
- dc.b SCISSORS,  PAPER,     SCISSORS
+ dc.b PAPER,     SCISSORS,  COMPUTER
+ dc.b SCISSORS,  ROCK,      COMPUTER
+ dc.b SCISSORS,  PAPER,     HUMAN
  dc.b SCISSORS,  SCISSORS,  TIE
 
 *************************************************************************
