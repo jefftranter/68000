@@ -52,7 +52,6 @@ COMPUTER equ    2
         ORG     $1000                   Locate in RAM.
 
 * Initialize variables
-* TODO: Test for randomness with 100 games or more.
 * TODO: Make random seed more random (e.g based on user input).
 
         move.l  #1,SEED                 Random number seed
@@ -74,15 +73,13 @@ enter
         bvs     invalid                 Complain if invalid.
         bsr     Dec2Bin                 Convert it to number.
 
-* TODO: Make maximum number of games a compile time value.
-
-        cmp.l   #1,d0                   Make sure it is in range from 1 to 10.
+        cmp.l   #1,d0                   Make sure it is in range from 1 to 20.
         blt     invalid                 Too small.
-        cmp.l   #10,d0
+        cmp.l   #20,d0
         ble     okay                    It is valid.
 
 invalid
-        lea.l   (S_INVALID1,pc),a0      "Please enter a number from 1 to 10."
+        lea.l   (S_INVALID1,pc),a0      "Please enter a number from 1 to 20."
         bsr     PrintString             Display it.
         bra     enter                   Try again.
 
@@ -91,7 +88,7 @@ okay
 
 gameloop
 
-* Display "Game number: 1 of 10"
+* Display "Game number: 1 of 20"
 
         lea.l   (S_GAMENUMBER,pc),a0    "Game number: "
         bsr     PrintString             Display it.
@@ -672,7 +669,7 @@ RuleTable
 
 S_WELCOME       dc.b    "Welcome to Rock, Paper, Scissors\r\n================================\r\n", 0
 S_HOWMANY       dc.b    "How many games do you want to play? ", 0
-S_INVALID1      dc.b    "Please enter a number from 1 to 10.\r\n", 0
+S_INVALID1      dc.b    "Please enter a number from 1 to 20.\r\n", 0
 S_INVALID2      dc.b    "Please enter a number from 1 to 3.\r\n", 0
 S_GAMENUMBER    dc.b    "Game number: ", 0
 S_OF            dc.b    " of ", 0
