@@ -15,7 +15,7 @@
 * Spock lizard" variant of the game. See
 * https://en.wikipedia.org/wiki/Rock%E2%80%93paper%E2%80%93scissors#Additional_weapons
 
-*RPSSL   equ     1
+RPSSL   equ     1
 
 *************************************************************************
 *
@@ -49,6 +49,17 @@ LIZARD   equ    5
 TIE      equ    0
 HUMAN    equ    1
 COMPUTER equ    2
+
+* Reasons for winning
+COVERS      equ   1
+CRUSHES     equ   2
+VAPORIZES   equ   3
+CUTS        equ   4
+DISPROVES   equ   5
+EATS        equ   6
+SMASHES     equ   7
+DECAPITATES equ   8
+POISONS     equ   9
 
 *************************************************************************
 *
@@ -176,7 +187,8 @@ okay1
         move.b  HUMANPLAY,d0            Get human player's move
         move.b  COMPUTERPLAY,d1         Get computer's move
         bsr     DetermineWinner         Determine who won
-        move.b  d2,WINNER               Save value.
+        move.b  d2,WINNER               Save winner value.
+        move.b  d3,REASON               Save reason value.
 
 * Report who won and update score.
 
@@ -190,11 +202,12 @@ next1   cmp.b  #COMPUTER,WINNER         Did computer win?
         bne     next2                   Branch if not
         move.b  COMPUTERPLAY,d0         Get computer's move.
         bsr     PrintPlay               Print name of play.
-
-* TODO: Use unique verb explaining why it wins, e.g. "Spock vaporizes Rock".
-
-        lea.l   (S_BEATS,pc),a0         " beats "
-        bsr     PrintString             Display it.
+        move.b  #" ",d0                 Print space.
+        bsr     PrintChar
+        move.b  REASON,d0               Get reason.
+        bsr     PrintReason             Print reason.
+        move.b  #" ",d0                 Print space.
+        bsr     PrintChar
         move.b  HUMANPLAY,d0            Get human's move.
         bsr     PrintPlay               Print name of play.
         lea.l   (S_IWIN,pc),a0          ", I win."
@@ -205,8 +218,12 @@ next1   cmp.b  #COMPUTER,WINNER         Did computer win?
 next2                                   * Human won (rare, but it happens).
         move.b  HUMANPLAY,d0            Get human's move.
         bsr     PrintPlay               Print name of play.
-        lea.l   (S_BEATS,pc),a0         " beats "
-        bsr     PrintString             Display it.
+        move.b  #" ",d0                 Print space.
+        bsr     PrintChar
+        move.b  REASON,d0               Get reason.
+        bsr     PrintReason             Print reason.
+        move.b  #" ",d0                 Print space.
+        bsr     PrintChar
         move.b  COMPUTERPLAY,d0         Get computer's move.
         bsr     PrintPlay               Print name of play.
         lea.l   (S_YOUWIN,pc),a0        ", You win."
@@ -635,7 +652,64 @@ printit
         bsr     PrintString             Print the string.
         movem.l (sp)+,a0                Restore registers.
         rts
-oops:   
+oops:
+        illegal                         Was not valid, should never happen,
+*                                       so cause exception if it does
+
+************************************************************************
+*
+* Print Reason
+*
+* Print "Smashes", "Crushes", etc.
+*
+* Inputs: D0.b: value of SMAHES, CRUSHES, etc.
+* Outputs: none
+* Registers used: none
+*
+************************************************************************
+
+PrintReason
+        movem.l a0,-(sp)                Preserve registers.
+        cmp.b   #COVERS,d0              Is it Covers?
+        bne     rtry1                   Branch if not.
+        lea.l   S_COVERS,a0             Get pointer to string.
+        bra     rprintit                Print it.
+rtry1   cmp.b   #CRUSHES,d0             Is it Crushes?
+        bne     rtry2                   Branch if not.
+        lea.l   S_CRUSHES,a0            Get pointer to string.
+        bra     rprintit                Print it.
+rtry2   cmp.b   #VAPORIZES,d0           Is it Vaporizes?
+        bne     rtry3                   Branch if not
+        lea.l   S_VAPORIZES,a0          Get pointer to string.
+        bra     rprintit                Print it.
+rtry3   cmp.b   #CUTS,d0                Is it Cuts?
+        bne     rtry4                   Branch if not
+        lea.l   S_CUTS,a0               Get pointer to string.
+        bra     rprintit                Print it.
+rtry4   cmp.b   #DISPROVES,d0           Is it Disproves?
+        bne     rtry5                   Branch if not.
+        lea.l   S_DISPROVES,a0          Get pointer to string.
+        bra     rprintit                Print it.
+rtry5   cmp.b   #EATS,d0                Is it Eats?
+        bne     rtry6                   Branch if not.
+        lea.l   S_EATS,a0               Get pointer to string.
+        bra     rprintit                Print it.
+rtry6   cmp.b   #SMASHES,d0             Is it Smashes?
+        bne     rtry7                   Branch if not.
+        lea.l   S_SMASHES,a0            Get pointer to string.
+        bra     rprintit                Print it.
+rtry7   cmp.b   #DECAPITATES,d0         Is it Decapitates?
+        bne     rtry8                   Branch if not.
+        lea.l   S_DECAPITATES,a0        Get pointer to string.
+        bra     rprintit                Print it.
+rtry8   cmp.b   #POISONS,d0             Is it Poisons?
+        bne     roops                   If not, then invalid.
+        lea.l   S_POISONS,a0            Get pointer to string.
+rprintit
+        bsr     PrintString             Print the string.
+        movem.l (sp)+,a0                Restore registers.
+        rts
+roops:
         illegal                         Was not valid, should never happen,
 *                                       so cause exception if it does
 
@@ -646,8 +720,8 @@ oops:
 * Determine who won.
 *
 * Inputs: D0.b: human's move, D1.b: computer's move
-* Outputs: D2.b: Winner (TIE, HUMAN, OR COMPUTER)
-* Registers used: D2
+* Outputs: D2.b: Winner (TIE, HUMAN, OR COMPUTER), D3.b Reason (SMASHES, EATS, etc.)
+* Registers used: D2,D3
 *
 ************************************************************************
 DetermineWinner
@@ -684,58 +758,59 @@ search
 
 * If here, then match was found.
 
-        move.b  2(a0),d2                Get result from table
+        move.b  2(a0),d2                Get winner from table
+        move.b  3(a0),d3                Get reason from table
         movem.l (sp)+,d0/d1             Restore registers.
         rts                             And return.
 
 next
-        addq.l  #3,a0                   Advance to next entry in table.
+        addq.l  #4,a0                   Advance to next entry in table (4 bytes per entry).
         bra     search
 
 ************************************************************************
 *
 * Table of Winning Rules
 *
-* Player 1      Player 2      Winner
+* Player 1      Player 2      Winner    Reason
 * (human)       (computer)
-* ------------  ------------  ------
+* ------------  ------------  ------    ------
 RuleTable
- dc.b ROCK,      ROCK,      TIE
- dc.b ROCK,      PAPER,     COMPUTER
- dc.b ROCK,      SCISSORS,  HUMAN
+ dc.b ROCK,      ROCK,      TIE,        TIE
+ dc.b ROCK,      PAPER,     COMPUTER,   COVERS
+ dc.b ROCK,      SCISSORS,  HUMAN,      CRUSHES
  ifd RPSSL
- dc.b ROCK,      SPOCK,     COMPUTER
- dc.b ROCK,      LIZARD,    HUMAN
+ dc.b ROCK,      SPOCK,     COMPUTER,   VAPORIZES
+ dc.b ROCK,      LIZARD,    HUMAN,      CRUSHES
  endif
 
- dc.b PAPER,     ROCK,      HUMAN
- dc.b PAPER,     PAPER,     TIE
- dc.b PAPER,     SCISSORS,  COMPUTER
+ dc.b PAPER,     ROCK,      HUMAN,      COVERS
+ dc.b PAPER,     PAPER,     TIE,        TIE
+ dc.b PAPER,     SCISSORS,  COMPUTER,   CUTS
  ifd RPSSL
- dc.b PAPER,     SPOCK,     HUMAN
- dc.b PAPER,     LIZARD,    COMPUTER
+ dc.b PAPER,     SPOCK,     HUMAN,      DISPROVES
+ dc.b PAPER,     LIZARD,    COMPUTER,   EATS
  endif
 
- dc.b SCISSORS,  ROCK,      COMPUTER
- dc.b SCISSORS,  PAPER,     HUMAN
- dc.b SCISSORS,  SCISSORS,  TIE
+ dc.b SCISSORS,  ROCK,      COMPUTER,   CRUSHES
+ dc.b SCISSORS,  PAPER,     HUMAN,      CUTS
+ dc.b SCISSORS,  SCISSORS,  TIE,        TIE
  ifd RPSSL
- dc.b SCISSORS,  SPOCK,     COMPUTER
- dc.b SCISSORS,  LIZARD,    HUMAN
+ dc.b SCISSORS,  SPOCK,     COMPUTER,   SMASHES
+ dc.b SCISSORS,  LIZARD,    HUMAN,      DECAPITATES
  endif
 
  ifd RPSSL
- dc.b SPOCK,     ROCK,      HUMAN
- dc.b SPOCK,     PAPER,     COMPUTER
- dc.b SPOCK,     SCISSORS,  HUMAN
- dc.b SPOCK,     SPOCK,     TIE
- dc.b SPOCK,     LIZARD,    COMPUTER
+ dc.b SPOCK,     ROCK,      HUMAN,      VAPORIZES
+ dc.b SPOCK,     PAPER,     COMPUTER,   DISPROVES
+ dc.b SPOCK,     SCISSORS,  HUMAN,      SMASHES
+ dc.b SPOCK,     SPOCK,     TIE,        TIE
+ dc.b SPOCK,     LIZARD,    COMPUTER,   POISONS
 
- dc.b LIZARD,    ROCK,      COMPUTER
- dc.b LIZARD,    PAPER,     HUMAN
- dc.b LIZARD,    SCISSORS,  COMPUTER
- dc.b LIZARD,    SPOCK,     HUMAN
- dc.b LIZARD,    LIZARD,    TIE
+ dc.b LIZARD,    ROCK,      COMPUTER,   CRUSHES
+ dc.b LIZARD,    PAPER,     HUMAN,      EATS
+ dc.b LIZARD,    SCISSORS,  COMPUTER,   DECAPITATES
+ dc.b LIZARD,    SPOCK,     HUMAN,      POISONS
+ dc.b LIZARD,    LIZARD,    TIE,        TIE
  endif
 
 *************************************************************************
@@ -787,6 +862,17 @@ S_IWIN1         dc.b    "I win!\r\n", 0
 S_TIE1          dc.b    "It's a tie!\r\n", 0
 S_PLAYAGAIN     dc.b    "Play again (y/n)? ", 0
 
+
+S_COVERS        dc.b    "covers", 0
+S_CRUSHES       dc.b    "crushes", 0
+S_VAPORIZES     dc.b    "vaporizes", 0
+S_CUTS          dc.b    "cuts", 0
+S_DISPROVES     dc.b    "disproves", 0
+S_EATS          dc.b    "eats", 0
+S_SMASHES       dc.b    "smashes", 0
+S_DECAPITATES   dc.b    "decapitates", 0
+S_POISONS       dc.b    "poisons", 0
+
 *************************************************************************
 *
 * Variables:
@@ -813,6 +899,9 @@ COMPUTERPLAY   ds.b     1
 
 * Most recent winner.
 WINNER         ds.b     1
+
+* Most recent reason for winning.
+REASON         ds.b     1
 
 * Random number initial seed
                align    1
