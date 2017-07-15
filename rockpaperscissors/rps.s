@@ -51,10 +51,17 @@ COMPUTER equ    2
 * Start address
         ORG     $1000                   Locate in RAM.
 
-* Initialize variables
-* TODO: Make random seed more random (e.g based on user input).
+* Do a checksum of some memory to use as a seed to initialize the
+* random number generator.
 
-        move.l  #1,SEED                 Random number seed
+        lea.l     0,a0                  Start address for checksum.
+        move.l    #$1000,d1             Length of memory to checkum (in longwords).
+        moveq.l   #0,d0                 Initialize checksum to zero.
+loop    add.l     (a0)+,d0              Add next memory location.
+        dbf       d1,loop               Loop until done.
+        move.l    d0,SEED               Store random number seed
+
+* Initialize variables
 
 start
         move.b  #1,TOTALGAMES           Total number of games.
