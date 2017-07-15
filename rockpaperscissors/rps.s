@@ -8,10 +8,14 @@
 *
 * Copyright (C) 2017 Jeff Tranter <tranter@pobox.com>
 *
-* TODO:
-* Add alternative version for "rock-paper-scissors-Spock-lizard".
 *
 *************************************************************************
+
+* Uncomment the following line if you want the "rock paper scissors
+* Spock lizard" variant of the game. See
+* https://en.wikipedia.org/wiki/Rock%E2%80%93paper%E2%80%93scissors#Additional_weapons
+
+*RPSSL   equ     1
 
 *************************************************************************
 *
@@ -36,6 +40,10 @@ FIXBUF  equ     251                     Initialize A5 and A6 to BUFFER.
 ROCK     equ    1
 PAPER    equ    2
 SCISSORS equ    3
+  ifd RPSSL
+SPOCK    equ    4
+LIZARD   equ    5
+  endif
 
 * Players/Winner:
 TIE      equ    0
@@ -111,7 +119,11 @@ gameloop
 * there can be no accusations of cheating!
 
         move.l  #1,d0                   Want random number from 1...
+  ifd RPSSL
+        move.l  #5,d1                   to 5.
+  else
         move.l  #3,d1                   to 3.
+  endif
         bsr     Random                  Generate number.
         move.b  d2,COMPUTERPLAY         Save computer's move.
 
@@ -126,9 +138,13 @@ enter1
         bvs     invalid1                Complain if invalid.
         bsr     Dec2Bin                 Convert it to number.
 
-        cmp.l   #1,d0                   Make sure it is in range from 1 to 3.
+        cmp.l   #1,d0                   Make sure it is in range from 1 to 3/5.
         blt     invalid1                Too small.
+  ifd RPSSL
+        cmp.l   #5,d0
+  else
         cmp.l   #3,d0
+  endif
         ble     okay1                   It is valid.
 
 invalid1
@@ -174,6 +190,9 @@ next1   cmp.b  #COMPUTER,WINNER         Did computer win?
         bne     next2                   Branch if not
         move.b  COMPUTERPLAY,d0         Get computer's move.
         bsr     PrintPlay               Print name of play.
+
+* TODO: Use unique verb explaining why it wins, e.g. "Spock vaporizes Rock".
+
         lea.l   (S_BEATS,pc),a0         " beats "
         bsr     PrintString             Display it.
         move.b  HUMANPLAY,d0            Get human's move.
@@ -577,9 +596,9 @@ DIV2           DBRA       D3,DIV1             ;decrement counter and loop
 *
 * Print Play
 *
-* Print "Rock", "Paper", or "Scissors".
+* Print "Rock", "Paper", "Scissors", "Spock", or "Lizard".
 *
-* Inputs: D0.b: value of ROCK, PAPER, or SCISSORS.
+* Inputs: D0.b: value of ROCK, PAPER, SCISSORS, SPOCK, or LIZARD.
 * Outputs: none
 * Registers used: none
 *
@@ -595,8 +614,23 @@ try1    cmp.b   #PAPER,d0               Is it Paper?
         lea.l   S_PAPER,a0              Get pointer to string.
         bra     printit                 Print it.
 try2    cmp.b   #SCISSORS,d0            Is it Scissors?
-        bne     oops                    Branch if not.
+  ifd RPSSL
+        bne     try3                    Branch if not
+ else
+        bne     oops                    If not, then invalid.
+  endif
         lea.l   S_SCISSORS,a0           Get pointer to string.
+        bra     printit                 Print it.
+  ifd RPSSL
+try3    cmp.b   #SPOCK,d0               Is it Spock?
+        bne     try4                    Branch if not
+        lea.l   S_SPOCK,a0              Get pointer to string.
+        bra     printit                 Print it.
+try4    cmp.b   #LIZARD,d0              Is it Lizard?
+        bne     oops                    If not, then invalid.
+        lea.l   S_LIZARD,a0             Get pointer to string.
+  endif
+
 printit
         bsr     PrintString             Print the string.
         movem.l (sp)+,a0                Restore registers.
@@ -619,17 +653,25 @@ oops:
 DetermineWinner
         movem.l d0/d2,-(sp)             Preserve registers.
 
-* Check that input parameters are within range 1..3
+* Check that input parameters are within range 1..3/5
 
         move.b  d0,d2                   Get input value.
         ext.w   d2                      CHK only supports word size, so need to extend from byte to word.
         sub.w   #1,d2                   Add one so we can use CHK.
+  ifd RPSSL
+        chk.w   #4,d2                   Will trap if outside the range of 0..4
+  else
         chk.w   #2,d2                   Will trap if outside the range of 0..2
+  endif
 
         move.b  d1,d2                   Now do the same for the value in D1.
         ext.w   d2
         sub.w   #1,d2
+  ifd RPSSL
+        chk.w   #4,d2
+   else
         chk.w   #2,d2
+   endif
 
 * Find entry in the rule table corresponding to the two input values.
 
@@ -661,12 +703,40 @@ RuleTable
  dc.b ROCK,      ROCK,      TIE
  dc.b ROCK,      PAPER,     COMPUTER
  dc.b ROCK,      SCISSORS,  HUMAN
+ ifd RPSSL
+ dc.b ROCK,      SPOCK,     COMPUTER
+ dc.b ROCK,      LIZARD,    HUMAN
+ endif
+
  dc.b PAPER,     ROCK,      HUMAN
  dc.b PAPER,     PAPER,     TIE
  dc.b PAPER,     SCISSORS,  COMPUTER
+ ifd RPSSL
+ dc.b PAPER,     SPOCK,     HUMAN
+ dc.b PAPER,     LIZARD,    COMPUTER
+ endif
+
  dc.b SCISSORS,  ROCK,      COMPUTER
  dc.b SCISSORS,  PAPER,     HUMAN
  dc.b SCISSORS,  SCISSORS,  TIE
+ ifd RPSSL
+ dc.b SCISSORS,  SPOCK,     COMPUTER
+ dc.b SCISSORS,  LIZARD,    HUMAN
+ endif
+
+ ifd RPSSL
+ dc.b SPOCK,     ROCK,      HUMAN
+ dc.b SPOCK,     PAPER,     COMPUTER
+ dc.b SPOCK,     SCISSORS,  HUMAN
+ dc.b SPOCK,     SPOCK,     TIE
+ dc.b SPOCK,     LIZARD,    COMPUTER
+
+ dc.b LIZARD,    ROCK,      COMPUTER
+ dc.b LIZARD,    PAPER,     HUMAN
+ dc.b LIZARD,    SCISSORS,  COMPUTER
+ dc.b LIZARD,    SPOCK,     HUMAN
+ dc.b LIZARD,    LIZARD,    TIE
+ endif
 
 *************************************************************************
 *
@@ -674,18 +744,35 @@ RuleTable
 *
 *************************************************************************
 
+  ifd RPSSL
+S_WELCOME       dc.b    "Welcome to Rock, Paper, Scissors, Spock, Lizard\r\n===============================================\r\n", 0
+  else
 S_WELCOME       dc.b    "Welcome to Rock, Paper, Scissors\r\n================================\r\n", 0
+  endif
 S_HOWMANY       dc.b    "How many games do you want to play? ", 0
 S_INVALID1      dc.b    "Please enter a number from 1 to 20.\r\n", 0
+  ifd RPSSL
+S_INVALID2      dc.b    "Please enter a number from 1 to 5.\r\n", 0
+  else
 S_INVALID2      dc.b    "Please enter a number from 1 to 3.\r\n", 0
+  endif
 S_GAMENUMBER    dc.b    "Game number: ", 0
 S_OF            dc.b    " of ", 0
+  ifd RPSSL
+S_PLAY          dc.b    "1=Rock 2=Paper 3=Scissors 4=Spock 5=Lizard\r\n1... 2... 3... What do you play? ", 0
+  else
 S_PLAY          dc.b    "1=Rock 2=Paper 3=Scissors\r\n1... 2... 3... What do you play? ", 0
+  endif
 S_MYCHOICE      dc.b    "This is my choice... ", 0
 S_YOUPLAYED     dc.b    "You played ", 0
 S_ROCK          dc.b    "Rock", 0
 S_PAPER         dc.b    "Paper", 0
 S_SCISSORS      dc.b    "Scissors", 0
+  ifd RPSSL
+S_SPOCK         dc.b    "Spock", 0
+S_LIZARD        dc.b    "Lizard", 0
+  endif
+
 S_TIE           dc.b    "It's a tie.\r\n", 0
 S_BEATS         dc.b    " beats ", 0
 S_IWIN          dc.b    ", I win.\r\n", 0
