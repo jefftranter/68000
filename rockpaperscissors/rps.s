@@ -8,8 +8,7 @@
 *
 * Copyright (C) 2017 Jeff Tranter <tranter@pobox.com>
 *
-* To Do:
-*
+* TODO:
 * Add alternative version for "rock-paper-scissors-Spock-lizard".
 *
 *************************************************************************
@@ -53,6 +52,7 @@ COMPUTER equ    2
         ORG     $1000                   Locate in RAM.
 
 * Initialize variables
+* TODO: Test for randomness with 100 games or more.
 * TODO: Make random seed more random (e.g based on user input).
 
         move.l  #1,SEED                 Random number seed
@@ -74,8 +74,7 @@ enter
         bvs     invalid                 Complain if invalid.
         bsr     Dec2Bin                 Convert it to number.
 
-; TODO: Make maximum number of games a compile time value.
-; TODO: Test for randomness with 100 games or more.
+* TODO: Make maximum number of games a compile time value.
 
         cmp.l   #1,d0                   Make sure it is in range from 1 to 10.
         blt     invalid                 Too small.
@@ -107,8 +106,8 @@ gameloop
 * Get computer's play. Do this before the human enters their play so
 * there can be no accusations of cheating!
 
-        move.l  #1,d0                   Want random number between 1...
-        move.l  #3,d1                   and 3.
+        move.l  #1,d0                   Want random number from 1...
+        move.l  #3,d1                   to 3.
         bsr     Random                  Generate number.
         move.b  d2,COMPUTERPLAY         Save computer's move.
 
@@ -472,14 +471,25 @@ Tutor
 *
 * Generate a random 32-bit number between two values.
 *
-* Inputs: D0.l: minimum value, D1.l: maximum value - as a bit mask of bits to use.
+* Inputs: D0.l: minimum value, D1.l: maximum value.
 * Outputs: D2.l: returned random number
 * Registers used: D2
 *
 ************************************************************************
 Random
-        movem.l d7,-(sp)                Save registers.
+        movem.l d3/d7,-(sp)             Save registers.
         move.l  SEED,d7                 Random seed.
+
+* Figure out the largest bit mask of all 1's that is large enough to
+* handle the upper limit of the desired range.
+
+        move.l  #1,d3                   Start with least significant bit set.
+shift   cmp.l   d1,d3                   Compare to maximum.
+        bge     again                   Found a suitable mask.
+        ori.b   #$10,ccr                Set Extend flag.
+        roxl.l  #1,d3                   Rotate left with extend.
+        bra     shift                   Go back and try again.
+
 again   movem.l d0-d6,-(sp)             Save registers.
         bsr     RANDOM                  Calculate random number.
         movem.l (sp)+,d0-d6             Restore registers
@@ -488,10 +498,12 @@ again   movem.l d0-d6,-(sp)             Save registers.
 
 * Limit value to selected range.
 
-        and.l   d1,d2                   Only allow bits set in D1.
-        cmp.b   d0,d2                   If below minimum, try again.
+        and.l   d3,d2                   Mask out to get number in correct range.
+        cmp.l   d0,d2                   If below minimum, try again.
         blt     again
-        movem.l (sp)+,d7                Restore registers
+        cmp.l   d1,d2                   If above maximum, try again.
+        bgt     again
+        movem.l (sp)+,d3/d7             Restore registers
         rts
 
 * This is the source for "A Pseudo Random-Number Generator" by Michael
