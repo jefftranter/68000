@@ -771,8 +771,7 @@ next
 *
 * Table of Winning Rules
 *
-* Player 1      Player 2      Winner    Reason
-* (human)       (computer)
+* Human         Computer      Winner    Reason
 * ------------  ------------  ------    ------
 RuleTable
  dc.b ROCK,      ROCK,      TIE,        TIE
