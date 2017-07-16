@@ -8,6 +8,8 @@
 *
 * Copyright (C) 2017 Jeff Tranter <tranter@pobox.com>
 *
+* TODO:
+* - Make code position independent.
 *
 *************************************************************************
 
@@ -643,7 +645,7 @@ DIV2           DBRA       D3,DIV1             ;decrement counter and loop
 PrintPlay
         movem.l d0/a0,-(sp)             Preserve registers.
 
-* Check that input paramter is within valid range 1..3 or 1..5
+* Check that input parameter is within valid range 1..3 or 1..5
 
         ext.w   d0                      CHK only supports word size, so need to extend from byte to word.
         sub.w   #1,d0                   Add one so we can use CHK.
@@ -652,11 +654,9 @@ PrintPlay
   else
         chk.w   #2,d0                   Will trap if outside the range of 0..2
   endif
-
         asl.w   #2,d0                   Multiply index by 4 (size of the lookup table entries).
-        lea.l   ItemNames,a0            Get pointer to lookup table of item names.
+        lea.l   (ItemNames,pc),a0       Get pointer to lookup table of item names.
         move.l  (a0,d0),a0              Get table entry for the item.
-
         bsr     PrintString             Print the string.
         movem.l (sp)+,d0/a0             Restore registers.
         rts
@@ -667,56 +667,26 @@ PrintPlay
 *
 * Print "Smashes", "Crushes", etc.
 *
-* Inputs: D0.b: value of SMAHES, CRUSHES, etc.
+* Inputs: D0.b: value of SMASHES, CRUSHES, etc.
 * Outputs: none
 * Registers used: none
 *
 ************************************************************************
 
 PrintReason
-        movem.l a0,-(sp)                Preserve registers.
-        cmp.b   #COVERS,d0              Is it Covers?
-        bne     rtry1                   Branch if not.
-        lea.l   S_COVERS,a0             Get pointer to string.
-        bra     rprintit                Print it.
-rtry1   cmp.b   #CRUSHES,d0             Is it Crushes?
-        bne     rtry2                   Branch if not.
-        lea.l   S_CRUSHES,a0            Get pointer to string.
-        bra     rprintit                Print it.
-rtry2   cmp.b   #VAPORIZES,d0           Is it Vaporizes?
-        bne     rtry3                   Branch if not
-        lea.l   S_VAPORIZES,a0          Get pointer to string.
-        bra     rprintit                Print it.
-rtry3   cmp.b   #CUTS,d0                Is it Cuts?
-        bne     rtry4                   Branch if not
-        lea.l   S_CUTS,a0               Get pointer to string.
-        bra     rprintit                Print it.
-rtry4   cmp.b   #DISPROVES,d0           Is it Disproves?
-        bne     rtry5                   Branch if not.
-        lea.l   S_DISPROVES,a0          Get pointer to string.
-        bra     rprintit                Print it.
-rtry5   cmp.b   #EATS,d0                Is it Eats?
-        bne     rtry6                   Branch if not.
-        lea.l   S_EATS,a0               Get pointer to string.
-        bra     rprintit                Print it.
-rtry6   cmp.b   #SMASHES,d0             Is it Smashes?
-        bne     rtry7                   Branch if not.
-        lea.l   S_SMASHES,a0            Get pointer to string.
-        bra     rprintit                Print it.
-rtry7   cmp.b   #DECAPITATES,d0         Is it Decapitates?
-        bne     rtry8                   Branch if not.
-        lea.l   S_DECAPITATES,a0        Get pointer to string.
-        bra     rprintit                Print it.
-rtry8   cmp.b   #POISONS,d0             Is it Poisons?
-        bne     roops                   If not, then invalid.
-        lea.l   S_POISONS,a0            Get pointer to string.
-rprintit
+        movem.l d0/a0,-(sp)             Preserve registers.
+
+* Check that input parameter is within valid range 1..9
+
+        ext.w   d0                      CHK only supports word size, so need to extend from byte to word.
+        sub.w   #1,d0                   Add one so we can use CHK.
+        chk.w   #8,d0                   Will trap if outside the range of 0..8
+        asl.w   #2,d0                   Multiply index by 4 (size of the lookup table entries).
+        lea.l   (ReasonNames,pc),a0     Get pointer to lookup table of item names.
+        move.l  (a0,d0),a0              Get table entry for the item.
         bsr     PrintString             Print the string.
-        movem.l (sp)+,a0                Restore registers.
+        movem.l (sp)+,d0/a0             Restore registers.
         rts
-roops:
-        illegal                         Was not valid, should never happen,
-*                                       so cause exception if it does
 
 ************************************************************************
 *
@@ -754,7 +724,7 @@ DetermineWinner
 
 * Find entry in the rule table corresponding to the two input values.
 
-        lea.l   RuleTable,a0            Get address of start of table.
+        lea.l   (RuleTable,pc),a0       Get address of start of table.
 search
         cmp.b   (a0),d0                 Does entry match human player value?
         bne     next                    Branch if not.
@@ -830,6 +800,22 @@ ItemNames
  dc.l    S_SPOCK
  dc.l S_LIZARD
   endif
+
+************************************************************************
+*
+* Lookup table of names for reasons. Given a reason number, gives pointer
+* to string with it's name.
+*
+ReasonNames
+ dc.l    S_COVERS
+ dc.l    S_CRUSHES
+ dc.l    S_VAPORIZES
+ dc.l    S_CUTS
+ dc.l    S_DISPROVES
+ dc.l    S_EATS
+ dc.l    S_SMASHES
+ dc.l    S_DECAPITATES
+ dc.l    S_POISONS
 
 *************************************************************************
 *
