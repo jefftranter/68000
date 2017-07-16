@@ -164,7 +164,7 @@ gameloop
         move.l  #3,d1                   to 3.
   endif
         bsr     Random                  Generate number.
-        lea.l   (COMPUTERPLAY),a0
+        lea.l   (COMPUTERPLAY,pc),a0
         move.b  d2,(a0)                 Save computer's move.
 
 * Get user's play.
@@ -200,7 +200,7 @@ okay1
 
         lea.l   (S_MYCHOICE,pc),a0      "This is my choice..."
         bsr     PrintString             Display it.
-        lea.l   (COMPUTERPLAY),a0
+        lea.l   (COMPUTERPLAY,pc),a0
         move.b  (a0),d0                 Get computer's move.
         bsr     PrintPlay               Print name of play.
         bsr     CrLf                    Then newline.
@@ -239,7 +239,7 @@ next1
         lea.l   (WINNER,pc),a0
         cmp.b   #COMPUTER,(a0)          Did computer win?
         bne     next2                   Branch if not
-        lea.l   (COMPUTERPLAY),a0
+        lea.l   (COMPUTERPLAY,pc),a0
         move.b  (a0),d0                 Get computer's move.
         bsr     PrintPlay               Print name of play.
         move.b  #" ",d0                 Print space.
@@ -269,7 +269,7 @@ next2                                   * Human won (rare, but it happens).
         bsr     PrintReason             Print reason.
         move.b  #" ",d0                 Print space.
         bsr     PrintChar
-        lea.l   (COMPUTERPLAY),a0
+        lea.l   (COMPUTERPLAY,pc),a0
         move.b  (a0),d0                 Get computer's move.
         bsr     PrintPlay               Print name of play.
         lea.l   (S_YOUWIN,pc),a0        ", You win."
