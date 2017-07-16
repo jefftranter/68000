@@ -641,40 +641,25 @@ DIV2           DBRA       D3,DIV1             ;decrement counter and loop
 *
 ************************************************************************
 PrintPlay
-        movem.l a0,-(sp)                Preserve registers.
-        cmp.b   #ROCK,d0                Is it Rock?
-        bne     try1                    Branch if not.
-        lea.l   S_ROCK,a0               Get pointer to string.
-        bra     printit                 Print it.
-try1    cmp.b   #PAPER,d0               Is it Paper?
-        bne     try2                    Branch if not.
-        lea.l   S_PAPER,a0              Get pointer to string.
-        bra     printit                 Print it.
-try2    cmp.b   #SCISSORS,d0            Is it Scissors?
+        movem.l d0/a0,-(sp)             Preserve registers.
+
+* Check that input paramter is within valid range 1..3 or 1..5
+
+        ext.w   d0                      CHK only supports word size, so need to extend from byte to word.
+        sub.w   #1,d0                   Add one so we can use CHK.
   ifd RPSSL
-        bne     try3                    Branch if not
- else
-        bne     oops                    If not, then invalid.
-  endif
-        lea.l   S_SCISSORS,a0           Get pointer to string.
-        bra     printit                 Print it.
-  ifd RPSSL
-try3    cmp.b   #SPOCK,d0               Is it Spock?
-        bne     try4                    Branch if not
-        lea.l   S_SPOCK,a0              Get pointer to string.
-        bra     printit                 Print it.
-try4    cmp.b   #LIZARD,d0              Is it Lizard?
-        bne     oops                    If not, then invalid.
-        lea.l   S_LIZARD,a0             Get pointer to string.
+        chk.w   #4,d0                   Will trap if outside the range of 0..4
+  else
+        chk.w   #2,d0                   Will trap if outside the range of 0..2
   endif
 
-printit
+        asl.w   #2,d0                   Multiply index by 4 (size of the lookup table entries).
+        lea.l   ItemNames,a0            Get pointer to lookup table of item names.
+        move.l  (a0,d0),a0              Get table entry for the item.
+
         bsr     PrintString             Print the string.
-        movem.l (sp)+,a0                Restore registers.
+        movem.l (sp)+,d0/a0             Restore registers.
         rts
-oops:
-        illegal                         Was not valid, should never happen,
-*                                       so cause exception if it does
 
 ************************************************************************
 *
@@ -831,6 +816,20 @@ RuleTable
  dc.b LIZARD,    SPOCK,     HUMAN,      POISONS
  dc.b LIZARD,    LIZARD,    TIE,        TIE
  endif
+
+************************************************************************
+*
+* Lookup table of names for items. Given an item number, gives pointer
+* to string with it's name.
+*
+ItemNames
+ dc.l    S_ROCK
+ dc.l    S_PAPER
+ dc.l    S_SCISSORS
+  ifd RPSSL
+ dc.l    S_SPOCK
+ dc.l S_LIZARD
+  endif
 
 *************************************************************************
 *
