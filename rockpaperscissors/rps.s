@@ -4,6 +4,10 @@
 * assembler code to run on the TS2 single board computer with the
 * TUTOR ROM monitor.
 *
+* It can also play the alternative game version
+* "rock-paper-scissors-Spock-lizard". This has to be determined at build
+* time.
+*
 * It is written for the VASM cross-assembler.
 *
 * Copyright (C) 2017 Jeff Tranter <tranter@pobox.com>
@@ -916,16 +920,16 @@ S_POISONS       dc.b    "poisons", 0
 *
 *************************************************************************
 
-* Total number of games
+* Total number of games.
 TOTALGAMES     ds.b     1
 
-* Current game number
+* Current game number.
 GAMENO         ds.b     1
 
-* Games won by computer
+* Games won by computer.
 COMPUTERWON    ds.b     1
 
-* Games won by human
+* Games won by human.
 HUMANWON       ds.b     1
 
 * Human player's most recent play.
@@ -940,6 +944,6 @@ WINNER         ds.b     1
 * Most recent reason for winning.
 REASON         ds.b     1
 
-* Random number initial seed
+* Random number initial seed.
                align    1
 SEED           ds.l     1
