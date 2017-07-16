@@ -19,6 +19,26 @@ RPSSL   equ     1
 
 *************************************************************************
 *
+* Macros
+*
+*************************************************************************
+
+* Convenient macros for setting and clearing flags in the CCR.
+
+  macro SETV
+        or      #$02,ccr                Set overflow bit.
+  endm
+
+  macro CLEARV
+        and     #$02,ccr                Clear overflow bit.
+  endm
+
+  macro SETX
+        ori.b   #$10,ccr                Set eXtend bit.
+  endm
+
+*************************************************************************
+*
 * Constants
 *
 *************************************************************************
@@ -481,10 +501,10 @@ scan    tst.b   (a0)                    Have we reached end of string?
         bgt.s   bad                     Invalid character if higher.
         bra.s   scan                    go back and continue.
 
-bad     or      #$02,CCR                Set overflow bit to indicate error.
+bad     SETV                            Set overflow bit to indicate error.
         bra.s   ret
 
-good    and     #$02,CCR                Clear overflow bit to indicate good.
+good    CLEARV                          Clear overflow bit to indicate good.
 ret     movem.l (sp)+,a0                Restore registers.
         rts
 
@@ -526,7 +546,7 @@ Random
         move.l  #1,d3                   Start with least significant bit set.
 shift   cmp.l   d1,d3                   Compare to maximum.
         bge     again                   Found a suitable mask.
-        ori.b   #$10,ccr                Set Extend flag.
+        SETX                            Set Extend flag.
         roxl.l  #1,d3                   Rotate left with extend.
         bra     shift                   Go back and try again.
 
