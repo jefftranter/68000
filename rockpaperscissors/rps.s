@@ -8,8 +8,6 @@
 *
 * Copyright (C) 2017 Jeff Tranter <tranter@pobox.com>
 *
-* TODO:
-* - Make code position independent.
 *
 *************************************************************************
 
@@ -100,15 +98,20 @@ POISONS     equ   9
         moveq.l   #0,d0                 Initialize checksum to zero.
 loop    add.l     (a0)+,d0              Add next memory location.
         dbf       d1,loop               Loop until done.
-        move.l    d0,SEED               Store random number seed
+        lea.l     (SEED,pc),a0
+        move.l    d0,(a0)               Store random number seed
 
 * Initialize variables
 
 start
-        move.b  #1,TOTALGAMES           Total number of games.
-        move.b  #1,GAMENO               Current game number.
-        move.b  #0,COMPUTERWON          Games won by computer.
-        move.b  #0,HUMANWON             Games won by human player.
+        lea.l   (TOTALGAMES,pc),a0
+        move.b  #1,(a0)                 Total number of games.
+        lea.l   (GAMENO,pc),a0
+        move.b  #1,(a0)                 Current game number.
+        lea.l   (COMPUTERWON,pc),a0
+        move.b  #0,(a0)                 Games won by computer.
+        lea.l   (HUMANWON,pc),a0
+        move.b  #0,(a0)                 Games won by human player.
 
         lea.l   (S_WELCOME,pc),a0       Get startup message.
         bsr     PrintString             Display it.
@@ -132,7 +135,8 @@ invalid
         bra     enter                   Try again.
 
 okay
-        move.b  d0,TOTALGAMES           Set total games to play.
+        lea.l   (TOTALGAMES,pc),a0
+        move.b  d0,(a0)                 Set total games to play.
 
 gameloop
 
@@ -140,11 +144,13 @@ gameloop
 
         lea.l   (S_GAMENUMBER,pc),a0    "Game number: "
         bsr     PrintString             Display it.
-        move.b  GAMENO,d0               Get game number
+        lea.l   (GAMENO,pc),a0
+        move.b  (a0),d0                 Get game number
         bsr     PrintDec                Display it.
         lea.l   (S_OF,pc),a0            " of "
         bsr     PrintString             Display it.
-        move.b  TOTALGAMES,d0           Get total games.
+        lea.l   (TOTALGAMES,pc),a0
+        move.b  (a0),d0                 Get total games.
         bsr     PrintDec                Display it.
         bsr     CrLf                    Newline.
 
@@ -158,7 +164,8 @@ gameloop
         move.l  #3,d1                   to 3.
   endif
         bsr     Random                  Generate number.
-        move.b  d2,COMPUTERPLAY         Save computer's move.
+        lea.l   (COMPUTERPLAY),a0
+        move.b  d2,(a0)                 Save computer's move.
 
 * Get user's play.
 
@@ -186,13 +193,15 @@ invalid1
         bra     enter1                  Try again.
 
 okay1
-        move.b  d0,HUMANPLAY            Save player's move.
+        lea.l   (HUMANPLAY,pc),a0
+        move.b  d0,(a0)                 Save player's move.
 
 * Report computer's play.
 
         lea.l   (S_MYCHOICE,pc),a0      "This is my choice..."
         bsr     PrintString             Display it.
-        move.b  COMPUTERPLAY,d0         Get computer's move.
+        lea.l   (COMPUTERPLAY),a0
+        move.b  (a0),d0                 Get computer's move.
         bsr     PrintPlay               Print name of play.
         bsr     CrLf                    Then newline.
 
@@ -200,63 +209,81 @@ okay1
 
         lea.l   (S_YOUPLAYED,pc),a0     "You played "
         bsr     PrintString             Display it.
-        move.b  HUMANPLAY,d0            Get computer's move.
+        lea.l   (HUMANPLAY,pc),a0
+        move.b  (a0),d0                 Get human's move.
         bsr     PrintPlay               Print name of play.
         bsr     CrLf                    Then newline.
 
 * Determine who won.
 
-        move.b  HUMANPLAY,d0            Get human player's move
-        move.b  COMPUTERPLAY,d1         Get computer's move
+        lea.l   (HUMANPLAY,pc),a0
+        move.b  (a0),d0                 Get human player's move
+        lea.l   (COMPUTERPLAY,pc),a0
+        move.b  (a0),d1                 Get computer's move
         bsr     DetermineWinner         Determine who won
-        move.b  d2,WINNER               Save winner value.
-        move.b  d3,REASON               Save reason value.
+        lea.l   (WINNER,pc),a0
+        move.b  d2,(a0)                 Save winner value.
+        lea.l   (REASON,pc),a0
+        move.b  d3,(a0)                 Save reason value.
 
 * Report who won and update score.
 
-        cmp.b   #TIE,WINNER             Was it a tie?
+        lea.l   (WINNER,pc),a0
+        cmp.b   #TIE,(a0)               Was it a tie?
         bne     next1                   Branch if not
         lea.l   (S_TIE,pc),a0           "It's a tie."
         bsr     PrintString             Display it.
         bra     nextgame
 
-next1   cmp.b  #COMPUTER,WINNER         Did computer win?
+next1
+        lea.l   (WINNER,pc),a0
+        cmp.b   #COMPUTER,(a0)          Did computer win?
         bne     next2                   Branch if not
-        move.b  COMPUTERPLAY,d0         Get computer's move.
+        lea.l   (COMPUTERPLAY),a0
+        move.b  (a0),d0                 Get computer's move.
         bsr     PrintPlay               Print name of play.
         move.b  #" ",d0                 Print space.
         bsr     PrintChar
-        move.b  REASON,d0               Get reason.
+        lea.l   (REASON,pc),a0
+        move.b  (a0),d0                 Get reason.
         bsr     PrintReason             Print reason.
         move.b  #" ",d0                 Print space.
         bsr     PrintChar
-        move.b  HUMANPLAY,d0            Get human's move.
+        lea.l   (HUMANPLAY,pc),a0
+        move.b  (a0),d0                 Get human's move.
         bsr     PrintPlay               Print name of play.
         lea.l   (S_IWIN,pc),a0          ", I win."
         bsr     PrintString             Display it.
-        add.b   #1,COMPUTERWON          Update won games.
+        lea.l   (COMPUTERWON,pc),a0
+        add.b   #1,(a0)                 Update won games.
         bra     nextgame
 
 next2                                   * Human won (rare, but it happens).
-        move.b  HUMANPLAY,d0            Get human's move.
+        lea.l   (HUMANPLAY,pc),a0
+        move.b  (a0),d0                 Get human's move.
         bsr     PrintPlay               Print name of play.
         move.b  #" ",d0                 Print space.
         bsr     PrintChar
-        move.b  REASON,d0               Get reason.
+        lea.l   (REASON,pc),a0
+        move.b  (a0),d0                 Get reason.
         bsr     PrintReason             Print reason.
         move.b  #" ",d0                 Print space.
         bsr     PrintChar
-        move.b  COMPUTERPLAY,d0         Get computer's move.
+        lea.l   (COMPUTERPLAY),a0
+        move.b  (a0),d0                 Get computer's move.
         bsr     PrintPlay               Print name of play.
         lea.l   (S_YOUWIN,pc),a0        ", You win."
         bsr     PrintString             Display it.
-        add.b   #1,HUMANWON             Update won games.
+        lea.l   (HUMANWON,pc),a0
+        add.b   #1,(a0)                 Update won games.
 
 nextgame
-        add.b   #1,GAMENO               Increment game number.
+        lea.l   (GAMENO,pc),a0
+        add.b   #1,(a0)                 Increment game number.
 
-        move.b  GAMENO,d0               Get game number.
-        cmp.b   TOTALGAMES,d0           Last game played?
+        move.b  (a0),d0                 Get game number.
+        lea.l   (TOTALGAMES,pc),a0
+        cmp.b   (a0),d0                 Last game played?
         ble     gameloop                If not, play next game.
 
 * Report final game scores.
@@ -265,7 +292,8 @@ nextgame
         bsr     PrintString             Display it.
         lea.l   (S_IWON,pc),a0          "I have won "
         bsr     PrintString             Display it.
-        move.b  COMPUTERWON,d0          Get computer won games.
+        lea.l   (COMPUTERWON,pc),a0
+        move.b  (a0),d0                 Get computer won games.
         bsr     PrintDec                Print it.
         cmp     #1,d0                   Handle "game" versus "games".
         beq     one1
@@ -275,7 +303,8 @@ one1    lea.l   (S_GAME,pc),a0         " game."
 disp1   bsr     PrintString             Display it.
         lea.l   (S_YOUWON,pc),a0        "You have won "
         bsr     PrintString             Display it.
-        move.b  HUMANWON,d0             Get human won games.
+        lea.l   (HUMANWON,pc),a0
+        move.b  (a0),d0                 Get human won games.
         bsr     PrintDec                Print it.
         cmp     #1,d0                   Handle "game" versus "games".
         beq     one2
@@ -286,8 +315,10 @@ disp2   bsr     PrintString             Display it.
 
 * Print the winner
 
-        move.b  HUMANWON,d0
-        cmp.b   COMPUTERWON,d0          Compare scores.
+        lea.l   (HUMANWON,pc),a0
+        move.b  (a0),d0
+        lea.l   (COMPUTERWON,pc),a0
+        cmp.b   (a0),d0                 Compare scores.
         blt     computerwon             Computer won.
         bgt     humanwon                Human won.
 
@@ -539,8 +570,9 @@ Tutor
 *
 ************************************************************************
 Random
-        movem.l d3/d7,-(sp)             Save registers.
-        move.l  SEED,d7                 Random seed.
+        movem.l d3/d7/a0,-(sp)          Save registers.
+        lea.l   (SEED,pc),a0
+        move.l  (a0),d7                 Random seed.
 
 * Figure out the largest bit mask of all 1's that is large enough to
 * handle the upper limit of the desired range.
@@ -555,7 +587,8 @@ shift   cmp.l   d1,d3                   Compare to maximum.
 again   movem.l d0-d6,-(sp)             Save registers.
         bsr     RANDOM                  Calculate random number.
         movem.l (sp)+,d0-d6             Restore registers
-        move.l  d7,SEED                 Save as next seed.
+        lea.l   (SEED,pc),a0
+        move.l  d7,(a0)                 Save as next seed.
         move.l  d7,d2                   Get random result.
 
 * Limit value to selected range.
@@ -565,7 +598,7 @@ again   movem.l d0-d6,-(sp)             Save registers.
         blt     again
         cmp.l   d1,d2                   If above maximum, try again.
         bgt     again
-        movem.l (sp)+,d3/d7             Restore registers
+        movem.l (sp)+,d3/d7/a0          Restore registers
         rts
 
 * This is the source for "A Pseudo Random-Number Generator" by Michael
