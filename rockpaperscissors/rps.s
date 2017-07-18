@@ -127,18 +127,18 @@ enter
         bsr     PrintString             Display it.
         bsr     GetString               Get response.
         bsr     ValidDec                Make sure it is a valid number.
-        bvs     invalid                 Complain if invalid.
+        bvs.s   invalid                 Complain if invalid.
         bsr     Dec2Bin                 Convert it to number.
 
         cmp.l   #1,d0                   Make sure it is in range from 1 to 20.
-        blt     invalid                 Too small.
+        blt.s   invalid                 Too small.
         cmp.l   #20,d0
-        ble     okay                    It is valid.
+        ble.s   okay                    It is valid.
 
 invalid
         lea.l   (S_INVALID1,pc),a0      "Please enter a number from 1 to 20."
         bsr     PrintString             Display it.
-        bra     enter                   Try again.
+        bra.s   enter                   Try again.
 
 okay
         lea.l   (TOTALGAMES,pc),a0
@@ -181,22 +181,22 @@ enter1
 
         bsr     GetString               Get response.
         bsr     ValidDec                Make sure it is a valid number.
-        bvs     invalid1                Complain if invalid.
+        bvs.s   invalid1                Complain if invalid.
         bsr     Dec2Bin                 Convert it to number.
 
         cmp.l   #1,d0                   Make sure it is in range from 1 to 3/5.
-        blt     invalid1                Too small.
+        blt.s   invalid1                Too small.
   ifd RPSSL
         cmp.l   #5,d0
   else
         cmp.l   #3,d0
   endif
-        ble     okay1                   It is valid.
+        ble.s   okay1                   It is valid.
 
 invalid1
         lea.l   (S_INVALID2,pc),a0      "Please enter a number from 1 to 3."
         bsr     PrintString             Display it.
-        bra     enter1                  Try again.
+        bra.s   enter1                  Try again.
 
 okay1
         lea.l   (HUMANPLAY,pc),a0
@@ -236,7 +236,7 @@ okay1
 
         lea.l   (WINNER,pc),a0
         cmp.b   #TIE,(a0)               Was it a tie?
-        bne     next1                   Branch if not
+        bne.s   next1                   Branch if not
         lea.l   (S_TIE,pc),a0           "It's a tie."
         bsr     PrintString             Display it.
         bra     nextgame
@@ -244,7 +244,7 @@ okay1
 next1
         lea.l   (WINNER,pc),a0
         cmp.b   #COMPUTER,(a0)          Did computer win?
-        bne     next2                   Branch if not
+        bne.s   next2                   Branch if not
         lea.l   (COMPUTERPLAY,pc),a0
         move.b  (a0),d0                 Get computer's move.
         bsr     PrintPlay               Print name of play.
@@ -261,7 +261,7 @@ next1
         lea.l   (S_IWIN,pc),a0          ", I win."
         bsr     PrintString             Display it.
         lea.l   (COMPUTERWON,pc),a0
-        add.b   #1,(a0)                 Update won games.
+        addq.b  #1,(a0)                 Update won games.
         bra     nextgame
 
 next2                                   * Human won (rare, but it happens).
@@ -281,11 +281,11 @@ next2                                   * Human won (rare, but it happens).
         lea.l   (S_YOUWIN,pc),a0        ", You win."
         bsr     PrintString             Display it.
         lea.l   (HUMANWON,pc),a0
-        add.b   #1,(a0)                 Update won games.
+        addq.b  #1,(a0)                 Update won games.
 
 nextgame
         lea.l   (GAMENO,pc),a0
-        add.b   #1,(a0)                 Increment game number.
+        addq.b  #1,(a0)                 Increment game number.
 
         move.b  (a0),d0                 Get game number.
         lea.l   (TOTALGAMES,pc),a0
@@ -302,9 +302,9 @@ nextgame
         move.b  (a0),d0                 Get computer won games.
         bsr     PrintDec                Print it.
         cmp     #1,d0                   Handle "game" versus "games".
-        beq     one1
+        beq.s   one1
         lea.l   (S_GAMES,pc),a0         " games."
-        bra     disp1
+        bra.s   disp1
 one1    lea.l   (S_GAME,pc),a0         " game."
 disp1   bsr     PrintString             Display it.
         lea.l   (S_YOUWON,pc),a0        "You have won "
@@ -313,9 +313,9 @@ disp1   bsr     PrintString             Display it.
         move.b  (a0),d0                 Get human won games.
         bsr     PrintDec                Print it.
         cmp     #1,d0                   Handle "game" versus "games".
-        beq     one2
+        beq.s   one2
         lea.l   (S_GAMES,pc),a0         " games."
-        bra     disp2
+        bra.s   disp2
 one2    lea.l   (S_GAME,pc),a0         " game."
 disp2   bsr     PrintString             Display it.
 
@@ -325,17 +325,17 @@ disp2   bsr     PrintString             Display it.
         move.b  (a0),d0
         lea.l   (COMPUTERWON,pc),a0
         cmp.b   (a0),d0                 Compare scores.
-        blt     computerwon             Computer won.
-        bgt     humanwon                Human won.
+        blt.s   computerwon             Computer won.
+        bgt.s   humanwon                Human won.
 
         lea.l   (S_TIE1,pc),a0          "It's a tie!"
         bsr     PrintString             Display it.
-        bra     playagain
+        bra.s   playagain
 
 computerwon
         lea.l   (S_IWIN1,pc),a0         "I win!"
         bsr     PrintString             Display it.
-        bra     playagain
+        bra.s   playagain
 
 humanwon
         lea.l   (S_YOUWIN1,pc),a0       "You win!"
@@ -352,10 +352,10 @@ playagain
         cmp.b   #'Y',(a0)               Did user enter 'Y'?
         beq     start                   If so, go to start
         cmp.b   #'n',(a0)               Did user enter 'n'?
-        beq     exit                    If so, exit
+        beq.s   exit                    If so, exit
         cmp.b   #'N',(a0)               Did user enter 'N'?
-        beq     exit                    If so, exit
-        bra     playagain               Otherwise invalid input, try again.
+        beq.s   exit                    If so, exit
+        bra.s   playagain               Otherwise invalid input, try again.
 
 exit
         bra     Tutor                   Return to TUTOR
@@ -585,10 +585,10 @@ Random
 
         move.l  #1,d3                   Start with least significant bit set.
 shift   cmp.l   d1,d3                   Compare to maximum.
-        bge     again                   Found a suitable mask.
+        bge.s   again                   Found a suitable mask.
         SETX                            Set Extend flag.
         roxl.l  #1,d3                   Rotate left with extend.
-        bra     shift                   Go back and try again.
+        bra.s   shift                   Go back and try again.
 
 again   movem.l d0-d6,-(sp)             Save registers.
         bsr     RANDOM                  Calculate random number.
@@ -603,7 +603,7 @@ again   movem.l d0-d6,-(sp)             Save registers.
         cmp.l   d0,d2                   If below minimum, try again.
         blt     again
         cmp.l   d1,d2                   If above maximum, try again.
-        bgt     again
+        bgt.s   again
         movem.l (sp)+,d3/d7/a0          Restore registers
         rts
 
@@ -687,7 +687,7 @@ PrintPlay
 * Check that input parameter is within valid range 1..3 or 1..5
 
         ext.w   d0                      CHK only supports word size, so need to extend from byte to word.
-        sub.w   #1,d0                   Add one so we can use CHK.
+        subq.w  #1,d0                   Add one so we can use CHK.
   ifd RPSSL
         chk.w   #4,d0                   Will trap if outside the range of 0..4
   else
@@ -718,7 +718,7 @@ PrintReason
 * Check that input parameter is within valid range 1..9
 
         ext.w   d0                      CHK only supports word size, so need to extend from byte to word.
-        sub.w   #1,d0                   Add one so we can use CHK.
+        subq.w  #1,d0                   Add one so we can use CHK.
         chk.w   #8,d0                   Will trap if outside the range of 0..8
         asl.w   #2,d0                   Multiply index by 4 (size of the lookup table entries).
         lea.l   (ReasonNames,pc),a0     Get pointer to lookup table of item names.
@@ -745,7 +745,7 @@ DetermineWinner
 
         move.b  d0,d2                   Get input value.
         ext.w   d2                      CHK only supports word size, so need to extend from byte to word.
-        sub.w   #1,d2                   Add one so we can use CHK.
+        subq.w  #1,d2                   Add one so we can use CHK.
   ifd RPSSL
         chk.w   #4,d2                   Will trap if outside the range of 0..4
   else
@@ -754,7 +754,7 @@ DetermineWinner
 
         move.b  d1,d2                   Now do the same for the value in D1.
         ext.w   d2
-        sub.w   #1,d2
+        subq.w  #1,d2
   ifd RPSSL
         chk.w   #4,d2
    else
@@ -766,9 +766,9 @@ DetermineWinner
         lea.l   (RuleTable,pc),a0       Get address of start of table.
 search
         cmp.b   (a0),d0                 Does entry match human player value?
-        bne     next                    Branch if not.
+        bne.s   next                    Branch if not.
         cmp.b   1(a0),d1                Does entry match computer player value?
-        bne     next                    Branch if not.
+        bne.s   next                    Branch if not.
 
 * If here, then match was found.
 
@@ -779,7 +779,7 @@ search
 
 next
         addq.l  #4,a0                   Advance to next entry in table (4 bytes per entry).
-        bra     search
+        bra.s   search
 
 ************************************************************************
 *
