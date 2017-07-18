@@ -571,41 +571,36 @@ Tutor
 * Generate a random 32-bit number between two values.
 *
 * Inputs: D0.l: minimum value, D1.l: maximum value.
-* Outputs: D2.l: returned random number
+* Outputs: D2.l: returned random number (only lower 16 bits are used).
 * Registers used: D2
 *
 ************************************************************************
-Random
-        movem.l d3/d7/a0,-(sp)          Save registers.
+
+
+Random  movem.l d0/d1/d7/a0,-(sp)       Save registers.
         lea.l   (SEED,pc),a0
-        move.l  (a0),d7                 Random seed.
+        move.l  (a0),d7                 Get random seed.
 
-* Figure out the largest bit mask of all 1's that is large enough to
-* handle the upper limit of the desired range.
-
-        move.l  #1,d3                   Start with least significant bit set.
-shift   cmp.l   d1,d3                   Compare to maximum.
-        bge.s   again                   Found a suitable mask.
-        SETX                            Set Extend flag.
-        roxl.l  #1,d3                   Rotate left with extend.
-        bra.s   shift                   Go back and try again.
-
-again   movem.l d0-d6,-(sp)             Save registers.
+        movem.l d0-d6,-(sp)             Save registers.
         bsr     RANDOM                  Calculate random number.
         movem.l (sp)+,d0-d6             Restore registers
+
         lea.l   (SEED,pc),a0
         move.l  d7,(a0)                 Save as next seed.
         move.l  d7,d2                   Get random result.
 
-* Limit value to selected range.
+* Constrain range by calculating number % (max-min+1) + min
 
-        and.l   d3,d2                   Mask out to get number in correct range.
-        cmp.l   d0,d2                   If below minimum, try again.
-        blt     again
-        cmp.l   d1,d2                   If above maximum, try again.
-        bgt.s   again
-        movem.l (sp)+,d3/d7/a0          Restore registers
-        rts
+        sub.l   d0,d1                   Calculate max-min.
+        addq.l  #1,d1                   Calculate max-min+1.
+        and.l   #$0000FFFF,d2           Only use low word so we can't get overflow from divide.
+        divu.w  d1,d2                   Calculate number / (max-min+1)
+        swap    d2                      Move remainder from high word to low word.
+        ext.l   d2                      Extend word to long word.
+        add.l   d0,d2                   Add min.
+
+        movem.l (sp)+,d0/d1/d7/a0       Restore registers
+        rts                             And return with result in D2.
 
 * This is the source for "A Pseudo Random-Number Generator" by Michael
 * P. McLaughlin from Dr. Dobb's Toolbook of 68000 Programming.
