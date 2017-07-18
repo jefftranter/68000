@@ -50,6 +50,8 @@ RPSSL   equ     1
 CR      equ     $0D                     Carriage return
 LF      equ     $0A                     Line feed
 
+ACIA_1   =      $00010040               Console ACIA base address.
+
 * TUTOR TRAP 14 functions
 GETNUMD equ     225                     Convert ASCII encoded decimal to hex.
 TUTOR   equ     228                     Go to TUTOR; print prompt.
@@ -94,17 +96,6 @@ POISONS     equ   9
 * Start address
         ORG     $1000                   Locate in RAM.
 
-* Do a checksum of some memory to use as a seed to initialize the
-* random number generator.
-
-        lea.l     0,a0                  Start address for checksum.
-        move.l    #$1000,d1             Length of memory to checkum (in longwords).
-        moveq.l   #0,d0                 Initialize checksum to zero.
-loop    add.l     (a0)+,d0              Add next memory location.
-        dbf       d1,loop               Loop until done.
-        lea.l     (SEED,pc),a0
-        move.l    d0,(a0)               Store random number seed
-
 * Initialize variables
 
 start
@@ -119,10 +110,21 @@ start
 
         lea.l   (S_WELCOME,pc),a0       Get startup message.
         bsr     PrintString             Display it.
+
+* Set random seed by counting while waiting for user to press key on
+* keyboard.
+
+        move.l    #1,d0                 Initialize counter to 1.
+        lea.l     ACIA_1,a0             A0 points to console ACIA
+notrdy  addq.l    #1,d0                 Increment counter.
+        btst.b    #0,(a0)               Test RDRF bit
+        beq.s     notrdy                Branch if ACIA Rx not ready
+        lea.l     (SEED,pc),a0
+        move.l    d0,(a0)               Store random number seed
+
 enter
         lea.l   (S_HOWMANY,pc),a0       "How many games do you want to play?"
         bsr     PrintString             Display it.
-
         bsr     GetString               Get response.
         bsr     ValidDec                Make sure it is a valid number.
         bvs     invalid                 Complain if invalid.
@@ -246,12 +248,12 @@ next1
         lea.l   (COMPUTERPLAY,pc),a0
         move.b  (a0),d0                 Get computer's move.
         bsr     PrintPlay               Print name of play.
-        move.b  #" ",d0                 Print space.
+        move.b  #' ',d0                 Print space.
         bsr     PrintChar
         lea.l   (REASON,pc),a0
         move.b  (a0),d0                 Get reason.
         bsr     PrintReason             Print reason.
-        move.b  #" ",d0                 Print space.
+        move.b  #' ',d0                 Print space.
         bsr     PrintChar
         lea.l   (HUMANPLAY,pc),a0
         move.b  (a0),d0                 Get human's move.
@@ -266,12 +268,12 @@ next2                                   * Human won (rare, but it happens).
         lea.l   (HUMANPLAY,pc),a0
         move.b  (a0),d0                 Get human's move.
         bsr     PrintPlay               Print name of play.
-        move.b  #" ",d0                 Print space.
+        move.b  #' ',d0                 Print space.
         bsr     PrintChar
         lea.l   (REASON,pc),a0
         move.b  (a0),d0                 Get reason.
         bsr     PrintReason             Print reason.
-        move.b  #" ",d0                 Print space.
+        move.b  #' ',d0                 Print space.
         bsr     PrintChar
         lea.l   (COMPUTERPLAY,pc),a0
         move.b  (a0),d0                 Get computer's move.
@@ -610,62 +612,62 @@ again   movem.l d0-d6,-(sp)             Save registers.
 *
 * It has been modified slightly to compile with the VASM assembler.
 *
-;PSEUDO-RANDOM NUMBER GENERATOR -- (USES D2-D7)
-;GIVEN ANY SEED (1 TO 2**31-2) IN D7 (LONGWORDS), THIS GENERATOR YIELDS A
-;NON-REPEATING SEQUENCE (RAND(I)) USING ALL INTEGERS IN THE RANGE 1 TO
-;2**31-2. THE AVERAGE EXECUTION TIME IS 240 MICROSECONDS (AT 8 MHZ). THIS
-;GENERATOR, REFERRED TO IN THE LITERATURE AS "GGUBS", IS KNOWN TO POSSESS
-;GOOD STATISTICS. THE ALGORITHM IS:
-;
-;              RAND(I+1) = (16807*RAND(I)) MOD (2**31)-1)
-;
-;WHEN PROPERLY CODED, THIS ALGORITHM WILL TRANSFORM RAND (0) = 1 INTO
-;RAND(1000) = 522329230. THE FOLLOWING IMPLEMENTATION USES SYNTHETIC
-;DIVISION, VIZ.,
-;
-;              K1 = RAND(I) DIV 127773
-;              RAND(I+1) = 16807*RAND(I)-K1*127773)-K1*2836
-;              IF RAND(I+1)<0 THEN RAND(I+1) = RAND(I+1)+2147483647
-;
-;REFERENCE:
-;              BRATLEY, P., FOX, B.L. and L.E. SCHRAGE, 1983.
-;              A GUIDE TO SIMULATION. SPRINGER-VERLAG.
-;
+*PSEUDO-RANDOM NUMBER GENERATOR -- (USES D2-D7)
+*GIVEN ANY SEED (1 TO 2**31-2) IN D7 (LONGWORDS), THIS GENERATOR YIELDS A
+*NON-REPEATING SEQUENCE (RAND(I)) USING ALL INTEGERS IN THE RANGE 1 TO
+*2**31-2. THE AVERAGE EXECUTION TIME IS 240 MICROSECONDS (AT 8 MHZ). THIS
+*GENERATOR, REFERRED TO IN THE LITERATURE AS "GGUBS", IS KNOWN TO POSSESS
+*GOOD STATISTICS. THE ALGORITHM IS:
+*
+*              RAND(I+1) = (16807*RAND(I)) MOD (2**31)-1)
+*
+*WHEN PROPERLY CODED, THIS ALGORITHM WILL TRANSFORM RAND (0) = 1 INTO
+*RAND(1000) = 522329230. THE FOLLOWING IMPLEMENTATION USES SYNTHETIC
+*DIVISION, VIZ.,
+*
+*              K1 = RAND(I) DIV 127773
+*              RAND(I+1) = 16807*RAND(I)-K1*127773)-K1*2836
+*              IF RAND(I+1)<0 THEN RAND(I+1) = RAND(I+1)+2147483647
+*
+*REFERENCE:
+*              BRATLEY, P., FOX, B.L. and L.E. SCHRAGE, 1983.
+*              A GUIDE TO SIMULATION. SPRINGER-VERLAG.
+*
 
-RANDOM         MOVE.L     D7,D6               ;copy RAND(I)
-               MOVE.L     #127773,D2          ;synthetic modulus
-               BSR.S      DIV                 ;divide D6 by 127773
-               MOVE.L     D4,D5               ;copy K1
-               MULS       #-2836,D5           ;D5 = -2836*K1
-               MULU       #42591,D4           ;multiply D4 by 12773
+RANDOM         MOVE.L     D7,D6               copy RAND(I)
+               MOVE.L     #127773,D2          synthetic modulus
+               BSR.S      DIV                 divide D6 by 127773
+               MOVE.L     D4,D5               copy K1
+               MULS       #-2836,D5           D5 = -2836*K1
+               MULU       #42591,D4           multiply D4 by 12773
                MOVE.L     D4,D6
                ADD.L      D4,D4
                ADD.L      D6,D4
-               SUB.L      D4,D7               ;D7 = RAND(I)-K1*12773
-               MOVEQ      #4,D4               ;counter
-RAN1           MOVE.L     D7,D6               ;multiply D7 by 16807
+               SUB.L      D4,D7               D7 = RAND(I)-K1*12773
+               MOVEQ      #4,D4               counter
+RAN1           MOVE.L     D7,D6               multiply D7 by 16807
                LSL.L      #3,D7
                SUB.L      D6,D7
                DBRA       D4,RAN1
-               ADD.L      D5,D7               ;D7 = RAND(I+1)
+               ADD.L      D5,D7               D7 = RAND(I+1)
                BPL.S      EXIT
-               ADD.L      #2147483647,D7      ;normalize negative result
-EXIT           RTS                            ;D7 = RAND(I+1)
-;RAND(I) (31 BITS) DIV 127773 (17 BITS)
-DIV            ADD.L      D6,D6               ;shift out unused bit
-               CLR.L      D4                  ;quotient
-               MOVEQ      #14,D3              ;counter
-               MOVE       D6,D5               ;save low word of RAND(I)
+               ADD.L      #2147483647,D7      normalize negative result
+EXIT           RTS                            D7 = RAND(I+1)
+* RAND(I) (31 BITS) DIV 127773 (17 BITS)
+DIV            ADD.L      D6,D6               shift out unused bit
+               CLR.L      D4                  quotient
+               MOVEQ      #14,D3              counter
+               MOVE       D6,D5               save low word of RAND(I)
                SWAP       D6
-               AND.L      #$0FFFF,D6          ;D6 = RAND(I) DIV 2**15
-DIV1           ADD        D4,D4               ;line up quotient
-               ADD        D5,D5               ;and dividend
-               ADDX.L     D6,D6               ;shift in bit of low word
-               CMP.L      D2,D6               ;trial subtraction
+               AND.L      #$0FFFF,D6          D6 = RAND(I) DIV 2**15
+DIV1           ADD        D4,D4               line up quotient
+               ADD        D5,D5               and dividend
+               ADDX.L     D6,D6               shift in bit of low word
+               CMP.L      D2,D6               trial subtraction
                BMI.S      DIV2
-               SUB.L      D2,D6               ;real subtraction
-               ADDQ       #1,D4               ;put 1 in quotient
-DIV2           DBRA       D3,DIV1             ;decrement counter and loop
+               SUB.L      D2,D6               real subtraction
+               ADDQ       #1,D4               put 1 in quotient
+DIV2           DBRA       D3,DIV1             decrement counter and loop
                RTS
 
 ************************************************************************
@@ -861,9 +863,9 @@ ReasonNames
 *************************************************************************
 
   ifd RPSSL
-S_WELCOME       dc.b    "Welcome to Rock, Paper, Scissors, Spock, Lizard\r\n===============================================\r\n", 0
+S_WELCOME       dc.b    "Welcome to Rock, Paper, Scissors, Spock, Lizard\r\n===============================================\r\nPress a key to start\r\n", 0
   else
-S_WELCOME       dc.b    "Welcome to Rock, Paper, Scissors\r\n================================\r\n", 0
+S_WELCOME       dc.b    "Welcome to Rock, Paper, Scissors\r\n================================\r\nPress a key to start\r\n", 0
   endif
 S_HOWMANY       dc.b    "How many games do you want to play? ", 0
 S_INVALID1      dc.b    "Please enter a number from 1 to 20.\r\n", 0
