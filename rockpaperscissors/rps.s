@@ -837,7 +837,7 @@ ItemNames
  dc.l    S_SCISSORS
   ifd RPSSL
  dc.l    S_SPOCK
- dc.l S_LIZARD
+ dc.l    S_LIZARD
   endif
 
 ************************************************************************
