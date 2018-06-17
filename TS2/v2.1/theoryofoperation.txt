@@ -532,7 +532,7 @@ used instead.
 Rev 2.1 PCB Issues
 ------------------
 
-The following issues were found with the intial rev 2.1 PCBs. They
+The following issues were found with the initial rev 2.1 PCBs. They
 have been corrected in revision 2.1.1.
 
 The holes for D3 are too small for a 1N5404. You can use a 1N4001,

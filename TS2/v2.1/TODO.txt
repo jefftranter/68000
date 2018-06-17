@@ -1,1 +1,1 @@
-Build unit on PCB and verify operation.
+Verify rev 2.1.1 PCB layout.
