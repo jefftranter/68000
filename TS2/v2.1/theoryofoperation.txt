@@ -557,6 +557,7 @@ Possible Future Enhancements
 
 Ideas for a possible rev 2.x:
 
+Holes for 68000 with both 0.8 and 0.9 inch pin spacing.
 Add one or two PIA, VIA, or PIT chips.
 Optionally support line drivers/receivers for true RS-232 serial ports.
 Add some connectors for external parallel i/o, interrupts, etc.
