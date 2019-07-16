@@ -1,0 +1,1695 @@
+68K GAS  monitor.s 			page 1
+
+
+   1               	*        TSBUG2 - 68000 monitor - version of 23 July 1986
+   2               	*                                   Symbol equates
+   3               	         .org     0x00000000
+   4               	BS       =        0x08              | Back_space
+   5               	CR       =        0x0D              | Carriage_return
+   6               	LF       =        0x0A              | Line_feed
+   7               	SPACE    =        0x20              | Space
+   8               	WAIT     =        'W'               | Wait character (to suspend output)
+   9               	ESC      =        0x1B              | ASCII escape character (used by TM)
+  10               	CTRL_A   =        0x01              | Control_A forces return to monitor
+  11               	*                                   | Device addresses
+  12               	STACK    =        0x00000800        | Stack_pointer
+  13               	ACIA_1   =        0x00010040        | Console ACIA control
+  14               	ACIA_2   =        ACIA_1+1          | Auxilary ACIA control
+  15               	X_BASE   =        0x08              | Start of exception vector table
+  16               	TRAP_14  =        0x4E4E            | Code for TRAP #14
+  17               	MAXCHR   =        64                | Length of input line buffer
+  18               	*
+  19               	DATA     =        0x00000C00        | Data origin
+  20               	LNBUFF   =        0x00000000        | Input line buffer (MAXCHR bytes)
+  21               	BUFFEND  =        LNBUFF+MAXCHR-1   | End of line buffer
+  22               	BUFFPT   =        0x00000040        | Pointer to line buffer (4 bytes)
+  23               	PARAMTR  =        0x00000044        | Last parameter from line buffer (4 bytes)
+  24               	ECHO     =        0x00000048        | When clear this enable input echo (1 byte)
+  25               	U_CASE   =        0x00000049        | Flag for upper case conversion (1 byte)
+  26               	UTAB     =        0x0000004A        | Pointer to user command table (4 bytes)
+  27               	CN_IVEC  =        0x0000004E        | Pointer to console input DCB (4 bytes)
+  28               	CN_OVEC  =        0x00000052        | Pointer to console output DCB (4 bytes)
+  29               	TSK_T    =        0x00000056        | Frame for D0-D7, A0-A6, USP, SSP, SW, PC (37*2 bytes)
+  30               	BP_TAB   =        0x000000A0        | Breakpoint table (24*2 bytes)
+  31               	FIRST    =        0x000000D0        | DCB area (512*2 bytes)
+  32               	BUFFER   =        0x000002D0        | 256 bytes for I/O buffer (256*2 bytes)
+  33               	*
+  34               	*************************************************************************
+  35               	*
+  36               	*  This is the main program which assembles a command in the line
+  37               	*  buffer, removes leading/embedded spaces and interprets it by matching
+  38               	*  it with a command in the user table or the built-in table COMTAB
+  39               	*  All variables are specified with respect to A6
+  40               	*
+  41 0000 0000 0000 	         .org     0x00008000        | Monitor origin
+  41      0000 0000 
+  41      0000 0000 
+  41      0000 0000 
+  41      0000 0000 
+  42 8000 0000 0800 	         .long    STACK             | Reset stack pointer
+  43               	         RESET = 0x00008008
+  44 8004 0000 8008 	         .long    RESET             | Reset vector
+  45               	RESET:                              | Cold entry point for monitor
+  46 8008 4DF8 0C00 	         LEA      DATA,%A6          | A6 points to data area
+  47 800c 42AE 004A 	         CLR.L    UTAB(%A6)         | Reset pointer to user extension table
+  48 8010 422E 0048 	         CLR.B    ECHO(%A6)         | Set automatic character echo
+  49 8014 422E 0049 	         CLR.B    U_CASE(%A6)       | Clear case conversion flag (UC<-LC)
+  50 8018 6136      	         BSR.S    SETACIA           | Setup ACIAs
+  51 801a 6100 05D8 	         BSR      X_SET             | Setup exception table
+  52 801e 6100 044E 	         BSR      SET_DCB           | Setup DCB table in RAM
+  53 8022 49FA 09D0 	         LEA.L    BANNER(%PC),%A4   | Point to banner
+68K GAS  monitor.s 			page 2
+
+
+  54 8026 6164      	         BSR.S    HEADING           | and print heading
+  55 8028 207C 0000 	         MOVE.L   #0x0000C000,%A0   | A0 points to extension ROM
+  55      C000 
+  56 802e 2010      	         MOVE.L   (%A0),%D0         | Read first longword in extension ROM
+  57 8030 0C80 524F 	         CMP.L    #0x524F4D32,%D0   | If extension begins with 'ROM2' then
+  57      4D32 
+  58 8036 6604      	         BNE.S    NO_EXT            | call the subroutine at EXT_ROM+8
+  59 8038 4EA8 0008 	         JSR      8(%A0)            | else continue
+  60 803c 4E71      	NO_EXT:  NOP                        | Two NOPs to allow for a future
+  61 803e 4E71      	         NOP                        | call to an initialization routine
+  62 8040 4287      	WARM:    CLR.L    %D7               | Warm entry point - clear error flag
+  63 8042 6128      	         BSR.S    NEWLINE           | Print a newline
+  64 8044 614C      	         BSR.S    GETLINE           | Get a command line
+  65 8046 6100 0080 	         BSR      TIDY              | Tidy up input buffer contents
+  66 804a 6100 00BE 	         BSR      EXECUTE           | Interpret command
+  67 804e 60F0      	         BRA.S    WARM              | Repeat indefinitely
+  68               	*
+  69               	*************************************************************************
+  70               	*
+  71               	*  Some initialization and basic routines
+  72               	*
+  73               	SETACIA:                            | Setup ACIA parameters
+  74 8050 41F9 0001 	         LEA.L    ACIA_1,%A0        | A0 points to console ACIA
+  74      0040 
+  75 8056 10BC 0003 	         MOVE.B   #0x03,(%A0)       | Reset ACIA1
+  76 805a 117C 0003 	         MOVE.B   #0x03,1(%A0)      | Reset ACIA2
+  76      0001 
+  77 8060 10BC 0015 	         MOVE.B   #0x15,(%A0)       | Set up ACIA1 constants (no IRQ,
+  78 8064 117C 0015 	         MOVE.B   #0x15,1(%A0)      | RTS* low, 8 bit, no parity, 1 stop)
+  78      0001 
+  79 806a 4E75      	         RTS                        | Return
+  80               	*
+  81               	NEWLINE:                            | Move cursor to start of newline
+  82 806c 48E7 0008 	         MOVEM.L  %A4,-(%A7)        | Save A4
+  83 8070 49FA 099C 	         LEA.L    CRLF(%PC),%A4     | Point to CR/LF string
+  84 8074 6106      	         BSR.S    PSTRING           | Print it
+  85 8076 4CDF 1000 	         MOVEM.L  (%A7)+,%A4        | Restore A4
+  86 807a 4E75      	         RTS                        | Return
+  87               	*
+  88               	PSTRING:                            | Display the string pointed at by A4
+  89 807c 2F00      	         MOVE.L   %D0,-(%A7)        | Save D0
+  90 807e 101C      	PS1:     MOVE.B   (%A4)+,%D0        | Get character to be printed
+  91 8080 6706      	         BEQ.S    PS2               | If null then return
+  92 8082 6100 050C 	         BSR      PUTCHAR           | Else print it
+  93 8086 60F6      	         BRA.S    PS1               | Continue
+  94 8088 201F      	PS2:     MOVE.L   (%A7)+,%D0        | Restore D0 and exit
+  95 808a 4E75      	         RTS
+  96               	*
+  97 808c 61DE      	HEADING: BSR.S    NEWLINE           | Same as PSTRING but with newline
+  98 808e 61EC      	         BSR.S    PSTRING
+  99 8090 60DA      	         BRA.S    NEWLINE
+ 100               	*
+ 101               	*************************************************************************
+ 102               	*
+ 103               	*  GETLINE  inputs a string of characters into a line buffer
+ 104               	*           A3 points to next free entry in line buffer
+ 105               	*           A2 points to end of buffer
+68K GAS  monitor.s 			page 3
+
+
+ 106               	*           A1 points to start of buffer
+ 107               	*           D0 holds character to be stored
+ 108               	*
+ 109 8092 43EE 0000 	GETLINE: LEA.L    LNBUFF.W(%A6),%A1 | A1 points to start of line buffer
+ 110 8096 47D1      	         LEA.L    (%A1),%A3         | A3 points to start (initially)
+ 111 8098 45E9 0040 	         LEA.L    MAXCHR.W(%A1),%A2 | A2 points to end of buffer
+ 112 809c 6100 04C0 	GETLN2:  BSR      GETCHAR           | Get a character
+ 113 80a0 0C00 0001 	         CMP.B    #CTRL_A,%D0       | If control_A then reject this line
+ 114 80a4 671E      	         BEQ.S    GETLN5            | and get another line
+ 115 80a6 0C00 0008 	         CMP.B    #BS,%D0           | If back_space then move back pointer
+ 116 80aa 660A      	         BNE.S    GETLN3            | Else skip past wind-back routine
+ 117 80ac B7C9      	         CMP.L    %A1,%A3           | First check for empty buffer
+ 118 80ae 67EC      	         BEQ.S    GETLN2            | If buffer empty then continue
+ 119 80b0 47EB FFFF 	         LEA      -1(%A3),%A3       | Else decrement buffer pointer
+ 120 80b4 60E6      	         BRA.S    GETLN2            | and continue with next character
+ 121 80b6 16C0      	GETLN3:  MOVE.B   %D0,(%A3)+        | Store character and update pointer
+ 122 80b8 0C00 000D 	         CMP.B    #CR,%D0           | Test for command terminator
+ 123 80bc 6602      	         BNE.S    GETLN4            | If not CR then skip past exit
+ 124 80be 60AC      	         BRA.S    NEWLINE           | Else new line before next operation
+ 125 80c0 B7CA      	GETLN4:  CMP.L    %A2,%A3           | Test for buffer overflow
+ 126 80c2 66D8      	         BNE.S    GETLN2            | If buffer not full then continue
+ 127 80c4 61A6      	GETLN5:  BSR.S    NEWLINE           | Else move to next line and
+ 128 80c6 60CA      	         BRA.S    GETLINE           | repeat this routine
+ 129               	*
+ 130               	*************************************************************************
+ 131               	*
+ 132               	*  TIDY cleans up the line buffer by removing leading spaces and multiple
+ 133               	*       spaces between parameters. At the end of TIDY, BUFFPT points to
+ 134               	*       the first parameter following the command.
+ 135               	*       A0 = pointer to line buffer. A1 = pointer to cleaned up buffer
+ 136               	*
+ 137 80c8 41EE 0000 	TIDY:    LEA.L    LNBUFF.L(%A6),%A0 | A0 points to line buffer
+ 138 80cc 43D0      	         LEA.L    (%A0),%A1         | A1 points to start of line buffer
+ 139 80ce 1018      	TIDY1:   MOVE.B   (%A0)+,%D0        | Read character from line buffer
+ 140 80d0 0C00 0020 	         CMP.B    #SPACE,%D0        | Repeat until the first non-space
+ 141 80d4 67F8      	         BEQ.S    TIDY1             | character is found
+ 142 80d6 41E8 FFFF 	         LEA.L    -1(%A0),%A0       | Move pointer back to first char
+ 143 80da 1018      	TIDY2:   MOVE.B   (%A0)+,%D0        | Move the string left to remove
+ 144 80dc 12C0      	         MOVE.B   %D0,(%A1)+        | any leading spaces
+ 145 80de 0C00 0020 	         CMP.B    #SPACE,%D0        | Test for embedded space
+ 146 80e2 660A      	         BNE.S    TIDY4             | If not space then test for EOL
+ 147 80e4 0C18 0020 	TIDY3:   CMP.B    #SPACE,(%A0)+     | If space skip multiple embedded
+ 148 80e8 67FA      	         BEQ.s    TIDY3             | spaces
+ 149 80ea 41E8 FFFF 	         LEA.L    -1(%A0),%A0       | Move back pointer
+ 150 80ee 0C00 000D 	TIDY4:   CMP.B    #CR,%D0           | Test for end_of_line (EOL)
+ 151 80f2 66E6      	         BNE.s    TIDY2             | If not EOL then read next char
+ 152 80f4 41EE 0000 	         LEA.L    LNBUFF.w(%A6),%A0 | Restore buffer pointer
+ 153 80f8 0C10 000D 	TIDY5:   CMP.B    #CR,(%A0)         | Test for EOL
+ 154 80fc 6706      	         BEQ.S    TIDY6             | If EOL then exit
+ 155 80fe 0C18 0020 	         CMP.B    #SPACE,(%A0)+     | Test for delimiter
+ 156 8102 66F4      	         BNE.S    TIDY5             | Repeat until delimiter or EOL
+ 157 8104 2D48 0040 	TIDY6:   MOVE.L   %A0,BUFFPT(%A6)   | Update buffer pointer
+ 158 8108 4E75      	         RTS
+ 159               	*
+ 160               	*************************************************************************
+ 161               	*
+ 162               	*  EXECUTE matches the first command in the line buffer with the
+68K GAS  monitor.s 			page 4
+
+
+ 163               	*  commands in a command table. An external table pointed at by
+ 164               	*  UTAB is searched first and then the in-built table, COMTAB.
+ 165               	*
+ 166 810a 4AAE 004A 	EXECUTE: TST.L    UTAB(%A6)         | Test pointer to user table
+ 167 810e 670C      	         BEQ.S    EXEC1             | If clear then try built-in table
+ 168 8110 266E 004A 	         MOVE.L   UTAB(%A6),%A3     | Else pick up pointer to user table
+ 169 8114 6120      	         BSR.S    SEARCH            | Look for command in user table
+ 170 8116 6404      	         BCC.S    EXEC1             | If not found then try internal table
+ 171 8118 2653      	         MOVE.L   (%A3),%A3         | Else get absolute address of command
+ 172 811a 4ED3      	         JMP      (%A3)             | from user table and execute it
+ 173               	*
+ 174 811c 47FA 0A46 	EXEC1:   LEA.L    COMTAB(%PC),%A3   | Try built-in command table
+ 175 8120 6114      	         BSR.S    SEARCH            | Look for command in built-in table
+ 176 8122 6508      	         BCS.S    EXEC2             | If found then execute command
+ 177 8124 49FA 09CF 	         LEA.L    ERMES2(%PC),%A4   | Else print "invalid command"
+ 178 8128 6000 FF52 	         BRA.W    PSTRING           | and return
+ 179 812c 2653      	EXEC2:   MOVE.L   (%A3),%A3         | Get the relative command address
+ 180 812e 49FA 0A34 	         LEA.L    COMTAB(%PC),%A4   | pointed at by A3 and add it to
+ 181 8132 D7CC      	         ADD.L    %A4,%A3           | the PC to generate the actual
+ 182 8134 4ED3      	         JMP      (%A3)             | command address. Then execute it.
+ 183               	*
+ 184               	SEARCH:                             | Match the command in the line buffer
+ 185 8136 4280      	         CLR.L    %D0               | with command table pointed at by A3
+ 186 8138 1013      	         MOVE.B   (%A3),%D0         | Get the first character in the
+ 187 813a 6734      	         BEQ.S    SRCH7             | current entry. If zero then exit
+ 188 813c 49F3 0006 	         LEA.L    6(%A3,%D0.W),%A4  | Else calculate address of next entry
+ 189 8140 122B 0001 	         MOVE.B   1(%A3),%D1        | Get number of characters to match
+ 190 8144 4BEE 0000 	         LEA.L    LNBUFF.L(%A6),%A5 | A5 points to command in line buffer
+ 191 8148 142B 0002 	         MOVE.B   2(%A3),%D2        | Get first character in this entry
+ 192 814c B41D      	         CMP.B    (%A5)+,%D2        | from the table and match with buffer
+ 193 814e 6704      	         BEQ.S    SRCH3             | If match then try rest of string
+ 194 8150 264C      	SRCH2:   MOVE.L   %A4,%A3           | Else get address of next entry
+ 195 8152 60E2      	         BRA.S    SEARCH            | and try the next entry in the table
+ 196 8154 5301      	SRCH3:   SUB.B    #1,%D1            | One less character to match
+ 197 8156 670E      	         BEQ.S    SRCH6             | If match counter zero then all done
+ 198 8158 47EB 0003 	         LEA.L    3(%A3),%A3        | Else point to next character in table
+ 199 815c 141B      	SRCH4:   MOVE.B   (%A3)+,%D2        | Now match a pair of characters
+ 200 815e B41D      	         CMP.B    (%A5)+,%D2
+ 201 8160 66EE      	         BNE.S    SRCH2             | If no match then try next entry
+ 202 8162 5301      	         SUB.B    #1,%D1            | Else decrement match counter and
+ 203 8164 66F6      	         BNE.S    SRCH4             | repeat until no chars left to match
+ 204 8166 47EC FFFC 	SRCH6:   LEA.L    -4(%A4),%A3       | Calculate address of command entry
+ 205 816a 003C 0001 	         OR.B     #1,%CCR           | point. Mark carry flag as success
+ 206 816e 4E75      	         RTS                        | and return
+ 207 8170 023C 00FE 	SRCH7:   AND.B    #0xFE,%CCR        | Fail - clear carry to indicate
+ 208 8174 4E75      	         RTS                        | command not found and return
+ 209               	*
+ 210               	*************************************************************************
+ 211               	*
+ 212               	*  Basic input routines
+ 213               	*  HEX    =  Get one   hexadecimal character  into D0
+ 214               	*  BYTE   =  Get two   hexadecimal characters into D0
+ 215               	*  WORD   =  Get four  hexadecimal characters into D0
+ 216               	*  LONGWD =  Get eight hexadecimal characters into D0
+ 217               	*  PARAM  =  Get a longword from the line buffer into D0
+ 218               	*  Bit 0 of D7 is set to indicate a hexadecimal input error
+ 219               	*
+68K GAS  monitor.s 			page 5
+
+
+ 220 8176 6100 03E6 	HEX:     BSR      GETCHAR           | Get a character from input device
+ 221 817a 0400 0030 	         SUB.B    #0x30,%D0         | Convert to binary
+ 222 817e 6B0E      	         BMI.S    NOT_HEX           | If less than $30 then exit with error
+ 223 8180 0C00 0009 	         CMP.B    #0x09,%D0         | Else test for number (0 to 9)
+ 224 8184 6F0C      	         BLE.S    HEX_OK            | If number then exit - success
+ 225 8186 5F00      	         SUB.B    #0x07,%D0         | Else convert letter to hex
+ 226 8188 0C00 000F 	         CMP.B    #0x0F,%D0         | If character in range "A" to "F"
+ 227 818c 6F04      	         BLE.S    HEX_OK            | then exit successfully
+ 228 818e 0007 0001 	NOT_HEX: OR.B     #1,%D7            | Else set error flag
+ 229 8192 4E75      	HEX_OK:  RTS                        | and return
+ 230               	*
+ 231 8194 2F01      	BYTE:    MOVE.L   %D1,-(%A7)        | Save D1
+ 232 8196 61DE      	         BSR.S    HEX               | Get first hex character
+ 233 8198 E900      	         ASL.B    #4,%D0            | Move it to MS nybble position
+ 234 819a 1200      	         MOVE.B   %D0,%D1           | Save MS nybble in D1
+ 235 819c 61D8      	         BSR.S    HEX               | Get second hex character
+ 236 819e D001      	         ADD.B    %D1,%D0           | Merge MS and LS nybbles
+ 237 81a0 221F      	         MOVE.L   (%A7)+,%D1        | Restore D1
+ 238 81a2 4E75      	         RTS
+ 239               	*
+ 240 81a4 61EE      	WORD:    BSR.S    BYTE              | Get upper order byte
+ 241 81a6 E140      	         ASL.W    #8,%D0            | Move it to MS position
+ 242 81a8 60EA      	         BRA.S    BYTE              | Get LS byte and return
+ 243               	*
+ 244 81aa 61F8      	LONGWD:  BSR.S    WORD              | Get upper order word
+ 245 81ac 4840      	         SWAP     %D0               | Move it to MS position
+ 246 81ae 60F4      	         BRA.S    WORD              | Get lower order word and return
+ 247               	*
+ 248               	*  PARAM reads a parameter from the line buffer and puts it in both
+ 249               	*  PARAMTR(A6) and D0. Bit 1 of D7 is set on error.
+ 250               	*
+ 251 81b0 2F01      	PARAM:   MOVE.L   %D1,-(%A7)        | Save D1
+ 252 81b2 4281      	         CLR.L    %D1               | Clear input accumulator
+ 253 81b4 206E 0040 	         MOVE.L   BUFFPT(%A6),%A0   | A0 points to parameter in buffer
+ 254 81b8 1018      	PARAM1:  MOVE.B   (%A0)+,%D0        | Read character from line buffer
+ 255 81ba 0C00 0020 	         CMP.B    #SPACE,%D0        | Test for delimiter
+ 256 81be 6720      	         BEQ.S    PARAM4            | The permitted delimiter is a
+ 257 81c0 0C00 000D 	         CMP.B    #CR,%D0           | space or a carriage return
+ 258 81c4 671A      	         BEQ.S    PARAM4            | Exit on either space or C/R
+ 259 81c6 E981      	         ASL.L    #4,%D1            | Shift accumulated result 4 bits left
+ 260 81c8 0400 0030 	         SUB.B    #0x30,%D0         | Convert new character to hex
+ 261 81cc 6B1E      	         BMI.S    PARAM5            | If less than $30 then not-hex
+ 262 81ce 0C00 0009 	         CMP.B    #0x09,%D0         | If less than 10
+ 263 81d2 6F08      	         BLE.S    PARAM3            | then continue
+ 264 81d4 5F00      	         SUB.B    #0x07,%D0         | Else assume $A - $F
+ 265 81d6 0C00 000F 	         CMP.B    #0x0F,%D0         | If more than $F
+ 266 81da 6E10      	         BGT.S    PARAM5            | then exit to error on not-hex
+ 267 81dc D200      	PARAM3:  ADD.B    %D0,%D1           | Add latest nybble to total in D1
+ 268 81de 60D8      	         BRA.S    PARAM1            | Repeat until delimiter found
+ 269 81e0 2D48 0040 	PARAM4:  MOVE.L   %A0,BUFFPT(%A6)   | Save pointer in memory
+ 270 81e4 2D41 0044 	         MOVE.L   %D1,PARAMTR(%A6)  | Save parameter in memory
+ 271 81e8 2001      	         MOVE.L   %D1,%D0           | Put parameter in D0 for return
+ 272 81ea 6004      	         BRA.S    PARAM6            | Return without error
+ 273 81ec 0007 0002 	PARAM5:  OR.B     #2,%D7            | Set error flag before return
+ 274 81f0 221F      	PARAM6:  MOVE.L   (%A7)+,%D1        | Restore working register
+ 275 81f2 4E75      	         RTS                        | Return with error
+ 276               	*
+68K GAS  monitor.s 			page 6
+
+
+ 277               	*************************************************************************
+ 278               	*
+ 279               	*  Output routines
+ 280               	*  OUT1X   = print one   hexadecimal character
+ 281               	*  OUT2X   = print two   hexadecimal characters
+ 282               	*  OUT4X   = print four  hexadecimal characters
+ 283               	*  OUT8X   = print eight hexadecimal characters
+ 284               	*  In each case, the data to be printed is in D0
+ 285               	*
+ 286 81f4 3F00      	OUT1X:   MOVE.W   %D0,-(%A7)        | Save D0
+ 287 81f6 0200 000F 	         AND.B    #0x0F,%D0         | Mask off MS nybble
+ 288 81fa 0600 0030 	         ADD.B    #0x30,%D0         | Convert to ASCII
+ 289 81fe 0C00 0039 	         CMP.B    #0x39,%D0         | ASCII = HEX + $30
+ 290 8202 6302      	         BLS.S    OUT1X1            | If ASCII <= $39 then print and exit
+ 291 8204 5E00      	         ADD.B    #0x07,%D0         | Else ASCII := HEX + 7
+ 292 8206 6100 0388 	OUT1X1:  BSR      PUTCHAR           | Print the character
+ 293 820a 301F      	         MOVE.W   (%A7)+,%D0        | Restore D0
+ 294 820c 4E75      	         RTS
+ 295               	*
+ 296 820e E818      	OUT2X:   ROR.B    #4,%D0            | Get MS nybble in LS position
+ 297 8210 61E2      	         BSR.S    OUT1X             | Print MS nybble
+ 298 8212 E918      	         ROL.B    #4,%D0            | Restore LS nybble
+ 299 8214 60DE      	         BRA.S    OUT1X             | Print LS nybble and return
+ 300               	*
+ 301 8216 E058      	OUT4X:   ROR.W    #8,%D0            | Get MS byte in LS position
+ 302 8218 61F4      	         BSR.S    OUT2X             | Print MS byte
+ 303 821a E158      	         ROL.W    #8,%D0            | Restore LS byte
+ 304 821c 60F0      	         BRA.S    OUT2X             | Print LS byte and return
+ 305               	*
+ 306 821e 4840      	OUT8X:   SWAP     %D0               | Get MS word in LS position
+ 307 8220 61F4      	         BSR.S    OUT4X             | Print MS word
+ 308 8222 4840      	         SWAP     %D0               | Restore LS word
+ 309 8224 60F0      	         BRA.S    OUT4X             | Print LS word and return
+ 310               	*
+ 311               	*************************************************************************
+ 312               	*
+ 313               	* JUMP causes execution to begin at the address in the line buffer
+ 314               	*
+ 315 8226 6188      	JUMP:    BSR.S   PARAM              | Get address from buffer
+ 316 8228 4A07      	         TST.B   %D7                | Test for input error
+ 317 822a 6608      	         BNE.S   JUMP1              | If error flag not zero then exit
+ 318 822c 4A80      	         TST.L   %D0                | Else test for missing address
+ 319 822e 6704      	         BEQ.S   JUMP1              | field. If no address then exit
+ 320 8230 2040      	         MOVE.L  %D0,%A0            | Put jump address in A0 and call the
+ 321 8232 4ED0      	         JMP     (%A0)              | subroutine. User to supply RTS!!
+ 322 8234 49FA 08A1 	JUMP1:   LEA.L   ERMES1(%PC),%A4    | Here for error - display error
+ 323 8238 6000 FE42 	         BRA     PSTRING            | message and return
+ 324               	*
+ 325               	*************************************************************************
+ 326               	*
+ 327               	*  Display the contents of a memory location and modify it
+ 328               	*
+ 329 823c 6100 FF72 	MEMORY:  BSR      PARAM             | Get start address from line buffer
+ 330 8240 4A07      	         TST.B    %D7               | Test for input error
+ 331 8242 6634      	         BNE.S    MEM3              | If error then exit
+ 332 8244 2640      	         MOVE.L   %D0,%A3           | A3 points to location to be opened
+ 333 8246 6100 FE24 	MEM1:    BSR      NEWLINE
+68K GAS  monitor.s 			page 7
+
+
+ 334 824a 612E      	         BSR.S    ADR_DAT           | Print current address and contents
+ 335 824c 6140      	         BSR.S    PSPACE            |  update pointer, A3, and O/P space
+ 336 824e 6100 030E 	         BSR      GETCHAR           | Input char to decide next action
+ 337 8252 0C00 000D 	         CMP.B    #CR,%D0           | If carriage return then exit
+ 338 8256 6720      	         BEQ.S    MEM3              | Exit
+ 339 8258 0C00 002D 	         CMP.B    #'-',%D0          | If "-" then move back
+ 340 825c 6606      	         BNE.S    MEM2              | Else skip wind-back procedure
+ 341 825e 47EB FFFC 	         LEA.L    -4(%A3),%A3       | Move pointer back 2+2
+ 342 8262 60E2      	         BRA.S    MEM1              | Repeat until carriage return
+ 343 8264 0C00 0020 	MEM2:    CMP.B    #SPACE,%D0        | Test for space (= new entry)
+ 344 8268 66DC      	         BNE.S    MEM1              | If not space then repeat
+ 345 826a 6100 FF38 	         BSR      WORD              | Else get new word to store
+ 346 826e 4A07      	         TST.B    %D7               | Test for input error
+ 347 8270 6606      	         BNE.S    MEM3              | If error then exit
+ 348 8272 3740 FFFE 	         MOVE.W   %D0,-2(%A3)       | Store new word
+ 349 8276 60CE      	         BRA.S    MEM1              | Repeat until carriage return
+ 350 8278 4E75      	MEM3:    RTS
+ 351               	*
+ 352 827a 2F00      	ADR_DAT: MOVE.L   %D0,-(%A7)        | Print the contents of A3 and the
+ 353 827c 200B      	         MOVE.L   %A3,%D0           | word pointed at by A3.
+ 354 827e 619E      	         BSR.S    OUT8X             |  and print current address
+ 355 8280 610C      	         BSR.S    PSPACE            | Insert delimiter
+ 356 8282 3013      	         MOVE.W   (%A3),%D0         | Get data at this address in D0
+ 357 8284 6190      	         BSR.S    OUT4X             |  and print it
+ 358 8286 47EB 0002 	         LEA.L    2(%A3),%A3        | Point to next address to display
+ 359 828a 201F      	         MOVE.L   (%A7)+,%D0        | Restore D0
+ 360 828c 4E75      	         RTS
+ 361               	*
+ 362 828e 1F00      	PSPACE:  MOVE.B   %D0,-(%A7)        | Print a single space
+ 363 8290 103C 0020 	         MOVE.B   #SPACE,%D0
+ 364 8294 6100 02FA 	         BSR      PUTCHAR
+ 365 8298 101F      	         MOVE.B   (%A7)+,%D0
+ 366 829a 4E75      	         RTS
+ 367               	*
+ 368               	*************************************************************************
+ 369               	*
+ 370               	*  LOAD  Loads data formatted in hexadecimal "S" format from Port 2
+ 371               	*        NOTE - I/O is automatically redirected to the aux port for
+ 372               	*        loader functions. S1 or S2 records accepted
+ 373               	*
+ 374 829c 2F2E 0052 	LOAD:    MOVE.L   CN_OVEC(%A6),-(%A7) | Save current output device name
+ 375 82a0 2F2E 004E 	         MOVE.L   CN_IVEC(%A6),-(%A7) | Save current input device name
+ 376               	         DCB4 = 0x00008c22            | Works around GNU assembler issue
+ 377 82a4 2D7C 0000 	         MOVE.L   #DCB4,CN_OVEC(%A6)  | Set up aux ACIA as output
+ 377      8C22 0052 
+ 378               	         DCB3 = 0x00008c10            | Works around GNU assembler issue
+ 379 82ac 2D7C 0000 	         MOVE.L   #DCB3,CN_IVEC(%A6)  | Set up aux ACIA as input
+ 379      8C10 004E 
+ 380 82b4 522E 0048 	         ADD.B    #1,ECHO(%A6)        | Turn off character echo
+ 381 82b8 6100 FDB2 	         BSR      NEWLINE             | Send newline to host
+ 382 82bc 6100 015A 	         BSR      DELAY               | Wait for host to "settle"
+ 383 82c0 6100 0156 	         BSR      DELAY
+ 384 82c4 286E 0040 	         MOVE.L   BUFFPT(%A6),%A4     | Any string in the line buffer is
+ 385 82c8 101C      	LOAD1:   MOVE.B   (%A4)+,%D0          | transmitted to the host computer
+ 386 82ca 6100 02C4 	         BSR      PUTCHAR             | before the loading begins
+ 387 82ce 0C00 000D 	         CMP.B    #CR,%D0             | Read from the buffer until EOL
+ 388 82d2 66F4      	         BNE.S    LOAD1
+68K GAS  monitor.s 			page 8
+
+
+ 389 82d4 6100 FD96 	         BSR      NEWLINE             | Send newline before loading
+ 390 82d8 6100 0284 	LOAD2:   BSR      GETCHAR             | Records from the host must begin
+ 391 82dc 0C00 0053 	         CMP.B    #'S',%D0            | with S1/S2 (data) or S9/S8 (term)
+ 392 82e0 66F6      	         BNE.S    LOAD2               | Repeat GETCHAR until char = "S"
+ 393 82e2 6100 027A 	         BSR      GETCHAR             | Get character after "S"
+ 394 82e6 0C00 0039 	         CMP.B    #'9',%D0            | Test for the two terminators S9/S8
+ 395 82ea 6706      	         BEQ.S    LOAD3               | If S9 record then exit else test
+ 396 82ec 0C00 0038 	         CMP.B    #'8',%D0            | for S8 terminator. Fall through to
+ 397 82f0 662A      	         BNE.S    LOAD6               | exit on S8 else continue search
+ 398               	LOAD3:                                | Exit point from LOAD
+ 399 82f2 2D5F 004E 	         MOVE.L   (%A7)+,CN_IVEC(%A6) | Clean up by restoring input device
+ 400 82f6 2D5F 0052 	         MOVE.L   (%A7)+,CN_OVEC(%A6) | and output device name
+ 401 82fa 422E 0048 	         CLR.B    ECHO(%A6)           | Restore input character echo
+ 402 82fe 0807 0000 	         BTST.B   #0,%D7              | Test for input errors
+ 403 8302 6708      	         BEQ.S    LOAD4               | If no I/P error then look at checksum
+ 404 8304 49FA 07D1 	         LEA.L    ERMES1(%PC),%A4     | Else point to error message
+ 405 8308 6100 FD72 	         BSR      PSTRING             | Print it
+ 406 830c 0807 0003 	LOAD4:   BTST.B   #3,%D7              | Test for checksum error
+ 407 8310 6708      	         BEQ.S    LOAD5               | If clear then exit
+ 408 8312 49FA 07F3 	         LEA.L    ERMES3(%PC),%A4     | Else point to error message
+ 409 8316 6100 FD64 	         BSR      PSTRING             | Print it and return
+ 410 831a 4E75      	LOAD5:   RTS
+ 411               	*
+ 412 831c 0C00 0031 	LOAD6:   CMP.B    #'1',%D0            | Test for S1 record
+ 413 8320 671E      	         BEQ.S    LOAD6A              | If S1 record then read it
+ 414 8322 0C00 0032 	         CMP.B    #'2',%D0            | Else test for S2 record
+ 415 8326 66B0      	         BNE.S    LOAD2               | Repeat until valid header found
+ 416 8328 4203      	         CLR.B    %D3                 | Read the S2 byte count and address,
+ 417 832a 613C      	         BSR.S    LOAD8               | clear the checksum
+ 418 832c 5900      	         SUB.B    #4,%D0              | Calculate size of data field
+ 419 832e 1400      	         MOVE.B   %D0,%D2             | D2 contains data bytes to read
+ 420 8330 4280      	         CLR.L    %D0                 | Clear address accumulator
+ 421 8332 6134      	         BSR.S    LOAD8               | Read most sig byte of address
+ 422 8334 E180      	         ASL.L    #8,%D0              | Move it one byte left
+ 423 8336 6130      	         BSR.S    LOAD8               | Read the middle byte of address
+ 424 8338 E180      	         ASL.L    #8,%D0              | Move it one byte left
+ 425 833a 612C      	         BSR.S    LOAD8               | Read least sig byte of address
+ 426 833c 2440      	         MOVE.L   %D0,%A2             | A2 points to destination of record
+ 427 833e 6012      	         BRA.S    LOAD7               | Skip past S1 header loader
+ 428 8340 4203      	LOAD6A:  CLR.B    %D3                 | S1 record found - clear checksum
+ 429 8342 6124      	         BSR.S    LOAD8               | Get byte and update checksum
+ 430 8344 5700      	         SUB.B    #3,%D0              | Subtract 3 from record length
+ 431 8346 1400      	         MOVE.B   %D0,%D2             | Save byte count in D2
+ 432 8348 4280      	         CLR.L    %D0                 | Clear address accumulator
+ 433 834a 611C      	         BSR.S    LOAD8               | Get MS byte of load address
+ 434 834c E180      	         ASL.L    #8,%D0              | Move it to MS position
+ 435 834e 6118      	         BSR.S    LOAD8               | Get LS byte in D2
+ 436 8350 2440      	         MOVE.L   %D0,%A2             | A2 points to destination of data
+ 437 8352 6114      	LOAD7:   BSR.S    LOAD8               | Get byte of data for loading
+ 438 8354 14C0      	         MOVE.B   %D0,(%A2)+          | Store it
+ 439 8356 5302      	         SUB.B    #1,%D2              | Decrement byte counter
+ 440 8358 66F8      	         BNE.S    LOAD7               | Repeat until count = 0
+ 441 835a 610C      	         BSR.S    LOAD8               | Read checksum
+ 442 835c 5203      	         ADD.B    #1,%D3              | Add 1 to total checksum
+ 443 835e 6700 FF78 	         BEQ      LOAD2               | If zero then start next record
+ 444 8362 0007 0008 	         OR.B     #0b00001000,%D7     | Else set checksum error bit,
+ 445 8366 608A      	         BRA.S    LOAD3               | restore I/O devices and return
+68K GAS  monitor.s 			page 9
+
+
+ 446               	*
+ 447 8368 6100 FE2A 	LOAD8:   BSR     BYTE                 | Get a byte
+ 448 836c D600      	         ADD.B   %D0,%D3              | Update checksum
+ 449 836e 4E75      	         RTS                          |  and return
+ 450               	*
+ 451               	*************************************************************************
+ 452               	*
+ 453               	*  DUMP   Transmit S1 formatted records to host computer
+ 454               	*         A3 = Starting address of data block
+ 455               	*         A2 = End address of data block
+ 456               	*         D1 = Checksum, D2 = current record length
+ 457               	*
+ 458 8370 6100 0096 	DUMP:    BSR      RANGE               | Get start and end address
+ 459 8374 4A07      	         TST.B    %D7                 | Test for input error
+ 460 8376 6708      	         BEQ.S    DUMP1               | If no error then continue
+ 461 8378 49FA 075D 	         LEA.L    ERMES1(%PC),%A4     | Else point to error message,
+ 462 837c 6000 FCFE 	         BRA      PSTRING             | print it and return
+ 463 8380 B08B      	DUMP1:   CMP.L    %A3,%D0             | Compare start and end addresses
+ 464 8382 6A08      	         BPL.S    DUMP2               | If positive then start < end
+ 465 8384 49FA 07D1 	         LEA.L    ERMES7(%PC),%A4     | Else print error message
+ 466 8388 6000 FCF2 	         BRA      PSTRING             | and return
+ 467 838c 2F2E 0052 	DUMP2:   MOVE.L   CN_OVEC(%A6),-(%A7) | Save name of current output device
+ 468 8390 2D7C 0000 	         MOVE.L   #DCB4,CN_OVEC(%A6)  | Set up Port 2 as output device
+ 468      8C22 0052 
+ 469 8398 6100 FCD2 	         BSR      NEWLINE             | Send newline to host and wait
+ 470 839c 617A      	         BSR.S    DELAY
+ 471 839e 286E 0040 	         MOVE.L   BUFFPT(%A6),%A4     | Before dumping, send any string
+ 472 83a2 101C      	DUMP3:   MOVE.B   (%A4)+,%D0          | in the input buffer to the host
+ 473 83a4 6100 01EA 	         BSR      PUTCHAR             | Repeat
+ 474 83a8 0C00 000D 	         CMP.B    #CR,%D0             | Transmit char from buffer to host
+ 475 83ac 66F4      	         BNE.S    DUMP3               | Until char = C/R
+ 476 83ae 6100 FCBC 	         BSR      NEWLINE
+ 477 83b2 6164      	         BSR.S    DELAY               | Allow time for host to settle
+ 478 83b4 528A      	         ADDQ.L   #1,%A2              | A2 contains length of record + 1
+ 479 83b6 240A      	DUMP4:   MOVE.L   %A2,%D2             | D2 points to end address
+ 480 83b8 948B      	         SUB.L    %A3,%D2             | D2 contains bytes left to print
+ 481 83ba 0C82 0000 	         CMP.L    #17,%D2             | If this is not a full record of 16
+ 481      0011 
+ 482 83c0 6502      	         BCS.S    DUMP5               | then load D2 with record size
+ 483 83c2 7410      	         MOVEQ    #16,%D2             | Else preset byte count to 16
+ 484 83c4 49FA 064C 	DUMP5:   LEA.L    HEADER(%PC),%A4     | Point to record header
+ 485 83c8 6100 FCB2 	         BSR      PSTRING             | Print header
+ 486 83cc 4201      	         CLR.B    %D1                 | Clear checksum
+ 487 83ce 1002      	         MOVE.B   %D2,%D0             | Move record length to output register
+ 488 83d0 5600      	         ADD.B    #3,%D0              | Length includes address + count
+ 489 83d2 612E      	         BSR.S    DUMP7               | Print number of bytes in record
+ 490 83d4 200B      	         MOVE.L   %A3,%D0             | Get start address to be printed
+ 491 83d6 E158      	         ROL.W    #8,%D0              | Get MS byte in LS position
+ 492 83d8 6128      	         BSR.S    DUMP7               | Print MS byte of address
+ 493 83da E058      	         ROR.W    #8,%D0              | Restore LS byte
+ 494 83dc 6124      	         BSR.S    DUMP7               | Print LS byte of address
+ 495 83de 101B      	DUMP6:   MOVE.B   (%A3)+,%D0          | Get data byte to be printed
+ 496 83e0 6120      	         BSR.S    DUMP7               | Print it
+ 497 83e2 5302      	         SUB.B    #1,%D2              | Decrement byte count
+ 498 83e4 66F8      	         BNE.S    DUMP6               | Repeat until all this record printed
+ 499 83e6 4601      	         NOT.B    %D1                 | Complement checksum
+ 500 83e8 1001      	         MOVE.B   %D1,%D0             | Move to output register
+68K GAS  monitor.s 			page 10
+
+
+ 501 83ea 6116      	         BSR.S    DUMP7               | Print checksum
+ 502 83ec 6100 FC7E 	         BSR      NEWLINE
+ 503 83f0 B7CA      	         CMP.L    %A2,%A3             | Have all records been printed?
+ 504 83f2 66C2      	         BNE.S    DUMP4               | Repeat until all done
+ 505 83f4 49FA 0622 	         LEA.L    TAIL(%PC),%A4       | Point to message tail (S9 record)
+ 506 83f8 6100 FC82 	         BSR      PSTRING             | Print it
+ 507 83fc 2D5F 0052 	         MOVE.L   (%A7)+,CN_OVEC(%A6) | Restore name of output device
+ 508 8400 4E75      	         RTS                          | and return
+ 509               	*
+ 510 8402 D200      	DUMP7:   ADD.B    %D0,%D1             | Update checksum, transmit byte
+ 511 8404 6000 FE08 	         BRA      OUT2X               | to host and return
+ 512               	*
+ 513               	RANGE:                                | Get the range of addresses to be
+ 514 8408 4207      	         CLR.B    %D7                 | transmitted from the buffer
+ 515 840a 6100 FDA4 	         BSR      PARAM               | Get starting address
+ 516 840e 2640      	         MOVE.L   %D0,%A3             | Set up start address in A3
+ 517 8410 6100 FD9E 	         BSR      PARAM               | Get end address
+ 518 8414 2440      	         MOVE.L   %D0,%A2             | Set up end address in A2
+ 519 8416 4E75      	         RTS
+ 520               	*
+ 521               	DELAY:                                | Provide a time delay for the host
+ 522 8418 48E7 8008 	         MOVEM.L   %D0/%A4,-(%A7)     | to settle. Save working registers
+ 523 841c 203C 0000 	         MOVE.L    #0x4000,%D0        | Set up delay constant
+ 523      4000 
+ 524 8422 5380      	DELAY1:  SUB.L     #1,%D0             | Count down         (8 clk cycles)
+ 525 8424 66FC      	         BNE.S     DELAY1             | Repeat until zero  (10 clk cycles)
+ 526 8426 4CDF 1001 	         MOVEM.L   (%A7)+,%D0/%A4     | Restore working registers
+ 527 842a 4E75      	         RTS
+ 528               	*
+ 529               	*************************************************************************
+ 530               	*
+ 531               	*  TM  Enter transparent mode (All communication to go from terminal to
+ 532               	*  the host processor until escape sequence entered). End sequence
+ 533               	*  = ESC, E. A newline is sent to the host to "clear it down".
+ 534               	*
+ 535 842c 13FC 0055 	TM:      MOVE.B    #0x55,ACIA_1        | Force RTS* high to re-route data
+ 535      0001 0040 
+ 536 8434 522E 0048 	         ADD.B     #1,ECHO(%A6)        | Turn off character echo
+ 537 8438 6100 0124 	TM1:     BSR       GETCHAR             | Get character
+ 538 843c 0C00 001B 	         CMP.B     #ESC,%D0            | Test for end of TM mode
+ 539 8440 66F6      	         BNE.S     TM1                 | Repeat until first escape character
+ 540 8442 6100 011A 	         BSR       GETCHAR             | Get second character
+ 541 8446 0C00 0045 	         CMP.B     #'E',%D0            | If second char = E then exit TM
+ 542 844a 66EC      	         BNE.S     TM1                 | Else continue
+ 543 844c 2F2E 0052 	         MOVE.L    CN_OVEC(%A6),-(%A7) |  Save output port device name
+ 544 8450 2D7C 0000 	         MOVE.L    #DCB4,CN_OVEC(%A6)  |  Get name of host port (aux port)
+ 544      8C22 0052 
+ 545 8458 6100 FC12 	         BSR       NEWLINE             | Send newline to host to clear it
+ 546 845c 2D5F 0052 	         MOVE.L    (%A7)+,CN_OVEC(%A6) | Restore output device port name
+ 547 8460 422E 0048 	         CLR.B     ECHO(%A6)           | Restore echo mode
+ 548 8464 13FC 0015 	         MOVE.B    #0x15,ACIA_1        | Restore normal ACIA mode (RTS* low)
+ 548      0001 0040 
+ 549 846c 4E75      	         RTS
+ 550               	*
+ 551               	*************************************************************************
+ 552               	*
+ 553               	*  This routine sets up the system DCBs in RAM using the information
+68K GAS  monitor.s 			page 11
+
+
+ 554               	*  stored in ROM at address DCB_LST. This is called at initialization.
+ 555               	*  CN_IVEC contains the name "DCB1" and IO_VEC the name "DCB2"
+ 556               	*
+ 557 846e 48E7 F0F0 	SET_DCB: MOVEM.L %A0-%A3/%D0-%D3,-(%A7) | Save all working registers
+ 558 8472 41EE 00D0 	         LEA.L   FIRST(%A6),%A0    | Pointer to first DCB destination in RAM
+ 559 8476 43FA 0774 	         LEA.L   DCB_LST(%PC),%A1  | A1 points to DCB info block in ROM
+ 560 847a 303C 0005 	         MOVE.W  #5,%D0            | 6 DCBs to set up
+ 561 847e 323C 000F 	ST_DCB1: MOVE.W  #15,%D1           | 16 bytes to move per DCB header
+ 562 8482 10D9      	ST_DCB2: MOVE.B  (%A1)+,(%A0)+     | Move the 16 bytes of a DCB header
+ 563 8484 51C9 FFFC 	         DBRA    %D1,ST_DCB2       | from ROM to RAM
+ 564 8488 3619      	         MOVE.W  (%A1)+,%D3        | Get size of parameter block (bytes)
+ 565 848a 3083      	         MOVE.W  %D3,(%A0)         | Store size in DCB in RAM
+ 566 848c 41F0 3002 	         LEA.L   2(%A0,%D3.W),%A0  | A0 points to tail of DCB in RAM
+ 567 8490 47E8 0004 	         LEA.L   4(%A0),%A3        | A3 contains address of next DCB in RAM
+ 568 8494 208B      	         MOVE.L  %A3,(%A0)         | Store pointer to next DCB in this DCB
+ 569 8496 41D3      	         LEA.L   (%A3),%A0         | A0 now points at next DCB in RAM
+ 570 8498 51C8 FFE4 	         DBRA    %D0,ST_DCB1       | Repeat until all DCBs set up
+ 571 849c 47EB FFFC 	         LEA.L   -4(%A3),%A3       | Adjust A3 to point to last DCB pointer
+ 572 84a0 4293      	         CLR.L   (%A3)             | and force last pointer to zero
+ 573               	         DCB1 = 0x00008bec         | Works around GNU assembler issue
+ 574 84a2 2D7C 0000 	         MOVE.L  #DCB1,CN_IVEC(%A6) | Set up vector to console input DCB
+ 574      8BEC 004E 
+ 575               	         DCB2 = 0x00008bfe         | Works around GNU assembler issue
+ 576 84aa 2D7C 0000 	         MOVE.L  #DCB2,CN_OVEC(%A6) | Set up vector to console output DCB
+ 576      8BFE 0052 
+ 577 84b2 4CDF 0F0F 	         MOVEM.L (%A7)+,%A0-%A3/%D0-%D3 | Restore registers
+ 578 84b6 4E75      	         RTS
+ 579               	*
+ 580               	*************************************************************************
+ 581               	*
+ 582               	*  IO_REQ handles all input/output transactions. A0 points to DCB on
+ 583               	*  entry. IO_REQ calls the device driver whose address is in the DCB.
+ 584               	*
+ 585 84b8 48E7 00C0 	IO_REQ:  MOVEM.L %A0-%A1,-(%A7)   | Save working registers
+ 586 84bc 43E8 0008 	         LEA.L   8(%A0),%A1       | A1 points to device handler field in DCB
+ 587 84c0 2251      	         MOVE.L  (%A1),%A1        | A1 contains device handler address
+ 588 84c2 4E91      	         JSR     (%A1)            | Call device handler
+ 589 84c4 4CDF 0300 	         MOVEM.L (%A7)+,%A0-%A1   | Restore working registers
+ 590 84c8 4E75      	         RTS
+ 591               	*
+ 592               	*************************************************************************
+ 593               	*
+ 594               	*  CON_IN handles input from the console device
+ 595               	*  This is the device driver used by DCB1. Exit with input in D0
+ 596               	*
+ 597 84ca 48E7 4040 	CON_IN:  MOVEM.L %D1/%A1,-(%A7)   | Save working registers
+ 598 84ce 43E8 000C 	         LEA.L   12(%A0),%A1      | Get pointer to ACIA from DCB
+ 599 84d2 2251      	         MOVE.L  (%A1),%A1        | Get address of ACIA in A1
+ 600 84d4 4228 0013 	         CLR.B   19(%A0)          | Clear logical error in DCB
+ 601 84d8 1211      	CON_I1:  MOVE.B  (%A1),%D1        | Read ACIA status
+ 602 84da 0801 0000 	         BTST.B  #0,%D1           | Test RDRF
+ 603 84de 67F8      	         BEQ.S   CON_I1           | Repeat until RDRF true
+ 604 84e0 1141 0012 	         MOVE.B  %D1,18(%A0)      | Store physical status in DCB
+ 605 84e4 0201 00F4 	         AND.B   #0b011110100,%D1 | Mask to input error bits
+ 606 84e8 6706      	         BEQ.S   CON_I2           | If no error then skip update
+ 607 84ea 117C 0001 	         MOVE.B  #1,19(%A0)       | Else update logical error
+ 607      0013 
+68K GAS  monitor.s 			page 12
+
+
+ 608 84f0 1029 0002 	CON_I2:  MOVE.B  2(%A1),%D0       | Read input from ACIA
+ 609 84f4 4CDF 0202 	         MOVEM.L (%A7)+,%A1/%D1   | Restore working registers
+ 610 84f8 4E75      	         RTS
+ 611               	*
+ 612               	*************************************************************************
+ 613               	*
+ 614               	*   This is the device driver used by DCB2. Output in D0
+ 615               	*   The output can be halted or suspended
+ 616               	*
+ 617 84fa 48E7 6040 	CON_OUT: MOVEM.L %A1/%D1-%D2,-(%A7) | Save working registers
+ 618 84fe 43E8 000C 	         LEA.L   12(%A0),%A1        | Get pointer to ACIA from DCB
+ 619 8502 2251      	         MOVE.L  (%A1),%A1          | Get address of ACIA in A1
+ 620 8504 4228 0013 	         CLR.B   19(%A0)            | Clear logical error in DCB
+ 621 8508 1211      	CON_OT1: MOVE.B  (%A1),%D1          | Read ACIA status
+ 622 850a 0801 0000 	         BTST.B  #0,%D1             | Test RDRF bit (any input?)
+ 623 850e 6716      	         BEQ.S   CON_OT3            | If no input then test output status
+ 624 8510 1429 0002 	         MOVE.B  2(%A1),%D2         | Else read the input
+ 625 8514 0202 005F 	         AND.B   #0b01011111,%D2    | Strip parity and bit 5
+ 626 8518 0C02 0057 	         CMP.B   #WAIT,%D2          | and test for a wait condition
+ 627 851c 6608      	         BNE.S   CON_OT3            | If not wait then ignore and test O/P
+ 628 851e 1411      	CON_OT2: MOVE.B  (%A1),%D2          | Else read ACIA status register
+ 629 8520 0802 0000 	         BTST.B  #0,%D2             | and poll ACIA until next char received
+ 630 8524 67F8      	         BEQ.S   CON_OT2
+ 631 8526 0801 0001 	CON_OT3: BTST.B  #1,%D1             | Repeat
+ 632 852a 67DC      	         BEQ.S   CON_OT1            |  until ACIA Tx ready
+ 633 852c 1141 0012 	         MOVE.B  %D1,18(%A0)        | Store status in DCB physical error
+ 634 8530 1340 0002 	         MOVE.B  %D0,2(%A1)         | Transmit output
+ 635 8534 4CDF 0206 	         MOVEM.L (%A7)+,%A1/%D1-%D2 | Restore working registers
+ 636 8538 4E75      	         RTS
+ 637               	*
+ 638               	*************************************************************************
+ 639               	*
+ 640               	*  AUX_IN and AUX_OUT are simplified versions of CON_IN and
+ 641               	*  CON_OUT for use with the port to the host processor
+ 642               	*
+ 643 853a 43E8 000C 	AUX_IN:  LEA.L   12(%A0),%A1     | Get pointer to aux ACIA from DCB
+ 644 853e 2251      	         MOVE.L  (%A1),%A1       | Get address of aux ACIA
+ 645 8540 0811 0000 	AUX_IN1: BTST.B  #0,(%A1)        | Test for data ready
+ 646 8544 67FA      	         BEQ.S   AUX_IN1         | Repeat until ready
+ 647 8546 1029 0002 	         MOVE.B  2(%A1),%D0      | Read input
+ 648 854a 4E75      	         RTS
+ 649               	*
+ 650 854c 43E8 000C 	AUX_OUT: LEA.L   12(%A0),%A1     | Get pointer to aux ACIA from DCB
+ 651 8550 2251      	         MOVE.L  (%A1),%A1       | Get address of aux ACIA
+ 652 8552 0811 0001 	AUX_OT1: BTST.B  #1,(%A1)        | Test for ready to transmit
+ 653 8556 67FA      	         BEQ.S   AUX_OT1         | Repeat until transmitter ready
+ 654 8558 1340 0002 	         MOVE.B  %D0,2(%A1)      | Transmit data
+ 655 855c 4E75      	         RTS
+ 656               	*
+ 657               	*************************************************************************
+ 658               	*
+ 659               	*  GETCHAR gets a character from the console device
+ 660               	*  This is the main input routine and uses the device whose name
+ 661               	*  is stored in CN_IVEC. Changing this name redirects input.
+ 662               	*
+ 663 855e 2F08      	GETCHAR: MOVE.L  %A0,-(%A7)       | Save working register
+ 664 8560 206E 004E 	         MOVE.L  CN_IVEC(%A6),%A0 | A0 points to name of console DCB
+68K GAS  monitor.s 			page 13
+
+
+ 665 8564 6154      	         BSR.S   IO_OPEN          | Open console (get DCB address in A0)
+ 666 8566 0807 0003 	         BTST.B  #3,%D7           | D7(3) set if open error
+ 667 856a 6620      	         BNE.S   GETCH3           | If error then exit now
+ 668 856c 6100 FF4A 	         BSR     IO_REQ           | Else execute I/O transaction
+ 669 8570 0200 007F 	         AND.B   #0x7F,%D0        | Strip msb of input
+ 670 8574 4A2E 0049 	         TST.B   U_CASE(%A6)      | Test for upper -> lower case conversion
+ 671 8578 660A      	         BNE.S   GETCH2           | If flag not zero do not convert case
+ 672 857a 0800 0006 	         BTST.B  #6,%D0           | Test input for lower case
+ 673 857e 6704      	         BEQ.S   GETCH2           | If upper case then skip conversion
+ 674 8580 0200 00DF 	         AND.B   #0b11011111,%D0  | Else clear bit 5 for upper case conv
+ 675 8584 4A2E 0048 	GETCH2:  TST.B   ECHO(%A6)        | Do we need to echo the input?
+ 676 8588 6602      	         BNE.S   GETCH3           | If ECHO not zero then no echo
+ 677 858a 6104      	         BSR.S   PUTCHAR          | Else echo the input
+ 678 858c 205F      	GETCH3:  MOVE.L  (%A7)+,%A0       | Restore working register
+ 679 858e 4E75      	         RTS                      | and return
+ 680               	*
+ 681               	*************************************************************************
+ 682               	*
+ 683               	*  PUTCHAR sends a character to the console device
+ 684               	*  The name of the output device is in CN_OVEC.
+ 685               	*
+ 686 8590 2F08      	PUTCHAR: MOVE.L  %A0,-(%A7)       | Save working register
+ 687 8592 206E 0052 	         MOVE.L  CN_OVEC(%A6),%A0 | A0 points to name of console output
+ 688 8596 6122      	         BSR.S   IO_OPEN          | Open console (Get address of DCB)
+ 689 8598 6100 FF1E 	         BSR     IO_REQ           | Perform output with DCB pointed at by A0
+ 690 859c 205F      	         MOVE.L  (%A7)+,%A0       | Restore working register
+ 691 859e 4E75      	         RTS
+ 692               	*
+ 693               	*************************************************************************
+ 694               	*
+ 695               	*  BUFF_IN and BUFF_OUT are two rudimentary input and output routines
+ 696               	*  which input data from and output data to a buffer in RAM. These are
+ 697               	*  used by DCB5 and DCB6, respectively.
+ 698               	*
+ 699 85a0 43E8 000C 	BUFF_IN: LEA.L   12(%A0),%A1       | A1 points to I/P buffer
+ 700 85a4 2451      	         MOVE.L  (%A1),%A2         | A2 gets I/P pointer from buffer
+ 701 85a6 1022      	         MOVE.B  -(%A2),%D0        | Read char from buffer and adjust A2
+ 702 85a8 228A      	         MOVE.L  %A2,(%A1)         | Restore pointer in buffer
+ 703 85aa 4E75      	         RTS
+ 704               	*
+ 705 85ac 43E8 000C 	BUFF_OT: LEA.L   12(%A0),%A1       | A1 points to O/P buffer
+ 706 85b0 2469 0004 	         MOVE.L  4(%A1),%A2        | A2 gets O/P pointer from buffer
+ 707 85b4 14C0      	         MOVE.B  %D0,(%A2)+        | Store char in buffer and adjust A2
+ 708 85b6 228A      	         MOVE.L  %A2,(%A1)         | Restore pointer in buffer
+ 709 85b8 4E75      	         RTS
+ 710               	*
+ 711               	*************************************************************************
+ 712               	*
+ 713               	*  Open - opens a DCB for input or output. IO_OPEN converts the
+ 714               	*  name pointed at by A0 into the address of the DCB pointed at
+ 715               	*  by A0. Bit 3 of D7 is set to zero if DCB not found
+ 716               	*
+ 717 85ba 48E7 F870 	IO_OPEN: MOVEM.L  %A1-%A3/%D0-%D4,-(%A7) | Save working registers
+ 718 85be 43EE 00D0 	         LEA.L    FIRST(%A6),%A1   | A1 points to first DCB in chain in RAM
+ 719 85c2 45D1      	OPEN1:   LEA.L    (%A1),%A2        | A2 = temp copy of pointer to DCB
+ 720 85c4 47D0      	         LEA.L    (%A0),%A3        | A3 = temp copy of pointer to DCB name
+ 721 85c6 303C 0007 	         MOVE.W   #7,%D0           | Up to 8 chars of DCB name to match
+68K GAS  monitor.s 			page 14
+
+
+ 722 85ca 181A      	OPEN2:   MOVE.B   (%A2)+,%D4       | Compare DCB name with string
+ 723 85cc B81B      	         CMP.B    (%A3)+,%D4
+ 724 85ce 6608      	         BNE.S    OPEN3            | If no match try next DCB
+ 725 85d0 51C8 FFF8 	         DBRA     %D0,OPEN2        | Else repeat until all chars matched
+ 726 85d4 41D1      	         LEA.L    (%A1),%A0        | Success - move this DCB address to A0
+ 727 85d6 6016      	         BRA.S    OPEN4            | and return
+ 728               	OPEN3:                             | Fail - calculate address of next DCB
+ 729 85d8 3229 0010 	         MOVE.W   16(%A1),%D1      | Get parameter block size of DCB
+ 730 85dc 43F1 1012 	         LEA.L    18(%A1,%D1.W),%A1 | A1 points to pointer to next DCB
+ 731 85e0 2251      	         MOVE.L   (%A1),%A1        | A1 now points to next DCB
+ 732 85e2 B3FC 0000 	         CMP.L    #0,%A1           | Test for end of DCB chain
+ 732      0000 
+ 733 85e8 66D8      	         BNE.S    OPEN1            | If not end of chain then try next DCB
+ 734 85ea 0007 0008 	         OR.B     #8,%D7           | Else set error flag and return
+ 735 85ee 4CDF 0E1F 	OPEN4:   MOVEM.L  (%A7)+,%A1-%A3/%D0-%D4 | Restore working registers
+ 736 85f2 4E75      	         RTS
+ 737               	*
+ 738               	*************************************************************************
+ 739               	*
+ 740               	*  Exception vector table initialization routine
+ 741               	*  All vectors not setup are loaded with uninitialized routine vector
+ 742               	*
+ 743 85f4 41F8 0008 	X_SET:  LEA.L   X_BASE,%A0         | Point to base of exception table
+ 744 85f8 303C 00FD 	        MOVE.W  #253,%D0           | Number of vectors -  3
+ 745               	        X_UN = 0x000089e4          | Works around GNU assembler issue
+ 746 85fc 20FC 0000 	X_SET1: MOVE.L  #X_UN,(%A0)+       | Store uninitialized exception vector
+ 746      89E4 
+ 747 8602 51C8 FFF8 	        DBRA    %D0,X_SET1         | Repeat until all entries preset
+ 748 8606 91C8      	        SUB.L   %A0,%A0            | Clear A0 (points to vector table)
+ 749               	        BUS_ER = 0x000087b4        | Works around GNU assembler issue
+ 750 8608 217C 0000 	        MOVE.L  #BUS_ER,8(%A0)     | Setup bus error vector
+ 750      87B4 0008 
+ 751               	        ADD_ER = 0x000087c2        | Works around GNU assembler issue
+ 752 8610 217C 0000 	        MOVE.L  #ADD_ER,12(%A0)    | Setup address error vector
+ 752      87C2 000C 
+ 753               	        IL_ER = 0x0000879e         | Works around GNU assembler issue
+ 754 8618 217C 0000 	        MOVE.L  #IL_ER,16(%A0)     | Setup illegal instruction error vect
+ 754      879E 0010 
+ 755               	        TRACE = 0x00008898         | Works around GNU assembler issue
+ 756 8620 217C 0000 	        MOVE.L  #TRACE,36(%A0)     | Setup trace exception vector
+ 756      8898 0024 
+ 757               	        TRAP_0 = 0x00008652        | Works around GNU assembler issue
+ 758 8628 217C 0000 	        MOVE.L  #TRAP_0,128(%A0)   | Setup TRAP #0 exception vector
+ 758      8652 0080 
+ 759               	        BRKPT = 0x000087d0         | Works around GNU assembler issue
+ 760 8630 217C 0000 	        MOVE.L  #BRKPT,184(%A0)    | Setup TRAP #14 vector = breakpoint
+ 760      87D0 00B8 
+ 761               	        AWARM = 0x00008040         | Works around GNU assembler issue
+ 762 8638 217C 0000 	        MOVE.L  #AWARM,188(%A0)    | Setup TRAP #15 exception vector
+ 762      8040 00BC 
+ 763 8640 303C 0007 	        MOVE.W  #7,%D0             | Now clear the breakpoint table
+ 764 8644 41EE 00A0 	        LEA.L   BP_TAB(%A6),%A0    | Point to table
+ 765 8648 4298      	X_SET2: CLR.L   (%A0)+             | Clear an address entry
+ 766 864a 4258      	        CLR.W   (%A0)+             | Clear the corresponding data
+ 767 864c 51C8 FFFA 	        DBRA    %D0,X_SET2         | Repeat until all 8 cleared
+ 768 8650 4E75      	        RTS
+ 769               	*
+68K GAS  monitor.s 			page 15
+
+
+ 770               	*************************************************************************
+ 771               	*
+ 772               	TRAP_0:                           | User links to  TS2BUG via TRAP #0
+ 773 8652 0C01 0000 	        CMP.B   #0,%D1            | D1 = 0 = Get character
+ 774 8656 6606      	        BNE.S   TRAP1
+ 775 8658 6100 FF04 	        BSR     GETCHAR
+ 776 865c 4E73      	        RTE
+ 777 865e 0C01 0001 	TRAP1:  CMP.B   #1,%D1            | D1 = 1 = Print character
+ 778 8662 6606      	        BNE.S   TRAP2
+ 779 8664 6100 FF2A 	        BSR     PUTCHAR
+ 780 8668 4E73      	        RTE
+ 781 866a 0C01 0002 	TRAP2:  CMP.B   #2,%D1            | D1 = 2 = Newline
+ 782 866e 6606      	        BNE.S   TRAP3
+ 783 8670 6100 F9FA 	        BSR     NEWLINE
+ 784 8674 4E73      	        RTE
+ 785 8676 0C01 0003 	TRAP3:  CMP.B   #3,%D1            | D1 = 3 = Get parameter from buffer
+ 786 867a 6606      	        BNE.S   TRAP4
+ 787 867c 6100 FB32 	        BSR     PARAM
+ 788 8680 4E73      	        RTE
+ 789 8682 0C01 0004 	TRAP4:  CMP.B   #4,%D1            | D1 = 4 = Print string pointed at by A4
+ 790 8686 6606      	        BNE.S   TRAP5
+ 791 8688 6100 F9F2 	        BSR     PSTRING
+ 792 868c 4E73      	        RTE
+ 793 868e 0C01 0005 	TRAP5:  CMP.B   #5,%D1            | D1 = 5 = Get a hex character
+ 794 8692 6606      	        BNE.S   TRAP6
+ 795 8694 6100 FAE0 	        BSR     HEX
+ 796 8698 4E73      	        RTE
+ 797 869a 0C01 0006 	TRAP6:  CMP.B   #6,%D1            | D1 = 6 = Get a hex byte
+ 798 869e 6606      	        BNE.S   TRAP7
+ 799 86a0 6100 FAF2 	        BSR     BYTE
+ 800 86a4 4E73      	        RTE
+ 801 86a6 0C01 0007 	TRAP7:  CMP.B   #7,%D1            | D1 = 7 = Get a word
+ 802 86aa 6606      	        BNE.S   TRAP8
+ 803 86ac 6100 FAF6 	        BSR     WORD
+ 804 86b0 4E73      	        RTE
+ 805 86b2 0C01 0008 	TRAP8:  CMP.B   #8,%D1            | D1 = 8 = Get a longword
+ 806 86b6 6606      	        BNE.S   TRAP9
+ 807 86b8 6100 FAF0 	        BSR     LONGWD
+ 808 86bc 4E73      	        RTE
+ 809 86be 0C01 0009 	TRAP9:  CMP.B   #9,%D1            | D1 = 9 = Output hex byte
+ 810 86c2 6606      	        BNE.S   TRAP10
+ 811 86c4 6100 FB48 	        BSR     OUT2X
+ 812 86c8 4E73      	        RTE
+ 813 86ca 0C01 000A 	TRAP10: CMP.B   #10,%D1           | D1 = 10 = Output hex word
+ 814 86ce 6606      	        BNE.S   TRAP11
+ 815 86d0 6100 FB44 	        BSR     OUT4X
+ 816 86d4 4E73      	        RTE
+ 817 86d6 0C01 000B 	TRAP11: CMP.B   #11,%D1           | D1 = 11 = Output hex longword
+ 818 86da 6606      	        BNE.S   TRAP12
+ 819 86dc 6100 FB40 	        BSR     OUT8X
+ 820 86e0 4E73      	        RTE
+ 821 86e2 0C01 000C 	TRAP12: CMP.B   #12,%D1           | D1 = 12 = Print a space
+ 822 86e6 6606      	        BNE.S   TRAP13
+ 823 86e8 6100 FBA4 	        BSR     PSPACE
+ 824 86ec 4E73      	        RTE
+ 825 86ee 0C01 000D 	TRAP13: CMP.B   #13,%D1           | D1 = 13 = Get a line of text into
+ 826 86f2 6606      	        BNE.S   TRAP14            | the line buffer
+68K GAS  monitor.s 			page 16
+
+
+ 827 86f4 6100 F99C 	        BSR     GETLINE
+ 828 86f8 4E73      	        RTE
+ 829 86fa 0C01 000E 	TRAP14: CMP.B   #14,%D1           | D1 = 14 = Tidy up the line in the
+ 830 86fe 6606      	        BNE.S   TRAP15            | line buffer by removing leading
+ 831 8700 6100 F9C6 	        BSR     TIDY              | leading and multiple embeded spaces
+ 832 8704 4E73      	        RTE
+ 833 8706 0C01 000F 	TRAP15: CMP.B   #15,%D1           | D1 = 15 = Execute the command in
+ 834 870a 6606      	        BNE.S   TRAP16            | the line buffer
+ 835 870c 6100 F9FC 	        BSR     EXECUTE
+ 836 8710 4E73      	        RTE
+ 837 8712 0C01 0010 	TRAP16: CMP.B   #16,%D1           | D1 = 16 = Call RESTORE to transfer
+ 838 8716 6606      	        BNE.S   TRAP17            | the registers in TSK_T to the 68000
+ 839 8718 6100 015A 	        BSR     RESTORE           | and therefore execute a program
+ 840 871c 4E73      	        RTE
+ 841 871e 4E73      	TRAP17: RTE
+ 842               	*
+ 843               	*************************************************************************
+ 844               	*
+ 845               	*  Display exception frame (D0 - D7, A0 - A6, USP, SSP, SR, PC)
+ 846               	*  EX_DIS prints registers saved after a breakpoint or exception
+ 847               	*  The registers are saved in TSK_T
+ 848               	*
+ 849 8720 4BEE 0056 	EX_DIS: LEA.L   TSK_T(%A6),%A5    | A5 points to display frame
+ 850 8724 49FA 0313 	        LEA.L   MES3(%PC),%A4     | Point to heading
+ 851 8728 6100 F962 	        BSR     HEADING           | and print it
+ 852 872c 3C3C 0007 	        MOVE.W  #7,%D6            | 8 pairs of registers to display
+ 853 8730 4205      	        CLR.B   %D5               | D5 is the line counter
+ 854 8732 1005      	EX_D1:  MOVE.B  %D5,%D0           | Put current register number in D0
+ 855 8734 6100 FABE 	        BSR     OUT1X             | and print it
+ 856 8738 6100 FB54 	        BSR     PSPACE            | and a space
+ 857 873c 5205      	        ADD.B   #1,%D5            | Update counter for next pair
+ 858 873e 2015      	        MOVE.L  (%A5),%D0         | Get data register to be displayed
+ 859 8740 6100 FADC 	        BSR     OUT8X             | from the frame and print it
+ 860 8744 49FA 0311 	        LEA.L   MES4(%PC),%A4     | Print string of spaces
+ 861 8748 6100 F932 	        BSR.W   PSTRING           | between data and address registers
+ 862 874c 202D 0020 	        MOVE.L  32(%A5),%D0       | Get address register to be displayed
+ 863 8750 6100 FACC 	        BSR     OUT8X             | which is 32 bytes on from data reg
+ 864 8754 6100 F916 	        BSR     NEWLINE
+ 865 8758 4BED 0004 	        LEA.L   4(%A5),%A5        | Point to next pair (ie Di, Ai)
+ 866 875c 51CE FFD4 	        DBRA    %D6,EX_D1         | Repeat until all displayed
+ 867 8760 4BED 0020 	        LEA.L   32(%A5),%A5       | Adjust pointer by 8 longwords
+ 868 8764 6100 F906 	        BSR     NEWLINE           | to point to SSP
+ 869 8768 49FA 02C6 	        LEA.L   MES2A(%PC),%A4    | Point to "SS ="
+ 870 876c 6100 F90E 	        BSR     PSTRING           | Print it
+ 871 8770 201D      	        MOVE.L  (%A5)+,%D0        | Get SSP from frame
+ 872 8772 6100 FAAA 	        BSR     OUT8X             | and display it
+ 873 8776 6100 F8F4 	        BSR     NEWLINE
+ 874 877a 49FA 02A2 	        LEA.L   MES1(%PC),%A4     | Point to 'SR ='
+ 875 877e 6100 F8FC 	        BSR     PSTRING           | Print it
+ 876 8782 301D      	        MOVE.W  (%A5)+,%D0        | Get status register
+ 877 8784 6100 FA90 	        BSR     OUT4X             | Display status
+ 878 8788 6100 F8E2 	        BSR     NEWLINE
+ 879 878c 49FA 0299 	        LEA.L   MES2(%PC),%A4     | Point to 'PC ='
+ 880 8790 6100 F8EA 	        BSR     PSTRING           | Print it
+ 881 8794 201D      	        MOVE.L  (%A5)+,%D0        | Get PC
+ 882 8796 6100 FA86 	        BSR     OUT8X             | Display PC
+ 883 879a 6000 F8D0 	        BRA     NEWLINE           | Newline and return
+68K GAS  monitor.s 			page 17
+
+
+ 884               	*
+ 885               	*************************************************************************
+ 886               	*
+ 887               	*  Exception handling routines
+ 888               	*
+ 889               	IL_ER:                            | Illegal instruction exception
+ 890 879e 2F0C      	        MOVE.L  %A4,-(%A7)        | Save A4
+ 891 87a0 49FA 02DF 	        LEA.L   MES10(%PC),%A4    | Point to heading
+ 892 87a4 6100 F8E6 	        BSR     HEADING           | Print it
+ 893 87a8 285F      	        MOVE.L  (%A7)+,%A4        | Restore A4
+ 894 87aa 6176      	        BSR.S   GROUP2            | Save registers in display frame
+ 895 87ac 6100 FF72 	        BSR     EX_DIS            | Display registers saved in frame
+ 896 87b0 6000 F88E 	        BRA     WARM              | Abort from illegal instruction
+ 897               	*
+ 898               	BUS_ER:                           | Bus error (group 1) exception
+ 899 87b4 2F0C      	        MOVE.L  %A4,-(%A7)        | Save A4
+ 900 87b6 49FA 02A9 	        LEA.L   MES8(%PC),%A4     | Point to heading
+ 901 87ba 6100 F8D0 	        BSR     HEADING           | Print it
+ 902 87be 285F      	        MOVE.L  (%A7)+,%A4        | Restore A4
+ 903 87c0 602C      	        BRA.S   GROUP1            | Deal with group 1 exception
+ 904               	*
+ 905               	ADD_ER:                           | Address error (group 1) exception
+ 906 87c2 2F0C      	        MOVE.L  %A4,-(%A7)        | Save A4
+ 907 87c4 49FA 02A9 	        LEA.L   MES9(%PC),%A4     | Point to heading
+ 908 87c8 6100 F8C2 	        BSR     HEADING           | Print it
+ 909 87cc 285F      	        MOVE.L  (%A7)+,%A4        | Restore A4
+ 910 87ce 601E      	        BRA.S   GROUP1            | Deal with group 1 exception
+ 911               	*
+ 912               	BRKPT:                            |   Deal with breakpoint
+ 913 87d0 48E7 FFFE 	        MOVEM.L %D0-%D7/%A0-%A6,-(%A7) |   Save all registers
+ 914 87d4 6100 0180 	        BSR     BR_CLR            |   Clear breakpoints in code
+ 915 87d8 4CDF 7FFF 	        MOVEM.L (%A7)+,%D0-%D7/%A0-%A6 |   Restore registers
+ 916 87dc 6144      	        BSR.S   GROUP2            | Treat as group 2 exception
+ 917 87de 49FA 02B7 	        LEA.L   MES11(%PC),%A4    | Point to heading
+ 918 87e2 6100 F8A8 	        BSR     HEADING           | Print it
+ 919 87e6 6100 FF38 	        BSR     EX_DIS            | Display saved registers
+ 920 87ea 6000 F854 	        BRA     WARM              | Return to monitor
+ 921               	*
+ 922               	*       GROUP1 is called by address and bus error exceptions
+ 923               	*       These are "turned into group 2" exceptions (eg TRAP)
+ 924               	*       by modifying the stack frame saved by a group 1 exception
+ 925               	*
+ 926 87ee 48E7 8080 	GROUP1: MOVEM.L %D0/%A0,-(%A7)    | Save working registers
+ 927 87f2 206F 0012 	        MOVE.L  18(%A7),%A0       | Get PC from group 1 stack frame
+ 928 87f6 302F 000E 	        MOVE.W  14(%A7),%D0       | Get instruction from stack frame
+ 929 87fa B060      	        CMP.W   -(%A0),%D0        | Now backtrack to find the "correct PC"
+ 930 87fc 670E      	        BEQ.S   GROUP1A           | by matching the op-code on the stack
+ 931 87fe B060      	        CMP.W   -(%A0),%D0        | with the code in the region of the
+ 932 8800 670A      	        BEQ.S   GROUP1A           | PC on the stack
+ 933 8802 B060      	        CMP.W   -(%A0),%D0
+ 934 8804 6706      	        BEQ.S   GROUP1A
+ 935 8806 B060      	        CMP.W   -(%A0),%D0
+ 936 8808 6702      	        BEQ.S   GROUP1A
+ 937 880a 5588      	        SUBQ.L  #2,%A0
+ 938 880c 2F48 0012 	GROUP1A:MOVE.L  %A0,18(%A7)       |  Restore modified PC to stack frame
+ 939 8810 4CDF 0101 	        MOVEM.L (%A7)+,%D0/%A0    |  Restore working registers
+ 940 8814 4FEF 0008 	        LEA.L   8(%A7),%A7        |  Adjust stack pointer to group 1 type
+68K GAS  monitor.s 			page 18
+
+
+ 941 8818 6108      	        BSR.S   GROUP2            |  Now treat as group 1 exception
+ 942 881a 6100 FF04 	        BSR     EX_DIS            |  Display contents of exception frame
+ 943 881e 6000 F820 	        BRA     WARM              |  Exit to monitor - no RTE from group 2
+ 944               	*
+ 945               	GROUP2:                           | Deal with group 2 exceptions
+ 946 8822 48E7 FFFF 	        MOVEM.L %A0-%A7/%D0-%D7,-(%A7) | Save all registers on the stack
+ 947 8826 303C 000E 	        MOVE.W  #14,%D0           | Transfer D0 - D7, A0 - A6 from
+ 948 882a 41EE 0056 	        LEA.L   TSK_T(%A6),%A0    | the stack to the display frame
+ 949 882e 20DF      	GROUP2A:MOVE.L  (%A7)+,(%A0)+     | Move a register from stack to frame
+ 950 8830 51C8 FFFC 	        DBRA    %D0,GROUP2A       | and repeat until D0-D7/A0-A6 moved
+ 951 8834 4E6A      	        MOVE.L  %USP,%A2          | Get the user stack pointer and put it
+ 952 8836 20CA      	        MOVE.L  %A2,(%A0)+        | in the A7 position in the frame
+ 953 8838 201F      	        MOVE.L  (%A7)+,%D0        | Now transfer the SSP to the frame,
+ 954 883a 0480 0000 	        SUB.L   #10,%D0           | remembering to account for the
+ 954      000A 
+ 955 8840 20C0      	        MOVE.L  %D0,(%A0)+        | data pushed on the stack to this point
+ 956 8842 225F      	        MOVE.L  (%A7)+,%A1        | Copy TOS (return address) to A1
+ 957 8844 30DF      	        MOVE.W  (%A7)+,(%A0)+     | Move SR to display frame
+ 958 8846 201F      	        MOVE.L  (%A7)+,%D0        | Get PC in D0
+ 959 8848 5580      	        SUBQ.L  #2,%D0            | Move back to current instruction
+ 960 884a 20C0      	        MOVE.L  %D0,(%A0)+        | Put adjusted PC in display frame
+ 961 884c 4ED1      	        JMP     (%A1)             | Return from subroutine
+ 962               	*
+ 963               	*************************************************************************
+ 964               	*
+ 965               	*  GO executes a program either from a supplied address or
+ 966               	*  by using the data in the display frame
+ 967 884e 6100 F960 	GO:      BSR     PARAM               | Get entry address (if any)
+ 968 8852 4A07      	         TST.B   %D7                 | Test for error in input
+ 969 8854 6708      	         BEQ.S   GO1                 | If D7 zero then OK
+ 970 8856 49FA 027F 	         LEA.L   ERMES1(%PC),%A4     | Else point to error message,
+ 971 885a 6000 F820 	         BRA     PSTRING             | print it and return
+ 972 885e 4A80      	GO1:     TST.L   %D0                 | If no address entered then get
+ 973 8860 670A      	         BEQ.S   GO2                 | address from display frame
+ 974 8862 2D40 009C 	         MOVE.L  %D0,TSK_T+70(%A6)   | Else save address in display frame
+ 975 8866 3D7C 2700 	         MOVE.W  #0x2700,TSK_T+68(%A6) | Store dummy status in frame
+ 975      009A 
+ 976 886c 6006      	GO2:     BRA.S   RESTORE             | Restore volatile environment and go
+ 977               	*
+ 978 886e 6100 007A 	GB:      BSR     BR_SET              | Same as go but presets breakpoints
+ 979 8872 60DA      	         BRA.S   GO                  | Execute program
+ 980               	*
+ 981               	*        RESTORE moves the volatile environment from the display
+ 982               	*        frame and transfers it to the 68000's registers. This
+ 983               	*        re-runs a program suspended after an exception
+ 984               	*
+ 985 8874 47EE 0056 	RESTORE: LEA.L   TSK_T(%A6),%A3      | A3 points to display frame
+ 986 8878 47EB 004A 	         LEA.L   74(%A3),%A3         | A3 now points to end of frame + 4
+ 987 887c 4FEF 0004 	         LEA.L   4(%A7),%A7          | Remove return address from stack
+ 988 8880 303C 0024 	         MOVE.W  #36,%D0             | Counter for 37 words to be moved
+ 989 8884 3F23      	REST1:   MOVE.W  -(%A3),-(%A7)       | Move word from display frame to stack
+ 990 8886 51C8 FFFC 	         DBRA    %D0,REST1           | Repeat until entire frame moved
+ 991 888a 4CDF 00FF 	         MOVEM.L (%A7)+,%D0-%D7      | Restore old data registers from stack
+ 992 888e 4CDF 7F00 	         MOVEM.L (%A7)+,%A0-%A6      | Restore old address registers
+ 993 8892 4FEF 0008 	         LEA.L   8(%A7),%A7          | Except SSP/USP - so adjust stack
+ 994 8896 4E73      	         RTE                         | Return from exception to run program
+ 995               	*
+68K GAS  monitor.s 			page 19
+
+
+ 996               	TRACE:                               | TRACE exception (rudimentary version)
+ 997 8898 287A 020B 	         MOVE.L  MES12(%PC),%A4      | Point to heading
+ 998 889c 6100 F7EE 	         BSR     HEADING             | Print it
+ 999 88a0 6100 FF4C 	         BSR     GROUP1              | Save volatile environment
+ 1000 88a4 6100 FE7A 	         BSR     EX_DIS              | Display it
+ 1001 88a8 6000 F796 	         BRA     WARM                | Return to monitor
+ 1002               	*
+ 1003               	*************************************************************************
+ 1004               	*  Breakpoint routines: BR_GET gets the address of a breakpoint and
+ 1005               	*  puts it in the breakpoint table. It does not plant it in the code.
+ 1006               	*  BR_SET plants all breakpoints in the code. NOBR removes one or all
+ 1007               	*  breakpoints from the table. KILL removes breakpoints from the code.
+ 1008               	*
+ 1009 88ac 6100 F902 	BR_GET:  BSR     PARAM               | Get breakpoint address in table
+ 1010 88b0 4A07      	         TST.B   %D7                 | Test for input error
+ 1011 88b2 6708      	         BEQ.S   BR_GET1             | If no error then continue
+ 1012 88b4 49FA 0221 	         LEA.L   ERMES1(%PC),%A4     | Else display error
+ 1013 88b8 6000 F7C2 	         BRA     PSTRING             | and return
+ 1014 88bc 47EE 00A0 	BR_GET1: LEA.L   BP_TAB(%A6),%A3     | A6 points to breakpoint table
+ 1015 88c0 2A40      	         MOVE.L  %D0,%A5             | Save new BP address in A5
+ 1016 88c2 2C00      	         MOVE.L  %D0,%D6             | and in D6 because D0 gets corrupted
+ 1017 88c4 3A3C 0007 	         MOVE.W  #7,%D5              | Eight entries to test
+ 1018 88c8 201B      	BR_GET2: MOVE.L  (%A3)+,%D0          | Read entry from breakpoint table
+ 1019 88ca 660C      	         BNE.S   BR_GET3             | If not zero display existing BP
+ 1020 88cc 4A86      	         TST.L   %D6                 | Only store a non-zero breakpoint
+ 1021 88ce 6710      	         BEQ.S   BR_GET4
+ 1022 88d0 274D FFFC 	         MOVE.L  %A5,-4(%A3)         | Store new breakpoint in table
+ 1023 88d4 3695      	         MOVE.W  (%A5),(%A3)         | Save code at BP address in table
+ 1024 88d6 4286      	         CLR.L   %D6                 | Clear D6 to avoid repetition
+ 1025 88d8 6100 F944 	BR_GET3: BSR     OUT8X               | Display this breakpoint
+ 1026 88dc 6100 F78E 	         BSR     NEWLINE
+ 1027 88e0 47EB 0002 	BR_GET4: LEA.L   2(%A3),%A3          | Step past stored op-code
+ 1028 88e4 51CD FFE2 	         DBRA    %D5,BR_GET2         | Repeat until all entries tested
+ 1029 88e8 4E75      	         RTS                         | Return
+ 1030               	*
+ 1031               	BR_SET:                              | Plant any breakpoints in user code
+ 1032 88ea 41EE 00A0 	         LEA.L   BP_TAB(%A6),%A0     | A0 points to BP table
+ 1033 88ee 45EE 009C 	         LEA.L   TSK_T+70(%A6),%A2   | A2 points to PC in display frame
+ 1034 88f2 2452      	         MOVE.L  (%A2),%A2           | Now A2 contains value of PC
+ 1035 88f4 303C 0007 	         MOVE.W  #7,%D0              | Up to eight entries to plant
+ 1036 88f8 2218      	BR_SET1: MOVE.L  (%A0)+,%D1          | Read breakpoint address from table
+ 1037 88fa 670A      	         BEQ.S   BR_SET2             | If zero then skip planting
+ 1038 88fc B28A      	         CMP.L   %A2,%D1             | Don't want to plant BP at current PC
+ 1039 88fe 6706      	         BEQ.S   BR_SET2             | location, so skip planting if same
+ 1040 8900 2241      	         MOVE.L  %D1,%A1             | Transfer BP address to address reg
+ 1041 8902 32BC 4E4E 	         MOVE.W  #TRAP_14,(%A1)      | Plant op-code for TRAP #14 in code
+ 1042 8906 41E8 0002 	BR_SET2: LEA.L   2(%A0),%A0          | Skip past op-code field in table
+ 1043 890a 51C8 FFEC 	         DBRA    %D0,BR_SET1         | Repeat until all entries tested
+ 1044 890e 4E75      	         RTS
+ 1045               	*
+ 1046               	NOBR:                                | Clear one or all breakpoints
+ 1047 8910 6100 F89E 	         BSR     PARAM               | Get BP address (if any)
+ 1048 8914 4A07      	         TST.B   %D7                 | Test for input error
+ 1049 8916 6708      	         BEQ.S   NOBR1               | If no error then skip abort
+ 1050 8918 49FA 01BD 	         LEA.L   ERMES1(%PC),%A4     | Point to error message
+ 1051 891c 6000 F75E 	         BRA     PSTRING             | Display it and return
+ 1052 8920 4A80      	NOBR1:   TST.L   %D0                 | Test for null address (clear all)
+68K GAS  monitor.s 			page 20
+
+
+ 1053 8922 6720      	         BEQ.S   NOBR4               | If no address then clear all entries
+ 1054 8924 2240      	         MOVE.L  %D0,%A1             | Else just clear breakpoint in A1
+ 1055 8926 41EE 00A0 	         LEA.L   BP_TAB(%A6),%A0     | A0 points to BP table
+ 1056 892a 303C 0007 	         MOVE.W  #7,%D0              | Up to eight entries to test
+ 1057 892e 2218      	NOBR2:   MOVE.L  (%A0)+,%D1          | Get entry and
+ 1058 8930 41E8 0002 	         LEA.L   2(%A0),%A0          | skip past op-code field
+ 1059 8934 B289      	         CMP.L   %A1,%D1             | Is this the one?
+ 1060 8936 6706      	         BEQ.S   NOBR3               | If so go and clear entry
+ 1061 8938 51C8 FFF4 	         DBRA    %D0,NOBR2           | Repeat until all tested
+ 1062 893c 4E75      	         RTS
+ 1063 893e 42A8 FFFA 	NOBR3:   CLR.L   -6(%A0)             | Clear address in BP table
+ 1064 8942 4E75      	         RTS
+ 1065 8944 41EE 00A0 	NOBR4:   LEA.L   BP_TAB(%A6),%A0     | Clear all 8 entries in BP table
+ 1066 8948 303C 0007 	         MOVE.W  #7,%D0              | Eight entries to clear
+ 1067 894c 4298      	NOBR5:   CLR.L   (%A0)+              | Clear breakpoint address
+ 1068 894e 4258      	         CLR.W   (%A0)+              | Clear op-code field
+ 1069 8950 51C8 FFFA 	         DBRA    %D0,NOBR5           | Repeat until all done
+ 1070 8954 4E75      	         RTS
+ 1071               	*
+ 1072               	BR_CLR:                              | Remove breakpoints from code
+ 1073 8956 41EE 00A0 	         LEA.L   BP_TAB(%A6),%A0     | A0 points to breakpoint table
+ 1074 895a 303C 0007 	         MOVE.W  #7,%D0              | Up to eight entries to clear
+ 1075 895e 2218      	BR_CLR1: MOVE.L  (%A0)+,%D1          | Get address of BP in D1
+ 1076 8960 2241      	         MOVE.L  %D1,%A1             | and put copy in A1
+ 1077 8962 4A81      	         TST.L   %D1                 | Test this breakpoint
+ 1078 8964 6702      	         BEQ.S   BR_CLR2             | If zero then skip BP clearing
+ 1079 8966 3290      	         MOVE.W  (%A0),(%A1)         | Else restore op-code
+ 1080 8968 41E8 0002 	BR_CLR2: LEA.L   2(%A0),%A0          | Skip past op-code field
+ 1081 896c 51C8 FFF0 	         DBRA    %D0,BR_CLR1         | Repeat until all tested
+ 1082 8970 4E75      	         RTS
+ 1083               	*
+ 1084               	*  REG_MOD modifies a register in the display frame. The command
+ 1085               	*  format is REG <reg> <value>. E.g. REG D3 1200
+ 1086               	*
+ 1087 8972 4281      	REG_MOD: CLR.L   %D1                 | D1 to hold name of register
+ 1088 8974 41EE 0040 	         LEA.L   BUFFPT(%A6),%A0     | A0 contains address of buffer pointer
+ 1089 8978 2050      	         MOVE.L  (%A0),%A0           | A0 now points to next char in buffer
+ 1090 897a 1218      	         MOVE.B  (%A0)+,%D1          | Put first char of name in D1
+ 1091 897c E159      	         ROL.W   #8,%D1              | Move char one place left
+ 1092 897e 1218      	         MOVE.B  (%A0)+,%D1          | Get second char in D1
+ 1093 8980 41E8 0001 	         LEA.L   1(%A0),%A0          | Move pointer past space in buffer
+ 1094 8984 2D48 0040 	         MOVE.L  %A0,BUFFPT(%A6)     | Update buffer pointer
+ 1095 8988 4282      	         CLR.L   %D2                 | D2 is the character pair counter
+ 1096 898a 41FA 0122 	         LEA.L   REGNAME(%PC),%A0    | A0 points to string of character pairs
+ 1097 898e 43D0      	         LEA.L   (%A0),%A1           | A1 also points to string
+ 1098 8990 B258      	REG_MD1: CMP.W   (%A0)+,%D1          | Compare a char pair with input
+ 1099 8992 6712      	         BEQ.S   REG_MD2             | If match then exit loop
+ 1100 8994 5282      	         ADD.L   #1,%D2              | Else increment match counter
+ 1101 8996 0C82 0000 	         CMP.L   #19,%D2             | Test for end of loop
+ 1101      0013 
+ 1102 899c 66F2      	         BNE.S   REG_MD1             | Continue until all pairs matched
+ 1103 899e 49FA 0137 	         LEA.L   ERMES1(%PC),%A4     | If here then error
+ 1104 89a2 6000 F6D8 	         BRA     PSTRING             | Display error and return
+ 1105 89a6 43EE 0056 	REG_MD2: LEA.L   TSK_T(%A6),%A1      | A1 points to display frame
+ 1106 89aa E582      	         ASL.L   #2,%D2              | Multiply offset by 4 (4 bytes/entry)
+ 1107 89ac 0C82 0000 	         CMP.L   #72,%D2             | Test for address of PC
+ 1107      0048 
+68K GAS  monitor.s 			page 21
+
+
+ 1108 89b2 6602      	         BNE.S   REG_MD3             | If not PC then all is OK
+ 1109 89b4 5582      	         SUB.L   #2,%D2              | else dec PC pointer as Sr is a word
+ 1110 89b6 45F1 2000 	REG_MD3: LEA.L   (%A1,%D2.W),%A2     | Calculate address of entry in disptable
+ 1111 89ba 2012      	         MOVE.L  (%A2),%D0           | Get old contents
+ 1112 89bc 6100 F860 	         BSR     OUT8X               | Display them
+ 1113 89c0 6100 F6AA 	         BSR     NEWLINE
+ 1114 89c4 6100 F7EA 	         BSR     PARAM               | Get new data
+ 1115 89c8 4A07      	         TST.B   %D7                 | Test for input error
+ 1116 89ca 6708      	         BEQ.S   REG_MD4             | If no error then go and store data
+ 1117 89cc 49FA 0109 	         LEA.L   ERMES1(%PC),%A4     | Else point to error message
+ 1118 89d0 6000 F6AA 	         BRA     PSTRING             | print it and return
+ 1119 89d4 0C82 0000 	REG_MD4: CMP.L   #68,%D2             | If this address is the SR then
+ 1119      0044 
+ 1120 89da 6704      	         BEQ.S   REG_MD5             | we have only a word to store
+ 1121 89dc 2480      	         MOVE.L  %D0,(%A2)           | Else store new data in display frame
+ 1122 89de 4E75      	         RTS
+ 1123 89e0 3480      	REG_MD5: MOVE.W  %D0,(%A2)           | Store SR (one word)
+ 1124 89e2 4E75      	         RTS
+ 1125               	*
+ 1126               	*************************************************************************
+ 1127               	*
+ 1128               	X_UN:                             | Uninitialized exception vector routine
+ 1129 89e4 49FA 0157 	        LEA.L   ERMES6(%PC),%A4   | Point to error message
+ 1130 89e8 6100 F692 	        BSR     PSTRING           | Display it
+ 1131 89ec 6100 FD32 	        BSR     EX_DIS            | Display registers
+ 1132 89f0 6000 F64E 	        BRA     WARM              | Abort
+ 1133               	*
+ 1134               	*************************************************************************
+ 1135               	*
+ 1136               	*  All strings and other fixed parameters here
+ 1137               	*
+ 1138 89f4 5453 4255 	BANNER:  .asciz   "TSBUG 2 Version 23.07.86\0"
+ 1138      4720 3220 
+ 1138      5665 7273 
+ 1138      696F 6E20 
+ 1138      3233 2E30 
+ 1139 8a0e 0D0A 3F00 	CRLF:    .byte    CR,LF,'?',0
+ 1140 8a12 0D0A 5331 	HEADER:  .byte    CR,LF,'S','1',0,0
+ 1140      0000 
+ 1141 8a18 5339 2020 	TAIL:    .asciz   "S9  \0"
+ 1141      0000 
+ 1142 8a1e 2053 5220 	MES1:    .asciz   " SR  =  "
+ 1142      203D 2020 
+ 1142      00
+ 1143 8a27 2050 4320 	MES2:    .asciz   " PC  =  "
+ 1143      203D 2020 
+ 1143      00
+ 1144 8a30 2053 5320 	MES2A:   .asciz   " SS  =  "
+ 1144      203D 2020 
+ 1144      00
+ 1145 8a39 2020 4461 	MES3:    .asciz   "  Data reg       Address reg\0"
+ 1145      7461 2072 
+ 1145      6567 2020 
+ 1145      2020 2020 
+ 1145      2041 6464 
+ 1146 8a57 2020 2020 	MES4:    .asciz   "        \0"
+ 1146      2020 2020 
+68K GAS  monitor.s 			page 22
+
+
+ 1146      0000 
+ 1147 8a61 4275 7320 	MES8:    .asciz   "Bus error   \0"
+ 1147      6572 726F 
+ 1147      7220 2020 
+ 1147      0000 
+ 1148 8a6f 4164 6472 	MES9:    .asciz   "Address error   \0"
+ 1148      6573 7320 
+ 1148      6572 726F 
+ 1148      7220 2020 
+ 1148      0000 
+ 1149 8a81 496C 6C65 	MES10:   .asciz   "Illegal instruction \0"
+ 1149      6761 6C20 
+ 1149      696E 7374 
+ 1149      7275 6374 
+ 1149      696F 6E20 
+ 1150 8a97 4272 6561 	MES11:   .asciz   "Breakpoint  \0"
+ 1150      6B70 6F69 
+ 1150      6E74 2020 
+ 1150      0000 
+ 1151 8aa5 5472 6163 	MES12:   .asciz   "Trace   "
+ 1151      6520 2020 
+ 1151      00
+ 1152 8aae 4430 4431 	REGNAME: .ascii   "D0D1D2D3D4D5D6D7"
+ 1152      4432 4433 
+ 1152      4434 4435 
+ 1152      4436 4437 
+ 1153 8abe 4130 4131 	         .ascii   "A0A1A2A3A4A5A6A7"
+ 1153      4132 4133 
+ 1153      4134 4135 
+ 1153      4136 4137 
+ 1154 8ace 5353 5352 	         .ascii   "SSSR"
+ 1155 8ad2 5043 2020 	         .asciz   "PC  "
+ 1155      00
+ 1156 8ad7 4E6F 6E2D 	ERMES1:  .asciz   "Non-valid hexadecimal input  "
+ 1156      7661 6C69 
+ 1156      6420 6865 
+ 1156      7861 6465 
+ 1156      6369 6D61 
+ 1157 8af5 496E 7661 	ERMES2:  .asciz   "Invalid command  "
+ 1157      6C69 6420 
+ 1157      636F 6D6D 
+ 1157      616E 6420 
+ 1157      2000 
+ 1158 8b07 4C6F 6164 	ERMES3:  .asciz   "Loading error"
+ 1158      696E 6720 
+ 1158      6572 726F 
+ 1158      7200 
+ 1159 8b15 5461 626C 	ERMES4:  .asciz   "Table full  \0"
+ 1159      6520 6675 
+ 1159      6C6C 2020 
+ 1159      0000 
+ 1160 8b23 4272 6561 	ERMES5:  .asciz   "Breakpoint not active   \0"
+ 1160      6B70 6F69 
+ 1160      6E74 206E 
+ 1160      6F74 2061 
+ 1160      6374 6976 
+ 1161 8b3d 556E 696E 	ERMES6:  .asciz   "Uninitialized exception \0"
+68K GAS  monitor.s 			page 23
+
+
+ 1161      6974 6961 
+ 1161      6C69 7A65 
+ 1161      6420 6578 
+ 1161      6365 7074 
+ 1162 8b57 2052 616E 	ERMES7:  .asciz   " Range error"
+ 1162      6765 2065 
+ 1162      7272 6F72 
+ 1162      00
+ 1163               	*
+ 1164               	*  COMTAB is the built-in command table. All entries are made up of
+ 1165               	*         a string length + number of characters to match + the string
+ 1166               	*         plus the address of the command relative to COMTAB
+ 1167               	*
+ 1168 8b64 0404      	COMTAB:  DC.B     4,4              | JUMP <address> causes execution to
+ 1169 8b66 4A55 4D50 	         .ascii   "JUMP"           | begin at <address>
+ 1170 8b6a FFFF F6C2 	         DC.L     JUMP-COMTAB
+ 1171 8b6e 0803      	         DC.B     8,3              | MEMORY <address> examines contents of
+ 1172 8b70 4D45 4D4F 	         .ascii   "MEMORY  "       | <address> and allows them to be changed
+ 1172      5259 2020 
+ 1173 8b78 FFFF F6D8 	         DC.L     MEMORY-COMTAB
+ 1174 8b7c 0402      	         DC.B     4,2              | LOAD <string> loads S1/S2 records
+ 1175 8b7e 4C4F 4144 	         .ascii   "LOAD"           | from the host. <string> is sent to host
+ 1176 8b82 FFFF F738 	         DC.L     LOAD-COMTAB
+ 1177 8b86 0402      	         DC.B     4,2              | DUMP <string> sends S1 records to the
+ 1178 8b88 4455 4D50 	         .ascii   "DUMP"           | host and is preceeded by <string>.
+ 1179 8b8c FFFF F80C 	         DC.L     DUMP-COMTAB
+ 1180 8b90 0403      	         DC.B     4,3              | TRAN enters the transparant mode
+ 1181 8b92 5452 414E 	         .ascii   "TRAN"           | and is exited by ESC,E.
+ 1182 8b96 FFFF F8C8 	         DC.L     TM-COMTAB
+ 1183 8b9a 0402      	         DC.B     4,2              | NOBR <address> removes the breakpoint
+ 1184 8b9c 4E4F 4252 	         .ascii   "NOBR"           | at <address> from the BP table. If
+ 1185 8ba0 FFFF FDAC 	         DC.L     NOBR-COMTAB      | no address is given all BPs are removed.
+ 1186 8ba4 0402      	         DC.B     4,2              | DISP displays the contents of the
+ 1187 8ba6 4449 5350 	         .ascii   "DISP"           | pseudo registers in TSK_T.
+ 1188 8baa FFFF FBBC 	         DC.L     EX_DIS-COMTAB
+ 1189 8bae 0402      	         DC.B    4,2               | GO <address> starts program execution
+ 1190 8bb0 474F 2020 	         .ascii   "GO  "           | at <address> and loads regs from TSK_T
+ 1191 8bb4 FFFF FCEA 	         DC.L    GO-COMTAB
+ 1192 8bb8 0402      	         DC.B    4,2               | BRGT puts a breakpoint in the BP
+ 1193 8bba 4252 4754 	         .ascii  "BRGT"            | table - but not in the code
+ 1194 8bbe FFFF FD48 	         DC.L    BR_GET-COMTAB
+ 1195 8bc2 0402      	         DC.B    4,2               | PLAN puts the breakpoints in the code
+ 1196 8bc4 504C 414E 	         .ascii  "PLAN"
+ 1197 8bc8 FFFF FD86 	         DC.L    BR_SET-COMTAB
+ 1198 8bcc 0404      	         DC.B    4,4               | KILL removes breakpoints from the code
+ 1199 8bce 4B49 4C4C 	         .ascii  "KILL"
+ 1200 8bd2 FFFF FDF2 	         DC.L    BR_CLR-COMTAB
+ 1201 8bd6 0402      	         DC.B    4,2               | GB <address> sets breakpoints and
+ 1202 8bd8 4742 2020 	         .ascii  "GB  "            | then calls GO.
+ 1203 8bdc FFFF FD0A 	         DC.L    GB-COMTAB
+ 1204 8be0 0403      	         DC.B    4,3               | REG <reg> <value> loads <value>
+ 1205 8be2 5245 4720 	         .ascii  "REG "            | into <reg> in TASK_T. Used to preset
+ 1206 8be6 FFFF FE0E 	         DC.L    REG_MOD-COMTAB    | registers before a GO or GB
+ 1207 8bea 0000      	         DC.B    0,0
+ 1208               	*
+ 1209               	*************************************************************************
+ 1210               	*
+68K GAS  monitor.s 			page 24
+
+
+ 1211               	*  This is a list of the information needed to setup the DCBs
+ 1212               	*
+ 1213               	DCB_LST:
+ 1214 8bec 434F 4E5F 	DCB1:    .ascii  "CON_IN  "          | Device name (8 bytes)
+ 1214      494E 2020 
+ 1215               	         SCON_IN = 0x000084ca        | Works around GNU assembler issue
+ 1216 8bf4 0000 84CA 	         DC.L    SCON_IN,ACIA_1      | Address of driver routine, device
+ 1216      0001 0040 
+ 1217 8bfc 0002      	         DC.W    2                   | Number of words in parameter field
+ 1218 8bfe 434F 4E5F 	DCB2:    .ascii  "CON_OUT "
+ 1218      4F55 5420 
+ 1219               	         SCON_OUT = 0x000084fa       | Works around GNU assembler issue
+ 1220 8c06 0000 84FA 	         DC.L    SCON_OUT,ACIA_1
+ 1220      0001 0040 
+ 1221 8c0e 0002      	         DC.W    2
+ 1222 8c10 4155 585F 	DCB3:    .ascii  "AUX_IN  "
+ 1222      494E 2020 
+ 1223               	         SAUX_IN = 0x0000853a        | Works around GNU assembler issue
+ 1224 8c18 0000 853A 	         DC.L    SAUX_IN,ACIA_2
+ 1224      0001 0041 
+ 1225 8c20 0002      	         DC.W    2
+ 1226 8c22 4155 585F 	DCB4:    .ascii  "AUX_OUT "
+ 1226      4F55 5420 
+ 1227               	         SAUX_OUT = 0x0000854c       | Works around GNU assembler issue
+ 1228 8c2a 0000 854C 	         DC.L    SAUX_OUT,ACIA_2
+ 1228      0001 0041 
+ 1229 8c32 0002      	         DC.W    2
+ 1230 8c34 4255 4646 	DCB5:    .ascii  "BUFF_IN "
+ 1230      5F49 4E20 
+ 1231               	         SBUFF_IN = 0x000085a0       | Works around GNU assembler issue
+ 1232 8c3c 0000 85A0 	         DC.L    SBUFF_IN,BUFFER
+ 1232      0000 02D0 
+ 1233 8c44 0002      	         DC.W    2
+ 1234 8c46 4255 4646 	DCB6:    .ascii  "BUFF_OUT"
+ 1234      5F4F 5554 
+ 1235               	         SBUFF_OT = 0x000085ac       | Works around GNU assembler issue
+ 1236 8c4e 0000 85AC 	         DC.L    SBUFF_OT,BUFFER
+ 1236      0000 02D0 
+ 1237 8c56 0002      	         DC.W    2
+ 1238               	*
+ 1239               	*************************************************************************
+ 1240               	*
+ 1241               	*  DCB structure
+ 1242               	*
+ 1243               	*              -----------------------
+ 1244               	*       0 ->   | DCB  name           |
+ 1245               	*              |---------------------|
+ 1246               	*       8 ->   | Device driver       |
+ 1247               	*              |---------------------|
+ 1248               	*      12 ->   | Device address      |
+ 1249               	*              |---------------------|
+ 1250               	*      16 ->   |Size of param block  |
+ 1251               	*              |---------------------| ---
+ 1252               	*      18 ->   |      Status         |   |
+ 1253               	*              | logical  | physical |   | S
+ 1254               	*              |---------------------|   |
+ 1255               	*              .                     .   .
+68K GAS  monitor.s 			page 25
+
+
+ 1256               	*              |---------------------| ---
+ 1257               	*    18+S ->   | Pointer to next DCB |
+ 1258               	*
+ 1259               	         .end
+68K GAS  monitor.s 			page 26
+
+
+DEFINED SYMBOLS
+           monitor.s:4      *ABS*:0000000000000008 BS
+           monitor.s:5      *ABS*:000000000000000d CR
+           monitor.s:6      *ABS*:000000000000000a LF
+           monitor.s:7      *ABS*:0000000000000020 SPACE
+           monitor.s:8      *ABS*:0000000000000057 WAIT
+           monitor.s:9      *ABS*:000000000000001b ESC
+           monitor.s:10     *ABS*:0000000000000001 CTRL_A
+           monitor.s:12     *ABS*:0000000000000800 STACK
+           monitor.s:13     *ABS*:0000000000010040 ACIA_1
+           monitor.s:14     *ABS*:0000000000010041 ACIA_2
+           monitor.s:15     *ABS*:0000000000000008 X_BASE
+           monitor.s:16     *ABS*:0000000000004e4e TRAP_14
+           monitor.s:17     *ABS*:0000000000000040 MAXCHR
+           monitor.s:19     *ABS*:0000000000000c00 DATA
+           monitor.s:20     *ABS*:0000000000000000 LNBUFF
+           monitor.s:21     *ABS*:000000000000003f BUFFEND
+           monitor.s:22     *ABS*:0000000000000040 BUFFPT
+           monitor.s:23     *ABS*:0000000000000044 PARAMTR
+           monitor.s:24     *ABS*:0000000000000048 ECHO
+           monitor.s:25     *ABS*:0000000000000049 U_CASE
+           monitor.s:26     *ABS*:000000000000004a UTAB
+           monitor.s:27     *ABS*:000000000000004e CN_IVEC
+           monitor.s:28     *ABS*:0000000000000052 CN_OVEC
+           monitor.s:29     *ABS*:0000000000000056 TSK_T
+           monitor.s:30     *ABS*:00000000000000a0 BP_TAB
+           monitor.s:31     *ABS*:00000000000000d0 FIRST
+           monitor.s:32     *ABS*:00000000000002d0 BUFFER
+           monitor.s:45     .text:0000000000008008 RESET
+           monitor.s:73     .text:0000000000008050 SETACIA
+           monitor.s:743    .text:00000000000085f4 X_SET
+           monitor.s:557    .text:000000000000846e SET_DCB
+           monitor.s:1138   .text:00000000000089f4 BANNER
+           monitor.s:97     .text:000000000000808c HEADING
+           monitor.s:60     .text:000000000000803c NO_EXT
+           monitor.s:62     .text:0000000000008040 WARM
+           monitor.s:81     .text:000000000000806c NEWLINE
+           monitor.s:109    .text:0000000000008092 GETLINE
+           monitor.s:137    .text:00000000000080c8 TIDY
+           monitor.s:166    .text:000000000000810a EXECUTE
+           monitor.s:1139   .text:0000000000008a0e CRLF
+           monitor.s:88     .text:000000000000807c PSTRING
+           monitor.s:90     .text:000000000000807e PS1
+           monitor.s:94     .text:0000000000008088 PS2
+           monitor.s:686    .text:0000000000008590 PUTCHAR
+           monitor.s:112    .text:000000000000809c GETLN2
+           monitor.s:663    .text:000000000000855e GETCHAR
+           monitor.s:127    .text:00000000000080c4 GETLN5
+           monitor.s:121    .text:00000000000080b6 GETLN3
+           monitor.s:125    .text:00000000000080c0 GETLN4
+           monitor.s:139    .text:00000000000080ce TIDY1
+           monitor.s:143    .text:00000000000080da TIDY2
+           monitor.s:150    .text:00000000000080ee TIDY4
+           monitor.s:147    .text:00000000000080e4 TIDY3
+           monitor.s:153    .text:00000000000080f8 TIDY5
+           monitor.s:157    .text:0000000000008104 TIDY6
+           monitor.s:174    .text:000000000000811c EXEC1
+68K GAS  monitor.s 			page 27
+
+
+           monitor.s:184    .text:0000000000008136 SEARCH
+           monitor.s:1168   .text:0000000000008b64 COMTAB
+           monitor.s:179    .text:000000000000812c EXEC2
+           monitor.s:1157   .text:0000000000008af5 ERMES2
+           monitor.s:207    .text:0000000000008170 SRCH7
+           monitor.s:196    .text:0000000000008154 SRCH3
+           monitor.s:194    .text:0000000000008150 SRCH2
+           monitor.s:204    .text:0000000000008166 SRCH6
+           monitor.s:199    .text:000000000000815c SRCH4
+           monitor.s:220    .text:0000000000008176 HEX
+           monitor.s:228    .text:000000000000818e NOT_HEX
+           monitor.s:229    .text:0000000000008192 HEX_OK
+           monitor.s:231    .text:0000000000008194 BYTE
+           monitor.s:240    .text:00000000000081a4 WORD
+           monitor.s:244    .text:00000000000081aa LONGWD
+           monitor.s:251    .text:00000000000081b0 PARAM
+           monitor.s:254    .text:00000000000081b8 PARAM1
+           monitor.s:269    .text:00000000000081e0 PARAM4
+           monitor.s:273    .text:00000000000081ec PARAM5
+           monitor.s:267    .text:00000000000081dc PARAM3
+           monitor.s:274    .text:00000000000081f0 PARAM6
+           monitor.s:286    .text:00000000000081f4 OUT1X
+           monitor.s:292    .text:0000000000008206 OUT1X1
+           monitor.s:296    .text:000000000000820e OUT2X
+           monitor.s:301    .text:0000000000008216 OUT4X
+           monitor.s:306    .text:000000000000821e OUT8X
+           monitor.s:315    .text:0000000000008226 JUMP
+           monitor.s:322    .text:0000000000008234 JUMP1
+           monitor.s:1156   .text:0000000000008ad7 ERMES1
+           monitor.s:329    .text:000000000000823c MEMORY
+           monitor.s:350    .text:0000000000008278 MEM3
+           monitor.s:333    .text:0000000000008246 MEM1
+           monitor.s:352    .text:000000000000827a ADR_DAT
+           monitor.s:362    .text:000000000000828e PSPACE
+           monitor.s:343    .text:0000000000008264 MEM2
+           monitor.s:374    .text:000000000000829c LOAD
+           monitor.s:1226   .text:0000000000008c22 DCB4
+           monitor.s:1222   .text:0000000000008c10 DCB3
+           monitor.s:521    .text:0000000000008418 DELAY
+           monitor.s:385    .text:00000000000082c8 LOAD1
+           monitor.s:390    .text:00000000000082d8 LOAD2
+           monitor.s:398    .text:00000000000082f2 LOAD3
+           monitor.s:412    .text:000000000000831c LOAD6
+           monitor.s:406    .text:000000000000830c LOAD4
+           monitor.s:410    .text:000000000000831a LOAD5
+           monitor.s:1158   .text:0000000000008b07 ERMES3
+           monitor.s:428    .text:0000000000008340 LOAD6A
+           monitor.s:447    .text:0000000000008368 LOAD8
+           monitor.s:437    .text:0000000000008352 LOAD7
+           monitor.s:458    .text:0000000000008370 DUMP
+           monitor.s:513    .text:0000000000008408 RANGE
+           monitor.s:463    .text:0000000000008380 DUMP1
+           monitor.s:467    .text:000000000000838c DUMP2
+           monitor.s:1162   .text:0000000000008b57 ERMES7
+           monitor.s:472    .text:00000000000083a2 DUMP3
+           monitor.s:479    .text:00000000000083b6 DUMP4
+           monitor.s:484    .text:00000000000083c4 DUMP5
+68K GAS  monitor.s 			page 28
+
+
+           monitor.s:1140   .text:0000000000008a12 HEADER
+           monitor.s:510    .text:0000000000008402 DUMP7
+           monitor.s:495    .text:00000000000083de DUMP6
+           monitor.s:1141   .text:0000000000008a18 TAIL
+           monitor.s:524    .text:0000000000008422 DELAY1
+           monitor.s:535    .text:000000000000842c TM
+           monitor.s:537    .text:0000000000008438 TM1
+           monitor.s:1213   .text:0000000000008bec DCB_LST
+           monitor.s:561    .text:000000000000847e ST_DCB1
+           monitor.s:562    .text:0000000000008482 ST_DCB2
+           monitor.s:1214   .text:0000000000008bec DCB1
+           monitor.s:1218   .text:0000000000008bfe DCB2
+           monitor.s:585    .text:00000000000084b8 IO_REQ
+           monitor.s:597    .text:00000000000084ca CON_IN
+           monitor.s:601    .text:00000000000084d8 CON_I1
+           monitor.s:608    .text:00000000000084f0 CON_I2
+           monitor.s:617    .text:00000000000084fa CON_OUT
+           monitor.s:621    .text:0000000000008508 CON_OT1
+           monitor.s:631    .text:0000000000008526 CON_OT3
+           monitor.s:628    .text:000000000000851e CON_OT2
+           monitor.s:643    .text:000000000000853a AUX_IN
+           monitor.s:645    .text:0000000000008540 AUX_IN1
+           monitor.s:650    .text:000000000000854c AUX_OUT
+           monitor.s:652    .text:0000000000008552 AUX_OT1
+           monitor.s:717    .text:00000000000085ba IO_OPEN
+           monitor.s:678    .text:000000000000858c GETCH3
+           monitor.s:675    .text:0000000000008584 GETCH2
+           monitor.s:699    .text:00000000000085a0 BUFF_IN
+           monitor.s:705    .text:00000000000085ac BUFF_OT
+           monitor.s:719    .text:00000000000085c2 OPEN1
+           monitor.s:722    .text:00000000000085ca OPEN2
+           monitor.s:728    .text:00000000000085d8 OPEN3
+           monitor.s:735    .text:00000000000085ee OPEN4
+           monitor.s:1128   .text:00000000000089e4 X_UN
+           monitor.s:746    .text:00000000000085fc X_SET1
+           monitor.s:898    .text:00000000000087b4 BUS_ER
+           monitor.s:905    .text:00000000000087c2 ADD_ER
+           monitor.s:889    .text:000000000000879e IL_ER
+           monitor.s:996    .text:0000000000008898 TRACE
+           monitor.s:772    .text:0000000000008652 TRAP_0
+           monitor.s:912    .text:00000000000087d0 BRKPT
+           monitor.s:761    *ABS*:0000000000008040 AWARM
+           monitor.s:765    .text:0000000000008648 X_SET2
+           monitor.s:777    .text:000000000000865e TRAP1
+           monitor.s:781    .text:000000000000866a TRAP2
+           monitor.s:785    .text:0000000000008676 TRAP3
+           monitor.s:789    .text:0000000000008682 TRAP4
+           monitor.s:793    .text:000000000000868e TRAP5
+           monitor.s:797    .text:000000000000869a TRAP6
+           monitor.s:801    .text:00000000000086a6 TRAP7
+           monitor.s:805    .text:00000000000086b2 TRAP8
+           monitor.s:809    .text:00000000000086be TRAP9
+           monitor.s:813    .text:00000000000086ca TRAP10
+           monitor.s:817    .text:00000000000086d6 TRAP11
+           monitor.s:821    .text:00000000000086e2 TRAP12
+           monitor.s:825    .text:00000000000086ee TRAP13
+           monitor.s:829    .text:00000000000086fa TRAP14
+68K GAS  monitor.s 			page 29
+
+
+           monitor.s:833    .text:0000000000008706 TRAP15
+           monitor.s:837    .text:0000000000008712 TRAP16
+           monitor.s:841    .text:000000000000871e TRAP17
+           monitor.s:985    .text:0000000000008874 RESTORE
+           monitor.s:849    .text:0000000000008720 EX_DIS
+           monitor.s:1145   .text:0000000000008a39 MES3
+           monitor.s:854    .text:0000000000008732 EX_D1
+           monitor.s:1146   .text:0000000000008a57 MES4
+           monitor.s:1144   .text:0000000000008a30 MES2A
+           monitor.s:1142   .text:0000000000008a1e MES1
+           monitor.s:1143   .text:0000000000008a27 MES2
+           monitor.s:1149   .text:0000000000008a81 MES10
+           monitor.s:945    .text:0000000000008822 GROUP2
+           monitor.s:1147   .text:0000000000008a61 MES8
+           monitor.s:926    .text:00000000000087ee GROUP1
+           monitor.s:1148   .text:0000000000008a6f MES9
+           monitor.s:1072   .text:0000000000008956 BR_CLR
+           monitor.s:1150   .text:0000000000008a97 MES11
+           monitor.s:938    .text:000000000000880c GROUP1A
+           monitor.s:949    .text:000000000000882e GROUP2A
+           monitor.s:967    .text:000000000000884e GO
+           monitor.s:972    .text:000000000000885e GO1
+           monitor.s:976    .text:000000000000886c GO2
+           monitor.s:978    .text:000000000000886e GB
+           monitor.s:1031   .text:00000000000088ea BR_SET
+           monitor.s:989    .text:0000000000008884 REST1
+           monitor.s:1151   .text:0000000000008aa5 MES12
+           monitor.s:1009   .text:00000000000088ac BR_GET
+           monitor.s:1014   .text:00000000000088bc BR_GET1
+           monitor.s:1018   .text:00000000000088c8 BR_GET2
+           monitor.s:1025   .text:00000000000088d8 BR_GET3
+           monitor.s:1027   .text:00000000000088e0 BR_GET4
+           monitor.s:1036   .text:00000000000088f8 BR_SET1
+           monitor.s:1042   .text:0000000000008906 BR_SET2
+           monitor.s:1046   .text:0000000000008910 NOBR
+           monitor.s:1052   .text:0000000000008920 NOBR1
+           monitor.s:1065   .text:0000000000008944 NOBR4
+           monitor.s:1057   .text:000000000000892e NOBR2
+           monitor.s:1063   .text:000000000000893e NOBR3
+           monitor.s:1067   .text:000000000000894c NOBR5
+           monitor.s:1075   .text:000000000000895e BR_CLR1
+           monitor.s:1080   .text:0000000000008968 BR_CLR2
+           monitor.s:1087   .text:0000000000008972 REG_MOD
+           monitor.s:1152   .text:0000000000008aae REGNAME
+           monitor.s:1098   .text:0000000000008990 REG_MD1
+           monitor.s:1105   .text:00000000000089a6 REG_MD2
+           monitor.s:1110   .text:00000000000089b6 REG_MD3
+           monitor.s:1119   .text:00000000000089d4 REG_MD4
+           monitor.s:1123   .text:00000000000089e0 REG_MD5
+           monitor.s:1161   .text:0000000000008b3d ERMES6
+           monitor.s:1159   .text:0000000000008b15 ERMES4
+           monitor.s:1160   .text:0000000000008b23 ERMES5
+           monitor.s:1215   *ABS*:00000000000084ca SCON_IN
+           monitor.s:1219   *ABS*:00000000000084fa SCON_OUT
+           monitor.s:1223   *ABS*:000000000000853a SAUX_IN
+           monitor.s:1227   *ABS*:000000000000854c SAUX_OUT
+           monitor.s:1230   .text:0000000000008c34 DCB5
+68K GAS  monitor.s 			page 30
+
+
+           monitor.s:1231   *ABS*:00000000000085a0 SBUFF_IN
+           monitor.s:1234   .text:0000000000008c46 DCB6
+           monitor.s:1235   *ABS*:00000000000085ac SBUFF_OT
+
+NO UNDEFINED SYMBOLS
