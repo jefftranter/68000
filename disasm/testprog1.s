@@ -1,6 +1,14 @@
         org	$1000
 
 start:
+        nop
+        bra.s   start
+        beq.s   start
+        bra.w   start
+        beq.w   start
+        abcd.b  d1,d2
+        abcd.b  -(a2),-(a3)
+
         move.b  d1,d2
         move.w  d3,d4
         move.l  a1,a2
@@ -37,9 +45,6 @@ start:
         ori.b   #$ff,$12
         ori.w   #$ff,$1234
         ori.l   #$ff,$12345678
-
-        abcd.b  d1,d2
-        abcd.b  -(a2),-(a3)
 
         nop
         move.b  d1,d2

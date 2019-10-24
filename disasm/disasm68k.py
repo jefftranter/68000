@@ -29,3 +29,24 @@ with open('opcodetable.csv') as csv_file:
             print(f'Mnemonic: {row["Mnemonic"]} Size: {row["Size"]} Pattern: {row["Bit Pattern"]}')
         line_count += 1
     print(f'Processed {line_count} lines.')
+
+    filename = "testprog1.bin"
+
+try:
+    f = open(filename, "rb")
+except FileNotFoundError:
+    print(("error: input file '{}' not found.".format(filename)), file=sys.stderr)
+    sys.exit(1)
+
+while True:
+    b1 = f.read(1)  # Get binary byte from file
+    b2 = f.read(1)  # Get binary byte from file
+
+    if len(b1) == 0:  # handle EOF
+        break
+
+    # Get op code
+    opcode = ord(b1) * 256 + ord(b2)
+
+    #print("{0:02X}".format(opcode))
+    print("{0:04X}".format(opcode))
