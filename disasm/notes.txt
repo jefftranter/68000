@@ -1,0 +1,119 @@
+Data structures needed:
+
+Mnemonic Names:
+
+ABCD
+ADD
+ADDA
+...
+TST
+UNLK
+
+Addressing modes:
+
+Data register direct                 Dn
+Address register direct              An
+Register indirect                    (An)
+Postincrement register indirect      (An)+
+Predecrement register indirect       -(An)
+Register indirect with offset        d16(An)
+Indexed register direct with offset  d8(An,Xn)
+Absolute short                       Abs.W
+Absolute long                        Abs.L
+PC relative with offset              d16(PC)
+PC relative with index and offset    d8(PC,Xn)
+Immediate                            #xxx
+Quick immediate                      #1-8
+Implied
+
+Opcodes versus name and addressing modes:
+
+- opcode pattern (16-bit)
+- opcode mask (16-bit, 0s indicate don't care bits)
+- source addressing mode
+- dest. addressing mode
+- instruction length in words for each addressing mode combination
+
+Bit Pattern/Mask  Mnemonic  Size Source: Dn An (An) (An)+ -(An) d(An) d(An,Xn) Abs.W Abs.L d(PC) d(PC+Xn) #xxx #1-8 Implied Destination: Dn An (An) (An)+ -(An) d(An) d(An,Xn) Abs.W Abs.L d(PC) d(PC+Xn)
+
+1100 xxx1 0000 0xxx  ABCD   B
+
+Mnemonic Size  Bit Pattern  Mask  Length  Source Addressing Mode Destination Addressing Mode
+ABCD           1100 RRR1 0000 0rrr 2           Dn                   Dn
+ABCD           1100 RRR1 0000 1rrr 2           -(An)                -(An)
+
+                      01 0RRR
+ADD       1101 DDD1 SSEE EEEE 2           Dn                   (An)
+ADD       1101 DDD1 SSEE EEEE 2           Dn                   (An)+
+ADD       1101 DDD1 SSEE EEEE 2           Dn                   -(An)
+ADD       1101 DDD1 SSEE EEEE 4           Dn                   d(An)
+ADD       1101 DDD1 SSEE EEEE 4           Dn                   d(An,Xn)
+ADD       1101 DDD1 SSEE EEEE 4           Dn                   Abs.W
+ADD       1101 DDD1 SSEE EEEE 6           Dn                   Abs.L
+
+NOP       0100 1110 0111 0001 2           -                    -
+
+UNLNK     0100 1110 0101 1AAA 2           An                   -
+
+------------------------------------------------------------------------
+
+Tables and algorithm used by Motorola TUTOR native disassembler:
+
+- Table of register names
+- Table of routines for handling groups of instructions
+- Opcodes:
+
+MNEMONIC, index to handling routine, first word mask, no operand allowed flag, .S allowed flag
+
+mask, opcode pattern, goto offset, index to op code.
+
+
+
+Starts at 
+*        JSR       DCODE68K
+
+------------------------------------------------------------------------
+
+My implementation:
+
+- Constants/enum for addressing modes
+
+- table taken from Motorola manual:
+
+Mnemonic,Size,Address Mode, #bytes for each of 14 addressing modes, Opcode Bit Pattern
+         BWL                      (0 if not valid)                      (with mask)
+
+        Dn An (An) (An)+ -(An) d16(An) d8(An,Xn) Abs.W Abs,L d16(PC) d8(PC,Vn) Immed Quick Implied
+
+ABCD B 
+
+---
+
+
+Pseudocode:
+
+Initialization:
+  Load CSV file of instructions.
+  Validate all files.
+  Store in data structure/array.
+  Possibly optimize as opcode and bitmask.
+
+
+Disassemble:
+
+  Get 16-bit instruction from memory.
+  Find match to instruction in table (using value and mask)
+  If debug/test enabled, check that there is no more than one match in the table
+  
+  case instruction of:
+
+    ILLEGAL, RESET, NOP, RTE, RTSS, TRAPV, RTR:
+      get length (2) from table entry with implicit addressing mode
+      handle implicit with no operands
+
+    STOP:
+      get length (4) from table entry with immediate addressing mode
+      handle implicit with 16-bit operand
+
+   INVALID:
+      handle invalid instruction (assume length of 2)
