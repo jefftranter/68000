@@ -15,22 +15,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 import csv
 
-with open('opcodetable.csv') as csv_file:
-    #csv_reader = csv.reader(csv_file, delimiter=',')
-    csv_reader = csv.DictReader(csv_file)
-    line_count = 0
-    for row in csv_reader:
-        if line_count == 0:
-            print(f'Column names are {", ".join(row)}')
-        else:
-            #print(f'Mnemonic: {row[0]} Size: {row[1]} Pattern: {row[17]}')
-            print(f'Mnemonic: {row["Mnemonic"]} Size: {row["Size"]} Pattern: {row["Bit Pattern"]}')
-        line_count += 1
-    print(f'Processed {line_count} lines.')
+with open('opcodetable.csv', newline='') as csvfile:
+    table = list(csv.DictReader(csvfile))
 
-    filename = "testprog1.bin"
+#print(table)
+#print(table[3])
+#print(table[3]["Mnemonic"])
+
+for row in table:
+    print(row["Mnemonic"], row["Bit Pattern"])
+
+# Convert bit pattern to 16-bit value and bitmask, e.g.
+# pattern: 1101 RRR1 1000 1rrr
+#   value: 1101000110001000
+#    mask: 1111000111111000
+# Opcode matches pattern if opcode AND mask equals value
+
+sys.exit(0)
+
+filename = "testprog1.bin"
 
 try:
     f = open(filename, "rb")
