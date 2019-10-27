@@ -40,12 +40,31 @@ import csv
 import re
 import sys
 
+
+# Functions
+
+# Print a disassembled line of output
+def printInstruction(address, length, mnemonic, data, operands):
+    if length == 2:
+        line = "{0:08X}  {1:02X} {2:02X}  {3:s}".format(address, data[0], data[1], mnemonic)
+    elif length == 3:
+        line = "{0:08X}  {1:02X} {2:02X} {3:02X}  {4:s}".format(address, data[0], data[1], data[2], mnemonic)
+    elif length == 4:
+        line = "{0:08X}  {1:02X} {2:02X} {3:02X} {4:02X}  {4:s}".format(address, data[0], data[1], data[2], data[3], mnemonic)
+    else:
+        print("Error: Invalid length passed to printInstruction().")
+        sys.exit(1)
+    
+    print(line)
+
+
 # Initialize variables
 address = 0            # Start address if instruction
 length = 0             # Length of instruction in bytes
 mnemonic = ""          # Mnemonic string
 sourceAddressMode = 0  # Addressing mode for source operand
 destAddressMode = 0    # Addressing mode for destination operand
+data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  # Instruction bytes
 
 # Parse command line options
 parser = argparse.ArgumentParser()
@@ -57,7 +76,7 @@ address = args.address
 
 # Address must be even
 if address % 2:
-    print("Error: Start address must be even")
+    print("Error: Start address must be even.")
     sys.exit(1)
 
 # Open CSV file of opcodes and read into table
@@ -135,15 +154,17 @@ except FileNotFoundError:
 while True:
 
     # Get 16-bit instruction
-    b1 = f.read(1)  # Get binary byte from file
-    b2 = f.read(1)  # Get binary byte from file
-    if len(b1) == 0:  # handle EOF
+    c1 = f.read(1)  # Get binary bytes from file
+    c2 = f.read(1)
+
+    if len(c1) == 0 or len(c2) == 0:  # handle EOF
         break
 
-    # Get op code
-    opcode = ord(b1) * 256 + ord(b2)
+    data[0] = ord(c1)  # Convert to numbers
+    data[1] = ord(c2)
 
-    print("{0:04X}".format(opcode))
+    # Get op code
+    opcode = data[0]*256 + data[1]
 
     # Find matching mnemonic in table
     for row in table:
@@ -152,17 +173,30 @@ while True:
         mnemonic = row["Mnemonic"]
 
         if (opcode & mask) == value:
-            print("Found match for", mnemonic)
             break
 
-# Handle instruction types - one word implicit with no operands:
-# ILLEGAL, RESET, NOP, RTE, RTS, TRAPV, RTR, UNIMPLEMENTED, INVALID
+    # Should now have the mnemonic
+    if mnemonic == "":
+        print("Error: Mnemonic not found in opcode table.")
+        sys.exit(1)
 
-# Handle instruction types - one word implicit with operands
-# TRAP
+    # Handle instruction types - one word implicit with no operands:
+    # ILLEGAL, RESET, NOP, RTE, RTS, TRAPV, RTR, UNIMPLEMENTED, INVALID
+    if mnemonic in ("ILLEGAL", "RESET", "NOP", "RTE", "RTS", "TRAPV", "RTR", "UNIMPLEMENTED", "INVALID"):
+        length = 2;
+        printInstruction(address, length, mnemonic, data, "")
 
-# Handle instruction types - BRA
+    # Handle instruction types - one word implicit with operands
+    # TRAP
 
-# Handle instruction types - BSR
+    # Handle instruction types - BRA
 
-# Handle instruction types - Bcc
+    # Handle instruction types - BSR
+
+    # Handle instruction types - Bcc
+
+    # Do next instruction
+    address += length
+    length = 0
+    mnemonic = ""
+    opcode = 0
