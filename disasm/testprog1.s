@@ -2,6 +2,11 @@
 
 start:
         nop
+        dc.w    $F123
+        dc.w    $A234
+        illegal
+        trap    #0
+        trap    #15
         bra.s   start
         beq.s   start
         bra.w   start

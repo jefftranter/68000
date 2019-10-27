@@ -46,7 +46,7 @@ import sys
 # Print a disassembled line of output
 def printInstruction(address, length, mnemonic, data, operands):
     if length == 2:
-        line = "{0:08X}  {1:02X} {2:02X}  {3:s}".format(address, data[0], data[1], mnemonic)
+        line = "{0:08X}  {1:02X} {2:02X}  {3:8s}  {4:s}".format(address, data[0], data[1], mnemonic, operands)
     elif length == 3:
         line = "{0:08X}  {1:02X} {2:02X} {3:02X}  {4:s}".format(address, data[0], data[1], data[2], mnemonic)
     elif length == 4:
@@ -188,6 +188,10 @@ while True:
 
     # Handle instruction types - one word implicit with operands
     # TRAP
+    if mnemonic == "TRAP":
+        length = 2;
+        operand = "#${0:02X}".format(data[1] & 0x0f)
+        printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types - BRA
 
