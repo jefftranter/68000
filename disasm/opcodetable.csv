@@ -1,43 +1,92 @@
-"Mnemonic","Size","Address Mode","Dn","An","(An)","(An)+","-(An)","d16(An)","d8(An,Xn)","Abs.W","Abs.L","d16(PC)","d8(PC,Xn)","Immediate","Quick","Implied","Bit Pattern"
-"ABCD","B","s=Dn",2,,,,,,,,,,,,,,"1100 RRR1 0000 0rrr"
-"ABCD","B","s=-(An)",,,,,2,,,,,,,,,,"1100 RRR1 0000 1rrr"
-"ADD","B/W","s=Dn d=",,,2,2,2,4,4,4,6,,,,,,"1101 DDD1 SSEE EEEE"
-"ADD","B/W","d=Dn s=",2,"2*",2,2,2,4,4,4,6,4,4,4,,,"1101 DDD0 SSee eeee"
-"ADD","L","s=Dn d=",,,2,2,2,4,4,4,6,,,,,,"1101 DDD1 10EE EEEE"
-"ADD","L","d=Dn s=",2,2,2,2,2,4,4,4,6,4,4,6,,,"1101 DDD0 10ee eeee"
-"ADDA","W","D=An s=",2,2,2,2,2,4,4,4,6,4,4,4,,,"1101 AAA0 11ee eeee"
-"ADDA","L","D=An s=",2,2,2,2,2,4,4,4,6,4,4,6,,,"1101 AAA1 11ee eeee"
-"ADDI","B","s=Imm d=",4,4,4,4,4,6,6,6,8,,,,,,"0000 0110 00EE EEEE"
-"ADDI","W","s=Imm d=",4,4,4,4,4,6,6,6,8,,,,,,"0000 0110 01EE EEEE"
-"ADDI","L","s=Imm d=",6,6,6,6,6,8,8,8,10,,,,,,"0000 0110 10EE EEEE"
-"ADDQ","B/W","s=imm3 d=",2,"2*",2,2,2,2,4,4,6,,,,,,"0101 QQQ0 SSEE EEEE"
-"ADDQ","L","s=imm3 d=",2,2,2,2,2,2,4,4,6,,,,,,"0101 QQQ0 SSEE EEEE"
-"ADDX","B/W","s=Dn",2,,,,,,,,,,,,,,"1101 RRR1 SS00 0rrr"
-"ADDX","B/W","s=-(An)",,,,,2,,,,,,,,,,"1101 RRR1 SS00 1rrr"
-"ADDX","L","s=Dn",2,,,,,,,,,,,,,,"1101 RRR1 1000 0rrr"
-"ADDX","L","s=-(An)",,,,,2,,,,,,,,,,"1101 RRR1 1000 1rrr"
-"AND","B/W","s=Dn d=",,,2,2,2,4,4,4,6,,,,,,"1100 DDD1 SSEE EEEE"
-"AND","B/W","d=Dn s=",2,,2,2,2,4,4,4,6,4,4,4,,,"1100 DDD0 Ssee eeee"
-"AND","L","s=Dn d=",,,2,2,2,4,4,4,6,,,,,,"1100 DDD1 10EE EEEE"
-"AND","L","d=Dn s=",2,,2,2,2,4,4,4,6,4,4,6,,,"1100 DDD0 10ee eeee"
-"ANDI","B/W","s=Imm d=",,,,,,,,,,,,4,,,"0000 0010 SSEE EEEE"
-"ANDI","L","s=Imm d=",,,,,,,,,,,,4,,,"0000 0010 SSEE EEEE"
-"ANDI CCR","B","s=Imm d=",,,,,,,,,,,,4,,,"0000 0010 0011 1100"
-"ANDI SR","W","s=Imm d=",,,,,,,,,,,,4,,,"0000 0010 0111 1100"
-"ASL, ASR","B/W","count=Dn d=",2,,,,,,,,,,,,,,"1110 rrrf SS10 1DDD"
-"ASL, ASR","B/W","count=#1-8 d=",2,,,,,,,,,,,,,,"1110 QQQ1 SS00 1DDD"
-"ASL, ASR","L","count=Dn d=",2,,,,,,,,,,,,,,"1110 rrrf SS10 0DDD"
-"ASL, ASR","L","count=#1-8 d=",2,,,,,,,,,,,,,,"1110 QQQf 1000 0DDD"
-"ASL, ASR","W","count=1",,,"2*","2*","2*","4*","4*","4*","6*",,,,,,"1110 000f 11EE EEEE"
-"Bcc","B","d8=",,,,,,,,,,,,2,,,"0110 CCCC PPPP PPPP"
-"Bcc","W","d16=",,,,,,,,,,,,4,,,"0110 CCCC PPPP PPPP"
-"NOP",,,,,,,,,,,,,,,,2,"0100 1110 0111 0001"
-"SWAP","W","d=",2,,,"s",,,,,,,,,,,"0100 1000 0100 0DDD"
-"TAS","B","d=",2,,2,2,2,4,4,6,,,,,,,"0100 1010 11EE EEEE"
-"TRAP",,,,,,,,,,,,,,2,,,"0100 1110 0100 VVVV"
-"TRAPV",,,,,,,,,,,,,,,,2,"0100 1110 0111 0110"
-"TST","BWL","d=",2,,2,2,2,4,4,4,6,,,,,,"0100 1010 SSEE EEEE"
-"UNLK",,,,2,,,,,,,,,,,,,"0100 1110 0101 1AAA"
-"UNIMPLEMENTED",,,,,,,,,,,,,,,,2,"1010 XXXX XXXX XXXX"
-"UNIMPLEMENTED",,,,,,,,,,,,,,,,2,"1111 XXXX XXXX XXXX"
-"INVALID",,,,,,,,,,,,,,,,2,"XXXX XXXX XXXX XXXX"
+"Mnemonic","B","W","L","Pattern","DataSize","DataType"
+"ORI to CCR","B",,,"0000000001111100","B","I"
+"ORI to SR",,"W",,"0000000000111100","W","I"
+"ORI","B","W","L","00000000XXXXXXXX","A","I"
+"ANDI to CCR","B",,,"0000001000111100","B","I"
+"ANDI to SR",,"W",,"0000001001111100","W","I"
+"ANDI","B","W","L","00000010XXXXXXXX","A","I"
+"SUBI","B","W","L","00000100XXXXXXXX","A","I"
+"ADDI","B","W","L","00000110XXXXXXXX","A","I"
+"EORI to CCR","B",,,"0000101000111100","B","I"
+"EORI to SSR",,"W",,"0000101001111100","W","I"
+"EORI","B","W","L","00001010XXXXXXXX","A","I"
+"CMPI","B","W","L","00001100XXXXXXXX","A","I"
+"BTST","B",,"L","0000100000XXXXXX","B","N"
+"BCHG","B",,"L","0000100001XXXXXX","B","N"
+"BCLR","B",,"L","0000100010XXXXXX","B","N"
+"BSET","B",,"L","0000100011XXXXXX","B","N"
+"BTST","B",,"L","0000XXX100XXXXXX","B","N"
+"BCHG","B",,"L","0000XXX101XXXXXX","B","N"
+"BCLR","B",,"L","0000XXX110XXXXXX","B","N"
+"BSET","B",,"L","0000XXX111XXXXXX","B","N"
+"MOVEP",,"W","L","0000XXX1XX001XXX","W","D"
+"MOVEA",,"W","L","00XXXXX001XXXXXX",,
+"MOVE","B","W","L","00XXXXXXXXXXXXXX",,
+"MOVE from SR",,"W",,"0100000011XXXXXX",,
+"MOVE to CCR","B",,,"0100010011XXXXXX",,
+"MOVE to SR",,"W",,"0100011011XXXXXX",,
+"NEGX","B","W","L","01000000XXXXXXXX",,
+"CLR","B","W","L","01000010XXXXXXXX",,
+"NEG","B","W","L","01000100XXXXXXXX",,
+"NOT","B","W","L","01000110XXXXXXXX",,
+"EXT",,"W","L","010010001X000000",,
+"NBCD","B",,,"0100100000XXXXXX",,
+"SWAP",,"W",,"0100100001000XXX",,
+"PEA",,,"L","0100100001XXXXXX",,
+"ILLEGAL",,,,"0100101011111100",,
+"TAS","B",,,"0100101011XXXXXX",,
+"TST","B","W","L","01001010XXXXXXXX",,
+"TRAP",,,,"010011100100XXXX",,
+"LINK",,"W",,"010011100100XXXX","W","D"
+"UNLK",,,,"010011100110XXXX",,
+"MOVE USP",,,"L","010011100110XXXX",,
+"RESET",,,,"0100111001110000",,
+"NOP",,,,"0100111001110001",,
+"STOP",,,,"0100111001110010","W","I"
+"RTE",,,,"0100111001110011",,
+"RTS",,,,"0100111001110101",,
+"TRAPV",,,,"0100111001110110",,
+"RTR",,,,"0100111001110111",,
+"JSR",,,,"0100111010XXXXXX",,
+"JMP",,,,"0100111011XXXXXX",,
+"MOVEM",,"W","L","01001X001XXXXXXX","W","M"
+"LEA",,,"L","0100XXX111XXXXXX",,
+"CHK",,"W",,"0100XXX110XXXXXX",,
+"ADDQ","B","W","L","0101XXX0XXXXXXXX",,
+"SUBQ","B","W","L","0101XXX1XXXXXXXX",,
+"SCC","B",,,"0101XXXX11XXXXXX",,
+"DBCC",,"W",,"0101XXXX11001XXX","W","D"
+"BRA","B","W",,"01100000XXXXXXXX","W","D"
+"BSR","B","W",,"01100001XXXXXXXX","W","D"
+"BCC","B","W",,"0110XXXXXXXXXXXX","W","D"
+"MOVEQ",,,"L","0111XXX0XXXXXXXX",,
+"DIVU",,"W",,"1000XXX011XXXXXX",,
+"DIVS",,"W",,"1000XXX111XXXXXX",,
+"SBCD","B",,,"1000XXX10000XXXX",,
+"OR","B","W","L","1000XXXXXXXXXXXX",,
+"SUB","B","W","L","1001XXXXXXXXXXXX",,
+"SUBX","B","W","L","1001XXX1XX00XXXX",,
+"SUBA",,"W","L","1001XXXX11XXXXXX",,
+"EOR","B","W","L","1011XXX1XXXXXXXX",,
+"CMPM","B","W","L","1011XXX1XX001XXX",,
+"CMP","B","W","L","1011XXX0XXXXXXXX",,
+"CMPA",,"W","L","1011XXXX11XXXXXX",,
+"MULU",,"W",,"1100XXX011XXXXXX",,
+"MULS",,"W",,"1100XXX111XXXXXX",,
+"ABCD","B",,,"1100XXX10000XXXX",,
+"EXG",,,"L","1100XXX1XX00XXXX",,
+"AND","B","W","L","1100XXXXXXXXXXXX",,
+"ADD","B","W","L","1101XXXXXXXXXXXX",,
+"ADDX","B","W","L","1101XXX1XX00XXXX",,
+"ADDA",,"W","L","1101XXXX11XXXXXX",,
+"ASD","B","W","L","1110000X11XXXXXX",,
+"LSD","B","W","L","1110001X11XXXXXX",,
+"ROXD","B","W","L","1110010X11XXXXXX",,
+"ROD","B","W","L","1110011X11XXXXXX",,
+"ASD","B","W","L","1110XXXXXXX00XXX",,
+"LSD","B","W","L","1110XXXXXXX01XXX",,
+"ROXD","B","W","L","1110XXXXXXX10XXX",,
+"ROD","B","W","L","1110XXXXXXX11XXX",,
+"UNIMPLEMENTED",,,,"1010XXXXXXXXXXXX",,
+"UNIMPLEMENTED",,,,"1111XXXXXXXXXXXX",,
+"INVALID",,,,"XXXXXXXXXXXXXXXX",,
