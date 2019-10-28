@@ -44,13 +44,11 @@ import sys
 # Functions
 
 # Print a disassembled line of output
-def printInstruction(address, length, mnemonic, data, operands):
+def printInstruction(address, length, mnemonic, data, operand):
     if length == 2:
-        line = "{0:08X}  {1:02X} {2:02X}  {3:8s}  {4:s}".format(address, data[0], data[1], mnemonic, operands)
-    elif length == 3:
-        line = "{0:08X}  {1:02X} {2:02X} {3:02X}  {4:s}".format(address, data[0], data[1], data[2], mnemonic)
+        line = "{0:08X}  {1:02X} {2:02X}                  {3:8s}  {4:s}".format(address, data[0], data[1], mnemonic, operand)
     elif length == 4:
-        line = "{0:08X}  {1:02X} {2:02X} {3:02X} {4:02X}  {4:s}".format(address, data[0], data[1], data[2], data[3], mnemonic)
+        line = "{0:08X}  {1:02X} {2:02X} {3:02X} {4:02X}  {5:8s}  {6:s}".format(address, data[0], data[1], data[2], data[3], mnemonic, operand)
     else:
         print("Error: Invalid length passed to printInstruction().")
         sys.exit(1)
@@ -192,6 +190,28 @@ while True:
         length = 2;
         operand = "#${0:02X}".format(data[1] & 0x0f)
         printInstruction(address, length, mnemonic, data, operand)
+
+    # Handle instruction types: ORI to CCR
+    if mnemonic == "ORI to CCR":
+        length = 4;
+        data[2] = ord(f.read(1))
+        data[3] = ord(f.read(1))
+        if data[2] != 0:
+            print("Warning: MSB of operand should be zero, but is {0:02X}".format(data[2]))
+        operand = "#${0:02X},CCR".format(data[3])
+        printInstruction(address, length, "ORI", data, operand)
+
+    # Handle instruction types: ORI to SR
+    if mnemonic == "ORI to SR":
+        length = 4;
+        data[2] = ord(f.read(1))
+        data[3] = ord(f.read(1))
+        operand = "#${0:04X},SR".format(data[2]*256 + data[3])
+        printInstruction(address, length, "ORI", data, operand)
+
+    # Handle instruction types: ANDI to CCR
+
+    # Handle instruction types: ANDI to SR
 
     # Handle instruction types - BRA
 

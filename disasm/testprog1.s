@@ -7,6 +7,12 @@ start:
         illegal
         trap    #0
         trap    #15
+        ori     #$aa,ccr
+        ori     #$aa55,sr
+        andi    #$55,ccr
+        andi    #$aa55,sr
+
+
         bra.s   start
         beq.s   start
         bra.w   start
@@ -42,8 +48,6 @@ start:
         move.w  d0,($10,a0,d0)
         move.w  d0,$12345678
 
-        ori     #$0f,ccr
-        ori     #$aa,sr
         ori.b   #$01,d0
         ori.w   #$0102,d0
         ori.l   #$01020304,d0

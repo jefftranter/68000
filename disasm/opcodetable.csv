@@ -1,6 +1,6 @@
 "Mnemonic","B","W","L","Pattern","DataSize","DataType"
-"ORI to CCR","B",,,"0000000001111100","B","I"
-"ORI to SR",,"W",,"0000000000111100","W","I"
+"ORI to CCR","B",,,"0000000000111100","B","I"
+"ORI to SR",,"W",,"0000000001111100","W","I"
 "ORI","B","W","L","00000000XXXXXXXX","A","I"
 "ANDI to CCR","B",,,"0000001000111100","B","I"
 "ANDI to SR",,"W",,"0000001001111100","W","I"
