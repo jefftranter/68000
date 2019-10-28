@@ -40,6 +40,9 @@ import csv
 import re
 import sys
 
+# Data/Tables
+
+conditions = ["T", "F", "HI", "LS", "CC", "CS", "NE", "EQ", "VC", "VS", "PL", "MI", "GE", "LT", "GT", "LE"]
 
 # Functions
 
@@ -236,8 +239,8 @@ while True:
         operand = "#${0:04X}".format(data[2]*256 + data[3])
         printInstruction(address, length, mnemonic, data, operand)
 
-    # Handle instruction types - BRA, BSR
-    elif mnemonic in ("BRA", "BSR"):
+    # Handle instruction types - BRA, BSR, Bcc
+    elif mnemonic in ("BRA", "BSR", "BCC"):
 
         if (data[1]) != 0:  # Byte offset
             length = 2
@@ -256,9 +259,14 @@ while True:
             else:  # Negative offset
                 dest = address - (disp ^ 0xffff) + 1
         operand = "${0:08X}".format(dest)
+
+        if mnemonic == "BCC":
+            cond = data[0] & 0x0f
+            mnemonic = "B" + conditions[cond]
+
         printInstruction(address, length, mnemonic, data, operand)
 
-    # Handle instruction types - Bcc
+    # Handle instruction types - 
 
     else:
         print("Error: unsupported instruction", mnemonic)

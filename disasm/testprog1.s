@@ -21,8 +21,36 @@ back:   andi    #$aa55,sr
         bra.s   back
         bra.w   fwd
         bra.w   back
-        bra.w   *+$1000
-        bra.w   *-$1000
+        bhi.s   fwd
+        bls.s   fwd
+        bcc.s   fwd
+        bcs.s   fwd
+        bne.s   fwd
+        beq.s   fwd
+        bvc.s   fwd
+        bcs.s   fwd
+        bpl.s   fwd
+        bmi.s   fwd
+        bge.s   fwd
+        blt.s   fwd
+        bgt.s   fwd
+        ble.s   fwd
+
+        bhi.w   fwd
+        bls.w   fwd
+        bcc.w   fwd
+        bcs.w   fwd
+        bne.w   fwd
+        beq.w   fwd
+        bvc.w   fwd
+        bcs.w   fwd
+        bpl.w   fwd
+        bmi.w   fwd
+        bge.w   fwd
+        blt.w   fwd
+        bgt.w   fwd
+        ble.w   fwd
+fwd:
         bsr.s   fwd
         bsr.s   back
         bsr.w   fwd
@@ -31,10 +59,8 @@ back:   andi    #$aa55,sr
         beq.s   fwd
         beq.w   fwd
         beq.w   back
-        beq.w   *+$1000
-        beq.w   *-$1000
         abcd.b  d1,d2
-fwd:    abcd.b  -(a2),-(a3)
+        abcd.b  -(a2),-(a3)
 
         move.b  d1,d2
         move.w  d3,d4
