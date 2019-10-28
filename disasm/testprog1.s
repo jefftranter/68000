@@ -5,20 +5,32 @@ start:
         dc.w    $F123
         dc.w    $A234
         illegal
+        reset
+        rte
+        rts
+        trapv
+        rtr
         trap    #0
         trap    #15
         ori     #$aa,ccr
         ori     #$aa55,sr
         andi    #$55,ccr
-        andi    #$aa55,sr
-
-
-        bra.s   start
-        beq.s   start
-        bra.w   start
-        beq.w   start
+back:   andi    #$aa55,sr
+        stop    #$1234
+        bra.s   fwd
+        bra.s   back
+        bra.w   fwd
+        bra.w   back
+        bra.w   *+$1000
+        bra.w   *-$1000
+        beq.s   back
+        beq.s   fwd
+        beq.w   fwd
+        beq.w   back
+        beq.w   *+$1000
+        beq.w   *-$1000
         abcd.b  d1,d2
-        abcd.b  -(a2),-(a3)
+fwd:    abcd.b  -(a2),-(a3)
 
         move.b  d1,d2
         move.w  d3,d4

@@ -46,13 +46,13 @@ import sys
 # Print a disassembled line of output
 def printInstruction(address, length, mnemonic, data, operand):
     if length == 2:
-        line = "{0:08X}  {1:02X} {2:02X}                  {3:8s}  {4:s}".format(address, data[0], data[1], mnemonic, operand)
+        line = "{0:08X}  {1:02X} {2:02X}        {3:8s}  {4:s}".format(address, data[0], data[1], mnemonic, operand)
     elif length == 4:
         line = "{0:08X}  {1:02X} {2:02X} {3:02X} {4:02X}  {5:8s}  {6:s}".format(address, data[0], data[1], data[2], data[3], mnemonic, operand)
     else:
         print("Error: Invalid length passed to printInstruction().")
         sys.exit(1)
-    
+
     print(line)
 
 
@@ -62,7 +62,7 @@ length = 0             # Length of instruction in bytes
 mnemonic = ""          # Mnemonic string
 sourceAddressMode = 0  # Addressing mode for source operand
 destAddressMode = 0    # Addressing mode for destination operand
-data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  # Instruction bytes
+data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # Instruction bytes
 
 # Parse command line options
 parser = argparse.ArgumentParser()
@@ -155,6 +155,7 @@ while True:
     c1 = f.read(1)  # Get binary bytes from file
     c2 = f.read(1)
 
+    # TODO: Trap eof anywhere in code
     if len(c1) == 0 or len(c2) == 0:  # handle EOF
         break
 
@@ -181,19 +182,19 @@ while True:
     # Handle instruction types - one word implicit with no operands:
     # ILLEGAL, RESET, NOP, RTE, RTS, TRAPV, RTR, UNIMPLEMENTED, INVALID
     if mnemonic in ("ILLEGAL", "RESET", "NOP", "RTE", "RTS", "TRAPV", "RTR", "UNIMPLEMENTED", "INVALID"):
-        length = 2;
+        length = 2
         printInstruction(address, length, mnemonic, data, "")
 
     # Handle instruction types - one word implicit with operands
     # TRAP
-    if mnemonic == "TRAP":
-        length = 2;
+    elif mnemonic == "TRAP":
+        length = 2
         operand = "#${0:02X}".format(data[1] & 0x0f)
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types: ORI to CCR
-    if mnemonic == "ORI to CCR":
-        length = 4;
+    elif mnemonic == "ORI to CCR":
+        length = 4
         data[2] = ord(f.read(1))
         data[3] = ord(f.read(1))
         if data[2] != 0:
@@ -202,22 +203,58 @@ while True:
         printInstruction(address, length, "ORI", data, operand)
 
     # Handle instruction types: ORI to SR
-    if mnemonic == "ORI to SR":
-        length = 4;
+    elif mnemonic == "ORI to SR":
+        length = 4
         data[2] = ord(f.read(1))
         data[3] = ord(f.read(1))
         operand = "#${0:04X},SR".format(data[2]*256 + data[3])
         printInstruction(address, length, "ORI", data, operand)
 
     # Handle instruction types: ANDI to CCR
+    elif mnemonic == "ANDI to CCR":
+        length = 4
+        data[2] = ord(f.read(1))
+        data[3] = ord(f.read(1))
+        if data[2] != 0:
+            print("Warning: MSB of operand should be zero, but is {0:02X}".format(data[2]))
+        operand = "#${0:02X},CCR".format(data[3])
+        printInstruction(address, length, "ANDI", data, operand)
 
     # Handle instruction types: ANDI to SR
+    elif mnemonic == "ANDI to SR":
+        length = 4
+        data[2] = ord(f.read(1))
+        data[3] = ord(f.read(1))
+        operand = "#${0:04X},SR".format(data[2]*256 + data[3])
+        printInstruction(address, length, "ANDI", data, operand)
+
+    # Handle instruction types: STOP
+    elif mnemonic == "STOP":
+        length = 4
+        data[2] = ord(f.read(1))
+        data[3] = ord(f.read(1))
+        operand = "#${0:04X}".format(data[2]*256 + data[3])
+        printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types - BRA
+    elif mnemonic == "BRA":
+        if (data[1] & 0x0f) != 0:
+            length = 2
+            operand = "${0:08X}".format(address + (data[1] & 0x0f))
+            printInstruction(address, length, mnemonic, data, operand)
+        else:
+            length = 4
+            data[2] = ord(f.read(1))
+            data[3] = ord(f.read(1))
+            operand = "${0:08X}".format(address + data[2]*256 + data[3])
+            printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types - BSR
 
     # Handle instruction types - Bcc
+
+    else:
+        print("Error: unsupported instruction", mnemonic)
 
     # Do next instruction
     address += length
