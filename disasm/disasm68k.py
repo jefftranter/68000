@@ -293,6 +293,21 @@ while True:
         operand = "A{0:d},#${1:02X}".format(data[1] & 0x07, data[2] * 256 + data[3])
         printInstruction(address, length, mnemonic, data, operand)
 
+    # Handle instruction types - SWAP
+    elif mnemonic == "SWAP":
+        length = 2
+        operand = "D{0:d}".format(data[1] & 0x07)
+        printInstruction(address, length, mnemonic, data, operand)
+
+    # Handle instruction types - EXT
+    elif mnemonic == "EXT":
+        length = 2
+        operand = "D{0:d}".format(data[1] & 0x07)
+        if data[1] & 0x40:
+            printInstruction(address, length, "EXT.l", data, operand)
+        else:
+            printInstruction(address, length, "EXT.w", data, operand)
+
     else:
         print("Error: unsupported instruction", mnemonic)
 

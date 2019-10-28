@@ -67,6 +67,12 @@ fwd:
         unlk    a1
         unlk    a6
 
+        swap    d1
+        swap    d7
+
+        ext.l   d2
+        ext.w   d6
+
         abcd.b  d1,d2
         abcd.b  -(a2),-(a3)
 
