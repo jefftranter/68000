@@ -61,6 +61,12 @@ fwd:
         beq.s   fwd
         beq.w   fwd
         beq.w   back
+
+        link    a1,#$1234
+        link    a7,#$AA55
+        unlk    a1
+        unlk    a6
+
         abcd.b  d1,d2
         abcd.b  -(a2),-(a3)
 

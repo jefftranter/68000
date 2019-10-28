@@ -46,12 +46,19 @@ conditions = ["T", "F", "HI", "LS", "CC", "CS", "NE", "EQ", "VC", "VS", "PL", "M
 
 # Functions
 
+
 # Print a disassembled line of output
 def printInstruction(address, length, mnemonic, data, operand):
     if length == 2:
         line = "{0:08X}  {1:02X} {2:02X}        {3:8s}  {4:s}".format(address, data[0], data[1], mnemonic, operand)
     elif length == 4:
-        line = "{0:08X}  {1:02X} {2:02X} {3:02X} {4:02X}  {5:8s}  {6:s}".format(address, data[0], data[1], data[2], data[3], mnemonic, operand)
+        line = "{0:08X}  {1:02X} {2:02X} {3:02X} {4:02X}  {5:8s}  {6:s}".format(address,
+                                                                                data[0],
+                                                                                data[1],
+                                                                                data[2],
+                                                                                data[3],
+                                                                                mnemonic,
+                                                                                operand)
     else:
         print("Error: Invalid length passed to printInstruction().")
         sys.exit(1)
@@ -272,7 +279,19 @@ while True:
 
         printInstruction(address, length, mnemonic, data, operand)
 
-    # Handle instruction types - 
+    # Handle instruction types - UNLK
+    elif mnemonic == "UNLK":
+        length = 2
+        operand = "A{0:d}".format(data[1] & 0x07)
+        printInstruction(address, length, mnemonic, data, operand)
+
+    # Handle instruction types - LINK
+    elif mnemonic == "LINK":
+        length = 4
+        data[2] = ord(f.read(1))
+        data[3] = ord(f.read(1))
+        operand = "A{0:d},#${1:02X}".format(data[1] & 0x07, data[2] * 256 + data[3])
+        printInstruction(address, length, mnemonic, data, operand)
 
     else:
         print("Error: unsupported instruction", mnemonic)
