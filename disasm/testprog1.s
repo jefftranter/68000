@@ -14,6 +14,8 @@ start:
         trap    #15
         ori     #$aa,ccr
         ori     #$aa55,sr
+        eori    #$aa,ccr
+        eori    #$aa55,sr
         andi    #$55,ccr
 back:   andi    #$aa55,sr
         stop    #$1234

@@ -196,22 +196,28 @@ while True:
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types: ORI to CCR
-    elif mnemonic == "ORI to CCR":
+    elif mnemonic in ("ORI to CCR", "EORI to CCR"):
         length = 4
         data[2] = ord(f.read(1))
         data[3] = ord(f.read(1))
         if data[2] != 0:
             print("Warning: MSB of operand should be zero, but is {0:02X}".format(data[2]))
         operand = "#${0:02X},CCR".format(data[3])
-        printInstruction(address, length, "ORI", data, operand)
+        if mnemonic == "ORI to CCR":
+            printInstruction(address, length, "ORI", data, operand)
+        else:
+            printInstruction(address, length, "EORI", data, operand)
 
     # Handle instruction types: ORI to SR
-    elif mnemonic == "ORI to SR":
+    elif mnemonic in ("ORI to SR", "EORI to SR"):
         length = 4
         data[2] = ord(f.read(1))
         data[3] = ord(f.read(1))
         operand = "#${0:04X},SR".format(data[2]*256 + data[3])
-        printInstruction(address, length, "ORI", data, operand)
+        if mnemonic == "ORI to SR":
+            printInstruction(address, length, "ORI", data, operand)
+        else:
+            printInstruction(address, length, "EORI", data, operand)
 
     # Handle instruction types: ANDI to CCR
     elif mnemonic == "ANDI to CCR":
