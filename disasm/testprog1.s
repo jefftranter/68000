@@ -23,6 +23,10 @@ back:   andi    #$aa55,sr
         bra.w   back
         bra.w   *+$1000
         bra.w   *-$1000
+        bsr.s   fwd
+        bsr.s   back
+        bsr.w   fwd
+        bsr.w   back
         beq.s   back
         beq.s   fwd
         beq.w   fwd

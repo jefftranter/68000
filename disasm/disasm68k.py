@@ -153,10 +153,10 @@ while True:
 
     # Get 16-bit instruction
     c1 = f.read(1)  # Get binary bytes from file
+    if len(c1) == 0:  # handle EOF
+        break
     c2 = f.read(1)
-
-    # TODO: Trap eof anywhere in code
-    if len(c1) == 0 or len(c2) == 0:  # handle EOF
+    if len(c2) == 0:
         break
 
     data[0] = ord(c1)  # Convert to numbers
@@ -236,20 +236,27 @@ while True:
         operand = "#${0:04X}".format(data[2]*256 + data[3])
         printInstruction(address, length, mnemonic, data, operand)
 
-    # Handle instruction types - BRA
-    elif mnemonic == "BRA":
-        if (data[1] & 0x0f) != 0:
+    # Handle instruction types - BRA, BSR
+    elif mnemonic in ("BRA", "BSR"):
+
+        if (data[1]) != 0:  # Byte offset
             length = 2
-            operand = "${0:08X}".format(address + (data[1] & 0x0f))
-            printInstruction(address, length, mnemonic, data, operand)
-        else:
+            disp = data[1]
+            if disp < 128:  # Positive offset
+                dest = address + disp + 2
+            else:  # Negative offset
+                dest = address - (disp ^ 0xff) + 1
+        else:  # Word offset
             length = 4
             data[2] = ord(f.read(1))
             data[3] = ord(f.read(1))
-            operand = "${0:08X}".format(address + data[2]*256 + data[3])
-            printInstruction(address, length, mnemonic, data, operand)
-
-    # Handle instruction types - BSR
+            disp = data[2] * 256 + data[3]
+            if disp < 32768:  # Positive offset
+                dest = address + disp + 2
+            else:  # Negative offset
+                dest = address - (disp ^ 0xffff) + 1
+        operand = "${0:08X}".format(dest)
+        printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types - Bcc
 
