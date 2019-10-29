@@ -35,6 +35,14 @@
 # ORI.l   #$ff,$12345678
 # JMP     $DEADBEEF
 
+# To Do:
+#
+# - Implement all 68000 instructions and addressing modes
+# - Stress test
+# - Implement -n option
+# - Test that output can be assembled
+# - Move CSV file into table into code, remove unused fields
+
 import argparse
 import csv
 import re
@@ -330,6 +338,26 @@ while True:
         cond = data[0] & 0x0f
         mnemonic = "DB" + conditions[cond]
 
+        printInstruction(address, length, mnemonic, data, operand)
+
+    elif mnemonic == "MOVEP":
+        length = 4
+        data[2] = ord(f.read(1))
+        data[3] = ord(f.read(1))
+        disp = data[2] * 256 + data[3]
+        op = (data[1] & 0xc0) >> 6
+        if op == 0:
+            mnemonic = "MOVEP.w"
+            operand = "(${0:04X},A{1:d}),D{2:d}".format(disp, data[1] & 0x07, (data[0] & 0x0e) >> 1)
+        elif op == 1:
+            mnemonic = "MOVEP.l"
+            operand = "(${0:04X},A{1:d}),D{2:d}".format(disp, data[1] & 0x07, (data[0] & 0x0e) >> 1)
+        elif op == 2:
+            mnemonic = "MOVEP.w"
+            operand = "D{0:d},(${1:04X},A{2:d})".format((data[0] & 0x0e) >> 1, disp, data[1] & 0x07)
+        elif op == 3:
+            mnemonic = "MOVEP.l"
+            operand = "D{0:d},(${1:04X},A{2:d})".format((data[0] & 0x0e) >> 1, disp, data[1] & 0x07)
         printInstruction(address, length, mnemonic, data, operand)
 
     else:

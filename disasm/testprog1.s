@@ -94,6 +94,11 @@ loop1:
         dbgt    d6,loop1
         dble    d7,loop2
 loop2:
+        movep.w d1,($1010,a2)
+        movep.l d2,($2030,a3)
+        movep.w ($3040,a4),d3
+        movep.l ($55aa,a5),d4
+loop3:
 
         abcd.b  d1,d2
         abcd.b  -(a2),-(a3)
