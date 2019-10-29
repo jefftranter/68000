@@ -360,6 +360,11 @@ while True:
             operand = "D{0:d},(${1:04X},A{2:d})".format((data[0] & 0x0e) >> 1, disp, data[1] & 0x07)
         printInstruction(address, length, mnemonic, data, operand)
 
+    elif mnemonic == "MOVEQ":
+        length = 2
+        operand = "#${0:02X},D{1:d}".format(data[1], (data[0] & 0x0e) >> 1)
+        printInstruction(address, length, mnemonic, data, operand)
+
     else:
         print("Error: unsupported instruction", mnemonic)
 

@@ -99,6 +99,10 @@ loop2:
         movep.w ($3040,a4),d3
         movep.l ($55aa,a5),d4
 loop3:
+        moveq   #1,d1
+        moveq   #-1,d2
+        moveq   #127,d3
+        moveq   #$55,d4
 
         abcd.b  d1,d2
         abcd.b  -(a2),-(a3)
