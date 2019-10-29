@@ -73,6 +73,9 @@ fwd:
         ext.l   d2
         ext.w   d6
 
+        move    USP,a1
+        move    a2,USP
+
         abcd.b  d1,d2
         abcd.b  -(a2),-(a3)
 

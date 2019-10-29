@@ -308,11 +308,20 @@ while True:
         else:
             printInstruction(address, length, "EXT.w", data, operand)
 
+    # Handle instruction types - MOVE USP
+    elif mnemonic == "MOVE USP":
+        length = 2
+        if data[1] & 0x08:
+            operand = "USP,A{0:d}".format(data[1] & 0x07)
+        else:
+            operand = "A{0:d},USP".format(data[1] & 0x07)
+        printInstruction(address, length, "MOVE", data, operand)
+
     else:
         print("Error: unsupported instruction", mnemonic)
 
     # Do next instruction
     address += length
     length = 0
-    mnemonic = ""
     opcode = 0
+    mnemonic = ""
