@@ -76,6 +76,25 @@ fwd:
         move    USP,a1
         move    a2,USP
 
+loop1:
+        dbt     d0,loop1
+        dbf     d1,loop2
+        dbhi    d2,loop1
+        dbls    d3,loop2
+        dbcc    d4,loop1
+        dbcs    d5,loop2
+        dbne    d6,loop1
+        dbeq    d7,loop2
+        dbvc    d0,loop1
+        dbvs    d1,loop2
+        dbpl    d2,loop1
+        dbmi    d4,loop2
+        dbge    d4,loop1
+        dblt    d5,loop2
+        dbgt    d6,loop1
+        dble    d7,loop2
+loop2:
+
         abcd.b  d1,d2
         abcd.b  -(a2),-(a3)
 

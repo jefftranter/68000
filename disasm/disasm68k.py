@@ -254,7 +254,6 @@ while True:
 
     # Handle instruction types - BRA, BSR, Bcc
     elif mnemonic in ("BRA", "BSR", "BCC"):
-
         if (data[1]) != 0:  # Byte offset
             length = 2
             disp = data[1]
@@ -316,6 +315,22 @@ while True:
         else:
             operand = "A{0:d},USP".format(data[1] & 0x07)
         printInstruction(address, length, "MOVE", data, operand)
+
+    elif mnemonic == "DBCC":
+        length = 4
+        data[2] = ord(f.read(1))
+        data[3] = ord(f.read(1))
+        disp = data[2] * 256 + data[3]
+        if disp < 32768:  # Positive offset
+            dest = address + disp + 2
+        else:  # Negative offset
+            dest = address - (disp ^ 0xffff) + 1
+        operand = "D{0:d},${1:08X}".format(data[1] & 0x07, dest)
+
+        cond = data[0] & 0x0f
+        mnemonic = "DB" + conditions[cond]
+
+        printInstruction(address, length, mnemonic, data, operand)
 
     else:
         print("Error: unsupported instruction", mnemonic)
