@@ -104,6 +104,11 @@ loop3:
         moveq   #127,d3
         moveq   #$55,d4
 
+        sbcd    d1,d2
+        sbcd    d3,d4
+        sbcd    -(a3),-(a4)
+        sbcd    -(a6),-(a7)
+
         abcd.b  d1,d2
         abcd.b  -(a2),-(a3)
 

@@ -365,6 +365,14 @@ while True:
         operand = "#${0:02X},D{1:d}".format(data[1], (data[0] & 0x0e) >> 1)
         printInstruction(address, length, mnemonic, data, operand)
 
+    elif mnemonic == "SBCD":
+        length = 2
+        if data[1] & 0x08:
+            operand = "-(A{0:d}),-(A{1:d})".format(data[1] & 0x7, (data[0] & 0x0e) >> 1)
+        else:
+            operand = "D{0:d},D{1:d}".format(data[1] & 0x7, (data[0] & 0x0e) >> 1)
+        printInstruction(address, length, mnemonic, data, operand)
+
     else:
         print("Error: unsupported instruction", mnemonic)
 
