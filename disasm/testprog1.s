@@ -117,6 +117,65 @@ loop3:
         exg     a5,d6
         exg     d0,d0
 
+        asl.b   d0,d0
+        asl.w   d0,d0
+        asl.l   d0,d0
+
+        asl.w   d3,d4
+        asl.l   d5,d6
+        asl.b   #1,d7
+        asl.w   #3,d1
+        asl.l   #7,d2
+
+        asr.b   d1,d2
+        asr.w   d3,d4
+        asr.l   d5,d6
+        asr.b   #2,d7
+        asr.w   #4,d1
+        asr.l   #8,d2
+
+        lsl.b   d1,d2
+        lsl.w   d3,d4
+        lsl.l   d5,d6
+        lsl.b   #1,d7
+        lsl.w   #3,d1
+        lsl.l   #7,d2
+       
+        lsr.b   d1,d2
+        lsr.w   d3,d4
+        lsr.l   d5,d6
+        lsr.b   #2,d7
+        lsr.w   #4,d1
+        lsr.l   #8,d2
+
+        rol.b   d1,d2
+        rol.w   d3,d4
+        rol.l   d5,d6
+        rol.b   #1,d7
+        rol.w   #3,d1
+        rol.l   #7,d2
+       
+        ror.b   d1,d2
+        ror.w   d3,d4
+        ror.l   d5,d6
+        ror.b   #2,d7
+        ror.w   #4,d1
+        ror.l   #8,d2
+
+        roxl.b   d1,d2
+        roxl.w   d3,d4
+        roxl.l   d5,d6
+        roxl.b   #1,d7
+        roxl.w   #3,d1
+        roxl.l   #7,d2
+       
+        roxr.b   d1,d2
+        roxr.w   d3,d4
+        roxr.l   d5,d6
+        roxr.b   #2,d7
+        roxr.w   #4,d1
+        roxr.l   #8,d2
+
 ;        abcd.b  d1,d2
 ;        abcd.b  -(a2),-(a3)
 

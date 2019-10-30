@@ -41,7 +41,7 @@
 # - Stress test
 # - Implement -n option
 # - Test that output can be assembled
-# - Move CSV file into table into code, remove unused fields
+# - Move CSV file into table in code, remove unused fields
 
 import argparse
 import csv
@@ -50,7 +50,7 @@ import sys
 
 # Data/Tables
 
-conditions = ["T", "F", "HI", "LS", "CC", "CS", "NE", "EQ", "VC", "VS", "PL", "MI", "GE", "LT", "GT", "LE"]
+conditions = ("T", "F", "HI", "LS", "CC", "CS", "NE", "EQ", "VC", "VS", "PL", "MI", "GE", "LT", "GT", "LE")
 
 # Functions
 
@@ -384,6 +384,37 @@ while True:
             operand = "D{0:d},A{1:d}".format((data[0] & 0x0e) >> 1, data[1] & 0x07)
         else:
             print("Error: internal error (should never occur)", mnemonic)
+
+        printInstruction(address, length, mnemonic, data, operand)
+
+    elif mnemonic in ("ASD", "LSD", "ROXD", "ROD"):
+        length = 2
+        cr = (data[0] & 0x0e) >> 1
+        dr = data[0] & 0x01
+        size = (data[1] & 0xc0) >> 6
+        ir = (data[1] & 0x20) >> 5
+        reg = data[1] & 0x07
+
+        # Handle direction
+        if dr == 1:
+            mnemonic = mnemonic.replace(mnemonic[len(mnemonic)-1], 'L')  # left
+        else:
+            mnemonic = mnemonic.replace(mnemonic[len(mnemonic)-1], 'R')  # right
+
+        # Handle size
+        if size == 0:
+            mnemonic += ".b"
+        elif size == 1:
+            mnemonic += ".w"
+        elif size == 2:
+            mnemonic += ".l"
+
+        if ir == 1:  # Register shift
+            operand = "D{0:d},D{1:d}".format(cr, reg)
+        else:  # Immediate shift.
+            if cr == 0:  # Shift count of zero means 8.
+                cr = 8
+            operand = "#{0:d},D{1:d}".format(cr, reg)
 
         printInstruction(address, length, mnemonic, data, operand)
 
