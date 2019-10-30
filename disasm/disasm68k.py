@@ -368,9 +368,23 @@ while True:
     elif mnemonic == "SBCD":
         length = 2
         if data[1] & 0x08:
-            operand = "-(A{0:d}),-(A{1:d})".format(data[1] & 0x7, (data[0] & 0x0e) >> 1)
+            operand = "-(A{0:d}),-(A{1:d})".format(data[1] & 0x07, (data[0] & 0x0e) >> 1)
         else:
-            operand = "D{0:d},D{1:d}".format(data[1] & 0x7, (data[0] & 0x0e) >> 1)
+            operand = "D{0:d},D{1:d}".format(data[1] & 0x07, (data[0] & 0x0e) >> 1)
+        printInstruction(address, length, mnemonic, data, operand)
+
+    elif mnemonic == "EXG":
+        length = 2
+        m = (data[1] & 0xf8) >> 3
+        if m == 0x08:
+            operand = "D{0:d},D{1:d}".format((data[0] & 0x0e) >> 1, data[1] & 0x07)
+        elif m == 0x09:
+            operand = "A{0:d},A{1:d}".format((data[0] & 0x0e) >> 1, data[1] & 0x07)
+        elif m == 0x11:
+            operand = "D{0:d},A{1:d}".format((data[0] & 0x0e) >> 1, data[1] & 0x07)
+        else:
+            print("Error: internal error (should never occur)", mnemonic)
+
         printInstruction(address, length, mnemonic, data, operand)
 
     else:
