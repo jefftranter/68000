@@ -199,6 +199,14 @@ loop3:
         subx.l   -(a4),-(a5)
         subx.b   -(a6),-(a7)
 
+        cmpm.b   (a0)+,(a1)+
+        cmpm.w   (a1)+,(a2)+
+        cmpm.l   (a2)+,(a3)+
+        cmpm.b   (a3)+,(a4)+
+        cmpm.w   (a4)+,(a5)+
+        cmpm.l   (a5)+,(a6)+
+        cmpm.l   (a7)+,(a7)+
+
 ;        abcd.b  d1,d2
 ;        abcd.b  -(a2),-(a3)
 
