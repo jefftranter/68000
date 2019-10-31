@@ -7,7 +7,7 @@ ASFLAGS = -quiet -m68000 -no-opt -Fbin
 all:	testprog1.bin pep8
 
 pep8:
-	pycodestyle --max-line-length=132 disasm68k.py
+	pycodestyle --max-line-length=256 disasm68k.py
 
 clean:
 	$(RM) *.bin *.lst
