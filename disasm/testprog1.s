@@ -190,6 +190,15 @@ loop3:
         addx.l   -(a4),-(a5)
         addx.b   -(a6),-(a7)
 
+        subx.b   d0,d1
+        subx.w   d2,d3
+        subx.l   d4,d5
+        subx.b   d6,d7
+        subx.b   -(a0),-(a1)
+        subx.w   -(a2),-(a3)
+        subx.l   -(a4),-(a5)
+        subx.b   -(a6),-(a7)
+
 ;        abcd.b  d1,d2
 ;        abcd.b  -(a2),-(a3)
 
