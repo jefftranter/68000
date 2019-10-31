@@ -109,6 +109,11 @@ loop3:
         sbcd    -(a3),-(a4)
         sbcd    -(a6),-(a7)
 
+        abcd    d1,d2
+        abcd    d3,d4
+        abcd    -(a3),-(a4)
+        abcd    -(a6),-(a7)
+
         exg     d0,d1
         exg     d1,d2
         exg     a2,a3
@@ -175,6 +180,15 @@ loop3:
         roxr.b   #2,d7
         roxr.w   #4,d1
         roxr.l   #8,d2
+
+        addx.b   d0,d1
+        addx.w   d2,d3
+        addx.l   d4,d5
+        addx.b   d6,d7
+        addx.b   -(a0),-(a1)
+        addx.w   -(a2),-(a3)
+        addx.l   -(a4),-(a5)
+        addx.b   -(a6),-(a7)
 
 ;        abcd.b  d1,d2
 ;        abcd.b  -(a2),-(a3)

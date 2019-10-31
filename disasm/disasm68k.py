@@ -365,7 +365,7 @@ while True:
         operand = "#${0:02X},D{1:d}".format(data[1], (data[0] & 0x0e) >> 1)
         printInstruction(address, length, mnemonic, data, operand)
 
-    elif mnemonic == "SBCD":
+    elif mnemonic in ("SBCD", "ABCD"):
         length = 2
         if data[1] & 0x08:
             operand = "-(A{0:d}),-(A{1:d})".format(data[1] & 0x07, (data[0] & 0x0e) >> 1)
@@ -416,6 +416,21 @@ while True:
                 cr = 8
             operand = "#{0:d},D{1:d}".format(cr, reg)
 
+        printInstruction(address, length, mnemonic, data, operand)
+
+    elif mnemonic in ("ADDX", "SUBX"):
+        length = 2
+        size = (data[1] & 0xc0) >> 6
+        if size == 0:
+            mnemonic += ".b"
+        elif size == 1:
+            mnemonic += ".w"
+        elif size == 2:
+            mnemonic += ".l"
+        if data[1] & 0x08:
+            operand = "-(A{0:d}),-(A{1:d})".format(data[1] & 0x07, (data[0] & 0x0e) >> 1)
+        else:
+            operand = "D{0:d},D{1:d}".format(data[1] & 0x07, (data[0] & 0x0e) >> 1)
         printInstruction(address, length, mnemonic, data, operand)
 
     else:
