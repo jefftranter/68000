@@ -58,15 +58,25 @@ conditions = ("T", "F", "HI", "LS", "CC", "CS", "NE", "EQ", "VC", "VS", "PL", "M
 # Print a disassembled line of output
 def printInstruction(address, length, mnemonic, data, operand):
     if length == 2:
-        line = "{0:08X}  {1:02X} {2:02X}        {3:8s}  {4:s}".format(address, data[0], data[1], mnemonic, operand)
+        line = "{0:08X}  {1:02X} {2:02X}              {3:8s}  {4:s}".format(address, data[0], data[1], mnemonic, operand)
     elif length == 4:
-        line = "{0:08X}  {1:02X} {2:02X} {3:02X} {4:02X}  {5:8s}  {6:s}".format(address,
-                                                                                data[0],
-                                                                                data[1],
-                                                                                data[2],
-                                                                                data[3],
-                                                                                mnemonic,
-                                                                                operand)
+        line = "{0:08X}  {1:02X} {2:02X} {3:02X} {4:02X}        {5:8s}  {6:s}".format(address,
+                                                                                      data[0],
+                                                                                      data[1],
+                                                                                      data[2],
+                                                                                      data[3],
+                                                                                      mnemonic,
+                                                                                      operand)
+    elif length == 6:
+        line = "{0:08X}  {1:02X} {2:02X} {3:02X} {4:02X} {5:02X} {6:0X}  {7:8s}  {8:s}".format(address,
+                                                                                               data[0],
+                                                                                               data[1],
+                                                                                               data[2],
+                                                                                               data[3],
+                                                                                               data[4],
+                                                                                               data[5],
+                                                                                               mnemonic,
+                                                                                               operand)
     else:
         print("Error: Invalid length passed to printInstruction().")
         sys.exit(1)

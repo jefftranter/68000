@@ -211,7 +211,7 @@ loop3:
         jmp      $1234(a2)
         jmp      $12(a3,d1)
         jmp      $34(a4,a2)
-        jmp      $1234
+        jmp      $1234.w
         jmp      $12345678
         jmp      $1234(pc)
         jmp      $12(pc,d4)
@@ -219,9 +219,9 @@ loop3:
 
         jsr      (a1)
         jsr      $1234(a2)
-        jsr      $59(a3,d1)
-        jsr      $59(a3,a2)
-        jsr      $1234
+        jsr      $12(a3,d1)
+        jsr      $34(a3,a2)
+        jsr      $1234.w
         jsr      $12345678
         jsr      $1234(pc)
         jsr      $12(pc,d4)
