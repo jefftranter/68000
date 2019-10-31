@@ -207,48 +207,22 @@ loop3:
         cmpm.l   (a5)+,(a6)+
         cmpm.l   (a7)+,(a7)+
 
-;        abcd.b  d1,d2
-;        abcd.b  -(a2),-(a3)
+        jmp      (a1)
+        jmp      $1234(a2)
+        jmp      $12(a3,d1)
+        jmp      $34(a4,a2)
+        jmp      $1234
+        jmp      $12345678
+        jmp      $1234(pc)
+        jmp      $12(pc,d4)
+        jmp      $12(pc,a5)
 
-;        move.b  d1,d2
-;        move.w  d3,d4
-;        move.l  a1,a2
-
-;        move.w  d0,d0
-;        move.w  a0,d0
-;        move.w  (a0),d0
-;        move.w  (a0)+,d0
-;        move.w  -(a0),d0
-;        move.w  ($10,a0),d0
-;        move.w  ($10,a0,d0),d0
-;        move.w  ($10,a0,d0),d0
-;        move.w  $12345678,d0
-;        move.w  #1,d0
-;        move.w  ($10,pc),d0
-;        move.w  ($10,pc,d0),d0
-;        move.w  ($1000,pc),d0
-
-;        move.w  d0,d0
-;        move.w  d0,a0
-;        move.w  d0,(a0)
-;        move.w  d0,(a0)+
-;        move.w  d0,-(a0)
-;        move.w  d0,($10,a0)
-;        move.w  d0,($10,a0,d0)
-;        move.w  d0,($10,a0,d0)
-;        move.w  d0,$12345678
-
-;        ori.b   #$01,d0
-;        ori.w   #$0102,d0
-;        ori.l   #$01020304,d0
-;        ori.b   #$ff,$12
-;        ori.w   #$ff,$1234
-;        ori.l   #$ff,$12345678
-
-;        nop
-;        move.b  d1,d2
-;        move.w  a1,d3
-;        move.l  d4,a2
-;        bra.s   end
-;       bra.w   start
-;end:    jmp     start
+        jsr      (a1)
+        jsr      $1234(a2)
+        jsr      $59(a3,d1)
+        jsr      $59(a3,a2)
+        jsr      $1234
+        jsr      $12345678
+        jsr      $1234(pc)
+        jsr      $12(pc,d4)
+        jsr      $12(pc,a5)

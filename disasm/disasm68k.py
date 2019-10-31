@@ -445,6 +445,57 @@ while True:
         operand = "(A{0:d})+,(A{1:d})+".format(data[1] & 0x07, (data[0] & 0x0e) >> 1)
         printInstruction(address, length, mnemonic, data, operand)
 
+    elif mnemonic in ("JMP", "JSR"):
+        m = (data[1] & 0x38) >> 3
+        xn = data[1] & 0x07
+
+        if m == 2:  # (An)
+            length = 2
+            operand = "(A{0:d})".format(xn)
+        elif m == 5:  # d16(An)
+            length = 4
+            data[2] = ord(f.read(1))
+            data[3] = ord(f.read(1))
+            operand = "${0:04X}(A{1:d})".format(data[2] * 256 + data[3], xn)
+        elif m == 6:  # d8(An,Xn)
+            length = 4
+            data[2] = ord(f.read(1))
+            data[3] = ord(f.read(1))
+            if data[2] & 0x80:
+                operand = "${0:02X}(A{1:d},A{2:d})".format(data[3], xn, (data[2] & 0x70) >> 4)
+            else:
+                operand = "${0:02X}(A{1:d},D{2:d})".format(data[3], xn, (data[2] & 0x70) >> 4)
+        elif m == 7 and xn == 2:  # d16(pc)
+            length = 4
+            data[2] = ord(f.read(1))
+            data[3] = ord(f.read(1))
+            operand = "${0:04X}(PC)".format(data[2] * 256 + data[3])
+        elif m == 7 and xn == 3:  # d8(PC,Xn)
+            length = 4
+            data[2] = ord(f.read(1))
+            data[3] = ord(f.read(1))
+            if data[2] & 0x80:
+                operand = "${0:02X}(PC,A{1:d})".format(data[3], (data[2] & 0x70) >> 4)
+            else:
+                operand = "${0:02X}(PC,D{1:d})".format(data[3], (data[2] & 0x70) >> 4)
+        elif m == 7 and xn == 0:  # XXX.W
+            length = 4
+            data[2] = ord(f.read(1))
+            data[3] = ord(f.read(1))
+            operand = "${0:04X}".format(data[2] * 256 + data[3])
+        elif m == 7 and xn == 1:  # XXX.L
+            length = 6
+            data[2] = ord(f.read(1))
+            data[3] = ord(f.read(1))
+            data[4] = ord(f.read(1))
+            data[5] = ord(f.read(1))
+            operand = "${0:04X}{1:04X}".format(data[2] * 256 + data[3], data[4] * 256 + data[5])
+        else:
+            print("Error: Invalid addressing mode.")
+            length = 2
+            operand = ""
+        printInstruction(address, length, mnemonic, data, operand)
+
     else:
         print("Error: unsupported instruction", mnemonic)
 
