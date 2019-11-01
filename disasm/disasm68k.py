@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 #
 # Motorola 68000 Disassembler
 # Copyright (c) 2019 by Jeff Tranter <tranter@pobox.com>
@@ -559,8 +559,23 @@ while True:
         elif m == 7 and xn == 1:  # abs.L   8/10
             length = 8
 
+        if s == 2:  # L
+            length += 2
+
         for i in range(2, length):
             data[i] = ord(f.read(1))
+
+        if s == 0:  # B
+            mnemonic += ".b"
+            src = "#${0:02X}".format(data[3])
+        elif s == 1:  # W
+            mnemonic += ".w"
+            src = "#${0:02X}{1:02X}".format(data[2], data[3])
+        elif s == 2:  # L
+            mnemonic += ".l"
+            src = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[2], data[3], data[4], data[5])
+        else:
+            print("Error: Invalid instruction size.")
 
         if m == 0:  # Dn  4/6 bytes
             dest = "D{0:n}".format(xn)
@@ -581,19 +596,6 @@ while True:
             dest = "${0:02X}{1:02X}".format(data[4], data[5])
         elif m == 7 and xn == 1:  # abs.L   8/10
             dest = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[4], data[5], data[6], data[7])
-
-        if s == 0:  # B
-            mnemonic += ".b"
-            src = "#${0:02X}".format(data[3])
-        elif s == 1:  # W
-            mnemonic += ".w"
-            src = "#${0:02X}{1:02X}".format(data[2], data[3])
-        elif s == 2:  # L
-            mnemonic += ".l"
-            src = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[2], data[3], data[4], data[5])
-            length += 2
-        else:
-            print("Error: Invalid instruction size.")
 
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
