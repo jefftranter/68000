@@ -586,16 +586,16 @@ while True:
         elif m == 4:  # -(An)  4/6
             dest = "-(A{0:n})".format(xn)
         elif m == 5:  # d16(An)  6/8
-            dest = "${0:02X}{1:02X}(A{2:n})".format(data[4], data[5], xn)
+            dest = "${0:02X}{1:02X}(A{2:n})".format(data[length-2], data[length-1], xn)
         elif m == 6:  # d8(An,Xn)  6/8
-            if data[4] & 0x80:
-                dest = "${0:02X}(A{1:n},A{2:n})".format(data[5], xn, (data[4] & 0x70) >> 4)
+            if data[length-2] & 0x80:
+                dest = "${0:02X}(A{1:n},A{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
             else:
-                dest = "${0:02X}(A{1:n},D{2:n})".format(data[5], xn, (data[4] & 0x70) >> 4)
+                dest = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
         elif m == 7 and xn == 0:  # abs.W  6/8
-            dest = "${0:02X}{1:02X}".format(data[4], data[5])
+            dest = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
         elif m == 7 and xn == 1:  # abs.L   8/10
-            dest = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[4], data[5], data[6], data[7])
+            dest = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
 
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
