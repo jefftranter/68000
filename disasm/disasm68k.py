@@ -269,7 +269,7 @@ while True:
         length = 4
         data[2] = ord(f.read(1))
         data[3] = ord(f.read(1))
-        operand = "#${0:04X},SR".format(data[2]*256 + data[3])
+        operand = "#${0:02X}{1:02X},SR".format(data[2], data[3])
         if mnemonic == "ORI to SR":
             printInstruction(address, length, "ORI", data, operand)
         else:
@@ -290,7 +290,7 @@ while True:
         length = 4
         data[2] = ord(f.read(1))
         data[3] = ord(f.read(1))
-        operand = "#${0:04X},SR".format(data[2]*256 + data[3])
+        operand = "#${0:02X}{1:02X},SR".format(data[2], data[3])
         printInstruction(address, length, "ANDI", data, operand)
 
     # Handle instruction types: STOP
@@ -298,7 +298,7 @@ while True:
         length = 4
         data[2] = ord(f.read(1))
         data[3] = ord(f.read(1))
-        operand = "#${0:04X}".format(data[2]*256 + data[3])
+        operand = "#${0:02X}{1:02X}".format(data[2], data[3])
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types - BRA, BSR, Bcc
@@ -314,7 +314,7 @@ while True:
             length = 4
             data[2] = ord(f.read(1))
             data[3] = ord(f.read(1))
-            disp = data[2] * 256 + data[3]
+            disp = data[2]*256 + data[3]
             if disp < 32768:  # Positive offset
                 dest = address + disp + 2
             else:  # Negative offset
@@ -338,7 +338,7 @@ while True:
         length = 4
         data[2] = ord(f.read(1))
         data[3] = ord(f.read(1))
-        operand = "A{0:d},#${1:02X}".format(data[1] & 0x07, data[2] * 256 + data[3])
+        operand = "A{0:d},#${1:02X}{2:02X}".format(data[1] & 0x07, data[2], data[3])
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types - SWAP
@@ -369,7 +369,7 @@ while True:
         length = 4
         data[2] = ord(f.read(1))
         data[3] = ord(f.read(1))
-        disp = data[2] * 256 + data[3]
+        disp = data[2]*256 + data[3]
         if disp < 32768:  # Positive offset
             dest = address + disp + 2
         else:  # Negative offset
@@ -385,7 +385,7 @@ while True:
         length = 4
         data[2] = ord(f.read(1))
         data[3] = ord(f.read(1))
-        disp = data[2] * 256 + data[3]
+        disp = data[2]*256 + data[3]
         op = (data[1] & 0xc0) >> 6
         if op == 0:
             mnemonic = "MOVEP.w"
@@ -497,7 +497,7 @@ while True:
             length = 4
             data[2] = ord(f.read(1))
             data[3] = ord(f.read(1))
-            operand = "${0:04X}(A{1:d})".format(data[2] * 256 + data[3], xn)
+            operand = "${0:02X}{1:02X}(A{2:d})".format(data[2], data[3], xn)
         elif m == 6:  # d8(An,Xn)
             length = 4
             data[2] = ord(f.read(1))
@@ -510,7 +510,7 @@ while True:
             length = 4
             data[2] = ord(f.read(1))
             data[3] = ord(f.read(1))
-            operand = "${0:04X}(PC)".format(data[2] * 256 + data[3])
+            operand = "${0:02X}{1:02X}(PC)".format(data[2], data[3])
         elif m == 7 and xn == 3:  # d8(PC,Xn)
             length = 4
             data[2] = ord(f.read(1))
@@ -523,14 +523,14 @@ while True:
             length = 4
             data[2] = ord(f.read(1))
             data[3] = ord(f.read(1))
-            operand = "${0:04X}".format(data[2] * 256 + data[3])
+            operand = "${0:02X}{1:02X}".format(data[2], data[3])
         elif m == 7 and xn == 1:  # XXX.L
             length = 6
             data[2] = ord(f.read(1))
             data[3] = ord(f.read(1))
             data[4] = ord(f.read(1))
             data[5] = ord(f.read(1))
-            operand = "${0:04X}{1:04X}".format(data[2] * 256 + data[3], data[4] * 256 + data[5])
+            operand = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[2], data[3], data[4], data[5])
         else:
             print("Error: Invalid addressing mode.")
             length = 2
