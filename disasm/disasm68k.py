@@ -552,7 +552,7 @@ while True:
             length = 4
         elif m == 5:  # d16(An)  6/8
             length = 6
-        elif m == 6:  # d16(An,Xn)  6/8
+        elif m == 6:  # d8(An,Xn)  6/8
             length = 6
         elif m == 7 and xn == 0:  # abs.W  6/8
             length = 6
@@ -572,11 +572,11 @@ while True:
             dest = "-(A{0:n})".format(xn)
         elif m == 5:  # d16(An)  6/8
             dest = "${0:02X}{1:02X}(A{2:n})".format(data[4], data[5], xn)
-        elif m == 6:  # d16(An,Xn)  6/8
-            if data[2] & 0x80:
-                dest = "${0:02X}{1:02X}(A{2:n},D{3:n})".format(data[4], data[5], xn)
+        elif m == 6:  # d8(An,Xn)  6/8
+            if data[4] & 0x80:
+                dest = "${0:02X}(A{1:n},A{2:n})".format(data[5], xn, (data[4] & 0x70) >> 4)
             else:
-                dest = "${0:02X}{1:02X}(A{2:n},A{3:n})".format(data[4], data[5], data[6] & 0x07, xn)
+                dest = "${0:02X}(A{1:n},D{2:n})".format(data[5], xn, (data[4] & 0x70) >> 4)
         elif m == 7 and xn == 0:  # abs.W  6/8
             dest = "${0:02X}{1:02X}".format(data[4], data[5])
         elif m == 7 and xn == 1:  # abs.L   8/10
