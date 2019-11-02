@@ -600,7 +600,7 @@ while True:
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
 
-    elif mnemonic == "BTST":
+    elif mnemonic in ("BTST", "BCLR", "BCHG", "BSET"):
         dn = (data[0] & 0x0e) >> 1
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07

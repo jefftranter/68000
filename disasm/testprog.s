@@ -433,3 +433,66 @@ loop3:
         btst    #10,$1234(pc)
         btst    #11,$12(pc,a1)
         btst    #12,$12(pc,d2)
+
+        bclr    d0,d2
+        bclr    d1,(a2)
+        bclr    d2,(a3)+
+        bclr    d3,-(a4)
+        bclr    d4,$12(a5)
+        bclr    d5,$12(a6,a7)
+        bclr    d6,$12(a6,d7)
+        bclr    d7,$1234.w
+        bclr    d0,$12345678
+
+        bclr    #1,d2
+        bclr    #31,d3
+        bclr    #2,(a2)
+        bclr    #3,(a3)+
+        bclr    #4,-(a4)
+        bclr    #5,$12(a5)
+        bclr    #6,$12(a6,a7)
+        bclr    #7,$12(a6,d7)
+        bclr    #8,$1234.w
+        bclr    #9,$12345678
+
+        bchg    d0,d2
+        bchg    d1,(a2)
+        bchg    d2,(a3)+
+        bchg    d3,-(a4)
+        bchg    d4,$12(a5)
+        bchg    d5,$12(a6,a7)
+        bchg    d6,$12(a6,d7)
+        bchg    d7,$1234.w
+        bchg    d0,$12345678
+
+        bchg    #1,d2
+        bchg    #31,d3
+        bchg    #2,(a2)
+        bchg    #3,(a3)+
+        bchg    #4,-(a4)
+        bchg    #5,$12(a5)
+        bchg    #6,$12(a6,a7)
+        bchg    #7,$12(a6,d7)
+        bchg    #8,$1234.w
+        bchg    #9,$12345678
+
+        bset    d0,d2
+        bset    d1,(a2)
+        bset    d2,(a3)+
+        bset    d3,-(a4)
+        bset    d4,$12(a5)
+        bset    d5,$12(a6,a7)
+        bset    d6,$12(a6,d7)
+        bset    d7,$1234.w
+        bset    d0,$12345678
+
+        bset    #1,d2
+        bset    #31,d3
+        bset    #2,(a2)
+        bset    #3,(a3)+
+        bset    #4,-(a4)
+        bset    #5,$12(a5)
+        bset    #6,$12(a6,a7)
+        bset    #7,$12(a6,d7)
+        bset    #8,$1234.w
+        bset    #9,$12345678
