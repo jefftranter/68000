@@ -600,6 +600,27 @@ while True:
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
 
+    elif mnemonic == "BTST":
+        dn = (data[0] & 0xe0) >> 1
+        m = (data[1] & 0x38) >> 3
+        xn = data[1] & 0x07
+
+        # Source:
+        # BTST  #data, <ea>  0000100000MMMXXX
+        # BTST  Dn, <ea>     0000DDD100MMMXXX
+
+        # Destination:
+        # Dn  2 (+2 for imm, applies to all) Size is .l, rest are .b
+        # (An)  2
+        # (An)+  2
+        # -(An)  2
+        # d16(An)  4
+        # d8(An,Xn)  4
+        # abs.W  4
+        # abs.L  6
+        # d16(PC)  4
+        # d8(PC,Xn)  4
+
     else:
         print("Error: unsupported instruction", mnemonic)
 
