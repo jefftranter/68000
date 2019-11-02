@@ -4,7 +4,7 @@
 AS	= vasmm68k_mot
 ASFLAGS = -quiet -m68000 -no-opt -Fbin
 
-all:	testprog1.bin pep8
+all:	testprog.bin pep8
 
 pep8:
 	pycodestyle --max-line-length=256 disasm68k.py
