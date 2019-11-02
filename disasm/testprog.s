@@ -407,18 +407,18 @@ loop3:
         cmpi.l  #$12345678,$4321.w
         cmpi.l  #$12345678,$87654321
 
-        btst    d1,d2
+        btst    d0,d2
         btst    d1,(a2)
-        btst    d1,(a3)+
-        btst    d1,-(a4)
-        btst    d1,$12(a5)
-        btst    d1,$12(a6,a7)
-        btst    d1,$12(a6,d7)
-        btst    d1,$1234
-        btst    d1,$12345678
+        btst    d2,(a3)+
+        btst    d3,-(a4)
+        btst    d4,$12(a5)
+        btst    d5,$12(a6,a7)
+        btst    d6,$12(a6,d7)
+        btst    d7,$1234.w
+        btst    d0,$12345678
         btst    d1,$1234(pc)
-        btst    d1,$12(pc,a1)
-        btst    d1,$12(pc,d2)
+        btst    d2,$12(pc,a1)
+        btst    d3,$12(pc,d2)
 
         btst    #1,d2
         btst    #31,d3
@@ -428,7 +428,7 @@ loop3:
         btst    #5,$12(a5)
         btst    #6,$12(a6,a7)
         btst    #7,$12(a6,d7)
-        btst    #8,$1234
+        btst    #8,$1234.w
         btst    #9,$12345678
         btst    #10,$1234(pc)
         btst    #11,$12(pc,a1)

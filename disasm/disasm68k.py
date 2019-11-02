@@ -601,25 +601,75 @@ while True:
         printInstruction(address, length, mnemonic, data, operand)
 
     elif mnemonic == "BTST":
-        dn = (data[0] & 0xe0) >> 1
+        dn = (data[0] & 0x0e) >> 1
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
+
+        if m == 0:  # Dn
+            length = 2
+        elif m == 2:  # (An)
+            length = 2
+        elif m == 3:  # (An)+
+            length = 2
+        elif m == 4:  # -(An)
+            length = 2
+        elif m == 5:  # d16(An)
+            length = 4
+        elif m == 6:  # d8(An,Xn)
+            length = 4
+        elif m == 7 and xn == 0:  # abs.W
+            length = 4
+        elif m == 7 and xn == 1:  # abs.L
+            length = 6
+        elif m == 7 and xn == 2:  # d16(PC)
+            length = 4
+        elif m == 7 and xn == 3:  # d8(PX,Xn)
+            length = 4
+
+        if data[0] == 0x80:  # Immediate
+            length += 2
+
+        for i in range(2, length):
+            data[i] = ord(f.read(1))
 
         # Source:
         # BTST  #data, <ea>  0000100000MMMXXX
         # BTST  Dn, <ea>     0000DDD100MMMXXX
 
-        # Destination:
-        # Dn  2 (+2 for imm, applies to all) Size is .l, rest are .b
-        # (An)  2
-        # (An)+  2
-        # -(An)  2
-        # d16(An)  4
-        # d8(An,Xn)  4
-        # abs.W  4
-        # abs.L  6
-        # d16(PC)  4
-        # d8(PC,Xn)  4
+        if data[0] == 0x80:  # Immediate
+            src = "#${0:02X}".format(data[3])
+        else:
+            src = "D{0:d}".format(dn)
+
+        if m == 0:  # Dn
+            dest = "D{0:n}".format(xn)
+        elif m == 2:  # (An)
+            dest = "(A{0:n})".format(xn)
+        elif m == 3:  # (An)+
+            dest = "(A{0:n})+".format(xn)
+        elif m == 4:  # -(An)
+            dest = "-(A{0:n})".format(xn)
+        elif m == 5:  # d16(An)
+            dest = "${0:02X}{1:02X}(A{2:n})".format(data[length-2], data[length-1], xn)
+        elif m == 6:  # d8(An,Xn)
+            if data[length-2] & 0x80:
+                dest = "${0:02X}(A{1:n},A{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
+            else:
+                dest = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
+        elif m == 7 and xn == 0:  # abs.W
+            dest = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
+        elif m == 7 and xn == 1:  # abs.L
+            dest = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+        elif m == 7 and xn == 2:  # d16(PC)
+            dest = "${0:02X}{1:02X}(PC)".format(data[2], data[3])
+        elif m == 7 and xn == 3:  # d8(PX,Xn)
+            if data[2] & 0x80:
+                dest = "${0:02X}(PC,A{1:d})".format(data[3], (data[2] & 0x70) >> 4)
+            else:
+                dest = "${0:02X}(PC,D{1:d})".format(data[3], (data[2] & 0x70) >> 4)
+
+        operand = src + "," + dest
+        printInstruction(address, length, mnemonic, data, operand)
 
     else:
         print("Error: unsupported instruction", mnemonic)
