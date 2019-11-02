@@ -496,3 +496,33 @@ loop3:
         bset    #7,$12(a6,d7)
         bset    #8,$1234.w
         bset    #9,$12345678
+
+        tst.b   d1
+        tst.b   (a2)
+        tst.b   (a3)+
+        tst.b   -(a4)
+        tst.b   $12(a5)
+        tst.b   $12(a6,a7)
+        tst.b   $12(a6,d7)
+        tst.b   $1234.w
+        tst.b   $12345678
+
+        tst.w   d1
+        tst.w   (a2)
+        tst.w   (a3)+
+        tst.w   -(a4)
+        tst.w   $12(a5)
+        tst.w   $12(a6,a7)
+        tst.w   $12(a6,d7)
+        tst.w   $1234.w
+        tst.w   $12345678
+
+        tst.l   d1
+        tst.l   (a2)
+        tst.l   (a3)+
+        tst.l   -(a4)
+        tst.l   $12(a5)
+        tst.l   $12(a6,a7)
+        tst.l   $12(a6,d7)
+        tst.l   $1234.w
+        tst.l   $12345678

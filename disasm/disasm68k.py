@@ -671,6 +671,62 @@ while True:
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
 
+    elif mnemonic == "TST":
+        s = (data[1] & 0xc0) >> 6
+        m = (data[1] & 0x38) >> 3
+        xn = data[1] & 0x07
+
+        if m == 0:  # Dn
+            length = 2
+        elif m == 2:  # (An)
+            length = 2
+        elif m == 3:  # (An)+
+            length = 2
+        elif m == 4:  # -(An)
+            length = 2
+        elif m == 5:  # d16(An)
+            length = 4
+        elif m == 6:  # d8(An,Xn)
+            length = 4
+        elif m == 7 and xn == 0:  # abs.W
+            length = 4
+        elif m == 7 and xn == 1:  # abs.L
+            length = 6
+
+        for i in range(2, length):
+            data[i] = ord(f.read(1))
+
+        if s == 0:  # B
+            mnemonic += ".b"
+        elif s == 1:  # W
+            mnemonic += ".w"
+        elif s == 2:  # L
+            mnemonic += ".l"
+        else:
+            print("Error: Invalid instruction size.")
+
+        if m == 0:  # Dn
+            dest = "D{0:n}".format(xn)
+        elif m == 2:  # (An)
+            dest = "(A{0:n})".format(xn)
+        elif m == 3:  # (An)+
+            dest = "(A{0:n})+".format(xn)
+        elif m == 4:  # -(An)
+            dest = "-(A{0:n})".format(xn)
+        elif m == 5:  # d16(An)
+            dest = "${0:02X}{1:02X}(A{2:n})".format(data[length-2], data[length-1], xn)
+        elif m == 6:  # d8(An,Xn)
+            if data[length-2] & 0x80:
+                dest = "${0:02X}(A{1:n},A{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
+            else:
+                dest = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
+        elif m == 7 and xn == 0:  # abs.W
+            dest = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
+        elif m == 7 and xn == 1:  # abs.L
+            dest = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+
+        printInstruction(address, length, mnemonic, data, dest)
+
     else:
         print("Error: unsupported instruction", mnemonic)
 
