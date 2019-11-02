@@ -626,7 +626,7 @@ while True:
         elif m == 7 and xn == 3:  # d8(PX,Xn)
             length = 4
 
-        if data[0] == 0x80:  # Immediate
+        if data[0] == 0x08:  # Immediate
             length += 2
 
         for i in range(2, length):
@@ -636,7 +636,7 @@ while True:
         # BTST  #data, <ea>  0000100000MMMXXX
         # BTST  Dn, <ea>     0000DDD100MMMXXX
 
-        if data[0] == 0x80:  # Immediate
+        if data[0] == 0x08:  # Immediate
             src = "#${0:02X}".format(data[3])
         else:
             src = "D{0:d}".format(dn)
@@ -661,12 +661,12 @@ while True:
         elif m == 7 and xn == 1:  # abs.L
             dest = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
         elif m == 7 and xn == 2:  # d16(PC)
-            dest = "${0:02X}{1:02X}(PC)".format(data[2], data[3])
+            dest = "${0:02X}{1:02X}(PC)".format(data[length-2], data[length-1])
         elif m == 7 and xn == 3:  # d8(PX,Xn)
-            if data[2] & 0x80:
-                dest = "${0:02X}(PC,A{1:d})".format(data[3], (data[2] & 0x70) >> 4)
+            if data[length-2] & 0x80:
+                dest = "${0:02X}(PC,A{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
             else:
-                dest = "${0:02X}(PC,D{1:d})".format(data[3], (data[2] & 0x70) >> 4)
+                dest = "${0:02X}(PC,D{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
 
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
