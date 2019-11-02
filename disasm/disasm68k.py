@@ -671,7 +671,7 @@ while True:
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
 
-    elif mnemonic == "TST":
+    elif mnemonic in ("TST", "NEGX", "CLR", "NEG", "NOT"):
         s = (data[1] & 0xc0) >> 6
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07

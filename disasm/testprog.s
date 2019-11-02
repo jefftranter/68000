@@ -526,3 +526,123 @@ loop3:
         tst.l   $12(a6,d7)
         tst.l   $1234.w
         tst.l   $12345678
+
+        negx.b  d1
+        negx.b  (a2)
+        negx.b  (a3)+
+        negx.b  -(a4)
+        negx.b  $12(a5)
+        negx.b  $12(a6,a7)
+        negx.b  $12(a6,d7)
+        negx.b  $1234.w
+        negx.b  $12345678
+
+        negx.w  d1
+        negx.w  (a2)
+        negx.w  (a3)+
+        negx.w  -(a4)
+        negx.w  $12(a5)
+        negx.w  $12(a6,a7)
+        negx.w  $12(a6,d7)
+        negx.w  $1234.w
+        negx.w  $12345678
+
+        negx.l  d1
+        negx.l  (a2)
+        negx.l  (a3)+
+        negx.l  -(a4)
+        negx.l  $12(a5)
+        negx.l  $12(a6,a7)
+        negx.l  $12(a6,d7)
+        negx.l  $1234.w
+        negx.l  $12345678
+
+        clr.b   d1
+        clr.b   (a2)
+        clr.b   (a3)+
+        clr.b   -(a4)
+        clr.b   $12(a5)
+        clr.b   $12(a6,a7)
+        clr.b   $12(a6,d7)
+        clr.b   $1234.w
+        clr.b   $12345678
+
+        clr.w   d1
+        clr.w   (a2)
+        clr.w   (a3)+
+        clr.w   -(a4)
+        clr.w   $12(a5)
+        clr.w   $12(a6,a7)
+        clr.w   $12(a6,d7)
+        clr.w   $1234.w
+        clr.w   $12345678
+
+        clr.l   d1
+        clr.l   (a2)
+        clr.l   (a3)+
+        clr.l   -(a4)
+        clr.l   $12(a5)
+        clr.l   $12(a6,a7)
+        clr.l   $12(a6,d7)
+        clr.l   $1234.w
+        clr.l   $12345678
+
+        neg.b   d1
+        neg.b   (a2)
+        neg.b   (a3)+
+        neg.b   -(a4)
+        neg.b   $12(a5)
+        neg.b   $12(a6,a7)
+        neg.b   $12(a6,d7)
+        neg.b   $1234.w
+        neg.b   $12345678
+
+        neg.w   d1
+        neg.w   (a2)
+        neg.w   (a3)+
+        neg.w   -(a4)
+        neg.w   $12(a5)
+        neg.w   $12(a6,a7)
+        neg.w   $12(a6,d7)
+        neg.w   $1234.w
+        neg.w   $12345678
+
+        neg.l   d1
+        neg.l   (a2)
+        neg.l   (a3)+
+        neg.l   -(a4)
+        neg.l   $12(a5)
+        neg.l   $12(a6,a7)
+        neg.l   $12(a6,d7)
+        neg.l   $1234.w
+        neg.l   $12345678
+
+        not.b   d1
+        not.b   (a2)
+        not.b   (a3)+
+        not.b   -(a4)
+        not.b   $12(a5)
+        not.b   $12(a6,a7)
+        not.b   $12(a6,d7)
+        not.b   $1234.w
+        not.b   $12345678
+
+        not.w   d1
+        not.w   (a2)
+        not.w   (a3)+
+        not.w   -(a4)
+        not.w   $12(a5)
+        not.w   $12(a6,a7)
+        not.w   $12(a6,d7)
+        not.w   $1234.w
+        not.w   $12345678
+
+        not.l   d1
+        not.l   (a2)
+        not.l   (a3)+
+        not.l   -(a4)
+        not.l   $12(a5)
+        not.l   $12(a6,a7)
+        not.l   $12(a6,d7)
+        not.l   $1234.w
+        not.l   $12345678
