@@ -537,7 +537,7 @@ while True:
             operand = ""
         printInstruction(address, length, mnemonic, data, operand)
 
-    elif mnemonic in ("ORI", "ANDI", "SUBI", "ADDI", "EORI", "CMPI", "NEGX", "CLR", "NEG", "NOT", "TST"):
+    elif mnemonic in ("ORI", "ANDI", "SUBI", "ADDI", "EORI", "CMPI"):
         s = (data[1] & 0xc0) >> 6
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
