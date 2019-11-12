@@ -646,3 +646,41 @@ loop3:
         not.l   $12(a6,d7)
         not.l   $1234.w
         not.l   $12345678
+
+        move    sr,d1
+        move    sr,(a2)
+        move    sr,(a3)+
+        move    sr,-(a4)
+        move    sr,$12(a5)
+        move    sr,$12(a6,a7)
+        move    sr,$12(a6,d7)
+        move    sr,$1234.w
+        move    sr,$12345678
+
+        move    d1,ccr
+        move    (a2),ccr
+        move    (a3)+,ccr
+        move    -(a4),ccr
+        move    $12(a5),ccr
+        move    $12(a6,a7),ccr
+        move    $12(a6,d7),ccr
+        move    $1234.w,ccr
+        move    $12345678,ccr
+        move    #$1234,ccr
+        move    ($1234,pc),ccr
+        move    $12(pc,a1),ccr
+        move    $12(pc,d2),ccr
+
+        move    d1,sr
+        move    (a2),sr
+        move    (a3)+,sr
+        move    -(a4),sr
+        move    $12(a5),sr
+        move    $12(a6,a7),sr
+        move    $12(a6,d7),sr
+        move    $1234.w,sr
+        move    $12345678,sr
+        move    #$1234,sr
+        move    ($1234,pc),sr
+        move    $12(pc,a1),sr
+        move    $12(pc,d2),sr
