@@ -714,3 +714,75 @@ loop3:
         tas     $12(a6,d7)
         tas     $1234.w
         tas     $12345678
+
+        asl     (a2)
+        asl     (a3)+
+        asl     -(a4)
+        asl     $1234(a5)
+        asl     $12(a6,a7)
+        asl     $12(a6,d7)
+        asl     $1234.w
+        asl     $12345678
+
+        asr     (a2)
+        asr     (a3)+
+        asr     -(a4)
+        asr     $1234(a5)
+        asr     $12(a6,a7)
+        asr     $12(a6,d7)
+        asr     $1234.w
+        asr     $12345678
+
+        lsl     (a2)
+        lsl     (a3)+
+        lsl     -(a4)
+        lsl     $1234(a5)
+        lsl     $12(a6,a7)
+        lsl     $12(a6,d7)
+        lsl     $1234.w
+        lsl     $12345678
+
+        lsr     (a2)
+        lsr     (a3)+
+        lsr     -(a4)
+        lsr     $1234(a5)
+        lsr     $12(a6,a7)
+        lsr     $12(a6,d7)
+        lsr     $1234.w
+        lsr     $12345678
+
+        rol     (a2)
+        rol     (a3)+
+        rol     -(a4)
+        rol     $1234(a5)
+        rol     $12(a6,a7)
+        rol     $12(a6,d7)
+        rol     $1234.w
+        rol     $12345678
+
+        ror     (a2)
+        ror     (a3)+
+        ror     -(a4)
+        ror     $1234(a5)
+        ror     $12(a6,a7)
+        ror     $12(a6,d7)
+        ror     $1234.w
+        ror     $12345678
+
+        roxl    (a2)
+        roxl    (a3)+
+        roxl    -(a4)
+        roxl    $1234(a5)
+        roxl    $12(a6,a7)
+        roxl    $12(a6,d7)
+        roxl    $1234.w
+        roxl    $12345678
+
+        roxr    (a2)
+        roxr    (a3)+
+        roxr    -(a4)
+        roxr    $1234(a5)
+        roxr    $12(a6,a7)
+        roxr    $12(a6,d7)
+        roxr    $1234.w
+        roxr    $12345678
