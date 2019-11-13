@@ -800,7 +800,7 @@ while True:
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types: NBCD
-    elif mnemonic == "NBCD":
+    elif mnemonic in ("NBCD", "PEA", "TAS"):
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
 
@@ -820,6 +820,10 @@ while True:
             length = 4
         elif m == 7 and xn == 1:  # abs.L
             length = 6
+        elif m == 7 and xn == 2:  # d16(PC)
+            length = 4
+        elif m == 7 and xn == 3:  # d8(PC,Xn)
+            length = 4
         else:
             print("Error: Invalid addressing mode.")
             length = 2
@@ -847,6 +851,15 @@ while True:
             operand = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
         elif m == 7 and xn == 1:  # abs.L
             operand = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+        elif m == 7 and xn == 2:  # d16(PC)
+            operand = "${0:02X}{1:02X}(PC)".format(data[length-2], data[length-1])
+        elif m == 7 and xn == 3:  # d8(PC,Xn)
+            if data[length-2] & 0x80:
+                operand = "${0:02X}(PC,A{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
+            else:
+                operand = "${0:02X}(PC,D{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
+        elif m == 7 and xn == 4:  # #imm
+            operand = "#${0:02X}{1:02X}".format(data[length-2], data[length-1])
 
         printInstruction(address, length, mnemonic, data, operand)
 

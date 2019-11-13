@@ -694,3 +694,23 @@ loop3:
         nbcd    $12(a6,d7)
         nbcd    $1234.w
         nbcd    $12345678
+
+        pea     (a2)
+        pea     $1234(a5)
+        pea     $12(a6,a7)
+        pea     $12(a6,d7)
+        pea     $1234.w
+        pea     $12345678
+        pea     ($1234,pc)
+        pea     $12(pc,a1)
+        pea     $12(pc,d2)
+
+        tas     d1
+        tas     (a2)
+        tas     (a3)+
+        tas     -(a4)
+        tas     $1234(a5)
+        tas     $12(a6,a7)
+        tas     $12(a6,d7)
+        tas     $1234.w
+        tas     $12345678
