@@ -411,7 +411,7 @@ loop3:
         btst    d1,(a2)
         btst    d2,(a3)+
         btst    d3,-(a4)
-        btst    d4,$12(a5)
+        btst    d4,$1234(a5)
         btst    d5,$12(a6,a7)
         btst    d6,$12(a6,d7)
         btst    d7,$1234.w
@@ -425,7 +425,7 @@ loop3:
         btst    #2,(a2)
         btst    #3,(a3)+
         btst    #4,-(a4)
-        btst    #5,$12(a5)
+        btst    #5,$1234(a5)
         btst    #6,$12(a6,a7)
         btst    #7,$12(a6,d7)
         btst    #8,$1234.w
@@ -438,7 +438,7 @@ loop3:
         bclr    d1,(a2)
         bclr    d2,(a3)+
         bclr    d3,-(a4)
-        bclr    d4,$12(a5)
+        bclr    d4,$1234(a5)
         bclr    d5,$12(a6,a7)
         bclr    d6,$12(a6,d7)
         bclr    d7,$1234.w
@@ -449,7 +449,7 @@ loop3:
         bclr    #2,(a2)
         bclr    #3,(a3)+
         bclr    #4,-(a4)
-        bclr    #5,$12(a5)
+        bclr    #5,$1234(a5)
         bclr    #6,$12(a6,a7)
         bclr    #7,$12(a6,d7)
         bclr    #8,$1234.w
@@ -459,7 +459,7 @@ loop3:
         bchg    d1,(a2)
         bchg    d2,(a3)+
         bchg    d3,-(a4)
-        bchg    d4,$12(a5)
+        bchg    d4,$1234(a5)
         bchg    d5,$12(a6,a7)
         bchg    d6,$12(a6,d7)
         bchg    d7,$1234.w
@@ -470,7 +470,7 @@ loop3:
         bchg    #2,(a2)
         bchg    #3,(a3)+
         bchg    #4,-(a4)
-        bchg    #5,$12(a5)
+        bchg    #5,$1234(a5)
         bchg    #6,$12(a6,a7)
         bchg    #7,$12(a6,d7)
         bchg    #8,$1234.w
@@ -480,7 +480,7 @@ loop3:
         bset    d1,(a2)
         bset    d2,(a3)+
         bset    d3,-(a4)
-        bset    d4,$12(a5)
+        bset    d4,$1234(a5)
         bset    d5,$12(a6,a7)
         bset    d6,$12(a6,d7)
         bset    d7,$1234.w
@@ -491,7 +491,7 @@ loop3:
         bset    #2,(a2)
         bset    #3,(a3)+
         bset    #4,-(a4)
-        bset    #5,$12(a5)
+        bset    #5,$1234(a5)
         bset    #6,$12(a6,a7)
         bset    #7,$12(a6,d7)
         bset    #8,$1234.w
@@ -501,7 +501,7 @@ loop3:
         tst.b   (a2)
         tst.b   (a3)+
         tst.b   -(a4)
-        tst.b   $12(a5)
+        tst.b   $1234(a5)
         tst.b   $12(a6,a7)
         tst.b   $12(a6,d7)
         tst.b   $1234.w
@@ -511,7 +511,7 @@ loop3:
         tst.w   (a2)
         tst.w   (a3)+
         tst.w   -(a4)
-        tst.w   $12(a5)
+        tst.w   $1234(a5)
         tst.w   $12(a6,a7)
         tst.w   $12(a6,d7)
         tst.w   $1234.w
@@ -521,7 +521,7 @@ loop3:
         tst.l   (a2)
         tst.l   (a3)+
         tst.l   -(a4)
-        tst.l   $12(a5)
+        tst.l   $1234(a5)
         tst.l   $12(a6,a7)
         tst.l   $12(a6,d7)
         tst.l   $1234.w
@@ -531,7 +531,7 @@ loop3:
         negx.b  (a2)
         negx.b  (a3)+
         negx.b  -(a4)
-        negx.b  $12(a5)
+        negx.b  $1234(a5)
         negx.b  $12(a6,a7)
         negx.b  $12(a6,d7)
         negx.b  $1234.w
@@ -541,7 +541,7 @@ loop3:
         negx.w  (a2)
         negx.w  (a3)+
         negx.w  -(a4)
-        negx.w  $12(a5)
+        negx.w  $1234(a5)
         negx.w  $12(a6,a7)
         negx.w  $12(a6,d7)
         negx.w  $1234.w
@@ -551,7 +551,7 @@ loop3:
         negx.l  (a2)
         negx.l  (a3)+
         negx.l  -(a4)
-        negx.l  $12(a5)
+        negx.l  $1234(a5)
         negx.l  $12(a6,a7)
         negx.l  $12(a6,d7)
         negx.l  $1234.w
@@ -561,7 +561,7 @@ loop3:
         clr.b   (a2)
         clr.b   (a3)+
         clr.b   -(a4)
-        clr.b   $12(a5)
+        clr.b   $1234(a5)
         clr.b   $12(a6,a7)
         clr.b   $12(a6,d7)
         clr.b   $1234.w
@@ -571,7 +571,7 @@ loop3:
         clr.w   (a2)
         clr.w   (a3)+
         clr.w   -(a4)
-        clr.w   $12(a5)
+        clr.w   $1234(a5)
         clr.w   $12(a6,a7)
         clr.w   $12(a6,d7)
         clr.w   $1234.w
@@ -581,7 +581,7 @@ loop3:
         clr.l   (a2)
         clr.l   (a3)+
         clr.l   -(a4)
-        clr.l   $12(a5)
+        clr.l   $1234(a5)
         clr.l   $12(a6,a7)
         clr.l   $12(a6,d7)
         clr.l   $1234.w
@@ -591,7 +591,7 @@ loop3:
         neg.b   (a2)
         neg.b   (a3)+
         neg.b   -(a4)
-        neg.b   $12(a5)
+        neg.b   $1234(a5)
         neg.b   $12(a6,a7)
         neg.b   $12(a6,d7)
         neg.b   $1234.w
@@ -601,7 +601,7 @@ loop3:
         neg.w   (a2)
         neg.w   (a3)+
         neg.w   -(a4)
-        neg.w   $12(a5)
+        neg.w   $1234(a5)
         neg.w   $12(a6,a7)
         neg.w   $12(a6,d7)
         neg.w   $1234.w
@@ -611,7 +611,7 @@ loop3:
         neg.l   (a2)
         neg.l   (a3)+
         neg.l   -(a4)
-        neg.l   $12(a5)
+        neg.l   $1234(a5)
         neg.l   $12(a6,a7)
         neg.l   $12(a6,d7)
         neg.l   $1234.w
@@ -621,7 +621,7 @@ loop3:
         not.b   (a2)
         not.b   (a3)+
         not.b   -(a4)
-        not.b   $12(a5)
+        not.b   $1234(a5)
         not.b   $12(a6,a7)
         not.b   $12(a6,d7)
         not.b   $1234.w
@@ -631,7 +631,7 @@ loop3:
         not.w   (a2)
         not.w   (a3)+
         not.w   -(a4)
-        not.w   $12(a5)
+        not.w   $1234(a5)
         not.w   $12(a6,a7)
         not.w   $12(a6,d7)
         not.w   $1234.w
@@ -641,7 +641,7 @@ loop3:
         not.l   (a2)
         not.l   (a3)+
         not.l   -(a4)
-        not.l   $12(a5)
+        not.l   $1234(a5)
         not.l   $12(a6,a7)
         not.l   $12(a6,d7)
         not.l   $1234.w
@@ -651,7 +651,7 @@ loop3:
         move    sr,(a2)
         move    sr,(a3)+
         move    sr,-(a4)
-        move    sr,$12(a5)
+        move    sr,$1234(a5)
         move    sr,$12(a6,a7)
         move    sr,$12(a6,d7)
         move    sr,$1234.w
@@ -661,7 +661,7 @@ loop3:
         move    (a2),ccr
         move    (a3)+,ccr
         move    -(a4),ccr
-        move    $12(a5),ccr
+        move    $1234(a5),ccr
         move    $12(a6,a7),ccr
         move    $12(a6,d7),ccr
         move    $1234.w,ccr
@@ -675,7 +675,7 @@ loop3:
         move    (a2),sr
         move    (a3)+,sr
         move    -(a4),sr
-        move    $12(a5),sr
+        move    $1234(a5),sr
         move    $12(a6,a7),sr
         move    $12(a6,d7),sr
         move    $1234.w,sr
