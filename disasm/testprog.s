@@ -684,3 +684,13 @@ loop3:
         move    ($1234,pc),sr
         move    $12(pc,a1),sr
         move    $12(pc,d2),sr
+
+        nbcd    d1
+        nbcd    (a2)
+        nbcd    (a3)+
+        nbcd    -(a4)
+        nbcd    $1234(a5)
+        nbcd    $12(a6,a7)
+        nbcd    $12(a6,d7)
+        nbcd    $1234.w
+        nbcd    $12345678
