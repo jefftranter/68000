@@ -878,11 +878,11 @@ loop3:
         suba.l  #$12345678,a1
 
         movem.w d1/d3/d5/d7,(a1)
-        movem.w d1/d3/d5/d7,-(a3)
+        movem.w a1/a3/a5/a7,-(a3)
         movem.w d1/d3/d5/d7,$1234(a5)
-        movem.w d1/d3/d5/d7,$12(a6,a7)
+        movem.w a1/a3/a5/a7,$12(a6,a7)
         movem.w d1/d3/d5/d7,$12(a6,d7)
-        movem.w d1/d3/d5/d7,$1234.w
+        movem.w a1/a3/a5/a7,$1234.w
         movem.w d1/d3/d5/d7,$12345678
 
         movem.w (a1),d1/d3/d5/d7/a0/a2/a4/a6
@@ -916,4 +916,4 @@ loop3:
         movem.l $12(pc,d2),d1/d3/d5/d7/a0/a2/a4/a6
 
         movem.l (a1),d0-d7/a0-a7
-        movem.l (a1),d1/a2
+        movem.l (a2),d1/a2

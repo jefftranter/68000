@@ -559,6 +559,9 @@ while True:
             length = 6
         elif m == 7 and xn == 1:  # abs.L   8/10
             length = 8
+        else:
+            print("Error: Invalid addressing mode.")
+            length = 2
 
         if s == 2:  # L
             length += 2
@@ -597,6 +600,8 @@ while True:
             dest = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
         elif m == 7 and xn == 1:  # abs.L   8/10
             dest = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+        else:
+            print("Error: Invalid addressing mode.")
 
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
@@ -626,6 +631,8 @@ while True:
             length = 4
         elif m == 7 and xn == 3:  # d8(PC,Xn)
             length = 4
+        else:
+            print("Error: Invalid addressing mode.")
 
         if data[0] == 0x08:  # Immediate
             length += 2
@@ -668,6 +675,8 @@ while True:
                 dest = "${0:02X}(PC,A{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
             else:
                 dest = "${0:02X}(PC,D{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
+        else:
+            print("Error: Invalid addressing mode.")
 
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
@@ -693,6 +702,8 @@ while True:
             length = 4
         elif m == 7 and xn == 1:  # abs.L
             length = 6
+        else:
+            print("Error: Invalid addressing mode.")
 
         for i in range(2, length):
             data[i] = ord(f.read(1))
@@ -725,6 +736,8 @@ while True:
             dest = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
         elif m == 7 and xn == 1:  # abs.L
             dest = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+        else:
+            print("Error: Invalid addressing mode.")
 
         printInstruction(address, length, mnemonic, data, dest)
 
@@ -755,6 +768,8 @@ while True:
             length = 4
         elif m == 7 and xn == 4:  # #imm
             length = 4
+        else:
+            print("Error: Invalid addressing mode.")
 
         for i in range(2, length):
             data[i] = ord(f.read(1))
@@ -787,6 +802,8 @@ while True:
                 dest = "${0:02X}(PC,D{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
         elif m == 7 and xn == 4:  # #imm
             dest = "#${0:02X}{1:02X}".format(data[length-2], data[length-1])
+        else:
+            print("Error: Invalid addressing mode.")
 
         if mnemonic == "MOVE from SR":
             mnemonic = "MOVE"
@@ -861,6 +878,8 @@ while True:
                 operand = "${0:02X}(PC,D{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
         elif m == 7 and xn == 4:  # #imm
             operand = "#${0:02X}{1:02X}".format(data[length-2], data[length-1])
+        else:
+            print("Error: Invalid addressing mode.")
 
         printInstruction(address, length, mnemonic, data, operand)
 
@@ -923,6 +942,8 @@ while True:
             operand = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
         elif m == 7 and xn == 1:  # abs.L
             operand = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+        else:
+            print("Error: Invalid addressing mode.")
 
         printInstruction(address, length, mnemonic, data, operand)
 
@@ -995,13 +1016,111 @@ while True:
             operand = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
         elif m == 7 and xn == 1:  # abs.L
             operand = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+        elif m == 7 and xn == 2:  # d16(PC)
+            operand = "${0:02X}{1:02X}(PC)".format(data[length-2], data[length-1])
+        elif m == 7 and xn == 3:  # d8(PC,Xn)
+            if data[length-2] & 0x80:
+                operand = "${0:02X}(PC,A{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
+            else:
+                operand = "${0:02X}(PC,D{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
         elif m == 7 and xn == 4:  # #imm
             if s == 0:
                 operand = "#${0:02X}{1:02X}".format(data[length-2], data[length-1])
             else:
                 operand = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+        else:
+            print("Error: Invalid addressing mode.")
 
         operand = operand + ",A{0:n}".format(an)
+
+        printInstruction(address, length, mnemonic, data, operand)
+
+    # Handle instruction types: MOVEM
+    elif mnemonic == "MOVEM":
+        d = (data[0] & 0x04) >> 2
+        s = (data[1] & 0x40) >> 6
+        m = (data[1] & 0x38) >> 3
+        xn = data[1] & 0x07
+
+        # Handle size
+        if s == 0:  # W
+            mnemonic += ".w"
+        elif s == 1:  # L
+            mnemonic += ".l"
+
+        if m == 2:  # (An)
+            length = 4
+        elif m == 3:  # (An)+
+            length = 4
+        elif m == 4:  # -(An)
+            length = 4
+        elif m == 5:  # d16(An)
+            length = 6
+        elif m == 6:  # d8(An,Xn)
+            length = 6
+        elif m == 7 and xn == 0:  # abs.W
+            length = 6
+        elif m == 7 and xn == 1:  # abs.L
+            length = 8
+        elif m == 7 and xn == 2:  # d16(PC)
+            length = 6
+        elif m == 7 and xn == 3:  # d8(PC,Xn)
+            length = 6
+        elif m == 7 and xn == 4:  # #imm
+            if s == 0:
+                length = 4
+            else:
+                length = 6
+        else:
+            print("Error: Invalid addressing mode.")
+            length = 2
+            operand = ""
+
+        for i in range(2, length):
+            data[i] = ord(f.read(1))
+
+        regs = 256 * data[2] + data[3]
+
+        if m == 0:  # Dn
+            operand = "D{0:n}".format(xn)
+        elif m == 1:  # An
+            operand = "A{0:n}".format(xn)
+        elif m == 2:  # (An)
+            operand = "(A{0:n})".format(xn)
+        elif m == 3:  # (An)+
+            operand = "(A{0:n})+".format(xn)
+        elif m == 4:  # -(An)
+            operand = "-(A{0:n})".format(xn)
+        elif m == 5:  # d16(An)
+            operand = "${0:02X}{1:02X}(A{2:n})".format(data[length-2], data[length-1], xn)
+        elif m == 6:  # d8(An,Xn)
+            if data[length-2] & 0x80:
+                operand = "${0:02X}(A{1:n},A{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
+            else:
+                operand = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
+        elif m == 7 and xn == 0:  # abs.W
+            operand = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
+        elif m == 7 and xn == 1:  # abs.L
+            operand = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+        elif m == 7 and xn == 2:  # d16(PC)
+            operand = "${0:02X}{1:02X}(PC)".format(data[length-2], data[length-1])
+        elif m == 7 and xn == 3:  # d8(PC,Xn)
+            if data[length-2] & 0x80:
+                operand = "${0:02X}(PC,A{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
+            else:
+                operand = "${0:02X}(PC,D{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
+        elif m == 7 and xn == 4:  # #imm
+            if s == 0:
+                operand = "#${0:02X}{1:02X}".format(data[length-2], data[length-1])
+            else:
+                operand = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+        else:
+            print("Error: Invalid addressing mode.")
+
+        if d == 0:
+            operand = "#${0:04X},".format(regs) + operand
+        else:
+            operand = operand + ",#${:04X}".format(regs)
 
         printInstruction(address, length, mnemonic, data, operand)
 
@@ -1013,3 +1132,4 @@ while True:
     length = 0
     opcode = 0
     mnemonic = ""
+    operand = ""
