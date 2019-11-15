@@ -917,3 +917,5 @@ loop3:
 
         movem.l (a1),d0-d7/a0-a7
         movem.l (a2),d1/a2
+        movem.l d2/a3,-(a3)
+        movem.l (a4)+,d3/a4

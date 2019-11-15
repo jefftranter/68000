@@ -115,6 +115,36 @@ def printInstruction(address, length, mnemonic, data, operand):
     print(line)
 
 
+# Return a register list as used by the MOVEM instruction.
+# Parameter mask has the 16-bit register mask.
+# Parameter aFirst is set true if MSB is A7, otherwise is D0.
+def registerList(aFirst, mask):
+    if mask < 0 or mask > 0xffff:
+        print("Error: bad mask {0:d} passed to registerList().".format(mask))
+        sys.exit(1)
+
+    result = ""
+    first = True
+
+    for bit in range(16):
+        if mask & (1 << bit):
+            if not first:
+                result = result + "/"
+            first = False
+            if aFirst:
+                if bit <= 7:
+                    result = result + "A{0:d}".format(7 - bit)
+                else:
+                    result = result + "D{0:d}".format(15 - bit)
+            else:
+                if bit <= 7:
+                    result = result + "D{0:d}".format(bit)
+                else:
+                    result = result + "A{0:d}".format(bit - 8)
+
+    return result
+
+
 # Initialize variables
 address = 0            # Start address if instruction
 length = 0             # Length of instruction in bytes
@@ -1118,9 +1148,9 @@ while True:
             print("Error: Invalid addressing mode.")
 
         if d == 0:
-            operand = "#${0:04X},".format(regs) + operand
+            operand = registerList(m == 4, regs) + "," + operand
         else:
-            operand = operand + ",#${:04X}".format(regs)
+            operand = operand + "," + registerList(m == 4, regs)
 
         printInstruction(address, length, mnemonic, data, operand)
 
