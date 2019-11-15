@@ -876,3 +876,44 @@ loop3:
         suba.l  $12(pc,a1),a6
         suba.l  $12(pc,d2),a7
         suba.l  #$12345678,a1
+
+        movem.w d1/d3/d5/d7,(a1)
+        movem.w d1/d3/d5/d7,-(a3)
+        movem.w d1/d3/d5/d7,$1234(a5)
+        movem.w d1/d3/d5/d7,$12(a6,a7)
+        movem.w d1/d3/d5/d7,$12(a6,d7)
+        movem.w d1/d3/d5/d7,$1234.w
+        movem.w d1/d3/d5/d7,$12345678
+
+        movem.w (a1),d1/d3/d5/d7/a0/a2/a4/a6
+        movem.w (a2)+,d1/d3/d5/d7/a0/a2/a4/a6
+        movem.w $1234(a5),d1/d3/d5/d7/a0/a2/a4/a6
+        movem.w $12(a6,a7),d1/d3/d5/d7/a0/a2/a4/a6
+        movem.w $12(a6,d7),d1/d3/d5/d7/a0/a2/a4/a6
+        movem.w $1234.w,d1/d3/d5/d7/a0/a2/a4/a6
+        movem.w $12345678,d1/d3/d5/d7/a0/a2/a4/a6
+        movem.w ($1234,pc),d1/d3/d5/d7/a0/a2/a4/a6
+        movem.w $12(pc,a1),d1/d3/d5/d7/a0/a2/a4/a6
+        movem.w $12(pc,d2),d1/d3/d5/d7/a0/a2/a4/a6
+
+        movem.l d1/d3/d5/d7/a0/a2/a4/a6,(a1)
+        movem.l d1/d3/d5/d7/a0/a2/a4/a6,-(a3)
+        movem.l d1/d3/d5/d7/a0/a2/a4/a6,$1234(a5)
+        movem.l d1/d3/d5/d7/a0/a2/a4/a6,$12(a6,a7)
+        movem.l d1/d3/d5/d7/a0/a2/a4/a6,$12(a6,d7)
+        movem.l d1/d3/d5/d7/a0/a2/a4/a6,$1234.w
+        movem.l d1/d3/d5/d7/a0/a2/a4/a6,$12345678
+
+        movem.l (a1),d1/d3/d5/d7/a0/a2/a4/a6
+        movem.l (a2)+,d1/d3/d5/d7/a0/a2/a4/a6
+        movem.l $1234(a5),d1/d3/d5/d7/a0/a2/a4/a6
+        movem.l $12(a6,a7),d1/d3/d5/d7/a0/a2/a4/a6
+        movem.l $12(a6,d7),d1/d3/d5/d7/a0/a2/a4/a6
+        movem.l $1234.w,d1/d3/d5/d7/a0/a2/a4/a6
+        movem.l $12345678,d1/d3/d5/d7/a0/a2/a4/a6
+        movem.l ($1234,pc),d1/d3/d5/d7/a0/a2/a4/a6
+        movem.l $12(pc,a1),d1/d3/d5/d7/a0/a2/a4/a6
+        movem.l $12(pc,d2),d1/d3/d5/d7/a0/a2/a4/a6
+
+        movem.l (a1),d0-d7/a0-a7
+        movem.l (a1),d1/a2
