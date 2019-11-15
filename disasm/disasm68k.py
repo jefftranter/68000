@@ -926,6 +926,85 @@ while True:
 
         printInstruction(address, length, mnemonic, data, operand)
 
+    # Handle instruction types: ADDA, CMPA, SUBA
+    elif mnemonic in ("ADDA", "CMPA", "SUBA"):
+        an = (data[0] & 0xe) >> 1
+        s = data[0] & 0x01
+        m = (data[1] & 0x38) >> 3
+        xn = data[1] & 0x07
+
+        # Handle size
+        if s == 0:  # W
+            mnemonic += ".w"
+        elif s == 1:  # L
+            mnemonic += ".l"
+
+        if m == 0:  # Dn
+            length = 2
+        elif m == 1:  # An
+            length = 2
+        elif m == 2:  # (An)
+            length = 2
+        elif m == 3:  # (An)+
+            length = 2
+        elif m == 4:  # -(An)
+            length = 2
+        elif m == 5:  # d16(An)
+            length = 4
+        elif m == 6:  # d8(An,Xn)
+            length = 4
+        elif m == 7 and xn == 0:  # abs.W
+            length = 4
+        elif m == 7 and xn == 1:  # abs.L
+            length = 6
+        elif m == 7 and xn == 2:  # d16(PC)
+            length = 4
+        elif m == 7 and xn == 3:  # d8(PC,Xn)
+            length = 4
+        elif m == 7 and xn == 4:  # #imm
+            if s == 0:
+                length = 4
+            else:
+                length = 6
+        else:
+            print("Error: Invalid addressing mode.")
+            length = 2
+            operand = ""
+
+        for i in range(2, length):
+            data[i] = ord(f.read(1))
+
+        if m == 0:  # Dn
+            operand = "D{0:n}".format(xn)
+        elif m == 1:  # An
+            operand = "A{0:n}".format(xn)
+        elif m == 2:  # (An)
+            operand = "(A{0:n})".format(xn)
+        elif m == 3:  # (An)+
+            operand = "(A{0:n})+".format(xn)
+        elif m == 4:  # -(An)
+            operand = "-(A{0:n})".format(xn)
+        elif m == 5:  # d16(An)
+            operand = "${0:02X}{1:02X}(A{2:n})".format(data[length-2], data[length-1], xn)
+        elif m == 6:  # d8(An,Xn)
+            if data[length-2] & 0x80:
+                operand = "${0:02X}(A{1:n},A{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
+            else:
+                operand = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
+        elif m == 7 and xn == 0:  # abs.W
+            operand = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
+        elif m == 7 and xn == 1:  # abs.L
+            operand = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+        elif m == 7 and xn == 4:  # #imm
+            if s == 0:
+                operand = "#${0:02X}{1:02X}".format(data[length-2], data[length-1])
+            else:
+                operand = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+
+        operand = operand + ",A{0:n}".format(an)
+
+        printInstruction(address, length, mnemonic, data, operand)
+
     else:
         print("Error: unsupported instruction", mnemonic)
 

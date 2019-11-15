@@ -786,3 +786,93 @@ loop3:
         roxr    $12(a6,d7)
         roxr    $1234.w
         roxr    $12345678
+
+        adda.w  d1,a1
+        adda.w  a1,a2
+        adda.w  (a2),a3
+        adda.w  (a3)+,a4
+        adda.w  -(a4),a5
+        adda.w  $1234(a5),a6
+        adda.w  $12(a6,a7),a1
+        adda.w  $12(a6,d7),a2
+        adda.w  $1234.w,a3
+        adda.w  $12345678,a4
+        adda.w  ($1234,pc),a5
+        adda.w  $12(pc,a1),a6
+        adda.w  $12(pc,d2),a7
+        adda.w  #$1234,a1
+
+        adda.l  d1,a1
+        adda.l  a1,a2
+        adda.l  (a2),a3
+        adda.l  (a3)+,a4
+        adda.l  -(a4),a5
+        adda.l  $1234(a5),a6
+        adda.l  $12(a6,a7),a1
+        adda.l  $12(a6,d7),a2
+        adda.l  $1234.w,a3
+        adda.l  $12345678,a4
+        adda.l  ($1234,pc),a5
+        adda.l  $12(pc,a1),a6
+        adda.l  $12(pc,d2),a7
+        adda.l  #$12345678,a1
+
+        cmpa.w  d1,a1
+        cmpa.w  a1,a2
+        cmpa.w  (a2),a3
+        cmpa.w  (a3)+,a4
+        cmpa.w  -(a4),a5
+        cmpa.w  $1234(a5),a6
+        cmpa.w  $12(a6,a7),a1
+        cmpa.w  $12(a6,d7),a2
+        cmpa.w  $1234.w,a3
+        cmpa.w  $12345678,a4
+        cmpa.w  ($1234,pc),a5
+        cmpa.w  $12(pc,a1),a6
+        cmpa.w  $12(pc,d2),a7
+        cmpa.w  #$1234,a1
+
+        cmpa.l  d1,a1
+        cmpa.l  a1,a2
+        cmpa.l  (a2),a3
+        cmpa.l  (a3)+,a4
+        cmpa.l  -(a4),a5
+        cmpa.l  $1234(a5),a6
+        cmpa.l  $12(a6,a7),a1
+        cmpa.l  $12(a6,d7),a2
+        cmpa.l  $1234.w,a3
+        cmpa.l  $12345678,a4
+        cmpa.l  ($1234,pc),a5
+        cmpa.l  $12(pc,a1),a6
+        cmpa.l  $12(pc,d2),a7
+        cmpa.l  #$12345678,a1
+
+        suba.w  d1,a1
+        suba.w  a1,a2
+        suba.w  (a2),a3
+        suba.w  (a3)+,a4
+        suba.w  -(a4),a5
+        suba.w  $1234(a5),a6
+        suba.w  $12(a6,a7),a1
+        suba.w  $12(a6,d7),a2
+        suba.w  $1234.w,a3
+        suba.w  $12345678,a4
+        suba.w  ($1234,pc),a5
+        suba.w  $12(pc,a1),a6
+        suba.w  $12(pc,d2),a7
+        suba.w  #$1234,a1
+
+        suba.l  d1,a1
+        suba.l  a1,a2
+        suba.l  (a2),a3
+        suba.l  (a3)+,a4
+        suba.l  -(a4),a5
+        suba.l  $1234(a5),a6
+        suba.l  $12(a6,a7),a1
+        suba.l  $12(a6,d7),a2
+        suba.l  $1234.w,a3
+        suba.l  $12345678,a4
+        suba.l  ($1234,pc),a5
+        suba.l  $12(pc,a1),a6
+        suba.l  $12(pc,d2),a7
+        suba.l  #$12345678,a1
