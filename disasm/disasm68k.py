@@ -145,6 +145,49 @@ def registerList(aFirst, mask):
     return result
 
 
+# Caalculate and return string for effective address.
+# Given M and Xn bits.
+# Also uses global variables data and length.
+def EffectiveAddress(s, m, xn):
+    if m == 0:  # Dn
+        operand = "D{0:n}".format(xn)
+    elif m == 1:  # An
+        operand = "A{0:n}".format(xn)
+    elif m == 2:  # (An)
+        operand = "(A{0:n})".format(xn)
+    elif m == 3:  # (An)+
+        operand = "(A{0:n})+".format(xn)
+    elif m == 4:  # -(An)
+        operand = "-(A{0:n})".format(xn)
+    elif m == 5:  # d16(An)
+        operand = "${0:02X}{1:02X}(A{2:n})".format(data[length-2], data[length-1], xn)
+    elif m == 6:  # d8(An,Xn)
+        if data[length-2] & 0x80:
+            operand = "${0:02X}(A{1:n},A{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
+        else:
+            operand = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
+    elif m == 7 and xn == 0:  # abs.W
+        operand = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
+    elif m == 7 and xn == 1:  # abs.L
+        operand = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+    elif m == 7 and xn == 2:  # d16(PC)
+        operand = "${0:02X}{1:02X}(PC)".format(data[length-2], data[length-1])
+    elif m == 7 and xn == 3:  # d8(PC,Xn)
+        if data[length-2] & 0x80:
+            operand = "${0:02X}(PC,A{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
+        else:
+            operand = "${0:02X}(PC,D{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
+    elif m == 7 and xn == 4:  # #imm
+        if s == 0:
+            operand = "#${0:02X}{1:02X}".format(data[length-2], data[length-1])
+        else:
+            operand = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+    else:
+        print("Error: Invalid addressing mode.")
+
+    return operand
+
+
 # Initialize variables
 address = 0            # Start address if instruction
 length = 0             # Length of instruction in bytes
@@ -747,28 +790,7 @@ while True:
         else:
             print("Error: Invalid instruction size.")
 
-        if m == 0:  # Dn
-            dest = "D{0:n}".format(xn)
-        elif m == 2:  # (An)
-            dest = "(A{0:n})".format(xn)
-        elif m == 3:  # (An)+
-            dest = "(A{0:n})+".format(xn)
-        elif m == 4:  # -(An)
-            dest = "-(A{0:n})".format(xn)
-        elif m == 5:  # d16(An)
-            dest = "${0:02X}{1:02X}(A{2:n})".format(data[length-2], data[length-1], xn)
-        elif m == 6:  # d8(An,Xn)
-            if data[length-2] & 0x80:
-                dest = "${0:02X}(A{1:n},A{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
-            else:
-                dest = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
-        elif m == 7 and xn == 0:  # abs.W
-            dest = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
-        elif m == 7 and xn == 1:  # abs.L
-            dest = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
-        else:
-            print("Error: Invalid addressing mode.")
-
+        dest = EffectiveAddress(s, m, xn)
         printInstruction(address, length, mnemonic, data, dest)
 
     # Handle instruction types: MOVE from SR/to SR
@@ -804,36 +826,7 @@ while True:
         for i in range(2, length):
             data[i] = ord(f.read(1))
 
-        if m == 0:  # Dn
-            dest = "D{0:n}".format(xn)
-        elif m == 2:  # (An)
-            dest = "(A{0:n})".format(xn)
-        elif m == 3:  # (An)+
-            dest = "(A{0:n})+".format(xn)
-        elif m == 4:  # -(An)
-            dest = "-(A{0:n})".format(xn)
-        elif m == 5:  # d16(An)
-            dest = "${0:02X}{1:02X}(A{2:n})".format(data[length-2], data[length-1], xn)
-        elif m == 6:  # d8(An,Xn)
-            if data[length-2] & 0x80:
-                dest = "${0:02X}(A{1:n},A{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
-            else:
-                dest = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
-        elif m == 7 and xn == 0:  # abs.W
-            dest = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
-        elif m == 7 and xn == 1:  # abs.L
-            dest = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
-        elif m == 7 and xn == 2:  # d16(PC)
-            dest = "${0:02X}{1:02X}(PC)".format(data[length-2], data[length-1])
-        elif m == 7 and xn == 3:  # d8(PC,Xn)
-            if data[length-2] & 0x80:
-                dest = "${0:02X}(PC,A{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
-            else:
-                dest = "${0:02X}(PC,D{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
-        elif m == 7 and xn == 4:  # #imm
-            dest = "#${0:02X}{1:02X}".format(data[length-2], data[length-1])
-        else:
-            print("Error: Invalid addressing mode.")
+        dest = EffectiveAddress(0, m, xn)
 
         if mnemonic == "MOVE from SR":
             mnemonic = "MOVE"
@@ -880,37 +873,7 @@ while True:
         for i in range(2, length):
             data[i] = ord(f.read(1))
 
-        if m == 0:  # Dn
-            operand = "D{0:n}".format(xn)
-        elif m == 2:  # (An)
-            operand = "(A{0:n})".format(xn)
-        elif m == 3:  # (An)+
-            operand = "(A{0:n})+".format(xn)
-        elif m == 4:  # -(An)
-            operand = "-(A{0:n})".format(xn)
-        elif m == 5:  # d16(An)
-            operand = "${0:02X}{1:02X}(A{2:n})".format(data[length-2], data[length-1], xn)
-        elif m == 6:  # d8(An,Xn)
-            if data[length-2] & 0x80:
-                operand = "${0:02X}(A{1:n},A{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
-            else:
-                operand = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
-        elif m == 7 and xn == 0:  # abs.W
-            operand = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
-        elif m == 7 and xn == 1:  # abs.L
-            operand = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
-        elif m == 7 and xn == 2:  # d16(PC)
-            operand = "${0:02X}{1:02X}(PC)".format(data[length-2], data[length-1])
-        elif m == 7 and xn == 3:  # d8(PC,Xn)
-            if data[length-2] & 0x80:
-                operand = "${0:02X}(PC,A{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
-            else:
-                operand = "${0:02X}(PC,D{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
-        elif m == 7 and xn == 4:  # #imm
-            operand = "#${0:02X}{1:02X}".format(data[length-2], data[length-1])
-        else:
-            print("Error: Invalid addressing mode.")
-
+        operand = EffectiveAddress(0, m, xn)
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types: ASd, LSd, ROXd, ROd
@@ -953,28 +916,7 @@ while True:
         for i in range(2, length):
             data[i] = ord(f.read(1))
 
-        if m == 0:  # Dn
-            operand = "D{0:n}".format(xn)
-        elif m == 2:  # (An)
-            operand = "(A{0:n})".format(xn)
-        elif m == 3:  # (An)+
-            operand = "(A{0:n})+".format(xn)
-        elif m == 4:  # -(An)
-            operand = "-(A{0:n})".format(xn)
-        elif m == 5:  # d16(An)
-            operand = "${0:02X}{1:02X}(A{2:n})".format(data[length-2], data[length-1], xn)
-        elif m == 6:  # d8(An,Xn)
-            if data[length-2] & 0x80:
-                operand = "${0:02X}(A{1:n},A{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
-            else:
-                operand = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
-        elif m == 7 and xn == 0:  # abs.W
-            operand = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
-        elif m == 7 and xn == 1:  # abs.L
-            operand = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
-        else:
-            print("Error: Invalid addressing mode.")
-
+        operand = EffectiveAddress(0, m, xn)
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types: ADDA, CMPA, SUBA
@@ -1025,44 +967,8 @@ while True:
         for i in range(2, length):
             data[i] = ord(f.read(1))
 
-        if m == 0:  # Dn
-            operand = "D{0:n}".format(xn)
-        elif m == 1:  # An
-            operand = "A{0:n}".format(xn)
-        elif m == 2:  # (An)
-            operand = "(A{0:n})".format(xn)
-        elif m == 3:  # (An)+
-            operand = "(A{0:n})+".format(xn)
-        elif m == 4:  # -(An)
-            operand = "-(A{0:n})".format(xn)
-        elif m == 5:  # d16(An)
-            operand = "${0:02X}{1:02X}(A{2:n})".format(data[length-2], data[length-1], xn)
-        elif m == 6:  # d8(An,Xn)
-            if data[length-2] & 0x80:
-                operand = "${0:02X}(A{1:n},A{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
-            else:
-                operand = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
-        elif m == 7 and xn == 0:  # abs.W
-            operand = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
-        elif m == 7 and xn == 1:  # abs.L
-            operand = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
-        elif m == 7 and xn == 2:  # d16(PC)
-            operand = "${0:02X}{1:02X}(PC)".format(data[length-2], data[length-1])
-        elif m == 7 and xn == 3:  # d8(PC,Xn)
-            if data[length-2] & 0x80:
-                operand = "${0:02X}(PC,A{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
-            else:
-                operand = "${0:02X}(PC,D{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
-        elif m == 7 and xn == 4:  # #imm
-            if s == 0:
-                operand = "#${0:02X}{1:02X}".format(data[length-2], data[length-1])
-            else:
-                operand = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
-        else:
-            print("Error: Invalid addressing mode.")
-
+        operand = EffectiveAddress(s, m, xn)
         operand = operand + ",A{0:n}".format(an)
-
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types: MOVEM
@@ -1109,44 +1015,8 @@ while True:
         for i in range(2, length):
             data[i] = ord(f.read(1))
 
-        regs = 256 * data[2] + data[3]
-
-        if m == 0:  # Dn
-            operand = "D{0:n}".format(xn)
-        elif m == 1:  # An
-            operand = "A{0:n}".format(xn)
-        elif m == 2:  # (An)
-            operand = "(A{0:n})".format(xn)
-        elif m == 3:  # (An)+
-            operand = "(A{0:n})+".format(xn)
-        elif m == 4:  # -(An)
-            operand = "-(A{0:n})".format(xn)
-        elif m == 5:  # d16(An)
-            operand = "${0:02X}{1:02X}(A{2:n})".format(data[length-2], data[length-1], xn)
-        elif m == 6:  # d8(An,Xn)
-            if data[length-2] & 0x80:
-                operand = "${0:02X}(A{1:n},A{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
-            else:
-                operand = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
-        elif m == 7 and xn == 0:  # abs.W
-            operand = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
-        elif m == 7 and xn == 1:  # abs.L
-            operand = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
-        elif m == 7 and xn == 2:  # d16(PC)
-            operand = "${0:02X}{1:02X}(PC)".format(data[length-2], data[length-1])
-        elif m == 7 and xn == 3:  # d8(PC,Xn)
-            if data[length-2] & 0x80:
-                operand = "${0:02X}(PC,A{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
-            else:
-                operand = "${0:02X}(PC,D{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
-        elif m == 7 and xn == 4:  # #imm
-            if s == 0:
-                operand = "#${0:02X}{1:02X}".format(data[length-2], data[length-1])
-            else:
-                operand = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
-        else:
-            print("Error: Invalid addressing mode.")
-
+        operand = EffectiveAddress(s, m, xn)
+        regs = 256 * data[2] + data[3]  # Register list
         if d == 0:
             operand = registerList(m == 4, regs) + "," + operand
         else:
