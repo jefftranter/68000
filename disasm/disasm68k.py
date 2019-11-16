@@ -188,6 +188,40 @@ def EffectiveAddress(s, m, xn):
     return operand
 
 
+# Return length of standard instruction based on S, M, and Xn bits
+def InstructionLength(s, m, xn):
+    if m == 0:  # Dn
+        return 2
+    elif m == 1:  # An
+        return 2
+    elif m == 2:  # (An)
+        return 2
+    elif m == 3:  # (An)+
+        return 2
+    elif m == 4:  # -(An)
+        return 2
+    elif m == 5:  # d16(An)
+        return 4
+    elif m == 6:  # d8(An,Xn)
+        return 4
+    elif m == 7 and xn == 0:  # abs.W
+        return 4
+    elif m == 7 and xn == 1:  # abs.L
+        return 6
+    elif m == 7 and xn == 2:  # d16(PC)
+        return 4
+    elif m == 7 and xn == 3:  # d8(PC,Xn)
+        return 4
+    elif m == 7 and xn == 4:  # #imm
+        if s == 0:
+            return 4
+        else:
+            return 6
+    else:
+        print("Error: Invalid addressing mode.")
+        return 2
+
+
 # Initialize variables
 address = 0            # Start address if instruction
 length = 0             # Length of instruction in bytes
@@ -654,28 +688,7 @@ while True:
         else:
             print("Error: Invalid instruction size.")
 
-        if m == 0:  # Dn  4/6 bytes
-            dest = "D{0:n}".format(xn)
-        elif m == 2:  # (An)  4/6
-            dest = "(A{0:n})".format(xn)
-        elif m == 3:  # (An)+  4/6
-            dest = "(A{0:n})+".format(xn)
-        elif m == 4:  # -(An)  4/6
-            dest = "-(A{0:n})".format(xn)
-        elif m == 5:  # d16(An)  6/8
-            dest = "${0:02X}{1:02X}(A{2:n})".format(data[length-2], data[length-1], xn)
-        elif m == 6:  # d8(An,Xn)  6/8
-            if data[length-2] & 0x80:
-                dest = "${0:02X}(A{1:n},A{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
-            else:
-                dest = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
-        elif m == 7 and xn == 0:  # abs.W  6/8
-            dest = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
-        elif m == 7 and xn == 1:  # abs.L   8/10
-            dest = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
-        else:
-            print("Error: Invalid addressing mode.")
-
+        dest = EffectiveAddress(0, m, xn)
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
 
@@ -722,35 +735,7 @@ while True:
         else:
             src = "D{0:d}".format(dn)
 
-        if m == 0:  # Dn
-            dest = "D{0:n}".format(xn)
-        elif m == 2:  # (An)
-            dest = "(A{0:n})".format(xn)
-        elif m == 3:  # (An)+
-            dest = "(A{0:n})+".format(xn)
-        elif m == 4:  # -(An)
-            dest = "-(A{0:n})".format(xn)
-        elif m == 5:  # d16(An)
-            dest = "${0:02X}{1:02X}(A{2:n})".format(data[length-2], data[length-1], xn)
-        elif m == 6:  # d8(An,Xn)
-            if data[length-2] & 0x80:
-                dest = "${0:02X}(A{1:n},A{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
-            else:
-                dest = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
-        elif m == 7 and xn == 0:  # abs.W
-            dest = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
-        elif m == 7 and xn == 1:  # abs.L
-            dest = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
-        elif m == 7 and xn == 2:  # d16(PC)
-            dest = "${0:02X}{1:02X}(PC)".format(data[length-2], data[length-1])
-        elif m == 7 and xn == 3:  # d8(PC,Xn)
-            if data[length-2] & 0x80:
-                dest = "${0:02X}(PC,A{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
-            else:
-                dest = "${0:02X}(PC,D{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
-        else:
-            print("Error: Invalid addressing mode.")
-
+        dest = EffectiveAddress(0, m, xn)
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
 
@@ -984,33 +969,7 @@ while True:
         elif s == 1:  # L
             mnemonic += ".l"
 
-        if m == 2:  # (An)
-            length = 4
-        elif m == 3:  # (An)+
-            length = 4
-        elif m == 4:  # -(An)
-            length = 4
-        elif m == 5:  # d16(An)
-            length = 6
-        elif m == 6:  # d8(An,Xn)
-            length = 6
-        elif m == 7 and xn == 0:  # abs.W
-            length = 6
-        elif m == 7 and xn == 1:  # abs.L
-            length = 8
-        elif m == 7 and xn == 2:  # d16(PC)
-            length = 6
-        elif m == 7 and xn == 3:  # d8(PC,Xn)
-            length = 6
-        elif m == 7 and xn == 4:  # #imm
-            if s == 0:
-                length = 4
-            else:
-                length = 6
-        else:
-            print("Error: Invalid addressing mode.")
-            length = 2
-            operand = ""
+        length = InstructionLength(s, m, xn) + 2
 
         for i in range(2, length):
             data[i] = ord(f.read(1))
