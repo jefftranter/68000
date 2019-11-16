@@ -650,25 +650,7 @@ while True:
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
 
-        if m == 0:  # Dn  4/6 bytes
-            length = 4
-        elif m == 2:  # (An)  4/6
-            length = 4
-        elif m == 3:  # (An)+  4/6
-            length = 4
-        elif m == 4:  # -(An)  4/6
-            length = 4
-        elif m == 5:  # d16(An)  6/8
-            length = 6
-        elif m == 6:  # d8(An,Xn)  6/8
-            length = 6
-        elif m == 7 and xn == 0:  # abs.W  6/8
-            length = 6
-        elif m == 7 and xn == 1:  # abs.L   8/10
-            length = 8
-        else:
-            print("Error: Invalid addressing mode.")
-            length = 2
+        length = InstructionLength(0, m, xn) + 2
 
         if s == 2:  # L
             length += 2
@@ -697,28 +679,7 @@ while True:
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
 
-        if m == 0:  # Dn
-            length = 2
-        elif m == 2:  # (An)
-            length = 2
-        elif m == 3:  # (An)+
-            length = 2
-        elif m == 4:  # -(An)
-            length = 2
-        elif m == 5:  # d16(An)
-            length = 4
-        elif m == 6:  # d8(An,Xn)
-            length = 4
-        elif m == 7 and xn == 0:  # abs.W
-            length = 4
-        elif m == 7 and xn == 1:  # abs.L
-            length = 6
-        elif m == 7 and xn == 2:  # d16(PC)
-            length = 4
-        elif m == 7 and xn == 3:  # d8(PC,Xn)
-            length = 4
-        else:
-            print("Error: Invalid addressing mode.")
+        length = InstructionLength(0, m, xn)
 
         if data[0] == 0x08:  # Immediate
             length += 2
@@ -744,24 +705,7 @@ while True:
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
 
-        if m == 0:  # Dn
-            length = 2
-        elif m == 2:  # (An)
-            length = 2
-        elif m == 3:  # (An)+
-            length = 2
-        elif m == 4:  # -(An)
-            length = 2
-        elif m == 5:  # d16(An)
-            length = 4
-        elif m == 6:  # d8(An,Xn)
-            length = 4
-        elif m == 7 and xn == 0:  # abs.W
-            length = 4
-        elif m == 7 and xn == 1:  # abs.L
-            length = 6
-        else:
-            print("Error: Invalid addressing mode.")
+        length = InstructionLength(s, m, xn)
 
         for i in range(2, length):
             data[i] = ord(f.read(1))
@@ -783,30 +727,7 @@ while True:
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
 
-        if m == 0:  # Dn
-            length = 2
-        elif m == 2:  # (An)
-            length = 2
-        elif m == 3:  # (An)+
-            length = 2
-        elif m == 4:  # -(An)
-            length = 2
-        elif m == 5:  # d16(An)
-            length = 4
-        elif m == 6:  # d8(An,Xn)
-            length = 4
-        elif m == 7 and xn == 0:  # abs.W
-            length = 4
-        elif m == 7 and xn == 1:  # abs.L
-            length = 6
-        elif m == 7 and xn == 2:  # d16(PC)
-            length = 4
-        elif m == 7 and xn == 3:  # d8(PC,Xn)
-            length = 4
-        elif m == 7 and xn == 4:  # #imm
-            length = 4
-        else:
-            print("Error: Invalid addressing mode.")
+        length = InstructionLength(0, m, xn)
 
         for i in range(2, length):
             data[i] = ord(f.read(1))
@@ -830,30 +751,7 @@ while True:
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
 
-        if m == 0:  # Dn
-            length = 2
-        elif m == 2:  # (An)
-            length = 2
-        elif m == 3:  # (An)+
-            length = 2
-        elif m == 4:  # -(An)
-            length = 2
-        elif m == 5:  # d16(An)
-            length = 4
-        elif m == 6:  # d8(An,Xn)
-            length = 4
-        elif m == 7 and xn == 0:  # abs.W
-            length = 4
-        elif m == 7 and xn == 1:  # abs.L
-            length = 6
-        elif m == 7 and xn == 2:  # d16(PC)
-            length = 4
-        elif m == 7 and xn == 3:  # d8(PC,Xn)
-            length = 4
-        else:
-            print("Error: Invalid addressing mode.")
-            length = 2
-            operand = ""
+        length = InstructionLength(s, m, xn)
 
         for i in range(2, length):
             data[i] = ord(f.read(1))
@@ -873,30 +771,7 @@ while True:
         else:
             mnemonic = mnemonic.replace(mnemonic[len(mnemonic)-1], 'R')  # right
 
-        if m == 0:  # Dn
-            length = 2
-        elif m == 2:  # (An)
-            length = 2
-        elif m == 3:  # (An)+
-            length = 2
-        elif m == 4:  # -(An)
-            length = 2
-        elif m == 5:  # d16(An)
-            length = 4
-        elif m == 6:  # d8(An,Xn)
-            length = 4
-        elif m == 7 and xn == 0:  # abs.W
-            length = 4
-        elif m == 7 and xn == 1:  # abs.L
-            length = 6
-        elif m == 7 and xn == 2:  # d16(PC)
-            length = 4
-        elif m == 7 and xn == 3:  # d8(PC,Xn)
-            length = 4
-        else:
-            print("Error: Invalid addressing mode.")
-            length = 2
-            operand = ""
+        length = InstructionLength(s, m, xn)
 
         for i in range(2, length):
             data[i] = ord(f.read(1))
@@ -917,37 +792,7 @@ while True:
         elif s == 1:  # L
             mnemonic += ".l"
 
-        if m == 0:  # Dn
-            length = 2
-        elif m == 1:  # An
-            length = 2
-        elif m == 2:  # (An)
-            length = 2
-        elif m == 3:  # (An)+
-            length = 2
-        elif m == 4:  # -(An)
-            length = 2
-        elif m == 5:  # d16(An)
-            length = 4
-        elif m == 6:  # d8(An,Xn)
-            length = 4
-        elif m == 7 and xn == 0:  # abs.W
-            length = 4
-        elif m == 7 and xn == 1:  # abs.L
-            length = 6
-        elif m == 7 and xn == 2:  # d16(PC)
-            length = 4
-        elif m == 7 and xn == 3:  # d8(PC,Xn)
-            length = 4
-        elif m == 7 and xn == 4:  # #imm
-            if s == 0:
-                length = 4
-            else:
-                length = 6
-        else:
-            print("Error: Invalid addressing mode.")
-            length = 2
-            operand = ""
+        length = InstructionLength(s, m, xn)
 
         for i in range(2, length):
             data[i] = ord(f.read(1))
