@@ -919,3 +919,33 @@ loop3:
         movem.l (a2),d1/a2
         movem.l d2/a3,-(a3)
         movem.l (a4)+,d3/a4
+
+        movea.w d0,a1
+        movea.w a1,a2
+        movea.w (a2),a3
+        movea.w (a3)+,a4
+        movea.w -(a4),a5
+        movea.w $1234(a5),a6
+        movea.w $12(a6,a7),a7
+        movea.w $12(a6,d7),a1
+        movea.w $1234.w,a2
+        movea.w $12345678,a3
+        movea.w ($1234,pc),a4
+        movea.w $12(pc,a1),a5
+        movea.w $12(pc,d2),a6
+        movea.w #$1234,a7
+
+        movea.l d0,a1
+        movea.l a1,a2
+        movea.l (a2),a3
+        movea.l (a3)+,a4
+        movea.l -(a4),a5
+        movea.l $1234(a5),a6
+        movea.l $12(a6,a7),a7
+        movea.l $12(a6,d7),a1
+        movea.l $1234.w,a2
+        movea.l $12345678,a3
+        movea.l ($1234,pc),a4
+        movea.l $12(pc,a1),a5
+        movea.l $12(pc,d2),a6
+        movea.l #$12345678,a7

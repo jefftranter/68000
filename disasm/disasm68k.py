@@ -828,6 +828,30 @@ while True:
 
         printInstruction(address, length, mnemonic, data, operand)
 
+    # Handle instruction types: MOVEA
+    elif mnemonic ==  "MOVEA":
+        s = (data[0] & 0x30) >> 4
+        an = (data[0] & 0xe) >> 1
+        m = (data[1] & 0x38) >> 3
+        xn = data[1] & 0x07
+
+        # Handle size
+        if s == 3:  # W
+            mnemonic += ".w"
+        elif s == 2:  # L
+            mnemonic += ".l"
+        else:
+            print("Invalid size")
+
+        length = InstructionLength(not(s == 3), m, xn)
+
+        for i in range(2, length):
+            data[i] = ord(f.read(1))
+
+        operand = EffectiveAddress(not(s == 3), m, xn)
+        operand = operand + ",A{0:n}".format(an)
+        printInstruction(address, length, mnemonic, data, operand)
+
     else:
         print("Error: unsupported instruction", mnemonic)
 
