@@ -667,7 +667,7 @@ loop3:
         move    $1234.w,ccr
         move    $12345678,ccr
         move    #$1234,ccr
-        move    ($1234,pc),ccr
+        move    $1234(pc),ccr
         move    $12(pc,a1),ccr
         move    $12(pc,d2),ccr
 
@@ -681,7 +681,7 @@ loop3:
         move    $1234.w,sr
         move    $12345678,sr
         move    #$1234,sr
-        move    ($1234,pc),sr
+        move    $1234(pc),sr
         move    $12(pc,a1),sr
         move    $12(pc,d2),sr
 
@@ -701,7 +701,7 @@ loop3:
         pea     $12(a6,d7)
         pea     $1234.w
         pea     $12345678
-        pea     ($1234,pc)
+        pea     $1234(pc)
         pea     $12(pc,a1)
         pea     $12(pc,d2)
 
@@ -797,7 +797,7 @@ loop3:
         adda.w  $12(a6,d7),a2
         adda.w  $1234.w,a3
         adda.w  $12345678,a4
-        adda.w  ($1234,pc),a5
+        adda.w  $1234(pc),a5
         adda.w  $12(pc,a1),a6
         adda.w  $12(pc,d2),a7
         adda.w  #$1234,a1
@@ -812,7 +812,7 @@ loop3:
         adda.l  $12(a6,d7),a2
         adda.l  $1234.w,a3
         adda.l  $12345678,a4
-        adda.l  ($1234,pc),a5
+        adda.l  $1234(pc),a5
         adda.l  $12(pc,a1),a6
         adda.l  $12(pc,d2),a7
         adda.l  #$12345678,a1
@@ -827,7 +827,7 @@ loop3:
         cmpa.w  $12(a6,d7),a2
         cmpa.w  $1234.w,a3
         cmpa.w  $12345678,a4
-        cmpa.w  ($1234,pc),a5
+        cmpa.w  $1234(pc),a5
         cmpa.w  $12(pc,a1),a6
         cmpa.w  $12(pc,d2),a7
         cmpa.w  #$1234,a1
@@ -842,7 +842,7 @@ loop3:
         cmpa.l  $12(a6,d7),a2
         cmpa.l  $1234.w,a3
         cmpa.l  $12345678,a4
-        cmpa.l  ($1234,pc),a5
+        cmpa.l  $1234(pc),a5
         cmpa.l  $12(pc,a1),a6
         cmpa.l  $12(pc,d2),a7
         cmpa.l  #$12345678,a1
@@ -857,7 +857,7 @@ loop3:
         suba.w  $12(a6,d7),a2
         suba.w  $1234.w,a3
         suba.w  $12345678,a4
-        suba.w  ($1234,pc),a5
+        suba.w  $1234(pc),a5
         suba.w  $12(pc,a1),a6
         suba.w  $12(pc,d2),a7
         suba.w  #$1234,a1
@@ -872,7 +872,7 @@ loop3:
         suba.l  $12(a6,d7),a2
         suba.l  $1234.w,a3
         suba.l  $12345678,a4
-        suba.l  ($1234,pc),a5
+        suba.l  $1234(pc),a5
         suba.l  $12(pc,a1),a6
         suba.l  $12(pc,d2),a7
         suba.l  #$12345678,a1
@@ -892,7 +892,7 @@ loop3:
         movem.w $12(a6,d7),d1/d3/d5/d7/a0/a2/a4/a6
         movem.w $1234.w,d1/d3/d5/d7/a0/a2/a4/a6
         movem.w $12345678,d1/d3/d5/d7/a0/a2/a4/a6
-        movem.w ($1234,pc),d1/d3/d5/d7/a0/a2/a4/a6
+        movem.w $1234(pc),d1/d3/d5/d7/a0/a2/a4/a6
         movem.w $12(pc,a1),d1/d3/d5/d7/a0/a2/a4/a6
         movem.w $12(pc,d2),d1/d3/d5/d7/a0/a2/a4/a6
 
@@ -911,7 +911,7 @@ loop3:
         movem.l $12(a6,d7),d1/d3/d5/d7/a0/a2/a4/a6
         movem.l $1234.w,d1/d3/d5/d7/a0/a2/a4/a6
         movem.l $12345678,d1/d3/d5/d7/a0/a2/a4/a6
-        movem.l ($1234,pc),d1/d3/d5/d7/a0/a2/a4/a6
+        movem.l $1234(pc),d1/d3/d5/d7/a0/a2/a4/a6
         movem.l $12(pc,a1),d1/d3/d5/d7/a0/a2/a4/a6
         movem.l $12(pc,d2),d1/d3/d5/d7/a0/a2/a4/a6
 
@@ -930,7 +930,7 @@ loop3:
         movea.w $12(a6,d7),a1
         movea.w $1234.w,a2
         movea.w $12345678,a3
-        movea.w ($1234,pc),a4
+        movea.w $1234(pc),a4
         movea.w $12(pc,a1),a5
         movea.w $12(pc,d2),a6
         movea.w #$1234,a7
@@ -945,7 +945,7 @@ loop3:
         movea.l $12(a6,d7),a1
         movea.l $1234.w,a2
         movea.l $12345678,a3
-        movea.l ($1234,pc),a4
+        movea.l $1234(pc),a4
         movea.l $12(pc,a1),a5
         movea.l $12(pc,d2),a6
         movea.l #$12345678,a7
@@ -959,7 +959,7 @@ loop3:
         move.b  $12(a6,d7),d1
         move.b  $1234.w,d2
         move.b  $12345678,d3
-        move.b  ($1234,pc),d4
+        move.b  $1234(pc),d4
         move.b  $12(pc,a1),d5
         move.b  $12(pc,d2),d6
         move.b  #$12,d7
@@ -970,14 +970,14 @@ loop3:
         move.w  (a4)+,d4
         move.w  -(a5),d5
         move.w  $1234(a5),d6
-        move.w  $12(a6,a7),a0
-        move.w  $12(a6,d7),a1
-        move.w  $1234.w,a2
-        move.w  $12345678,a3
-        move.w  ($1234,pc),a4
-        move.w  $12(pc,a1),a5
-        move.w  $12(pc,d2),a6
-        move.w  #$1234,a7
+        move.w  $12(a6,a7),d0
+        move.w  $12(a6,d7),d1
+        move.w  $1234.w,d2
+        move.w  $12345678,d3
+        move.w  $1234(pc),d4
+        move.w  $12(pc,a1),d5
+        move.w  $12(pc,d2),d6
+        move.w  #$1234,d7
 
         move.l  d1,d1
         move.l  a2,d2
@@ -989,7 +989,7 @@ loop3:
         move.l  $12(a6,d7),d1
         move.l  $1234.w,d2
         move.l  $12345678,d3
-        move.l  ($1234,pc),d4
+        move.l  $1234(pc),d4
         move.l  $12(pc,a1),d5
         move.l  $12(pc,d2),d6
         move.l  #$12345678,d7
@@ -1011,7 +1011,6 @@ loop3:
         move.w  d7,$12(a6,d7)
         move.w  a2,$12345678
 
-        move.l  d1,d1
         move.l  d2,(a3)
         move.l  d3,(a4)+
         move.l  d4,-(a5)

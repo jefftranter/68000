@@ -760,7 +760,7 @@ while True:
         for i in range(2, length):
             data[i] = ord(f.read(1))
 
-        dest = EffectiveAddress(SLength1(s), m, xn)
+        dest = EffectiveAddress("b", m, xn)
 
         if mnemonic == "MOVE from SR":
             mnemonic = "MOVE"
@@ -817,12 +817,12 @@ while True:
         # Handle size
         mnemonic += "." + SLength3(s)
 
-        length = InstructionLength(SLength1(s), m, xn)
+        length = InstructionLength(SLength3(s), m, xn)
 
         for i in range(2, length):
             data[i] = ord(f.read(1))
 
-        operand = EffectiveAddress(SLength1(s), m, xn)
+        operand = EffectiveAddress(SLength3(s), m, xn)
         operand = operand + ",A{0:n}".format(an)
         printInstruction(address, length, mnemonic, data, operand)
 
@@ -897,8 +897,16 @@ while True:
         for i in range(2, length):
             data[i] = ord(f.read(1))
 
-        src = EffectiveAddress(SLength2(s), sm, sxn)
+        # Handle some special cases.
+        if sm == 7 and sxn == 1:  # Source is abs.L
+            src = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-8], data[length-7], data[length-6], data[length-5])
+        elif sm == 7 and sxn == 4 and SLength2(s) == "l":  # Source is #imm long
+            operand = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-8], data[length-7], data[length-6], data[length-5])
+        else:
+            src = EffectiveAddress(SLength2(s), sm, sxn)
+
         dest = EffectiveAddress(SLength2(s), dm, dxn)
+
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
     else:
