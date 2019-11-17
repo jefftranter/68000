@@ -147,6 +147,7 @@ def registerList(aFirst, mask):
 
 # Caalculate and return string for effective address.
 # Given M and Xn bits.
+# Parameter s should be the character "b", "w", or "l".
 # Also uses global variables data and length.
 def EffectiveAddress(s, m, xn):
     if m == 0:  # Dn
@@ -178,12 +179,15 @@ def EffectiveAddress(s, m, xn):
         else:
             operand = "${0:02X}(PC,D{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
     elif m == 7 and xn == 4:  # #imm
-        if s == 0:
+        if s == "b" or s == "w":
             operand = "#${0:02X}{1:02X}".format(data[length-2], data[length-1])
-        else:
+        elif s == "l":
             operand = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+        else:
+            print("Error: Invalid S value passed to EffectiveAddress().")
+            operand = ""
     else:
-        print("Error: Invalid addressing mode.")
+        print("Error: Invalid addressing mode passed to EffectiveAddress(),", s, m, xn)
         operand = ""
 
     return operand
@@ -255,14 +259,14 @@ def InstructionLength(s, m, xn):
         if s == "b":
             return 4
         elif s == "w":
-            return 6
+            return 4
         elif s == "l":
             return 6
         else:
             print("Invalid s value passed to InstructionLength().")
             return 6
     else:
-        print("Error: Invalid addressing mode.")
+        print("Error: Invalid addressing mode passed to InstructionLength(),", s, m, xn)
         return 2
 
 
@@ -701,7 +705,7 @@ while True:
         else:
             print("Error: Invalid instruction size.")
 
-        dest = EffectiveAddress(0, m, xn)
+        dest = EffectiveAddress(SLength1(s), m, xn)
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
 
@@ -727,7 +731,7 @@ while True:
         else:
             src = "D{0:d}".format(dn)
 
-        dest = EffectiveAddress(0, m, xn)
+        dest = EffectiveAddress(SLength1(s), m, xn)
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
 
@@ -743,7 +747,7 @@ while True:
 
         mnemonic += "." + SLength1(s)
 
-        dest = EffectiveAddress(s, m, xn)
+        dest = EffectiveAddress(SLength1(s), m, xn)
         printInstruction(address, length, mnemonic, data, dest)
 
     # Handle instruction types: MOVE from SR/to SR
@@ -756,7 +760,7 @@ while True:
         for i in range(2, length):
             data[i] = ord(f.read(1))
 
-        dest = EffectiveAddress(0, m, xn)
+        dest = EffectiveAddress(SLength1(s), m, xn)
 
         if mnemonic == "MOVE from SR":
             mnemonic = "MOVE"
@@ -780,7 +784,7 @@ while True:
         for i in range(2, length):
             data[i] = ord(f.read(1))
 
-        operand = EffectiveAddress(0, m, xn)
+        operand = EffectiveAddress(SLength1(s), m, xn)
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types: ASd, LSd, ROXd, ROd
@@ -800,7 +804,7 @@ while True:
         for i in range(2, length):
             data[i] = ord(f.read(1))
 
-        operand = EffectiveAddress(0, m, xn)
+        operand = EffectiveAddress(SLength1(s), m, xn)
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types: ADDA, CMPA, SUBA
@@ -818,7 +822,7 @@ while True:
         for i in range(2, length):
             data[i] = ord(f.read(1))
 
-        operand = EffectiveAddress(s, m, xn)
+        operand = EffectiveAddress(SLength1(s), m, xn)
         operand = operand + ",A{0:n}".format(an)
         printInstruction(address, length, mnemonic, data, operand)
 
@@ -837,7 +841,7 @@ while True:
         for i in range(2, length):
             data[i] = ord(f.read(1))
 
-        operand = EffectiveAddress(s, m, xn)
+        operand = EffectiveAddress(SLength1(s), m, xn)
         regs = 256 * data[2] + data[3]  # Register list
         if d == 0:
             operand = registerList(m == 4, regs) + "," + operand
@@ -861,14 +865,14 @@ while True:
         for i in range(2, length):
             data[i] = ord(f.read(1))
 
-        operand = EffectiveAddress(not(s == 3), m, xn)
+        operand = EffectiveAddress(SLength2(s), m, xn)
         operand = operand + ",A{0:n}".format(an)
         printInstruction(address, length, mnemonic, data, operand)
 
     elif mnemonic == "MOVE":
         s = (data[0] & 0x30) >> 4
         dxn = (data[0] & 0xe) >> 1
-        dm = (data[1] & 0xc0) >> 6 + (data[0] & 0x01) << 2
+        dm = ((data[1] & 0xc0) >> 6) + ((data[0] & 0x01) << 2)
         sxn = data[1] & 0x07
         sm = (data[1] & 0x38) >> 3
 
@@ -882,9 +886,9 @@ while True:
         if dm == 2 and SLength2(s) != "l" and dm == 7 and dxn == 1:  # (An) and byte or word size -> subtract two if source mode is abs.L
             length -= 2
         elif dm == 5:  # d16(An) -> add 2
-            length -= 2
-        elif dm == 6:  # # d8(An,Xn) -> add 2
-            length -= 2
+            length += 2
+        elif dm == 6:  # d8(An,Xn) -> add 2
+            length += 2
         elif dm == 7 and dxn == 0:  # abs.W -> add 2
             length += 2
         elif dm == 7 and dxn == 1:  # abs.L -> add 4
