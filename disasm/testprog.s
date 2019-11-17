@@ -1199,3 +1199,56 @@ loop3:
         mulu    $12(pc,a1),d2
         mulu    $12(pc,d2),d3
         mulu    #$1234,d4
+
+        cmp.b   d1,d0
+        cmp.b   (a1),d1
+        cmp.b   (a2)+,d2
+        cmp.b   -(a3),d3
+        cmp.b   $1234(a5),d4
+        cmp.b   $12(a6,a7),d5
+        cmp.b   $12(a6,d7),d6
+        cmp.b   $1234.w,d7
+        cmp.b   $12345678,d0
+        cmp.b   $1234(pc),d1
+        cmp.b   $12(pc,a1),d2
+        cmp.b   $12(pc,d2),d3
+        cmp.b   #$12,d4
+
+        cmp.w   d1,d0
+        cmp.w   a1,d0
+        cmp.w   (a1),d1
+        cmp.w   (a2)+,d2
+        cmp.w   -(a3),d3
+        cmp.w   $1234(a5),d4
+        cmp.w   $12(a6,a7),d5
+        cmp.w   $12(a6,d7),d6
+        cmp.w   $1234.w,d7
+        cmp.w   $12345678,d0
+        cmp.w   $1234(pc),d1
+        cmp.w   $12(pc,a1),d2
+        cmp.w   $12(pc,d2),d3
+        cmp.w   #$1234,d4
+
+        cmp.l   d1,d0
+        cmp.l   a1,d0
+        cmp.l   (a1),d1
+        cmp.l   (a2)+,d2
+        cmp.l   -(a3),d3
+        cmp.l   $1234(a5),d4
+        cmp.l   $12(a6,a7),d5
+        cmp.l   $12(a6,d7),d6
+        cmp.l   $1234.w,d7
+        cmp.l   $12345678,d0
+        cmp.l   $1234(pc),d1
+        cmp.l   $12(pc,a1),d2
+        cmp.l   $12(pc,d2),d3
+        cmp.l   #$12345678,d4
+
+        eor.b   d1,d0
+        eor.b   #$12,d4
+
+        eor.w   d1,d0
+        eor.w   #$1234,d4
+
+        eor.l   d1,d0
+        eor.l   #$12345678,d4

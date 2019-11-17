@@ -988,6 +988,22 @@ while True:
         operand = operand + ",D{0:n}".format(dn)
         printInstruction(address, length, mnemonic, data, operand)
 
+    elif mnemonic in ("CMP", "EOR"):
+        dn = (data[0] & 0xe) >> 1
+        s = (data[1] & 0xc0) >> 6
+        m = (data[1] & 0x38) >> 3
+        xn = data[1] & 0x07
+
+        length = InstructionLength(SLength1(s), m, xn)
+
+        for i in range(2, length):
+            data[i] = ord(f.read(1))
+
+        mnemonic += "." + SLength1(s)
+        operand = EffectiveAddress(SLength1(s), m, xn)
+        operand = operand + ",D{0:n}".format(dn)
+        printInstruction(address, length, mnemonic, data, operand)
+
     else:
         print("Error: unsupported instruction", mnemonic)
 
