@@ -594,9 +594,9 @@ while True:
 
         # Handle direction
         if dr == 1:
-            mnemonic = mnemonic.replace(mnemonic[len(mnemonic)-1], 'L')  # left
+            mnemonic = mnemonic.replace(mnemonic[len(mnemonic)-1], "L")  # left
         else:
-            mnemonic = mnemonic.replace(mnemonic[len(mnemonic)-1], 'R')  # right
+            mnemonic = mnemonic.replace(mnemonic[len(mnemonic)-1], "R")  # right
 
         # Handle size
         mnemonic += "." + SLength1(size)
@@ -714,7 +714,7 @@ while True:
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
 
-        length = InstructionLength('l', m, xn)
+        length = InstructionLength("l", m, xn)
 
         if data[0] == 0x08:  # Immediate
             length += 2
@@ -731,7 +731,7 @@ while True:
         else:
             src = "D{0:d}".format(dn)
 
-        dest = EffectiveAddress(SLength1(s), m, xn)
+        dest = EffectiveAddress("l", m, xn)
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
 
@@ -795,9 +795,9 @@ while True:
 
         # Handle direction
         if d == 1:
-            mnemonic = mnemonic.replace(mnemonic[len(mnemonic)-1], 'L')  # left
+            mnemonic = mnemonic.replace(mnemonic[len(mnemonic)-1], "L")  # left
         else:
-            mnemonic = mnemonic.replace(mnemonic[len(mnemonic)-1], 'R')  # right
+            mnemonic = mnemonic.replace(mnemonic[len(mnemonic)-1], "R")  # right
 
         length = InstructionLength(SLength1(s), m, xn)
 
@@ -972,6 +972,20 @@ while True:
 
         mnemonic = "S" + conditions[cond]
         operand = EffectiveAddress("b", m, xn)
+        printInstruction(address, length, mnemonic, data, operand)
+
+    elif mnemonic in ("DIVS", "DIVU", "MULS", "MULU"):
+        dn = (data[0] & 0xe) >> 1
+        m = (data[1] & 0x38) >> 3
+        xn = data[1] & 0x07
+
+        length = InstructionLength("w", m, xn)
+
+        for i in range(2, length):
+            data[i] = ord(f.read(1))
+
+        operand = EffectiveAddress("w", m, xn)
+        operand = operand + ",D{0:n}".format(dn)
         printInstruction(address, length, mnemonic, data, operand)
 
     else:

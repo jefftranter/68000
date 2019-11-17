@@ -1143,3 +1143,59 @@ loop3:
         sgt     $12(a6,a7)
         sle     $1234.w
         sle     $12345678
+
+        divs    d1,d0
+        divs    (a1),d1
+        divs    (a2)+,d2
+        divs    -(a3),d3
+        divs    $1234(a5),d4
+        divs    $12(a6,a7),d5
+        divs    $12(a6,d7),d6
+        divs    $1234.w,d7
+        divs    $12345678,d0
+        divs    $1234(pc),d1
+        divs    $12(pc,a1),d2
+        divs    $12(pc,d2),d3
+        divs    #$1234,d4
+
+        divu    d1,d0
+        divu    (a1),d1
+        divu    (a2)+,d2
+        divu    -(a3),d3
+        divu    $1234(a5),d4
+        divu    $12(a6,a7),d5
+        divu    $12(a6,d7),d6
+        divu    $1234.w,d7
+        divu    $12345678,d0
+        divu    $1234(pc),d1
+        divu    $12(pc,a1),d2
+        divu    $12(pc,d2),d3
+        divu    #$1234,d4
+
+        muls    d1,d0
+        muls    (a1),d1
+        muls    (a2)+,d2
+        muls    -(a3),d3
+        muls    $1234(a5),d4
+        muls    $12(a6,a7),d5
+        muls    $12(a6,d7),d6
+        muls    $1234.w,d7
+        muls    $12345678,d0
+        muls    $1234(pc),d1
+        muls    $12(pc,a1),d2
+        muls    $12(pc,d2),d3
+        muls    #$1234,d4
+
+        mulu    d1,d0
+        mulu    (a1),d1
+        mulu    (a2)+,d2
+        mulu    -(a3),d3
+        mulu    $1234(a5),d4
+        mulu    $12(a6,a7),d5
+        mulu    $12(a6,d7),d6
+        mulu    $1234.w,d7
+        mulu    $12345678,d0
+        mulu    $1234(pc),d1
+        mulu    $12(pc,a1),d2
+        mulu    $12(pc,d2),d3
+        mulu    #$1234,d4
