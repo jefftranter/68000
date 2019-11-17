@@ -1047,3 +1047,81 @@ loop3:
         chk     $12(pc,a1),d2
         chk     $12(pc,d2),d3
         chk     #$1234,d4
+
+        addq.b  #1,d0
+        addq.w  #2,d0
+        addq.l  #3,d0
+        addq.b  #4,d0
+        addq.w  #5,d0
+        addq.l  #6,d0
+        addq.b  #7,d0
+        addq.w  #8,d0
+        addq.l  #8,d0
+
+        addq.b  #2,(a1)
+        addq.b  #3,(a2)+
+        addq.b  #4,-(a3)
+        addq.b  #5,$1234(a5)
+        addq.b  #6,$12(a6,a7)
+        addq.b  #7,$12(a6,d7)
+        addq.b  #8,$1234.w
+        addq.b  #1,$12345678
+
+        addq.w  #1,a1
+        addq.w  #2,(a1)
+        addq.w  #3,(a2)+
+        addq.w  #4,-(a3)
+        addq.w  #5,$1234(a5)
+        addq.w  #6,$12(a6,a7)
+        addq.w  #7,$12(a6,d7)
+        addq.w  #8,$1234.w
+        addq.w  #1,$12345678
+
+        addq.l  #1,a1
+        addq.l  #2,(a1)
+        addq.l  #3,(a2)+
+        addq.l  #4,-(a3)
+        addq.l  #5,$1234(a5)
+        addq.l  #6,$12(a6,a7)
+        addq.l  #7,$12(a6,d7)
+        addq.l  #8,$1234.w
+        addq.l  #1,$12345678
+
+        subq.b  #1,d0
+        subq.w  #2,d0
+        subq.l  #3,d0
+        subq.b  #4,d0
+        subq.w  #5,d0
+        subq.l  #6,d0
+        subq.b  #7,d0
+        subq.w  #8,d0
+        subq.l  #8,d0
+
+        subq.b  #2,(a1)
+        subq.b  #3,(a2)+
+        subq.b  #4,-(a3)
+        subq.b  #5,$1234(a5)
+        subq.b  #6,$12(a6,a7)
+        subq.b  #7,$12(a6,d7)
+        subq.b  #8,$1234.w
+        subq.b  #1,$12345678
+
+        subq.w  #1,a1
+        subq.w  #2,(a1)
+        subq.w  #3,(a2)+
+        subq.w  #4,-(a3)
+        subq.w  #5,$1234(a5)
+        subq.w  #6,$12(a6,a7)
+        subq.w  #7,$12(a6,d7)
+        subq.w  #8,$1234.w
+        subq.w  #1,$12345678
+
+        subq.l  #1,a1
+        subq.l  #2,(a1)
+        subq.l  #3,(a2)+
+        subq.l  #4,-(a3)
+        subq.l  #5,$1234(a5)
+        subq.l  #6,$12(a6,a7)
+        subq.l  #7,$12(a6,d7)
+        subq.l  #8,$1234.w
+        subq.l  #1,$12345678
