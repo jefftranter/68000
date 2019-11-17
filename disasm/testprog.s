@@ -949,3 +949,78 @@ loop3:
         movea.l $12(pc,a1),a5
         movea.l $12(pc,d2),a6
         movea.l #$12345678,a7
+
+        move.b  d1,d1
+        move.b  (a3),d3
+        move.b  (a4)+,d4
+        move.b  -(a5),d5
+        move.b  $1234(a5),d6
+        move.b  $12(a6,a7),d0
+        move.b  $12(a6,d7),d1
+        move.b  $1234.w,d2
+        move.b  $12345678,d3
+        move.b  ($1234,pc),d4
+        move.b  $12(pc,a1),d5
+        move.b  $12(pc,d2),d6
+        move.b  #$12,d7
+
+        move.w  d1,d1
+        move.w  a2,d2
+        move.w  (a3),d3
+        move.w  (a4)+,d4
+        move.w  -(a5),d5
+        move.w  $1234(a5),d6
+        move.w  $12(a6,a7),a0
+        move.w  $12(a6,d7),a1
+        move.w  $1234.w,a2
+        move.w  $12345678,a3
+        move.w  ($1234,pc),a4
+        move.w  $12(pc,a1),a5
+        move.w  $12(pc,d2),a6
+        move.w  #$1234,a7
+
+        move.l  d1,d1
+        move.l  a2,d2
+        move.l  (a3),d3
+        move.l  (a4)+,d4
+        move.l  -(a5),d5
+        move.l  $1234(a5),d6
+        move.l  $12(a6,a7),d0
+        move.l  $12(a6,d7),d1
+        move.l  $1234.w,d2
+        move.l  $12345678,d3
+        move.l  ($1234,pc),d4
+        move.l  $12(pc,a1),d5
+        move.l  $12(pc,d2),d6
+        move.l  #$12345678,d7
+
+        move.b  d1,d1
+        move.b  d2,(a3)
+        move.b  d3,(a4)+
+        move.b  d4,-(a5)
+        move.b  d5,$1234(a5)
+        move.b  d6,$12(a6,a7)
+        move.b  d7,$12(a6,d7)
+
+        move.w  d1,d1
+        move.w  d2,(a3)
+        move.w  d3,(a4)+
+        move.w  d4,-(a5)
+        move.w  d5,$1234(a5)
+        move.w  d6,$12(a6,a7)
+        move.w  d7,$12(a6,d7)
+        move.w  a2,$12345678
+
+        move.l  d1,d1
+        move.l  d2,(a3)
+        move.l  d3,(a4)+
+        move.l  d4,-(a5)
+        move.l  d5,$1234(a5)
+        move.l  d6,$12(a6,a7)
+        move.l  d7,$12(a6,d7)
+        move.l  a2,$12345678
+
+        move.l  #$12345678,$87654321
+        move.b  $12345678,$87654321
+        move.w  $12345678,$87654321
+        move.l  $12345678,$87654321

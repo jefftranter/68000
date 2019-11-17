@@ -73,41 +73,41 @@ def printInstruction(address, length, mnemonic, data, operand):
                                                                                                   mnemonic,
                                                                                                   operand)
     elif length == 6:
-        line = "{0:08X}  {1:02X} {2:02X} {3:02X} {4:02X} {5:02X} {6:0X}              {7:8s}  {8:s}".format(address,
-                                                                                                           data[0],
-                                                                                                           data[1],
-                                                                                                           data[2],
-                                                                                                           data[3],
-                                                                                                           data[4],
-                                                                                                           data[5],
-                                                                                                           mnemonic,
-                                                                                                           operand)
+        line = "{0:08X}  {1:02X} {2:02X} {3:02X} {4:02X} {5:02X} {6:02X}              {7:8s}  {8:s}".format(address,
+                                                                                                            data[0],
+                                                                                                            data[1],
+                                                                                                            data[2],
+                                                                                                            data[3],
+                                                                                                            data[4],
+                                                                                                            data[5],
+                                                                                                            mnemonic,
+                                                                                                            operand)
     elif length == 8:
-        line = "{0:08X}  {1:02X} {2:02X} {3:02X} {4:02X} {5:02X} {6:0X} {7:02X} {8:02X}        {9:8s}  {10:s}".format(address,
-                                                                                                                      data[0],
-                                                                                                                      data[1],
-                                                                                                                      data[2],
-                                                                                                                      data[3],
-                                                                                                                      data[4],
-                                                                                                                      data[5],
-                                                                                                                      data[6],
-                                                                                                                      data[7],
-                                                                                                                      mnemonic,
-                                                                                                                      operand)
+        line = "{0:08X}  {1:02X} {2:02X} {3:02X} {4:02X} {5:02X} {6:02X} {7:02X} {8:02X}        {9:8s}  {10:s}".format(address,
+                                                                                                                       data[0],
+                                                                                                                       data[1],
+                                                                                                                       data[2],
+                                                                                                                       data[3],
+                                                                                                                       data[4],
+                                                                                                                       data[5],
+                                                                                                                       data[6],
+                                                                                                                       data[7],
+                                                                                                                       mnemonic,
+                                                                                                                       operand)
     elif length == 10:
-        line = "{0:08X}  {1:02X} {2:02X} {3:02X} {4:02X} {5:02X} {6:0X} {7:02X} {8:02X} {9:02X} {10:02X}  {11:8s}  {12:s}".format(address,
-                                                                                                                                  data[0],
-                                                                                                                                  data[1],
-                                                                                                                                  data[2],
-                                                                                                                                  data[3],
-                                                                                                                                  data[4],
-                                                                                                                                  data[5],
-                                                                                                                                  data[6],
-                                                                                                                                  data[7],
-                                                                                                                                  data[8],
-                                                                                                                                  data[9],
-                                                                                                                                  mnemonic,
-                                                                                                                                  operand)
+        line = "{0:08X}  {1:02X} {2:02X} {3:02X} {4:02X} {5:02X} {6:02X} {7:02X} {8:02X} {9:02X} {10:02X}  {11:8s}  {12:s}".format(address,
+                                                                                                                                   data[0],
+                                                                                                                                   data[1],
+                                                                                                                                   data[2],
+                                                                                                                                   data[3],
+                                                                                                                                   data[4],
+                                                                                                                                   data[5],
+                                                                                                                                   data[6],
+                                                                                                                                   data[7],
+                                                                                                                                   data[8],
+                                                                                                                                   data[9],
+                                                                                                                                   mnemonic,
+                                                                                                                                   operand)
     else:
         print("Error: Invalid length {0:d} passed to printInstruction().".format(length))
         sys.exit(1)
@@ -184,11 +184,50 @@ def EffectiveAddress(s, m, xn):
             operand = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
     else:
         print("Error: Invalid addressing mode.")
+        operand = ""
 
     return operand
 
 
+# Return instruction length based on S bits, type 1
+def SLength1(s):
+    if s == 0:
+        return "b"
+    elif s == 1:
+        return "w"
+    elif s == 2:
+        return "l"
+    else:
+        print("Error: Invalid S bits.")
+        return "w"
+
+
+# Return instruction length based on S bits, type 2
+def SLength2(s):
+    if s == 1:
+        return "b"
+    elif s == 3:
+        return "w"
+    elif s == 2:
+        return "l"
+    else:
+        print("Error: Invalid S bits.")
+        return "w"
+
+
+# Return instruction length based on S bits, type 3
+def SLength3(s):
+    if s == 0:
+        return "w"
+    elif s == 1:
+        return "l"
+    else:
+        print("Error: Invalid S bit.")
+        return "w"
+
+
 # Return length of standard instruction based on S, M, and Xn bits
+# Parameter s should be the character "b", "w", or "l".
 def InstructionLength(s, m, xn):
     if m == 0:  # Dn
         return 2
@@ -213,9 +252,14 @@ def InstructionLength(s, m, xn):
     elif m == 7 and xn == 3:  # d8(PC,Xn)
         return 4
     elif m == 7 and xn == 4:  # #imm
-        if s == 0:
+        if s == "b":
             return 4
+        elif s == "w":
+            return 6
+        elif s == "l":
+            return 6
         else:
+            print("Invalid s value passed to InstructionLength().")
             return 6
     else:
         print("Error: Invalid addressing mode.")
@@ -551,12 +595,7 @@ while True:
             mnemonic = mnemonic.replace(mnemonic[len(mnemonic)-1], 'R')  # right
 
         # Handle size
-        if size == 0:
-            mnemonic += ".b"
-        elif size == 1:
-            mnemonic += ".w"
-        elif size == 2:
-            mnemonic += ".l"
+        mnemonic += "." + SLength1(size)
 
         if ir == 1:  # Register shift
             operand = "D{0:d},D{1:d}".format(cr, reg)
@@ -570,12 +609,8 @@ while True:
     elif mnemonic in ("ADDX", "SUBX"):
         length = 2
         size = (data[1] & 0xc0) >> 6
-        if size == 0:
-            mnemonic += ".b"
-        elif size == 1:
-            mnemonic += ".w"
-        elif size == 2:
-            mnemonic += ".l"
+        mnemonic += "." + SLength1(size)
+
         if data[1] & 0x08:
             operand = "-(A{0:d}),-(A{1:d})".format(data[1] & 0x07, (data[0] & 0x0e) >> 1)
         else:
@@ -585,12 +620,8 @@ while True:
     elif mnemonic == "CMPM":
         length = 2
         size = (data[1] & 0xc0) >> 6
-        if size == 0:
-            mnemonic += ".b"
-        elif size == 1:
-            mnemonic += ".w"
-        elif size == 2:
-            mnemonic += ".l"
+        mnemonic += "." + SLength1(size)
+
         operand = "(A{0:d})+,(A{1:d})+".format(data[1] & 0x07, (data[0] & 0x0e) >> 1)
         printInstruction(address, length, mnemonic, data, operand)
 
@@ -650,7 +681,7 @@ while True:
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
 
-        length = InstructionLength(0, m, xn) + 2
+        length = InstructionLength(SLength1(s), m, xn) + 2
 
         if s == 2:  # L
             length += 2
@@ -679,7 +710,7 @@ while True:
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
 
-        length = InstructionLength(0, m, xn)
+        length = InstructionLength('l', m, xn)
 
         if data[0] == 0x08:  # Immediate
             length += 2
@@ -705,19 +736,12 @@ while True:
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
 
-        length = InstructionLength(s, m, xn)
+        length = InstructionLength(SLength1(s), m, xn)
 
         for i in range(2, length):
             data[i] = ord(f.read(1))
 
-        if s == 0:  # B
-            mnemonic += ".b"
-        elif s == 1:  # W
-            mnemonic += ".w"
-        elif s == 2:  # L
-            mnemonic += ".l"
-        else:
-            print("Error: Invalid instruction size.")
+        mnemonic += "." + SLength1(s)
 
         dest = EffectiveAddress(s, m, xn)
         printInstruction(address, length, mnemonic, data, dest)
@@ -727,7 +751,7 @@ while True:
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
 
-        length = InstructionLength(0, m, xn)
+        length = InstructionLength("b", m, xn)
 
         for i in range(2, length):
             data[i] = ord(f.read(1))
@@ -751,7 +775,7 @@ while True:
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
 
-        length = InstructionLength(s, m, xn)
+        length = InstructionLength(SLength1(s), m, xn)
 
         for i in range(2, length):
             data[i] = ord(f.read(1))
@@ -771,7 +795,7 @@ while True:
         else:
             mnemonic = mnemonic.replace(mnemonic[len(mnemonic)-1], 'R')  # right
 
-        length = InstructionLength(s, m, xn)
+        length = InstructionLength(SLength1(s), m, xn)
 
         for i in range(2, length):
             data[i] = ord(f.read(1))
@@ -787,12 +811,9 @@ while True:
         xn = data[1] & 0x07
 
         # Handle size
-        if s == 0:  # W
-            mnemonic += ".w"
-        elif s == 1:  # L
-            mnemonic += ".l"
+        mnemonic += "." + SLength3(s)
 
-        length = InstructionLength(s, m, xn)
+        length = InstructionLength(SLength1(s), m, xn)
 
         for i in range(2, length):
             data[i] = ord(f.read(1))
@@ -809,12 +830,9 @@ while True:
         xn = data[1] & 0x07
 
         # Handle size
-        if s == 0:  # W
-            mnemonic += ".w"
-        elif s == 1:  # L
-            mnemonic += ".l"
+        mnemonic += "." + SLength3(s)
 
-        length = InstructionLength(s, m, xn) + 2
+        length = InstructionLength(SLength1(s), m, xn) + 2
 
         for i in range(2, length):
             data[i] = ord(f.read(1))
@@ -829,21 +847,16 @@ while True:
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types: MOVEA
-    elif mnemonic ==  "MOVEA":
+    elif mnemonic == "MOVEA":
         s = (data[0] & 0x30) >> 4
         an = (data[0] & 0xe) >> 1
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
 
         # Handle size
-        if s == 3:  # W
-            mnemonic += ".w"
-        elif s == 2:  # L
-            mnemonic += ".l"
-        else:
-            print("Invalid size")
+        mnemonic += "." + SLength2(s)
 
-        length = InstructionLength(not(s == 3), m, xn)
+        length = InstructionLength(SLength2(s), m, xn)
 
         for i in range(2, length):
             data[i] = ord(f.read(1))
@@ -852,6 +865,38 @@ while True:
         operand = operand + ",A{0:n}".format(an)
         printInstruction(address, length, mnemonic, data, operand)
 
+    elif mnemonic == "MOVE":
+        s = (data[0] & 0x30) >> 4
+        dxn = (data[0] & 0xe) >> 1
+        dm = (data[1] & 0xc0) >> 6 + (data[0] & 0x01) << 2
+        sxn = data[1] & 0x07
+        sm = (data[1] & 0x38) >> 3
+
+        # Handle size
+        mnemonic += "." + SLength2(s)
+
+        # Get length based on source addressing mode
+        length = InstructionLength(SLength2(s), sm, sxn)
+
+        # Adjust instruction length based on destination addressing mode
+        if dm == 2 and SLength2(s) != "l" and dm == 7 and dxn == 1:  # (An) and byte or word size -> subtract two if source mode is abs.L
+            length -= 2
+        elif dm == 5:  # d16(An) -> add 2
+            length -= 2
+        elif dm == 6:  # # d8(An,Xn) -> add 2
+            length -= 2
+        elif dm == 7 and dxn == 0:  # abs.W -> add 2
+            length += 2
+        elif dm == 7 and dxn == 1:  # abs.L -> add 4
+            length += 4
+
+        for i in range(2, length):
+            data[i] = ord(f.read(1))
+
+        src = EffectiveAddress(SLength2(s), sm, sxn)
+        dest = EffectiveAddress(SLength2(s), dm, dxn)
+        operand = src + "," + dest
+        printInstruction(address, length, mnemonic, data, operand)
     else:
         print("Error: unsupported instruction", mnemonic)
 
