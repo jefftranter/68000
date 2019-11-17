@@ -1125,3 +1125,21 @@ loop3:
         subq.l  #7,$12(a6,d7)
         subq.l  #8,$1234.w
         subq.l  #1,$12345678
+
+        st      d1
+        sf      (a1)
+        shi     (a2)+
+        sls     -(a3)
+        scc     $1234(a5)
+        scs     $12(a6,a7)
+        sne     $12(a6,d7)
+        seq     $1234.w
+        svc     $12345678
+        svs     d2
+        spl     (a2)
+        smi     (a3)+
+        sge     -(a4)
+        slt     $1234(a5)
+        sgt     $12(a6,a7)
+        sle     $1234.w
+        sle     $12345678

@@ -960,6 +960,20 @@ while True:
 
         printInstruction(address, length, mnemonic, data, operand)
 
+    elif mnemonic == "SCC":
+        cond = data[0] & 0x0f
+        m = (data[1] & 0x38) >> 3
+        xn = data[1] & 0x07
+
+        length = InstructionLength("b", m, xn)
+
+        for i in range(2, length):
+            data[i] = ord(f.read(1))
+
+        mnemonic = "S" + conditions[cond]
+        operand = EffectiveAddress("b", m, xn)
+        printInstruction(address, length, mnemonic, data, operand)
+
     else:
         print("Error: unsupported instruction", mnemonic)
 
