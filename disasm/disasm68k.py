@@ -909,6 +909,35 @@ while True:
 
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
+
+    elif mnemonic == "LEA":
+        an = (data[0] & 0xe) >> 1
+        m = (data[1] & 0x38) >> 3
+        xn = data[1] & 0x07
+
+        length = InstructionLength("l", m, xn)
+
+        for i in range(2, length):
+            data[i] = ord(f.read(1))
+
+        operand = EffectiveAddress("l", m, xn)
+        operand = operand + ",A{0:n}".format(an)
+        printInstruction(address, length, mnemonic, data, operand)
+
+    elif mnemonic == "CHK":
+        dn = (data[0] & 0xe) >> 1
+        m = (data[1] & 0x38) >> 3
+        xn = data[1] & 0x07
+
+        length = InstructionLength("w", m, xn)
+
+        for i in range(2, length):
+            data[i] = ord(f.read(1))
+
+        operand = EffectiveAddress("w", m, xn)
+        operand = operand + ",D{0:n}".format(dn)
+        printInstruction(address, length, mnemonic, data, operand)
+
     else:
         print("Error: unsupported instruction", mnemonic)
 

@@ -1023,3 +1023,27 @@ loop3:
         move.b  $12345678,$87654321
         move.w  $12345678,$87654321
         move.l  $12345678,$87654321
+
+        lea     (a1),a2
+        lea     $1234(a2),a3
+        lea     $12(a6,a7),a4
+        lea     $12(a6,d7),a5
+        lea     $1234.w,a6
+        lea     $12345678,a7
+        lea     $1234(pc),a1
+        lea     $12(pc,a1),a2
+        lea     $12(pc,d2),a3
+
+        chk     d1,d0
+        chk     (a1),d1
+        chk     (a2)+,d2
+        chk     -(a3),d3
+        chk     $1234(a5),d4
+        chk     $12(a6,a7),d5
+        chk     $12(a6,d7),d6
+        chk     $1234.w,d7
+        chk     $12345678,d0
+        chk     $1234(pc),d1
+        chk     $12(pc,a1),d2
+        chk     $12(pc,d2),d3
+        chk     #$1234,d4
