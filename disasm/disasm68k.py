@@ -62,6 +62,7 @@
 # To Do:
 # - Move CSV file into table in code, remove unused fields
 # - Refactor more common code into functions
+# - Add support for 68020 (and later) instructions
 
 import argparse
 import csv
@@ -168,7 +169,7 @@ def registerList(aFirst, mask):
     return result
 
 
-# Caalculate and return string for effective address.
+# Calculate and return string for effective address.
 # Given M and Xn bits.
 # Parameter s should be the character "b", "w", or "l".
 # Also uses global variables data and length.
@@ -208,7 +209,7 @@ def EffectiveAddress(s, m, xn):
             operand = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
         else:
             print("Error: Invalid S value passed to EffectiveAddress().")
-            operand = ""
+            sys.exit(1)
     else:
         print("Warning: Invalid addressing mode in instruction (M={0:02X} Xn={1:02X}).".format(m, xn))
         operand = ""
@@ -291,6 +292,12 @@ def InstructionLength(s, m, xn):
     else:
         print("Warning: Invalid addressing mode in instruction (M={0:02X} Xn={1:02X}).".format(m, xn))
         return 2
+
+
+# Read length bytes of data into data() array, starting after 2 byte opcode.
+def readData(length):
+    for i in range(2, length):
+        data[i] = ord(f.read(1))
 
 
 # Initialize variables
@@ -713,8 +720,7 @@ while True:
         if s == 2:  # L
             length += 2
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         if s == 0:  # B
             mnemonic += ".b"
@@ -744,8 +750,7 @@ while True:
         if data[0] == 0x08:  # Immediate
             length += 2
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         # Source:
         # BTST  #data, <ea>  0000100000MMMXXX
@@ -767,8 +772,7 @@ while True:
 
         length = InstructionLength(SLength1(s), m, xn)
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         mnemonic += "." + SLength1(s)
 
@@ -782,8 +786,7 @@ while True:
 
         length = InstructionLength("b", m, xn)
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         dest = EffectiveAddress("b", m, xn)
 
@@ -806,8 +809,7 @@ while True:
 
         length = InstructionLength(SLength1(s), m, xn)
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         operand = EffectiveAddress(SLength1(s), m, xn)
         printInstruction(address, length, mnemonic, data, operand)
@@ -826,8 +828,7 @@ while True:
 
         length = InstructionLength(SLength1(s), m, xn)
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         operand = EffectiveAddress(SLength1(s), m, xn)
         printInstruction(address, length, mnemonic, data, operand)
@@ -844,8 +845,7 @@ while True:
 
         length = InstructionLength(SLength3(s), m, xn)
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         operand = EffectiveAddress(SLength3(s), m, xn)
         operand = operand + ",A{0:n}".format(an)
@@ -863,8 +863,7 @@ while True:
 
         length = InstructionLength(SLength1(s), m, xn) + 2
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         operand = EffectiveAddress(SLength1(s), m, xn)
         regs = 256 * data[2] + data[3]  # Register list
@@ -887,8 +886,7 @@ while True:
 
         length = InstructionLength(SLength2(s), m, xn)
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         operand = EffectiveAddress(SLength2(s), m, xn)
         operand = operand + ",A{0:n}".format(an)
@@ -919,8 +917,7 @@ while True:
         elif dm == 7 and dxn == 1:  # abs.L -> add 4
             length += 4
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         # Handle some special cases.
         if sm == 7 and sxn == 1:  # Source is abs.L
@@ -942,8 +939,7 @@ while True:
 
         length = InstructionLength("l", m, xn)
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         operand = EffectiveAddress("l", m, xn)
         operand = operand + ",A{0:n}".format(an)
@@ -956,8 +952,7 @@ while True:
 
         length = InstructionLength("w", m, xn)
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         operand = EffectiveAddress("w", m, xn)
         operand = operand + ",D{0:n}".format(dn)
@@ -974,8 +969,7 @@ while True:
 
         length = InstructionLength(SLength1(s), m, xn)
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         mnemonic += "." + SLength1(s)
 
@@ -992,8 +986,7 @@ while True:
 
         length = InstructionLength("b", m, xn)
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         mnemonic = "S" + conditions[cond]
         operand = EffectiveAddress("b", m, xn)
@@ -1006,8 +999,7 @@ while True:
 
         length = InstructionLength("w", m, xn)
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         operand = EffectiveAddress("w", m, xn)
         operand = operand + ",D{0:n}".format(dn)
@@ -1021,8 +1013,7 @@ while True:
 
         length = InstructionLength(SLength1(s), m, xn)
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         mnemonic += "." + SLength1(s)
         operand = EffectiveAddress(SLength1(s), m, xn)
@@ -1038,8 +1029,7 @@ while True:
 
         length = InstructionLength(SLength1(s), m, xn)
 
-        for i in range(2, length):
-            data[i] = ord(f.read(1))
+        readData(length)
 
         mnemonic += "." + SLength1(s)
         src = EffectiveAddress(SLength1(s), m, xn)
@@ -1053,10 +1043,13 @@ while True:
 
     else:
         print("Error: unsupported instruction", mnemonic)
+        sys.exit(1)
 
     # Do next instruction
-    address += length
+    address = (address + length) % 0x100000000
     length = 0
     opcode = 0
     mnemonic = ""
     operand = ""
+    src = ""
+    dest = ""
