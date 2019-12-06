@@ -79,7 +79,7 @@ conditions = ("T", "F", "HI", "LS", "CC", "CS", "NE", "EQ", "VC", "VS", "PL", "M
 # Print a disassembled line of output
 def printInstruction(address, length, mnemonic, data, operand):
     if args.nolist:
-            line = " {0:8s}  {1:s}".format(mnemonic, operand)
+        line = " {0:8s}  {1:s}".format(mnemonic, operand)
 
     else:
         if length == 2:
