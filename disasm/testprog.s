@@ -1308,6 +1308,12 @@ loop3:
         add.b   $12(pc,a1),d2
         add.b   $12(pc,d2),d3
         add.b   #$12,d4
+        add.b   ($20,a0,d0),d0
+        add.b   ($20,a0,d0.w),d0
+        add.b   ($20,a0,d0.l),d0
+        add.b   ($20,a0,a0),d0
+        add.b   ($20,a0,a0.w),d0
+        add.b   ($20,a0,a0.l),d0
 
         or.w    d1,d0
         or.w    (a1),d1
