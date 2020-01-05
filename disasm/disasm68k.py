@@ -777,7 +777,6 @@ while True:
         xn = data[1] & 0x07
 
         length = InstructionLength(SLength1(s), m, xn)
-
         readData(length)
 
         mnemonic += "." + SLength1(s)
@@ -791,7 +790,6 @@ while True:
         xn = data[1] & 0x07
 
         length = InstructionLength("b", m, xn)
-
         readData(length)
 
         dest = EffectiveAddress("b", m, xn)
@@ -814,7 +812,6 @@ while True:
         xn = data[1] & 0x07
 
         length = InstructionLength(SLength1(s), m, xn)
-
         readData(length)
 
         operand = EffectiveAddress(SLength1(s), m, xn)
@@ -833,7 +830,6 @@ while True:
             mnemonic = mnemonic.replace(mnemonic[len(mnemonic)-1], "R")  # right
 
         length = InstructionLength(SLength1(s), m, xn)
-
         readData(length)
 
         operand = EffectiveAddress(SLength1(s), m, xn)
@@ -850,11 +846,9 @@ while True:
         mnemonic += "." + SLength3(s)
 
         length = InstructionLength(SLength3(s), m, xn)
-
         readData(length)
 
-        operand = EffectiveAddress(SLength3(s), m, xn)
-        operand = operand + ",A{0:n}".format(an)
+        operand = EffectiveAddress(SLength3(s), m, xn) + ",A{0:n}".format(an)
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types: MOVEM
@@ -868,7 +862,6 @@ while True:
         mnemonic += "." + SLength3(s)
 
         length = InstructionLength(SLength1(s), m, xn) + 2
-
         readData(length)
 
         operand = EffectiveAddress(SLength1(s), m, xn)
@@ -891,11 +884,9 @@ while True:
         mnemonic += "." + SLength2(s)
 
         length = InstructionLength(SLength2(s), m, xn)
-
         readData(length)
 
-        operand = EffectiveAddress(SLength2(s), m, xn)
-        operand = operand + ",A{0:n}".format(an)
+        operand = EffectiveAddress(SLength2(s), m, xn) + ",A{0:n}".format(an)
         printInstruction(address, length, mnemonic, data, operand)
 
     elif mnemonic == "MOVE":
@@ -944,11 +935,9 @@ while True:
         xn = data[1] & 0x07
 
         length = InstructionLength("l", m, xn)
-
         readData(length)
 
-        operand = EffectiveAddress("l", m, xn)
-        operand = operand + ",A{0:n}".format(an)
+        operand = EffectiveAddress("l", m, xn) + ",A{0:n}".format(an)
         printInstruction(address, length, mnemonic, data, operand)
 
     elif mnemonic == "CHK":
@@ -957,11 +946,9 @@ while True:
         xn = data[1] & 0x07
 
         length = InstructionLength("w", m, xn)
-
         readData(length)
 
-        operand = EffectiveAddress("w", m, xn)
-        operand = operand + ",D{0:n}".format(dn)
+        operand = EffectiveAddress("w", m, xn) + ",D{0:n}".format(dn)
         printInstruction(address, length, mnemonic, data, operand)
 
     elif mnemonic in ("ADDQ", "SUBQ"):
@@ -974,7 +961,6 @@ while True:
             add = 8
 
         length = InstructionLength(SLength1(s), m, xn)
-
         readData(length)
 
         mnemonic += "." + SLength1(s)
@@ -991,7 +977,6 @@ while True:
         xn = data[1] & 0x07
 
         length = InstructionLength("b", m, xn)
-
         readData(length)
 
         mnemonic = "S" + conditions[cond]
@@ -1004,26 +989,35 @@ while True:
         xn = data[1] & 0x07
 
         length = InstructionLength("w", m, xn)
-
         readData(length)
 
-        operand = EffectiveAddress("w", m, xn)
-        operand = operand + ",D{0:n}".format(dn)
+        operand = EffectiveAddress("w", m, xn) + ",D{0:n}".format(dn)
         printInstruction(address, length, mnemonic, data, operand)
 
-    elif mnemonic in ("CMP", "EOR"):
+    elif mnemonic in ("CMP"):
         dn = (data[0] & 0xe) >> 1
         s = (data[1] & 0xc0) >> 6
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
 
         length = InstructionLength(SLength1(s), m, xn)
-
         readData(length)
 
         mnemonic += "." + SLength1(s)
-        operand = EffectiveAddress(SLength1(s), m, xn)
-        operand = operand + ",D{0:n}".format(dn)
+        operand = EffectiveAddress(SLength1(s), m, xn) + ",D{0:n}".format(dn)
+        printInstruction(address, length, mnemonic, data, operand)
+
+    elif mnemonic in ("EOR"):
+        dn = (data[0] & 0xe) >> 1
+        s = (data[1] & 0xc0) >> 6
+        m = (data[1] & 0x38) >> 3
+        xn = data[1] & 0x07
+
+        length = InstructionLength(SLength1(s), m, xn)
+        readData(length)
+
+        mnemonic += "." + SLength1(s)
+        operand = "D{0:n},".format(dn) + EffectiveAddress(SLength1(s), m, xn)
         printInstruction(address, length, mnemonic, data, operand)
 
     elif mnemonic in ("OR", "SUB", "AND", "ADD"):
