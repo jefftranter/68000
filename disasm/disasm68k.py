@@ -919,8 +919,12 @@ while True:
         # Handle some special cases.
         if sm == 7 and sxn == 1:  # Source is abs.L
             src = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-8], data[length-7], data[length-6], data[length-5])
+        elif sm == 7 and sxn == 4 and SLength2(s) == "b":  # Source is #imm byte
+            src = "#${0:02X}".format(data[3])
+        elif sm == 7 and sxn == 4 and SLength2(s) == "w":  # Source is #imm word
+            src = "#${0:02X}{1:02X}".format(data[2], data[3])
         elif sm == 7 and sxn == 4 and SLength2(s) == "l":  # Source is #imm long
-            src = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-8], data[length-7], data[length-6], data[length-5])
+            src = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[2], data[3], data[4], data[5])
         else:
             src = EffectiveAddress(SLength2(s), sm, sxn)
 
