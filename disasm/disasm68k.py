@@ -925,6 +925,8 @@ while True:
             src = "#${0:02X}{1:02X}".format(data[2], data[3])
         elif sm == 7 and sxn == 4 and SLength2(s) == "l":  # Source is #imm long
             src = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[2], data[3], data[4], data[5])
+        if sm == 5:  # Source is (d16,An)
+            src = "(${0:02X}{1:02X},a{2:n})".format(data[2], data[3], sxn)
         else:
             src = EffectiveAddress(SLength2(s), sm, sxn)
 
