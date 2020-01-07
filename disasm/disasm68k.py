@@ -594,7 +594,13 @@ while True:
 
     elif mnemonic == "MOVEQ":
         length = 2
-        operand = "#${0:02X},D{1:d}".format(data[1], (data[0] & 0x0e) >> 1)
+        # Use these lines if you want signed value (some assemblers complain otherwise)
+        if data[1] > 127:
+            operand = "#{0:d},D{1:d}".format(-(256 - data[1]), (data[0] & 0x0e) >> 1)
+        else:
+            operand = "#{0:d},D{1:d}".format(data[1], (data[0] & 0x0e) >> 1)
+        # Use this line if you want 8-bt hex value
+        #operand = "#${0:02X},D{1:d}".format(data[1], (data[0] & 0x0e) >> 1)
         printInstruction(address, length, mnemonic, data, operand)
 
     elif mnemonic in ("SBCD", "ABCD"):
