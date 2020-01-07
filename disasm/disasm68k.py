@@ -439,7 +439,7 @@ while True:
     # TRAP
     elif mnemonic == "TRAP":
         length = 2
-        operand = "#${0:02X}".format(data[1] & 0x0f)
+        operand = "#{0:d}".format(data[1] & 0x0f)
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types: ORI to CCR
@@ -599,8 +599,8 @@ while True:
             operand = "#{0:d},D{1:d}".format(-(256 - data[1]), (data[0] & 0x0e) >> 1)
         else:
             operand = "#{0:d},D{1:d}".format(data[1], (data[0] & 0x0e) >> 1)
-        # Use this line if you want 8-bt hex value
-        #operand = "#${0:02X},D{1:d}".format(data[1], (data[0] & 0x0e) >> 1)
+        # Use this line if you want 8-bit hex value
+        # operand = "#${0:02X},D{1:d}".format(data[1], (data[0] & 0x0e) >> 1)
         printInstruction(address, length, mnemonic, data, operand)
 
     elif mnemonic in ("SBCD", "ABCD"):
