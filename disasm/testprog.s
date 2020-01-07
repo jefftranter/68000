@@ -1,5 +1,20 @@
         org	$1000
 
+        move.b  $1234(pc),d0
+        move.b  $1234(pc),(a0)
+        move.b  $1234(pc),(a0)+
+        move.b  $1234(pc),-(a0)
+        move.b  $1234(pc),($2345,a0)
+        move.b  $1234(pc),($18,a0,d0.w)
+        move.b  $1234(pc),($18,a0,d2.l)
+        move.b  $1234(pc),($18,a0,a0.w)
+        move.b  $1234(pc),($18,a0,a1.l)
+
+        move.b  ($1234,a0),($56,a0,d7.w)
+        move.b  ($1234,a1),($56,a0,d7.l)
+        move.b  ($1234,a2),($56,a0,a0.w)
+        move.b  ($1234,a3),($56,a0,a0.l)
+
 start:
         nop
         dc.w    $F123
