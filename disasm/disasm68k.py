@@ -198,7 +198,7 @@ def EffectiveAddress(s, m, xn):
             else:  # Dn.w (default)
                 operand = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
     elif m == 7 and xn == 0:  # abs.W
-        operand = "${0:02X}{1:02X}".format(data[length-2], data[length-1])
+        operand = "${0:02X}{1:02X}.w".format(data[length-2], data[length-1])
     elif m == 7 and xn == 1:  # abs.L
         operand = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
     elif m == 7 and xn == 2:  # d16(PC)
@@ -429,11 +429,16 @@ while True:
         print("Error: Mnemonic not found in opcode table.")
         sys.exit(1)
 
-    # Handle instruction types - one word implicit with no operands:
-    # ILLEGAL, RESET, NOP, RTE, RTS, TRAPV, RTR, UNIMPLEMENTED, INVALID
-    if mnemonic in ("ILLEGAL", "RESET", "NOP", "RTE", "RTS", "TRAPV", "RTR", "UNIMPLEMENTED", "INVALID"):
+    # Handle instruction types - one word implicit with no operands
+    if mnemonic in ("ILLEGAL", "RESET", "NOP", "RTE", "RTS", "TRAPV", "RTR"):
         length = 2
         printInstruction(address, length, mnemonic, data, "")
+
+    # Handle unimplemented and invalid instructions as a dc.w directive
+    elif mnemonic in ("UNIMPLEMENTED", "INVALID"):
+        length = 2
+        operand = "${0:02X}{1:02X}".format(data[0], data[1]) + " ; " + mnemonic
+        printInstruction(address, length, "dc.w", data, operand)
 
     # Handle instruction types - one word implicit with operands
     # TRAP
@@ -708,7 +713,7 @@ while True:
             length = 4
             data[2] = ord(f.read(1))
             data[3] = ord(f.read(1))
-            operand = "${0:02X}{1:02X}".format(data[2], data[3])
+            operand = "${0:02X}{1:02X}.w".format(data[2], data[3])
         elif m == 7 and xn == 1:  # XXX.L
             length = 6
             data[2] = ord(f.read(1))
@@ -924,7 +929,7 @@ while True:
 
         # Handle some special cases.
         if sm == 7 and sxn == 1:  # Source is abs.L
-            src = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-8], data[length-7], data[length-6], data[length-5])
+            src = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[2], data[3], data[4], data[5])
         elif sm == 7 and sxn == 2:  # Source is d16(PC)
             src = "${0:02X}{1:02X}(PC)".format(data[2], data[3])
         elif sm == 7 and sxn == 4 and SLength2(s) == "b":  # Source is #imm byte
@@ -1034,7 +1039,7 @@ while True:
         operand = "D{0:n},".format(dn) + EffectiveAddress(SLength1(s), m, xn)
         printInstruction(address, length, mnemonic, data, operand)
 
-    elif mnemonic in ("SUB", "AND", "ADD"):
+    elif mnemonic in ("SUB", "AND", "ADD", "OR"):
         dn = (data[0] & 0xe) >> 1
         d = data[0] & 0x01
         s = (data[1] & 0xc0) >> 6
@@ -1051,22 +1056,6 @@ while True:
             operand = dest + "," + src
         else:
             operand = src + "," + dest
-
-        printInstruction(address, length, mnemonic, data, operand)
-
-    elif mnemonic == "OR":
-        dn = (data[0] & 0xe) >> 1
-        s = (data[1] & 0xc0) >> 6
-        m = (data[1] & 0x38) >> 3
-        xn = data[1] & 0x07
-
-        length = InstructionLength(SLength1(s), m, xn)
-        readData(length)
-
-        mnemonic += "." + SLength1(s)
-        src = EffectiveAddress(SLength1(s), m, xn)
-        dest = "D{0:n}".format(dn)
-        operand = src + "," + dest
 
         printInstruction(address, length, mnemonic, data, operand)
 
