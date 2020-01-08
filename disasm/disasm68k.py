@@ -60,12 +60,14 @@
 # ADD.l     D7,$1234
 
 # To Do:
+# - Option for relative branches to use *+$xx
 # - Move CSV file into table in code, remove unused fields
 # - Refactor more common code into functions
 # - Add support for 68020 (and later) instructions
 
 import argparse
 import csv
+import os
 import re
 import sys
 
@@ -327,8 +329,10 @@ if address % 2:
     print("Error: Start address must be even.")
     sys.exit(1)
 
-# Open CSV file of opcodes and read into table
-with open("opcodetable.csv", newline='') as csvfile:
+# Open CSV file of opcodes and read into table.
+# Look for file in same directory as this program.
+file = os.path.dirname(os.path.realpath(__file__)) + os.sep + "opcodetable.csv"
+with open(file, newline='') as csvfile:
     table = list(csv.DictReader(csvfile))
 
     # Do validity check on table entries and calculate bitmask and value
