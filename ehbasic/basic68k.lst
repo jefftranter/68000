@@ -9110,7 +9110,7 @@ F00:6159       							* now do cordic set-up
 F00:6160       	MOVEQ		#0,d1				* y = 0
                S02:0000E07A:  72 00
 F00:6161       	MOVE.l	#KFCTSEED,d6		* x = 1 with jkh inverse factored out
-               S02:0000E07C:  2C 3C E6 A3 D1 10
+               S02:0000E07C:  2C 3C 26 A3 D1 10
 F00:6162       	LEA		TAB_HTHET(pc),a0		* get pointer to hyperbolic arctan table
                S02:0000E082:  41 FA 0D 20
 F00:6163       	MOVEQ		#0,d4				* clear shift count
@@ -12199,1869 +12199,1868 @@ F00:8159
 F00:8160       * constants are normalised to n integer bits and are tanh(2^-i)
 F00:8161       n	equ	2
 F00:8162       TAB_HTHET
-F00:8163       	dc.l	$8C9F53D0>>n			* atnh(2^-1)	.549306144
-               S02:0000EDA4:  E3 27 D4 F4
-F00:8164       	dc.l	$4162BBE8>>n			* atnh(2^-2)	.255412812
+F00:8163       	dc.l	$2327d4f4			* atnh(2^-1) .549306144
+               S02:0000EDA4:  23 27 D4 F4
+F00:8164       	dc.l	$1058aefa			* atnh(2^-2) .255412812
                S02:0000EDA8:  10 58 AE FA
-F00:8165       	dc.l	$202B1238>>n			* atnh(2^-3)
+F00:8165       	dc.l	$080ac48e			* atnh(2^-3)
                S02:0000EDAC:  08 0A C4 8E
-F00:8166       	dc.l	$10055888>>n			* atnh(2^-4)
+F00:8166       	dc.l	$04015622			* atnh(2^-4)
                S02:0000EDB0:  04 01 56 22
-F00:8167       	dc.l	$0800AAC0>>n			* atnh(2^-5)
+F00:8167       	dc.l	$02002ab0			* atnh(2^-5)
                S02:0000EDB4:  02 00 2A B0
-F00:8168       	dc.l	$04001550>>n			* atnh(2^-6)
+F00:8168       	dc.l	$01000554			* atnh(2^-6)
                S02:0000EDB8:  01 00 05 54
-F00:8169       	dc.l	$020002A8>>n			* atnh(2^-7)
+F00:8169       	dc.l	$008000aa			* atnh(2^-7)
                S02:0000EDBC:  00 80 00 AA
-F00:8170       	dc.l	$01000050>>n			* atnh(2^-8)
+F00:8170       	dc.l	$00400014			* atnh(2^-8)
                S02:0000EDC0:  00 40 00 14
-F00:8171       	dc.l	$00800008>>n			* atnh(2^-9)
+F00:8171       	dc.l	$00200002			* atnh(2^-9)
                S02:0000EDC4:  00 20 00 02
-F00:8172       	dc.l	$00400000>>n			* atnh(2^-10)
+F00:8172       	dc.l	$00100000			* atnh(2^-10)
                S02:0000EDC8:  00 10 00 00
-F00:8173       	dc.l	$00200000>>n			* atnh(2^-11)
+F00:8173       	dc.l	$00080000			* atnh(2^-11)
                S02:0000EDCC:  00 08 00 00
-F00:8174       	dc.l	$00100000>>n			* atnh(2^-12)
+F00:8174       	dc.l	$00040000			* atnh(2^-12)
                S02:0000EDD0:  00 04 00 00
-F00:8175       	dc.l	$00080000>>n			* atnh(2^-13)
+F00:8175       	dc.l	$00020000			* atnh(2^-13)
                S02:0000EDD4:  00 02 00 00
-F00:8176       	dc.l	$00040000>>n			* atnh(2^-14)
+F00:8176       	dc.l	$00010000			* atnh(2^-14)
                S02:0000EDD8:  00 01 00 00
-F00:8177       	dc.l	$00020000>>n			* atnh(2^-15)
+F00:8177       	dc.l	$00008000			* atnh(2^-15)
                S02:0000EDDC:  00 00 80 00
-F00:8178       	dc.l	$00010000>>n			* atnh(2^-16)
+F00:8178       	dc.l	$00004000			* atnh(2^-16)
                S02:0000EDE0:  00 00 40 00
-F00:8179       	dc.l	$00008000>>n			* atnh(2^-17)
+F00:8179       	dc.l	$00002000			* atnh(2^-17)
                S02:0000EDE4:  00 00 20 00
-F00:8180       	dc.l	$00004000>>n			* atnh(2^-18)
+F00:8180       	dc.l	$00001000			* atnh(2^-18)
                S02:0000EDE8:  00 00 10 00
-F00:8181       	dc.l	$00002000>>n			* atnh(2^-19)
+F00:8181       	dc.l	$00000800			* atnh(2^-19)
                S02:0000EDEC:  00 00 08 00
-F00:8182       	dc.l	$00001000>>n			* atnh(2^-20)
+F00:8182       	dc.l	$00000400			* atnh(2^-20)
                S02:0000EDF0:  00 00 04 00
-F00:8183       	dc.l	$00000800>>n			* atnh(2^-21)
+F00:8183       	dc.l	$00000200			* atnh(2^-21)
                S02:0000EDF4:  00 00 02 00
-F00:8184       	dc.l	$00000400>>n			* atnh(2^-22)
+F00:8184       	dc.l	$00000100			* atnh(2^-22)
                S02:0000EDF8:  00 00 01 00
-F00:8185       	dc.l	$00000200>>n			* atnh(2^-23)
+F00:8185       	dc.l	$00000080			* atnh(2^-23)
                S02:0000EDFC:  00 00 00 80
-F00:8186       	dc.l	$00000100>>n			* atnh(2^-24)
+F00:8186       	dc.l	$00000040			* atnh(2^-24)
                S02:0000EE00:  00 00 00 40
-F00:8187       	dc.l	$00000080>>n			* atnh(2^-25)
+F00:8187       	dc.l	$00000020			* atnh(2^-25)
                S02:0000EE04:  00 00 00 20
-F00:8188       	dc.l	$00000040>>n			* atnh(2^-26)
+F00:8188       	dc.l	$00000010			* atnh(2^-26)
                S02:0000EE08:  00 00 00 10
-F00:8189       	dc.l	$00000020>>n			* atnh(2^-27)
+F00:8189       	dc.l	$00000008			* atnh(2^-27)
                S02:0000EE0C:  00 00 00 08
-F00:8190       	dc.l	$00000010>>n			* atnh(2^-28)
+F00:8190       	dc.l	$00000004			* atnh(2^-28)
                S02:0000EE10:  00 00 00 04
-F00:8191       	dc.l	$00000008>>n			* atnh(2^-29)
+F00:8191       	dc.l	$00000002			* atnh(2^-29)
                S02:0000EE14:  00 00 00 02
-F00:8192       	dc.l	$00000004>>n			* atnh(2^-30)
+F00:8192       	dc.l	$00000001			* atnh(2^-30)
                S02:0000EE18:  00 00 00 01
-F00:8193       	dc.l	$00000002>>n			* atnh(2^-31)
+F00:8193       	dc.l	$00000000			* atnh(2^-31)
                S02:0000EE1C:  00 00 00 00
-F00:8194       	dc.l	$00000001>>n			* atnh(2^-32)
+F00:8194       	dc.l	$00000000			* atnh(2^-32)
                S02:0000EE20:  00 00 00 00
-F00:8195       
-F00:8196       KFCTSEED	equ	$9A8F4441>>n		* $26A3D110
+F00:8195       KFCTSEED	equ	$26A3D110		* $26A3D110
+F00:8196       
 F00:8197       
-F00:8198       
-F00:8199       *************************************************************************************
-F00:8200       *
-F00:8201       * command vector table
-F00:8202       
-F00:8203       LAB_CTBL
-F00:8204       	dc.w	LAB_END-LAB_CTBL			* END
+F00:8198       *************************************************************************************
+F00:8199       *
+F00:8200       * command vector table
+F00:8201       
+F00:8202       LAB_CTBL
+F00:8203       	dc.w	LAB_END-LAB_CTBL			* END
                S02:0000EE24:  D7 C8
-F00:8205       	dc.w	LAB_FOR-LAB_CTBL			* FOR
+F00:8204       	dc.w	LAB_FOR-LAB_CTBL			* FOR
                S02:0000EE26:  D6 FC
-F00:8206       	dc.w	LAB_NEXT-LAB_CTBL			* NEXT
+F00:8205       	dc.w	LAB_NEXT-LAB_CTBL			* NEXT
                S02:0000EE28:  DD 68
-F00:8207       	dc.w	LAB_DATA-LAB_CTBL			* DATA
+F00:8206       	dc.w	LAB_DATA-LAB_CTBL			* DATA
                S02:0000EE2A:  D9 1C
-F00:8208       	dc.w	LAB_INPUT-LAB_CTBL		* INPUT
+F00:8207       	dc.w	LAB_INPUT-LAB_CTBL		* INPUT
                S02:0000EE2C:  DC 5C
-F00:8209       	dc.w	LAB_DIM-LAB_CTBL			* DIM
+F00:8208       	dc.w	LAB_DIM-LAB_CTBL			* DIM
                S02:0000EE2E:  E1 36
-F00:8210       	dc.w	LAB_READ-LAB_CTBL			* READ
+F00:8209       	dc.w	LAB_READ-LAB_CTBL			* READ
                S02:0000EE30:  DC 82
-F00:8211       	dc.w	LAB_LET-LAB_CTBL			* LET
+F00:8210       	dc.w	LAB_LET-LAB_CTBL			* LET
                S02:0000EE32:  DA 8E
-F00:8212       	dc.w	LAB_DEC-LAB_CTBL			* DEC	
+F00:8211       	dc.w	LAB_DEC-LAB_CTBL			* DEC	
                S02:0000EE34:  DA 2C
-F00:8213       	dc.w	LAB_GOTO-LAB_CTBL			* GOTO
+F00:8212       	dc.w	LAB_GOTO-LAB_CTBL			* GOTO
                S02:0000EE36:  D8 84
-F00:8214       	dc.w	LAB_RUN-LAB_CTBL			* RUN
+F00:8213       	dc.w	LAB_RUN-LAB_CTBL			* RUN
                S02:0000EE38:  D8 4C
-F00:8215       	dc.w	LAB_IF-LAB_CTBL			* IF
+F00:8214       	dc.w	LAB_IF-LAB_CTBL			* IF
                S02:0000EE3A:  D9 44
-F00:8216       	dc.w	LAB_RESTORE-LAB_CTBL		* RESTORE
+F00:8215       	dc.w	LAB_RESTORE-LAB_CTBL		* RESTORE
                S02:0000EE3C:  D7 F6
-F00:8217       	dc.w	LAB_GOSUB-LAB_CTBL		* GOSUB
+F00:8216       	dc.w	LAB_GOSUB-LAB_CTBL		* GOSUB
                S02:0000EE3E:  D8 72
-F00:8218       	dc.w	LAB_RETURN-LAB_CTBL		* RETURN
+F00:8217       	dc.w	LAB_RETURN-LAB_CTBL		* RETURN
                S02:0000EE40:  D9 08
-F00:8219       	dc.w	LAB_REM-LAB_CTBL			* REM
+F00:8218       	dc.w	LAB_REM-LAB_CTBL			* REM
                S02:0000EE42:  D9 B2
-F00:8220       	dc.w	LAB_STOP-LAB_CTBL			* STOP
+F00:8219       	dc.w	LAB_STOP-LAB_CTBL			* STOP
                S02:0000EE44:  D7 D0
-F00:8221       	dc.w	LAB_ON-LAB_CTBL			* ON
+F00:8220       	dc.w	LAB_ON-LAB_CTBL			* ON
                S02:0000EE46:  D9 BA
-F00:8222       	dc.w	LAB_NULL-LAB_CTBL			* NULL
+F00:8221       	dc.w	LAB_NULL-LAB_CTBL			* NULL
                S02:0000EE48:  D8 24
-F00:8223       	dc.w	LAB_INC-LAB_CTBL			* INC	
+F00:8222       	dc.w	LAB_INC-LAB_CTBL			* INC	
                S02:0000EE4A:  DA 32
-F00:8224       	dc.w	LAB_WAIT-LAB_CTBL			* WAIT
+F00:8223       	dc.w	LAB_WAIT-LAB_CTBL			* WAIT
                S02:0000EE4C:  EA 34
-F00:8225       	dc.w	LAB_LOAD-LAB_CTBL			* LOAD
+F00:8224       	dc.w	LAB_LOAD-LAB_CTBL			* LOAD
                S02:0000EE4E:  EA 22
-F00:8226       	dc.w	LAB_SAVE-LAB_CTBL			* SAVE
+F00:8225       	dc.w	LAB_SAVE-LAB_CTBL			* SAVE
                S02:0000EE50:  EA 26
-F00:8227       	dc.w	LAB_DEF-LAB_CTBL			* DEF
+F00:8226       	dc.w	LAB_DEF-LAB_CTBL			* DEF
                S02:0000EE52:  E4 C6
-F00:8228       	dc.w	LAB_POKE-LAB_CTBL			* POKE
+F00:8227       	dc.w	LAB_POKE-LAB_CTBL			* POKE
                S02:0000EE54:  E9 A2
-F00:8229       	dc.w	LAB_DOKE-LAB_CTBL			* DOKE
+F00:8228       	dc.w	LAB_DOKE-LAB_CTBL			* DOKE
                S02:0000EE56:  E9 D2
-F00:8230       	dc.w	LAB_LOKE-LAB_CTBL			* LOKE
+F00:8229       	dc.w	LAB_LOKE-LAB_CTBL			* LOKE
                S02:0000EE58:  E9 D8
-F00:8231       	dc.w	LAB_CALL-LAB_CTBL			* CALL
+F00:8230       	dc.w	LAB_CALL-LAB_CTBL			* CALL
                S02:0000EE5A:  EA 2A
-F00:8232       	dc.w	LAB_DO-LAB_CTBL			* DO	
+F00:8231       	dc.w	LAB_DO-LAB_CTBL			* DO	
                S02:0000EE5C:  D8 60
-F00:8233       	dc.w	LAB_LOOP-LAB_CTBL			* LOOP
+F00:8232       	dc.w	LAB_LOOP-LAB_CTBL			* LOOP
                S02:0000EE5E:  D8 B2
-F00:8234       	dc.w	LAB_PRINT-LAB_CTBL		* PRINT
+F00:8233       	dc.w	LAB_PRINT-LAB_CTBL		* PRINT
                S02:0000EE60:  DB 22
-F00:8235       	dc.w	LAB_CONT-LAB_CTBL			* CONT
+F00:8234       	dc.w	LAB_CONT-LAB_CTBL			* CONT
                S02:0000EE62:  D8 2E
-F00:8236       	dc.w	LAB_LIST-LAB_CTBL			* LIST
+F00:8235       	dc.w	LAB_LIST-LAB_CTBL			* LIST
                S02:0000EE64:  D6 48
-F00:8237       	dc.w	LAB_CLEAR-LAB_CTBL		* CLEAR
+F00:8236       	dc.w	LAB_CLEAR-LAB_CTBL		* CLEAR
                S02:0000EE66:  D6 44
-F00:8238       	dc.w	LAB_NEW-LAB_CTBL			* NEW
+F00:8237       	dc.w	LAB_NEW-LAB_CTBL			* NEW
                S02:0000EE68:  D5 F4
-F00:8239       	dc.w	LAB_WDTH-LAB_CTBL			* WIDTH
+F00:8238       	dc.w	LAB_WDTH-LAB_CTBL			* WIDTH
                S02:0000EE6A:  F9 54
-F00:8240       	dc.w	LAB_GET-LAB_CTBL			* GET
+F00:8239       	dc.w	LAB_GET-LAB_CTBL			* GET
                S02:0000EE6C:  DA E8
-F00:8241       	dc.w	LAB_SWAP-LAB_CTBL			* SWAP
+F00:8240       	dc.w	LAB_SWAP-LAB_CTBL			* SWAP
                S02:0000EE6E:  E9 EC
-F00:8242       	dc.w	LAB_BITSET-LAB_CTBL		* BITSET
+F00:8241       	dc.w	LAB_BITSET-LAB_CTBL		* BITSET
                S02:0000EE70:  F4 A2
-F00:8243       	dc.w	LAB_BITCLR-LAB_CTBL		* BITCLR
+F00:8242       	dc.w	LAB_BITCLR-LAB_CTBL		* BITCLR
                S02:0000EE72:  F4 B2
+F00:8243       
 F00:8244       
-F00:8245       
-F00:8246       *************************************************************************************
-F00:8247       *
-F00:8248       * function pre process routine table
-F00:8249       
-F00:8250       LAB_FTPP
-F00:8251       	dc.w	LAB_PPFN-LAB_FTPP			* SGN(n)	process numeric expression in ()
+F00:8245       *************************************************************************************
+F00:8246       *
+F00:8247       * function pre process routine table
+F00:8248       
+F00:8249       LAB_FTPP
+F00:8250       	dc.w	LAB_PPFN-LAB_FTPP			* SGN(n)	process numeric expression in ()
                S02:0000EE74:  DF E4
-F00:8252       	dc.w	LAB_PPFN-LAB_FTPP			* INT(n)		"
+F00:8251       	dc.w	LAB_PPFN-LAB_FTPP			* INT(n)		"
                S02:0000EE76:  DF E4
-F00:8253       	dc.w	LAB_PPFN-LAB_FTPP			* ABS(n)		"
+F00:8252       	dc.w	LAB_PPFN-LAB_FTPP			* ABS(n)		"
                S02:0000EE78:  DF E4
-F00:8254       	dc.w	LAB_EVEZ-LAB_FTPP			* USR(x)	process any expression
+F00:8253       	dc.w	LAB_EVEZ-LAB_FTPP			* USR(x)	process any expression
                S02:0000EE7A:  DD E8
-F00:8255       	dc.w	LAB_1BF7-LAB_FTPP			* FRE(x)	process any expression in ()
+F00:8254       	dc.w	LAB_1BF7-LAB_FTPP			* FRE(x)	process any expression in ()
                S02:0000EE7C:  DF 30
-F00:8256       	dc.w	LAB_1BF7-LAB_FTPP			* POS(x)		"
+F00:8255       	dc.w	LAB_1BF7-LAB_FTPP			* POS(x)		"
                S02:0000EE7E:  DF 30
-F00:8257       	dc.w	LAB_PPFN-LAB_FTPP			* SQR(n)	process numeric expression in ()
+F00:8256       	dc.w	LAB_PPFN-LAB_FTPP			* SQR(n)	process numeric expression in ()
                S02:0000EE80:  DF E4
-F00:8258       	dc.w	LAB_PPFN-LAB_FTPP			* RND(n)		"
+F00:8257       	dc.w	LAB_PPFN-LAB_FTPP			* RND(n)		"
                S02:0000EE82:  DF E4
-F00:8259       	dc.w	LAB_PPFN-LAB_FTPP			* LOG(n)		"
+F00:8258       	dc.w	LAB_PPFN-LAB_FTPP			* LOG(n)		"
                S02:0000EE84:  DF E4
-F00:8260       	dc.w	LAB_PPFN-LAB_FTPP			* EXP(n)		"
+F00:8259       	dc.w	LAB_PPFN-LAB_FTPP			* EXP(n)		"
                S02:0000EE86:  DF E4
-F00:8261       	dc.w	LAB_PPFN-LAB_FTPP			* COS(n)		"
+F00:8260       	dc.w	LAB_PPFN-LAB_FTPP			* COS(n)		"
                S02:0000EE88:  DF E4
-F00:8262       	dc.w	LAB_PPFN-LAB_FTPP			* SIN(n)		"
+F00:8261       	dc.w	LAB_PPFN-LAB_FTPP			* SIN(n)		"
                S02:0000EE8A:  DF E4
-F00:8263       	dc.w	LAB_PPFN-LAB_FTPP			* TAN(n)		"
+F00:8262       	dc.w	LAB_PPFN-LAB_FTPP			* TAN(n)		"
                S02:0000EE8C:  DF E4
-F00:8264       	dc.w	LAB_PPFN-LAB_FTPP			* ATN(n)		"
+F00:8263       	dc.w	LAB_PPFN-LAB_FTPP			* ATN(n)		"
                S02:0000EE8E:  DF E4
-F00:8265       	dc.w	LAB_PPFN-LAB_FTPP			* PEEK(n)		"
+F00:8264       	dc.w	LAB_PPFN-LAB_FTPP			* PEEK(n)		"
                S02:0000EE90:  DF E4
-F00:8266       	dc.w	LAB_PPFN-LAB_FTPP			* DEEK(n)		"
+F00:8265       	dc.w	LAB_PPFN-LAB_FTPP			* DEEK(n)		"
                S02:0000EE92:  DF E4
-F00:8267       	dc.w	LAB_PPFN-LAB_FTPP			* LEEK(n)		"
+F00:8266       	dc.w	LAB_PPFN-LAB_FTPP			* LEEK(n)		"
                S02:0000EE94:  DF E4
-F00:8268       	dc.w	LAB_PPFS-LAB_FTPP			* LEN($)	process string expression in ()
+F00:8267       	dc.w	LAB_PPFS-LAB_FTPP			* LEN($)	process string expression in ()
                S02:0000EE96:  DF D6
-F00:8269       	dc.w	LAB_PPFN-LAB_FTPP			* STR$(n)	process numeric expression in ()
+F00:8268       	dc.w	LAB_PPFN-LAB_FTPP			* STR$(n)	process numeric expression in ()
                S02:0000EE98:  DF E4
-F00:8270       	dc.w	LAB_PPFS-LAB_FTPP			* VAL($)	process string expression in ()
+F00:8269       	dc.w	LAB_PPFS-LAB_FTPP			* VAL($)	process string expression in ()
                S02:0000EE9A:  DF D6
-F00:8271       	dc.w	LAB_PPFS-LAB_FTPP			* ASC($)		"
+F00:8270       	dc.w	LAB_PPFS-LAB_FTPP			* ASC($)		"
                S02:0000EE9C:  DF D6
-F00:8272       	dc.w	LAB_PPFS-LAB_FTPP			* UCASE$($)		"
+F00:8271       	dc.w	LAB_PPFS-LAB_FTPP			* UCASE$($)		"
                S02:0000EE9E:  DF D6
-F00:8273       	dc.w	LAB_PPFS-LAB_FTPP			* LCASE$($)		"
+F00:8272       	dc.w	LAB_PPFS-LAB_FTPP			* LCASE$($)		"
                S02:0000EEA0:  DF D6
-F00:8274       	dc.w	LAB_PPFN-LAB_FTPP			* CHR$(n)	process numeric expression in ()
+F00:8273       	dc.w	LAB_PPFN-LAB_FTPP			* CHR$(n)	process numeric expression in ()
                S02:0000EEA2:  DF E4
-F00:8275       	dc.w	LAB_BHSS-LAB_FTPP			* HEX$()	bin/hex pre process
+F00:8274       	dc.w	LAB_BHSS-LAB_FTPP			* HEX$()	bin/hex pre process
                S02:0000EEA4:  E0 1E
-F00:8276       	dc.w	LAB_BHSS-LAB_FTPP			* BIN$()		"
+F00:8275       	dc.w	LAB_BHSS-LAB_FTPP			* BIN$()		"
                S02:0000EEA6:  E0 1E
-F00:8277       	dc.w	$0000					* BITTST()	none
+F00:8276       	dc.w	$0000					* BITTST()	none
                S02:0000EEA8:  00 00
-F00:8278       	dc.w	$0000					* MAX()		"
+F00:8277       	dc.w	$0000					* MAX()		"
                S02:0000EEAA:  00 00
-F00:8279       	dc.w	$0000					* MIN()		"
+F00:8278       	dc.w	$0000					* MIN()		"
                S02:0000EEAC:  00 00
-F00:8280       	dc.w	LAB_PPBI-LAB_FTPP			* RAMBASE	advance pointer
+F00:8279       	dc.w	LAB_PPBI-LAB_FTPP			* RAMBASE	advance pointer
                S02:0000EEAE:  DF F2
-F00:8281       	dc.w	LAB_PPBI-LAB_FTPP			* PI			"
+F00:8280       	dc.w	LAB_PPBI-LAB_FTPP			* PI			"
                S02:0000EEB0:  DF F2
-F00:8282       	dc.w	LAB_PPBI-LAB_FTPP			* TWOPI		"
+F00:8281       	dc.w	LAB_PPBI-LAB_FTPP			* TWOPI		"
                S02:0000EEB2:  DF F2
-F00:8283       	dc.w	$0000					* VARPTR()	none
+F00:8282       	dc.w	$0000					* VARPTR()	none
                S02:0000EEB4:  00 00
-F00:8284       	dc.w	$0000					* SADD()		"
+F00:8283       	dc.w	$0000					* SADD()		"
                S02:0000EEB6:  00 00
-F00:8285       	dc.w	LAB_LRMS-LAB_FTPP			* LEFT$()	process string expression
+F00:8284       	dc.w	LAB_LRMS-LAB_FTPP			* LEFT$()	process string expression
                S02:0000EEB8:  DF FC
-F00:8286       	dc.w	LAB_LRMS-LAB_FTPP			* RIGHT$()		"
+F00:8285       	dc.w	LAB_LRMS-LAB_FTPP			* RIGHT$()		"
                S02:0000EEBA:  DF FC
-F00:8287       	dc.w	LAB_LRMS-LAB_FTPP			* MID$()		"
+F00:8286       	dc.w	LAB_LRMS-LAB_FTPP			* MID$()		"
                S02:0000EEBC:  DF FC
-F00:8288       	dc.w	LAB_EVEZ-LAB_FTPP			* USING$(x)	process any expression
+F00:8287       	dc.w	LAB_EVEZ-LAB_FTPP			* USING$(x)	process any expression
                S02:0000EEBE:  DD E8
+F00:8288       
 F00:8289       
-F00:8290       
-F00:8291       *************************************************************************************
-F00:8292       *
-F00:8293       * action addresses for functions
-F00:8294       
-F00:8295       LAB_FTBL
-F00:8296       	dc.w	LAB_SGN-LAB_FTBL			* SGN()
+F00:8290       *************************************************************************************
+F00:8291       *
+F00:8292       * action addresses for functions
+F00:8293       
+F00:8294       LAB_FTBL
+F00:8295       	dc.w	LAB_SGN-LAB_FTBL			* SGN()
                S02:0000EEC0:  ED 5E
-F00:8297       	dc.w	LAB_INT-LAB_FTBL			* INT()
+F00:8296       	dc.w	LAB_INT-LAB_FTBL			* INT()
                S02:0000EEC2:  ED E0
-F00:8298       	dc.w	LAB_ABS-LAB_FTBL			* ABS()
+F00:8297       	dc.w	LAB_ABS-LAB_FTBL			* ABS()
                S02:0000EEC4:  ED 70
-F00:8299       	dc.w	LAB_USR-LAB_FTBL			* USR()
+F00:8298       	dc.w	LAB_USR-LAB_FTBL			* USR()
                S02:0000EEC6:  E9 7E
-F00:8300       	dc.w	LAB_FRE-LAB_FTBL			* FRE()
+F00:8299       	dc.w	LAB_FRE-LAB_FTBL			* FRE()
                S02:0000EEC8:  E3 E2
-F00:8301       	dc.w	LAB_POS-LAB_FTBL			* POS()
+F00:8300       	dc.w	LAB_POS-LAB_FTBL			* POS()
                S02:0000EECA:  E4 14
-F00:8302       	dc.w	LAB_SQR-LAB_FTBL			* SQR()
+F00:8301       	dc.w	LAB_SQR-LAB_FTBL			* SQR()
                S02:0000EECC:  F9 38
-F00:8303       	dc.w	LAB_RND-LAB_FTBL			* RND()
+F00:8302       	dc.w	LAB_RND-LAB_FTBL			* RND()
                S02:0000EECE:  F2 28
-F00:8304       	dc.w	LAB_LOG-LAB_FTBL			* LOG()
+F00:8303       	dc.w	LAB_LOG-LAB_FTBL			* LOG()
                S02:0000EED0:  EA 80
-F00:8305       	dc.w	LAB_EXP-LAB_FTBL			* EXP()
+F00:8304       	dc.w	LAB_EXP-LAB_FTBL			* EXP()
                S02:0000EED2:  F1 0E
-F00:8306       	dc.w	LAB_COS-LAB_FTBL			* COS()
+F00:8305       	dc.w	LAB_COS-LAB_FTBL			* COS()
                S02:0000EED4:  F2 7C
-F00:8307       	dc.w	LAB_SIN-LAB_FTBL			* SIN()
+F00:8306       	dc.w	LAB_SIN-LAB_FTBL			* SIN()
                S02:0000EED6:  F2 94
-F00:8308       	dc.w	LAB_TAN-LAB_FTBL			* TAN()
+F00:8307       	dc.w	LAB_TAN-LAB_FTBL			* TAN()
                S02:0000EED8:  F2 5A
-F00:8309       	dc.w	LAB_ATN-LAB_FTBL			* ATN()
+F00:8308       	dc.w	LAB_ATN-LAB_FTBL			* ATN()
                S02:0000EEDA:  F3 54
-F00:8310       	dc.w	LAB_PEEK-LAB_FTBL			* PEEK()
+F00:8309       	dc.w	LAB_PEEK-LAB_FTBL			* PEEK()
                S02:0000EEDC:  E8 FA
-F00:8311       	dc.w	LAB_DEEK-LAB_FTBL			* DEEK()
+F00:8310       	dc.w	LAB_DEEK-LAB_FTBL			* DEEK()
                S02:0000EEDE:  E9 0C
-F00:8312       	dc.w	LAB_LEEK-LAB_FTBL			* LEEK()
+F00:8311       	dc.w	LAB_LEEK-LAB_FTBL			* LEEK()
                S02:0000EEE0:  E9 22
-F00:8313       	dc.w	LAB_LENS-LAB_FTBL			* LEN()
+F00:8312       	dc.w	LAB_LENS-LAB_FTBL			* LEN()
                S02:0000EEE2:  E8 3E
-F00:8314       	dc.w	LAB_STRS-LAB_FTBL			* STR$()
+F00:8313       	dc.w	LAB_STRS-LAB_FTBL			* STR$()
                S02:0000EEE4:  E5 0A
-F00:8315       	dc.w	LAB_VAL-LAB_FTBL			* VAL()
+F00:8314       	dc.w	LAB_VAL-LAB_FTBL			* VAL()
                S02:0000EEE6:  E8 82
-F00:8316       	dc.w	LAB_ASC-LAB_FTBL			* ASC()
+F00:8315       	dc.w	LAB_ASC-LAB_FTBL			* ASC()
                S02:0000EEE8:  E8 46
-F00:8317       	dc.w	LAB_UCASE-LAB_FTBL		* UCASE$()
+F00:8316       	dc.w	LAB_UCASE-LAB_FTBL		* UCASE$()
                S02:0000EEEA:  E7 F4
-F00:8318       	dc.w	LAB_LCASE-LAB_FTBL		* LCASE$()
+F00:8317       	dc.w	LAB_LCASE-LAB_FTBL		* LCASE$()
                S02:0000EEEC:  E7 C4
-F00:8319       	dc.w	LAB_CHRS-LAB_FTBL			* CHR$()
+F00:8318       	dc.w	LAB_CHRS-LAB_FTBL			* CHR$()
                S02:0000EEEE:  E7 2C
-F00:8320       	dc.w	LAB_HEXS-LAB_FTBL			* HEX$()
+F00:8319       	dc.w	LAB_HEXS-LAB_FTBL			* HEX$()
                S02:0000EEF0:  F7 DC
-F00:8321       	dc.w	LAB_BINS-LAB_FTBL			* BIN$()
+F00:8320       	dc.w	LAB_BINS-LAB_FTBL			* BIN$()
                S02:0000EEF2:  F7 8A
-F00:8322       	dc.w	LAB_BTST-LAB_FTBL			* BITTST()
+F00:8321       	dc.w	LAB_BTST-LAB_FTBL			* BITTST()
                S02:0000EEF4:  F4 26
-F00:8323       	dc.w	LAB_MAX-LAB_FTBL			* MAX()
+F00:8322       	dc.w	LAB_MAX-LAB_FTBL			* MAX()
                S02:0000EEF6:  F8 48
-F00:8324       	dc.w	LAB_MIN-LAB_FTBL			* MIN()
+F00:8323       	dc.w	LAB_MIN-LAB_FTBL			* MIN()
                S02:0000EEF8:  F8 5E
-F00:8325       	dc.w	LAB_RAM-LAB_FTBL			* RAMBASE
+F00:8324       	dc.w	LAB_RAM-LAB_FTBL			* RAMBASE
                S02:0000EEFA:  F9 AA
-F00:8326       	dc.w	LAB_PI-LAB_FTBL			* PI
+F00:8325       	dc.w	LAB_PI-LAB_FTBL			* PI
                S02:0000EEFC:  F9 B4
-F00:8327       	dc.w	LAB_TWOPI-LAB_FTBL		* TWOPI
+F00:8326       	dc.w	LAB_TWOPI-LAB_FTBL		* TWOPI
                S02:0000EEFE:  F9 C4
-F00:8328       	dc.w	LAB_VARPTR-LAB_FTBL		* VARPTR()
+F00:8327       	dc.w	LAB_VARPTR-LAB_FTBL		* VARPTR()
                S02:0000EF00:  F9 9A
-F00:8329       	dc.w	LAB_SADD-LAB_FTBL			* SADD()
+F00:8328       	dc.w	LAB_SADD-LAB_FTBL			* SADD()
                S02:0000EF02:  E8 26
-F00:8330       	dc.w	LAB_LEFT-LAB_FTBL			* LEFT$()
+F00:8329       	dc.w	LAB_LEFT-LAB_FTBL			* LEFT$()
                S02:0000EF04:  E7 3C
-F00:8331       	dc.w	LAB_RIGHT-LAB_FTBL		* RIGHT$()
+F00:8330       	dc.w	LAB_RIGHT-LAB_FTBL		* RIGHT$()
                S02:0000EF06:  E7 50
-F00:8332       	dc.w	LAB_MIDS-LAB_FTBL			* MID$()
+F00:8331       	dc.w	LAB_MIDS-LAB_FTBL			* MID$()
                S02:0000EF08:  E7 80
-F00:8333       	dc.w	LAB_USINGS-LAB_FTBL		* USING$()
+F00:8332       	dc.w	LAB_USINGS-LAB_FTBL		* USING$()
                S02:0000EF0A:  F4 54
+F00:8333       
 F00:8334       
-F00:8335       
-F00:8336       *************************************************************************************
-F00:8337       *
-F00:8338       * hierarchy and action addresses for operator
-F00:8339       
-F00:8340       LAB_OPPT
-F00:8341       	dc.w	$0079					* +
+F00:8335       *************************************************************************************
+F00:8336       *
+F00:8337       * hierarchy and action addresses for operator
+F00:8338       
+F00:8339       LAB_OPPT
+F00:8340       	dc.w	$0079					* +
                S02:0000EF0C:  00 79
-F00:8342       	dc.w	LAB_ADD-LAB_OPPT
+F00:8341       	dc.w	LAB_ADD-LAB_OPPT
                S02:0000EF0E:  E9 84
-F00:8343       	dc.w	$0079					* -
+F00:8342       	dc.w	$0079					* -
                S02:0000EF10:  00 79
-F00:8344       	dc.w	LAB_SUBTRACT-LAB_OPPT
+F00:8343       	dc.w	LAB_SUBTRACT-LAB_OPPT
                S02:0000EF12:  E9 70
-F00:8345       	dc.w	$007B					* *
+F00:8344       	dc.w	$007B					* *
                S02:0000EF14:  00 7B
-F00:8346       	dc.w	LAB_MULTIPLY-LAB_OPPT
+F00:8345       	dc.w	LAB_MULTIPLY-LAB_OPPT
                S02:0000EF16:  EB 26
-F00:8347       	dc.w	$007B					* /
+F00:8346       	dc.w	$007B					* /
                S02:0000EF18:  00 7B
-F00:8348       	dc.w	LAB_DIVIDE-LAB_OPPT
+F00:8347       	dc.w	LAB_DIVIDE-LAB_OPPT
                S02:0000EF1A:  EB B2
-F00:8349       	dc.w	$007F					* ^
+F00:8348       	dc.w	$007F					* ^
                S02:0000EF1C:  00 7F
-F00:8350       	dc.w	LAB_POWER-LAB_OPPT
+F00:8349       	dc.w	LAB_POWER-LAB_OPPT
                S02:0000EF1E:  F0 0C
-F00:8351       	dc.w	$0050					* AND
+F00:8350       	dc.w	$0050					* AND
                S02:0000EF20:  00 50
-F00:8352       	dc.w	LAB_AND-LAB_OPPT
+F00:8351       	dc.w	LAB_AND-LAB_OPPT
                S02:0000EF22:  DF C6
-F00:8353       	dc.w	$0046					* EOR
+F00:8352       	dc.w	$0046					* EOR
                S02:0000EF24:  00 46
-F00:8354       	dc.w	LAB_EOR-LAB_OPPT
+F00:8353       	dc.w	LAB_EOR-LAB_OPPT
                S02:0000EF26:  DF B6
-F00:8355       	dc.w	$0046					* OR
+F00:8354       	dc.w	$0046					* OR
                S02:0000EF28:  00 46
-F00:8356       	dc.w	LAB_OR-LAB_OPPT
+F00:8355       	dc.w	LAB_OR-LAB_OPPT
                S02:0000EF2A:  DF BE
-F00:8357       	dc.w	$0056					* >>
+F00:8356       	dc.w	$0056					* >>
                S02:0000EF2C:  00 56
-F00:8358       	dc.w	LAB_RSHIFT-LAB_OPPT
+F00:8357       	dc.w	LAB_RSHIFT-LAB_OPPT
                S02:0000EF2E:  E0 6A
-F00:8359       	dc.w	$0056					* <<
+F00:8358       	dc.w	$0056					* <<
                S02:0000EF30:  00 56
-F00:8360       	dc.w	LAB_LSHIFT-LAB_OPPT
+F00:8359       	dc.w	LAB_LSHIFT-LAB_OPPT
                S02:0000EF32:  E0 5A
-F00:8361       	dc.w	$007D					* >
+F00:8360       	dc.w	$007D					* >
                S02:0000EF34:  00 7D
-F00:8362       	dc.w	LAB_GTHAN-LAB_OPPT		* used to evaluate -n
+F00:8361       	dc.w	LAB_GTHAN-LAB_OPPT		* used to evaluate -n
                S02:0000EF36:  F0 70
-F00:8363       	dc.w	$005A					* =
+F00:8362       	dc.w	$005A					* =
                S02:0000EF38:  00 5A
-F00:8364       	dc.w	LAB_EQUAL-LAB_OPPT		* used to evaluate NOT
+F00:8363       	dc.w	LAB_EQUAL-LAB_OPPT		* used to evaluate NOT
                S02:0000EF3A:  DF DC
-F00:8365       	dc.w	$0064					* <
+F00:8364       	dc.w	$0064					* <
                S02:0000EF3C:  00 64
-F00:8366       	dc.w	LAB_LTHAN-LAB_OPPT
+F00:8365       	dc.w	LAB_LTHAN-LAB_OPPT
                S02:0000EF3E:  DF E6
+F00:8366       
 F00:8367       
-F00:8368       
-F00:8369       *************************************************************************************
-F00:8370       *
-F00:8371       * misc constants
-F00:8372       
-F00:8373       * This table is used in converting numbers to ASCII.
-F00:8374       * first four entries for expansion to 9.25 digits
-F00:8375       
-F00:8376       LAB_2A9A
-F00:8377       	dc.l	$FFF0BDC0				* -1000000
+F00:8368       *************************************************************************************
+F00:8369       *
+F00:8370       * misc constants
+F00:8371       
+F00:8372       * This table is used in converting numbers to ASCII.
+F00:8373       * first four entries for expansion to 9.25 digits
+F00:8374       
+F00:8375       LAB_2A9A
+F00:8376       	dc.l	$FFF0BDC0				* -1000000
                S02:0000EF40:  FF F0 BD C0
-F00:8378       	dc.l	$000186A0				* 100000
+F00:8377       	dc.l	$000186A0				* 100000
                S02:0000EF44:  00 01 86 A0
-F00:8379       	dc.l	$FFFFD8F0				* -10000
+F00:8378       	dc.l	$FFFFD8F0				* -10000
                S02:0000EF48:  FF FF D8 F0
-F00:8380       	dc.l	$000003E8				* 1000
+F00:8379       	dc.l	$000003E8				* 1000
                S02:0000EF4C:  00 00 03 E8
-F00:8381       	dc.l	$FFFFFF9C				* -100
+F00:8380       	dc.l	$FFFFFF9C				* -100
                S02:0000EF50:  FF FF FF 9C
-F00:8382       	dc.l	$0000000A				* 10
+F00:8381       	dc.l	$0000000A				* 10
                S02:0000EF54:  00 00 00 0A
-F00:8383       	dc.l	$FFFFFFFF				* -1
+F00:8382       	dc.l	$FFFFFFFF				* -1
                S02:0000EF58:  FF FF FF FF
-F00:8384       LAB_2A9B
+F00:8383       LAB_2A9B
+F00:8384       
 F00:8385       
-F00:8386       
-F00:8387       *************************************************************************************
-F00:8388       *
-F00:8389       * new keyword tables
-F00:8390       
-F00:8391       * offsets to keyword tables
-F00:8392       
-F00:8393       TAB_CHRT
-F00:8394       	dc.w	TAB_STAR-TAB_STAR			* "*"	$2A
+F00:8386       *************************************************************************************
+F00:8387       *
+F00:8388       * new keyword tables
+F00:8389       
+F00:8390       * offsets to keyword tables
+F00:8391       
+F00:8392       TAB_CHRT
+F00:8393       	dc.w	TAB_STAR-TAB_STAR			* "*"	$2A
                S02:0000EF5C:  00 00
-F00:8395       	dc.w	TAB_PLUS-TAB_STAR			* "+"	$2B
+F00:8394       	dc.w	TAB_PLUS-TAB_STAR			* "+"	$2B
                S02:0000EF5E:  00 02
-F00:8396       	dc.w	-1					* "," $2C no keywords
+F00:8395       	dc.w	-1					* "," $2C no keywords
                S02:0000EF60:  FF FF
-F00:8397       	dc.w	TAB_MNUS-TAB_STAR			* "-"	$2D
+F00:8396       	dc.w	TAB_MNUS-TAB_STAR			* "-"	$2D
                S02:0000EF62:  00 04
-F00:8398       	dc.w	-1					* "." $2E no keywords
+F00:8397       	dc.w	-1					* "." $2E no keywords
                S02:0000EF64:  FF FF
-F00:8399       	dc.w	TAB_SLAS-TAB_STAR			* "/"	$2F
+F00:8398       	dc.w	TAB_SLAS-TAB_STAR			* "/"	$2F
                S02:0000EF66:  00 06
-F00:8400       	dc.w	-1					* "0" $30 no keywords
+F00:8399       	dc.w	-1					* "0" $30 no keywords
                S02:0000EF68:  FF FF
-F00:8401       	dc.w	-1					* "1" $31 no keywords
+F00:8400       	dc.w	-1					* "1" $31 no keywords
                S02:0000EF6A:  FF FF
-F00:8402       	dc.w	-1					* "2" $32 no keywords
+F00:8401       	dc.w	-1					* "2" $32 no keywords
                S02:0000EF6C:  FF FF
-F00:8403       	dc.w	-1					* "3" $33 no keywords
+F00:8402       	dc.w	-1					* "3" $33 no keywords
                S02:0000EF6E:  FF FF
-F00:8404       	dc.w	-1					* "4" $34 no keywords
+F00:8403       	dc.w	-1					* "4" $34 no keywords
                S02:0000EF70:  FF FF
-F00:8405       	dc.w	-1					* "5" $35 no keywords
+F00:8404       	dc.w	-1					* "5" $35 no keywords
                S02:0000EF72:  FF FF
-F00:8406       	dc.w	-1					* "6" $36 no keywords
+F00:8405       	dc.w	-1					* "6" $36 no keywords
                S02:0000EF74:  FF FF
-F00:8407       	dc.w	-1					* "7" $37 no keywords
+F00:8406       	dc.w	-1					* "7" $37 no keywords
                S02:0000EF76:  FF FF
-F00:8408       	dc.w	-1					* "8" $38 no keywords
+F00:8407       	dc.w	-1					* "8" $38 no keywords
                S02:0000EF78:  FF FF
-F00:8409       	dc.w	-1					* "9" $39 no keywords
+F00:8408       	dc.w	-1					* "9" $39 no keywords
                S02:0000EF7A:  FF FF
-F00:8410       	dc.w	-1					* ";" $3A no keywords
+F00:8409       	dc.w	-1					* ";" $3A no keywords
                S02:0000EF7C:  FF FF
-F00:8411       	dc.w	-1					* ":" $3B no keywords
+F00:8410       	dc.w	-1					* ":" $3B no keywords
                S02:0000EF7E:  FF FF
-F00:8412       	dc.w	TAB_LESS-TAB_STAR			* "<"	$3C
+F00:8411       	dc.w	TAB_LESS-TAB_STAR			* "<"	$3C
                S02:0000EF80:  00 08
-F00:8413       	dc.w	TAB_EQUL-TAB_STAR			* "="	$3D
+F00:8412       	dc.w	TAB_EQUL-TAB_STAR			* "="	$3D
                S02:0000EF82:  00 0C
-F00:8414       	dc.w	TAB_MORE-TAB_STAR			* ">"	$3E
+F00:8413       	dc.w	TAB_MORE-TAB_STAR			* ">"	$3E
                S02:0000EF84:  00 0E
-F00:8415       	dc.w	TAB_QEST-TAB_STAR			* "?"	$3F
+F00:8414       	dc.w	TAB_QEST-TAB_STAR			* "?"	$3F
                S02:0000EF86:  00 12
-F00:8416       	dc.w	-1					* "@" $40 no keywords
+F00:8415       	dc.w	-1					* "@" $40 no keywords
                S02:0000EF88:  FF FF
-F00:8417       	dc.w	TAB_ASCA-TAB_STAR			* "A"	$41
+F00:8416       	dc.w	TAB_ASCA-TAB_STAR			* "A"	$41
                S02:0000EF8A:  00 14
-F00:8418       	dc.w	TAB_ASCB-TAB_STAR			* "B"	$42
+F00:8417       	dc.w	TAB_ASCB-TAB_STAR			* "B"	$42
                S02:0000EF8C:  00 24
-F00:8419       	dc.w	TAB_ASCC-TAB_STAR			* "C"	$43
+F00:8418       	dc.w	TAB_ASCC-TAB_STAR			* "C"	$43
                S02:0000EF8E:  00 3D
-F00:8420       	dc.w	TAB_ASCD-TAB_STAR			* "D"	$44
+F00:8419       	dc.w	TAB_ASCD-TAB_STAR			* "D"	$44
                S02:0000EF90:  00 54
-F00:8421       	dc.w	TAB_ASCE-TAB_STAR			* "E"	$45
+F00:8420       	dc.w	TAB_ASCE-TAB_STAR			* "E"	$45
                S02:0000EF92:  00 6D
-F00:8422       	dc.w	TAB_ASCF-TAB_STAR			* "F"	$46
+F00:8421       	dc.w	TAB_ASCF-TAB_STAR			* "F"	$46
                S02:0000EF94:  00 7C
-F00:8423       	dc.w	TAB_ASCG-TAB_STAR			* "G"	$47
+F00:8422       	dc.w	TAB_ASCG-TAB_STAR			* "G"	$47
                S02:0000EF96:  00 86
-F00:8424       	dc.w	TAB_ASCH-TAB_STAR			* "H"	$48
+F00:8423       	dc.w	TAB_ASCH-TAB_STAR			* "H"	$48
                S02:0000EF98:  00 93
-F00:8425       	dc.w	TAB_ASCI-TAB_STAR			* "I"	$49
+F00:8424       	dc.w	TAB_ASCI-TAB_STAR			* "I"	$49
                S02:0000EF9A:  00 99
-F00:8426       	dc.w	-1					* "J" $4A no keywords
+F00:8425       	dc.w	-1					* "J" $4A no keywords
                S02:0000EF9C:  FF FF
-F00:8427       	dc.w	-1					* "K" $4B no keywords
+F00:8426       	dc.w	-1					* "K" $4B no keywords
                S02:0000EF9E:  FF FF
-F00:8428       	dc.w	TAB_ASCL-TAB_STAR			* "L"	$4C
+F00:8427       	dc.w	TAB_ASCL-TAB_STAR			* "L"	$4C
                S02:0000EFA0:  00 A8
-F00:8429       	dc.w	TAB_ASCM-TAB_STAR			* "M"	$4D
+F00:8428       	dc.w	TAB_ASCM-TAB_STAR			* "M"	$4D
                S02:0000EFA2:  00 D6
-F00:8430       	dc.w	TAB_ASCN-TAB_STAR			* "N"	$4E
+F00:8429       	dc.w	TAB_ASCN-TAB_STAR			* "N"	$4E
                S02:0000EFA4:  00 E4
-F00:8431       	dc.w	TAB_ASCO-TAB_STAR			* "O"	$4F
+F00:8430       	dc.w	TAB_ASCO-TAB_STAR			* "O"	$4F
                S02:0000EFA6:  00 F3
-F00:8432       	dc.w	TAB_ASCP-TAB_STAR			* "P"	$50
+F00:8431       	dc.w	TAB_ASCP-TAB_STAR			* "P"	$50
                S02:0000EFA8:  00 F8
-F00:8433       	dc.w	-1					* "Q" $51 no keywords
+F00:8432       	dc.w	-1					* "Q" $51 no keywords
                S02:0000EFAA:  FF FF
-F00:8434       	dc.w	TAB_ASCR-TAB_STAR			* "R"	$52
+F00:8433       	dc.w	TAB_ASCR-TAB_STAR			* "R"	$52
                S02:0000EFAC:  01 0D
-F00:8435       	dc.w	TAB_ASCS-TAB_STAR			* "S"	$53
+F00:8434       	dc.w	TAB_ASCS-TAB_STAR			* "S"	$53
                S02:0000EFAE:  01 37
-F00:8436       	dc.w	TAB_ASCT-TAB_STAR			* "T"	$54
+F00:8435       	dc.w	TAB_ASCT-TAB_STAR			* "T"	$54
                S02:0000EFB0:  01 62
-F00:8437       	dc.w	TAB_ASCU-TAB_STAR			* "U"	$55
+F00:8436       	dc.w	TAB_ASCU-TAB_STAR			* "U"	$55
                S02:0000EFB2:  01 76
-F00:8438       	dc.w	TAB_ASCV-TAB_STAR			* "V"	$56
+F00:8437       	dc.w	TAB_ASCV-TAB_STAR			* "V"	$56
                S02:0000EFB4:  01 8E
-F00:8439       	dc.w	TAB_ASCW-TAB_STAR			* "W"	$57
+F00:8438       	dc.w	TAB_ASCW-TAB_STAR			* "W"	$57
                S02:0000EFB6:  01 9A
-F00:8440       	dc.w	-1					* "X" $58 no keywords
+F00:8439       	dc.w	-1					* "X" $58 no keywords
                S02:0000EFB8:  FF FF
-F00:8441       	dc.w	-1					* "Y" $59 no keywords
+F00:8440       	dc.w	-1					* "Y" $59 no keywords
                S02:0000EFBA:  FF FF
-F00:8442       	dc.w	-1					* "Z" $5A no keywords
+F00:8441       	dc.w	-1					* "Z" $5A no keywords
                S02:0000EFBC:  FF FF
-F00:8443       	dc.w	-1					* "[" $5B no keywords
+F00:8442       	dc.w	-1					* "[" $5B no keywords
                S02:0000EFBE:  FF FF
-F00:8444       	dc.w	-1					* "\" $5C no keywords
+F00:8443       	dc.w	-1					* "\" $5C no keywords
                S02:0000EFC0:  FF FF
-F00:8445       	dc.w	-1					* "]" $5D no keywords
+F00:8444       	dc.w	-1					* "]" $5D no keywords
                S02:0000EFC2:  FF FF
-F00:8446       	dc.w	TAB_POWR-TAB_STAR			* "^"	$5E
+F00:8445       	dc.w	TAB_POWR-TAB_STAR			* "^"	$5E
                S02:0000EFC4:  01 A9
+F00:8446       
 F00:8447       
-F00:8448       
-F00:8449       *************************************************************************************
-F00:8450       *
-F00:8451       * Table of Basic keywords for LIST command
-F00:8452       * [byte]first character,[byte]remaining length -1
-F00:8453       * [word]offset from table start
-F00:8454       
-F00:8455       LAB_KEYT
-F00:8456       	dc.b	'E',1
+F00:8448       *************************************************************************************
+F00:8449       *
+F00:8450       * Table of Basic keywords for LIST command
+F00:8451       * [byte]first character,[byte]remaining length -1
+F00:8452       * [word]offset from table start
+F00:8453       
+F00:8454       LAB_KEYT
+F00:8455       	dc.b	'E',1
                S02:0000EFC6:  45
                S02:0000EFC7:  01
-F00:8457       	dc.w	KEY_END-TAB_STAR			* END
+F00:8456       	dc.w	KEY_END-TAB_STAR			* END
                S02:0000EFC8:  00 71
-F00:8458       	dc.b	'F',1
+F00:8457       	dc.b	'F',1
                S02:0000EFCA:  46
                S02:0000EFCB:  01
-F00:8459       	dc.w	KEY_FOR-TAB_STAR			* FOR
+F00:8458       	dc.w	KEY_FOR-TAB_STAR			* FOR
                S02:0000EFCC:  00 7C
-F00:8460       	dc.b	'N',2
+F00:8459       	dc.b	'N',2
                S02:0000EFCE:  4E
                S02:0000EFCF:  02
-F00:8461       	dc.w	KEY_NEXT-TAB_STAR			* NEXT
+F00:8460       	dc.w	KEY_NEXT-TAB_STAR			* NEXT
                S02:0000EFD0:  00 E7
-F00:8462       	dc.b	'D',2
+F00:8461       	dc.b	'D',2
                S02:0000EFD2:  44
                S02:0000EFD3:  02
-F00:8463       	dc.w	KEY_DATA-TAB_STAR			* DATA
+F00:8462       	dc.w	KEY_DATA-TAB_STAR			* DATA
                S02:0000EFD4:  00 54
-F00:8464       	dc.b	'I',3
+F00:8463       	dc.b	'I',3
                S02:0000EFD6:  49
                S02:0000EFD7:  03
-F00:8465       	dc.w	KEY_INPUT-TAB_STAR		* INPUT
+F00:8464       	dc.w	KEY_INPUT-TAB_STAR		* INPUT
                S02:0000EFD8:  00 9E
-F00:8466       	dc.b	'D',1
+F00:8465       	dc.b	'D',1
                S02:0000EFDA:  44
                S02:0000EFDB:  01
-F00:8467       	dc.w	KEY_DIM-TAB_STAR			* DIM
+F00:8466       	dc.w	KEY_DIM-TAB_STAR			* DIM
                S02:0000EFDC:  00 63
-F00:8468       	dc.b	'R',2
+F00:8467       	dc.b	'R',2
                S02:0000EFDE:  52
                S02:0000EFDF:  02
-F00:8469       	dc.w	KEY_READ-TAB_STAR			* READ
+F00:8468       	dc.w	KEY_READ-TAB_STAR			* READ
                S02:0000EFE0:  01 14
-F00:8470       	dc.b	'L',1
+F00:8469       	dc.b	'L',1
                S02:0000EFE2:  4C
                S02:0000EFE3:  01
-F00:8471       	dc.w	KEY_LET-TAB_STAR			* LET
+F00:8470       	dc.w	KEY_LET-TAB_STAR			* LET
                S02:0000EFE4:  00 BE
-F00:8472       	dc.b	'D',1
+F00:8471       	dc.b	'D',1
                S02:0000EFE6:  44
                S02:0000EFE7:  01
-F00:8473       	dc.w	KEY_DEC-TAB_STAR			* DEC
+F00:8472       	dc.w	KEY_DEC-TAB_STAR			* DEC
                S02:0000EFE8:  00 58
-F00:8474       	dc.b	'G',2
+F00:8473       	dc.b	'G',2
                S02:0000EFEA:  47
                S02:0000EFEB:  02
-F00:8475       	dc.w	KEY_GOTO-TAB_STAR			* GOTO
+F00:8474       	dc.w	KEY_GOTO-TAB_STAR			* GOTO
                S02:0000EFEC:  00 89
-F00:8476       	dc.b	'R',1
+F00:8475       	dc.b	'R',1
                S02:0000EFEE:  52
                S02:0000EFEF:  01
-F00:8477       	dc.w	KEY_RUN-TAB_STAR			* RUN
+F00:8476       	dc.w	KEY_RUN-TAB_STAR			* RUN
                S02:0000EFF0:  01 33
-F00:8478       	dc.b	'I',0
+F00:8477       	dc.b	'I',0
                S02:0000EFF2:  49
                S02:0000EFF3:  00
-F00:8479       	dc.w	KEY_IF-TAB_STAR			* IF
+F00:8478       	dc.w	KEY_IF-TAB_STAR			* IF
                S02:0000EFF4:  00 99
-F00:8480       	dc.b	'R',5
+F00:8479       	dc.b	'R',5
                S02:0000EFF6:  52
                S02:0000EFF7:  05
-F00:8481       	dc.w	KEY_RESTORE-TAB_STAR		* RESTORE
+F00:8480       	dc.w	KEY_RESTORE-TAB_STAR		* RESTORE
                S02:0000EFF8:  01 1B
-F00:8482       	dc.b	'G',3
+F00:8481       	dc.b	'G',3
                S02:0000EFFA:  47
                S02:0000EFFB:  03
-F00:8483       	dc.w	KEY_GOSUB-TAB_STAR		* GOSUB
+F00:8482       	dc.w	KEY_GOSUB-TAB_STAR		* GOSUB
                S02:0000EFFC:  00 8D
-F00:8484       	dc.b	'R',4
+F00:8483       	dc.b	'R',4
                S02:0000EFFE:  52
                S02:0000EFFF:  04
-F00:8485       	dc.w	KEY_RETURN-TAB_STAR		* RETURN
+F00:8484       	dc.w	KEY_RETURN-TAB_STAR		* RETURN
                S02:0000F000:  01 22
-F00:8486       	dc.b	'R',1
+F00:8485       	dc.b	'R',1
                S02:0000F002:  52
                S02:0000F003:  01
-F00:8487       	dc.w	KEY_REM-TAB_STAR			* REM
+F00:8486       	dc.w	KEY_REM-TAB_STAR			* REM
                S02:0000F004:  01 18
-F00:8488       	dc.b	'S',2
+F00:8487       	dc.b	'S',2
                S02:0000F006:  53
                S02:0000F007:  02
-F00:8489       	dc.w	KEY_STOP-TAB_STAR			* STOP
+F00:8488       	dc.w	KEY_STOP-TAB_STAR			* STOP
                S02:0000F008:  01 54
-F00:8490       	dc.b	'O',0
+F00:8489       	dc.b	'O',0
                S02:0000F00A:  4F
                S02:0000F00B:  00
-F00:8491       	dc.w	KEY_ON-TAB_STAR			* ON
+F00:8490       	dc.w	KEY_ON-TAB_STAR			* ON
                S02:0000F00C:  00 F3
-F00:8492       	dc.b	'N',2
+F00:8491       	dc.b	'N',2
                S02:0000F00E:  4E
                S02:0000F00F:  02
-F00:8493       	dc.w	KEY_NULL-TAB_STAR			* NULL
+F00:8492       	dc.w	KEY_NULL-TAB_STAR			* NULL
                S02:0000F010:  00 EE
-F00:8494       	dc.b	'I',1
+F00:8493       	dc.b	'I',1
                S02:0000F012:  49
                S02:0000F013:  01
-F00:8495       	dc.w	KEY_INC-TAB_STAR			* INC
+F00:8494       	dc.w	KEY_INC-TAB_STAR			* INC
                S02:0000F014:  00 9B
-F00:8496       	dc.b	'W',2
+F00:8495       	dc.b	'W',2
                S02:0000F016:  57
                S02:0000F017:  02
-F00:8497       	dc.w	KEY_WAIT-TAB_STAR			* WAIT
+F00:8496       	dc.w	KEY_WAIT-TAB_STAR			* WAIT
                S02:0000F018:  01 9A
-F00:8498       	dc.b	'L',2
+F00:8497       	dc.b	'L',2
                S02:0000F01A:  4C
                S02:0000F01B:  02
-F00:8499       	dc.w	KEY_LOAD-TAB_STAR			* LOAD
+F00:8498       	dc.w	KEY_LOAD-TAB_STAR			* LOAD
                S02:0000F01C:  00 C5
-F00:8500       	dc.b	'S',2
+F00:8499       	dc.b	'S',2
                S02:0000F01E:  53
                S02:0000F01F:  02
-F00:8501       	dc.w	KEY_SAVE-TAB_STAR			* SAVE
+F00:8500       	dc.w	KEY_SAVE-TAB_STAR			* SAVE
                S02:0000F020:  01 3C
-F00:8502       	dc.b	'D',1
+F00:8501       	dc.b	'D',1
                S02:0000F022:  44
                S02:0000F023:  01
-F00:8503       	dc.w	KEY_DEF-TAB_STAR			* DEF
+F00:8502       	dc.w	KEY_DEF-TAB_STAR			* DEF
                S02:0000F024:  00 60
-F00:8504       	dc.b	'P',2
+F00:8503       	dc.b	'P',2
                S02:0000F026:  50
                S02:0000F027:  02
-F00:8505       	dc.w	KEY_POKE-TAB_STAR			* POKE
+F00:8504       	dc.w	KEY_POKE-TAB_STAR			* POKE
                S02:0000F028:  00 FF
-F00:8506       	dc.b	'D',2
+F00:8505       	dc.b	'D',2
                S02:0000F02A:  44
                S02:0000F02B:  02
-F00:8507       	dc.w	KEY_DOKE-TAB_STAR			* DOKE
+F00:8506       	dc.w	KEY_DOKE-TAB_STAR			* DOKE
                S02:0000F02C:  00 66
-F00:8508       	dc.b	'L',2
+F00:8507       	dc.b	'L',2
                S02:0000F02E:  4C
                S02:0000F02F:  02
-F00:8509       	dc.w	KEY_LOKE-TAB_STAR			* LOKE
+F00:8508       	dc.w	KEY_LOKE-TAB_STAR			* LOKE
                S02:0000F030:  00 CD
-F00:8510       	dc.b	'C',2
+F00:8509       	dc.b	'C',2
                S02:0000F032:  43
                S02:0000F033:  02
-F00:8511       	dc.w	KEY_CALL-TAB_STAR			* CALL
+F00:8510       	dc.w	KEY_CALL-TAB_STAR			* CALL
                S02:0000F034:  00 3D
-F00:8512       	dc.b	'D',0
+F00:8511       	dc.b	'D',0
                S02:0000F036:  44
                S02:0000F037:  00
-F00:8513       	dc.w	KEY_DO-TAB_STAR			* DO
+F00:8512       	dc.w	KEY_DO-TAB_STAR			* DO
                S02:0000F038:  00 6A
-F00:8514       	dc.b	'L',2
+F00:8513       	dc.b	'L',2
                S02:0000F03A:  4C
                S02:0000F03B:  02
-F00:8515       	dc.w	KEY_LOOP-TAB_STAR			* LOOP
+F00:8514       	dc.w	KEY_LOOP-TAB_STAR			* LOOP
                S02:0000F03C:  00 D1
-F00:8516       	dc.b	'P',3
+F00:8515       	dc.b	'P',3
                S02:0000F03E:  50
                S02:0000F03F:  03
-F00:8517       	dc.w	KEY_PRINT-TAB_STAR		* PRINT
+F00:8516       	dc.w	KEY_PRINT-TAB_STAR		* PRINT
                S02:0000F040:  01 07
-F00:8518       	dc.b	'C',2
+F00:8517       	dc.b	'C',2
                S02:0000F042:  43
                S02:0000F043:  02
-F00:8519       	dc.w	KEY_CONT-TAB_STAR			* CONT
+F00:8518       	dc.w	KEY_CONT-TAB_STAR			* CONT
                S02:0000F044:  00 4B
-F00:8520       	dc.b	'L',2
+F00:8519       	dc.b	'L',2
                S02:0000F046:  4C
                S02:0000F047:  02
-F00:8521       	dc.w	KEY_LIST-TAB_STAR			* LIST
+F00:8520       	dc.w	KEY_LIST-TAB_STAR			* LIST
                S02:0000F048:  00 C1
-F00:8522       	dc.b	'C',3
+F00:8521       	dc.b	'C',3
                S02:0000F04A:  43
                S02:0000F04B:  03
-F00:8523       	dc.w	KEY_CLEAR-TAB_STAR		* CLEAR
+F00:8522       	dc.w	KEY_CLEAR-TAB_STAR		* CLEAR
                S02:0000F04C:  00 46
-F00:8524       	dc.b	'N',1
+F00:8523       	dc.b	'N',1
                S02:0000F04E:  4E
                S02:0000F04F:  01
-F00:8525       	dc.w	KEY_NEW-TAB_STAR			* NEW
+F00:8524       	dc.w	KEY_NEW-TAB_STAR			* NEW
                S02:0000F050:  00 E4
-F00:8526       	dc.b	'W',3
+F00:8525       	dc.b	'W',3
                S02:0000F052:  57
                S02:0000F053:  03
-F00:8527       	dc.w	KEY_WIDTH-TAB_STAR		* WIDTH
+F00:8526       	dc.w	KEY_WIDTH-TAB_STAR		* WIDTH
                S02:0000F054:  01 A3
-F00:8528       	dc.b	'G',1
+F00:8527       	dc.b	'G',1
                S02:0000F056:  47
                S02:0000F057:  01
-F00:8529       	dc.w	KEY_GET-TAB_STAR			* GET
+F00:8528       	dc.w	KEY_GET-TAB_STAR			* GET
                S02:0000F058:  00 86
-F00:8530       	dc.b	'S',2
+F00:8529       	dc.b	'S',2
                S02:0000F05A:  53
                S02:0000F05B:  02
-F00:8531       	dc.w	KEY_SWAP-TAB_STAR			* SWAP
+F00:8530       	dc.w	KEY_SWAP-TAB_STAR			* SWAP
                S02:0000F05C:  01 5D
-F00:8532       	dc.b	'B',4
+F00:8531       	dc.b	'B',4
                S02:0000F05E:  42
                S02:0000F05F:  04
-F00:8533       	dc.w	KEY_BITSET-TAB_STAR		* BITSET
+F00:8532       	dc.w	KEY_BITSET-TAB_STAR		* BITSET
                S02:0000F060:  00 2F
-F00:8534       	dc.b	'B',4
+F00:8533       	dc.b	'B',4
                S02:0000F062:  42
                S02:0000F063:  04
-F00:8535       	dc.w	KEY_BITCLR-TAB_STAR		* BITCLR
+F00:8534       	dc.w	KEY_BITCLR-TAB_STAR		* BITCLR
                S02:0000F064:  00 29
-F00:8536       	dc.b	'T',2
+F00:8535       	dc.b	'T',2
                S02:0000F066:  54
                S02:0000F067:  02
-F00:8537       	dc.w	KEY_TAB-TAB_STAR			* TAB(
+F00:8536       	dc.w	KEY_TAB-TAB_STAR			* TAB(
                S02:0000F068:  01 62
-F00:8538       	dc.b	'E',2
+F00:8537       	dc.b	'E',2
                S02:0000F06A:  45
                S02:0000F06B:  02
-F00:8539       	dc.w	KEY_ELSE-TAB_STAR			* ELSE
+F00:8538       	dc.w	KEY_ELSE-TAB_STAR			* ELSE
                S02:0000F06C:  00 6D
-F00:8540       	dc.b	'T',0
+F00:8539       	dc.b	'T',0
                S02:0000F06E:  54
                S02:0000F06F:  00
-F00:8541       	dc.w	KEY_TO-TAB_STAR			* TO
+F00:8540       	dc.w	KEY_TO-TAB_STAR			* TO
                S02:0000F070:  01 6E
-F00:8542       	dc.b	'F',0
+F00:8541       	dc.b	'F',0
                S02:0000F072:  46
                S02:0000F073:  00
-F00:8543       	dc.w	KEY_FN-TAB_STAR			* FN
+F00:8542       	dc.w	KEY_FN-TAB_STAR			* FN
                S02:0000F074:  00 7F
-F00:8544       	dc.b	'S',2
+F00:8543       	dc.b	'S',2
                S02:0000F076:  53
                S02:0000F077:  02
-F00:8545       	dc.w	KEY_SPC-TAB_STAR			* SPC(
+F00:8544       	dc.w	KEY_SPC-TAB_STAR			* SPC(
                S02:0000F078:  01 48
-F00:8546       	dc.b	'T',2
+F00:8545       	dc.b	'T',2
                S02:0000F07A:  54
                S02:0000F07B:  02
-F00:8547       	dc.w	KEY_THEN-TAB_STAR			* THEN
+F00:8546       	dc.w	KEY_THEN-TAB_STAR			* THEN
                S02:0000F07C:  01 6A
-F00:8548       	dc.b	'N',1
+F00:8547       	dc.b	'N',1
                S02:0000F07E:  4E
                S02:0000F07F:  01
-F00:8549       	dc.w	KEY_NOT-TAB_STAR			* NOT
+F00:8548       	dc.w	KEY_NOT-TAB_STAR			* NOT
                S02:0000F080:  00 EB
-F00:8550       	dc.b	'S',2
+F00:8549       	dc.b	'S',2
                S02:0000F082:  53
                S02:0000F083:  02
-F00:8551       	dc.w	KEY_STEP-TAB_STAR			* STEP
+F00:8550       	dc.w	KEY_STEP-TAB_STAR			* STEP
                S02:0000F084:  01 50
-F00:8552       	dc.b	'U',3
+F00:8551       	dc.b	'U',3
                S02:0000F086:  55
                S02:0000F087:  03
-F00:8553       	dc.w	KEY_UNTIL-TAB_STAR		* UNTIL
+F00:8552       	dc.w	KEY_UNTIL-TAB_STAR		* UNTIL
                S02:0000F088:  01 7D
-F00:8554       	dc.b	'W',3
+F00:8553       	dc.b	'W',3
                S02:0000F08A:  57
                S02:0000F08B:  03
-F00:8555       	dc.w	KEY_WHILE-TAB_STAR		* WHILE
+F00:8554       	dc.w	KEY_WHILE-TAB_STAR		* WHILE
                S02:0000F08C:  01 9E
-F00:8556       
-F00:8557       	dc.b	'+',-1
+F00:8555       
+F00:8556       	dc.b	'+',-1
                S02:0000F08E:  2B
                S02:0000F08F:  FF
-F00:8558       	dc.w	KEY_PLUS-TAB_STAR			* +
+F00:8557       	dc.w	KEY_PLUS-TAB_STAR			* +
                S02:0000F090:  00 02
-F00:8559       	dc.b	'-',-1
+F00:8558       	dc.b	'-',-1
                S02:0000F092:  2D
                S02:0000F093:  FF
-F00:8560       	dc.w	KEY_MINUS-TAB_STAR		* -
+F00:8559       	dc.w	KEY_MINUS-TAB_STAR		* -
                S02:0000F094:  00 04
-F00:8561       	dc.b	'*',-1
+F00:8560       	dc.b	'*',-1
                S02:0000F096:  2A
                S02:0000F097:  FF
-F00:8562       	dc.w	KEY_MULT-TAB_STAR			* *
+F00:8561       	dc.w	KEY_MULT-TAB_STAR			* *
                S02:0000F098:  00 00
-F00:8563       	dc.b	'/',-1
+F00:8562       	dc.b	'/',-1
                S02:0000F09A:  2F
                S02:0000F09B:  FF
-F00:8564       	dc.w	KEY_DIV-TAB_STAR			* /
+F00:8563       	dc.w	KEY_DIV-TAB_STAR			* /
                S02:0000F09C:  00 06
-F00:8565       	dc.b	'^',-1
+F00:8564       	dc.b	'^',-1
                S02:0000F09E:  5E
                S02:0000F09F:  FF
-F00:8566       	dc.w	KEY_POWER-TAB_STAR		* ^
+F00:8565       	dc.w	KEY_POWER-TAB_STAR		* ^
                S02:0000F0A0:  01 A9
-F00:8567       	dc.b	'A',1
+F00:8566       	dc.b	'A',1
                S02:0000F0A2:  41
                S02:0000F0A3:  01
-F00:8568       	dc.w	KEY_AND-TAB_STAR			* AND
+F00:8567       	dc.w	KEY_AND-TAB_STAR			* AND
                S02:0000F0A4:  00 18
-F00:8569       	dc.b	'E',1
+F00:8568       	dc.b	'E',1
                S02:0000F0A6:  45
                S02:0000F0A7:  01
-F00:8570       	dc.w	KEY_EOR-TAB_STAR			* EOR
+F00:8569       	dc.w	KEY_EOR-TAB_STAR			* EOR
                S02:0000F0A8:  00 74
-F00:8571       	dc.b	'O',0
+F00:8570       	dc.b	'O',0
                S02:0000F0AA:  4F
                S02:0000F0AB:  00
-F00:8572       	dc.w	KEY_OR-TAB_STAR			* OR
+F00:8571       	dc.w	KEY_OR-TAB_STAR			* OR
                S02:0000F0AC:  00 F5
-F00:8573       	dc.b	'>',0
+F00:8572       	dc.b	'>',0
                S02:0000F0AE:  3E
                S02:0000F0AF:  00
-F00:8574       	dc.w	KEY_RSHIFT-TAB_STAR		* >>
+F00:8573       	dc.w	KEY_RSHIFT-TAB_STAR		* >>
                S02:0000F0B0:  00 0E
-F00:8575       	dc.b	'<',0
+F00:8574       	dc.b	'<',0
                S02:0000F0B2:  3C
                S02:0000F0B3:  00
-F00:8576       	dc.w	KEY_LSHIFT-TAB_STAR		* <<
+F00:8575       	dc.w	KEY_LSHIFT-TAB_STAR		* <<
                S02:0000F0B4:  00 08
-F00:8577       	dc.b	'>',-1
+F00:8576       	dc.b	'>',-1
                S02:0000F0B6:  3E
                S02:0000F0B7:  FF
-F00:8578       	dc.w	KEY_GT-TAB_STAR			* >
+F00:8577       	dc.w	KEY_GT-TAB_STAR			* >
                S02:0000F0B8:  00 10
-F00:8579       	dc.b	'=',-1
+F00:8578       	dc.b	'=',-1
                S02:0000F0BA:  3D
                S02:0000F0BB:  FF
-F00:8580       	dc.w	KEY_EQUAL-TAB_STAR		* =
+F00:8579       	dc.w	KEY_EQUAL-TAB_STAR		* =
                S02:0000F0BC:  00 0C
-F00:8581       	dc.b	'<',-1
+F00:8580       	dc.b	'<',-1
                S02:0000F0BE:  3C
                S02:0000F0BF:  FF
-F00:8582       	dc.w	KEY_LT-TAB_STAR			* <
+F00:8581       	dc.w	KEY_LT-TAB_STAR			* <
                S02:0000F0C0:  00 0A
-F00:8583       
-F00:8584       	dc.b	'S',2
+F00:8582       
+F00:8583       	dc.b	'S',2
                S02:0000F0C2:  53
                S02:0000F0C3:  02
-F00:8585       	dc.w	KEY_SGN-TAB_STAR			* SGN(
+F00:8584       	dc.w	KEY_SGN-TAB_STAR			* SGN(
                S02:0000F0C4:  01 40
-F00:8586       	dc.b	'I',2
+F00:8585       	dc.b	'I',2
                S02:0000F0C6:  49
                S02:0000F0C7:  02
-F00:8587       	dc.w	KEY_INT-TAB_STAR			* INT(
+F00:8586       	dc.w	KEY_INT-TAB_STAR			* INT(
                S02:0000F0C8:  00 A3
-F00:8588       	dc.b	'A',2
+F00:8587       	dc.b	'A',2
                S02:0000F0CA:  41
                S02:0000F0CB:  02
-F00:8589       	dc.w	KEY_ABS-TAB_STAR			* ABS(
+F00:8588       	dc.w	KEY_ABS-TAB_STAR			* ABS(
                S02:0000F0CC:  00 14
-F00:8590       	dc.b	'U',2
+F00:8589       	dc.b	'U',2
                S02:0000F0CE:  55
                S02:0000F0CF:  02
-F00:8591       	dc.w	KEY_USR-TAB_STAR			* USR(
+F00:8590       	dc.w	KEY_USR-TAB_STAR			* USR(
                S02:0000F0D0:  01 89
-F00:8592       	dc.b	'F',2
+F00:8591       	dc.b	'F',2
                S02:0000F0D2:  46
                S02:0000F0D3:  02
-F00:8593       	dc.w	KEY_FRE-TAB_STAR			* FRE(
+F00:8592       	dc.w	KEY_FRE-TAB_STAR			* FRE(
                S02:0000F0D4:  00 81
-F00:8594       	dc.b	'P',2
+F00:8593       	dc.b	'P',2
                S02:0000F0D6:  50
                S02:0000F0D7:  02
-F00:8595       	dc.w	KEY_POS-TAB_STAR			* POS(
+F00:8594       	dc.w	KEY_POS-TAB_STAR			* POS(
                S02:0000F0D8:  01 03
-F00:8596       	dc.b	'S',2
+F00:8595       	dc.b	'S',2
                S02:0000F0DA:  53
                S02:0000F0DB:  02
-F00:8597       	dc.w	KEY_SQR-TAB_STAR			* SQR(
+F00:8596       	dc.w	KEY_SQR-TAB_STAR			* SQR(
                S02:0000F0DC:  01 4C
-F00:8598       	dc.b	'R',2
+F00:8597       	dc.b	'R',2
                S02:0000F0DE:  52
                S02:0000F0DF:  02
-F00:8599       	dc.w	KEY_RND-TAB_STAR			* RND(
+F00:8598       	dc.w	KEY_RND-TAB_STAR			* RND(
                S02:0000F0E0:  01 2F
-F00:8600       	dc.b	'L',2
+F00:8599       	dc.b	'L',2
                S02:0000F0E2:  4C
                S02:0000F0E3:  02
-F00:8601       	dc.w	KEY_LOG-TAB_STAR			* LOG(
+F00:8600       	dc.w	KEY_LOG-TAB_STAR			* LOG(
                S02:0000F0E4:  00 C9
-F00:8602       	dc.b	'E',2
+F00:8601       	dc.b	'E',2
                S02:0000F0E6:  45
                S02:0000F0E7:  02
-F00:8603       	dc.w	KEY_EXP-TAB_STAR			* EXP(
+F00:8602       	dc.w	KEY_EXP-TAB_STAR			* EXP(
                S02:0000F0E8:  00 77
-F00:8604       	dc.b	'C',2
+F00:8603       	dc.b	'C',2
                S02:0000F0EA:  43
                S02:0000F0EB:  02
-F00:8605       	dc.w	KEY_COS-TAB_STAR			* COS(
+F00:8604       	dc.w	KEY_COS-TAB_STAR			* COS(
                S02:0000F0EC:  00 4F
-F00:8606       	dc.b	'S',2
+F00:8605       	dc.b	'S',2
                S02:0000F0EE:  53
                S02:0000F0EF:  02
-F00:8607       	dc.w	KEY_SIN-TAB_STAR			* SIN(
+F00:8606       	dc.w	KEY_SIN-TAB_STAR			* SIN(
                S02:0000F0F0:  01 44
-F00:8608       	dc.b	'T',2
+F00:8607       	dc.b	'T',2
                S02:0000F0F2:  54
                S02:0000F0F3:  02
-F00:8609       	dc.w	KEY_TAN-TAB_STAR			* TAN(
+F00:8608       	dc.w	KEY_TAN-TAB_STAR			* TAN(
                S02:0000F0F4:  01 66
-F00:8610       	dc.b	'A',2
+F00:8609       	dc.b	'A',2
                S02:0000F0F6:  41
                S02:0000F0F7:  02
-F00:8611       	dc.w	KEY_ATN-TAB_STAR			* ATN(
+F00:8610       	dc.w	KEY_ATN-TAB_STAR			* ATN(
                S02:0000F0F8:  00 1F
-F00:8612       	dc.b	'P',3
+F00:8611       	dc.b	'P',3
                S02:0000F0FA:  50
                S02:0000F0FB:  03
-F00:8613       	dc.w	KEY_PEEK-TAB_STAR			* PEEK(
+F00:8612       	dc.w	KEY_PEEK-TAB_STAR			* PEEK(
                S02:0000F0FC:  00 F8
-F00:8614       	dc.b	'D',3
+F00:8613       	dc.b	'D',3
                S02:0000F0FE:  44
                S02:0000F0FF:  03
-F00:8615       	dc.w	KEY_DEEK-TAB_STAR			* DEEK(
+F00:8614       	dc.w	KEY_DEEK-TAB_STAR			* DEEK(
                S02:0000F100:  00 5B
-F00:8616       	dc.b	'L',3
+F00:8615       	dc.b	'L',3
                S02:0000F102:  4C
                S02:0000F103:  03
-F00:8617       	dc.w	KEY_LEEK-TAB_STAR			* LEEK(
+F00:8616       	dc.w	KEY_LEEK-TAB_STAR			* LEEK(
                S02:0000F104:  00 AF
-F00:8618       	dc.b	'L',2
+F00:8617       	dc.b	'L',2
                S02:0000F106:  4C
                S02:0000F107:  02
-F00:8619       	dc.w	KEY_LEN-TAB_STAR			* LEN(
+F00:8618       	dc.w	KEY_LEN-TAB_STAR			* LEN(
                S02:0000F108:  00 BA
-F00:8620       	dc.b	'S',3
+F00:8619       	dc.b	'S',3
                S02:0000F10A:  53
                S02:0000F10B:  03
-F00:8621       	dc.w	KEY_STRS-TAB_STAR			* STR$(
+F00:8620       	dc.w	KEY_STRS-TAB_STAR			* STR$(
                S02:0000F10C:  01 58
-F00:8622       	dc.b	'V',2
+F00:8621       	dc.b	'V',2
                S02:0000F10E:  56
                S02:0000F10F:  02
-F00:8623       	dc.w	KEY_VAL-TAB_STAR			* VAL(
+F00:8622       	dc.w	KEY_VAL-TAB_STAR			* VAL(
                S02:0000F110:  01 8E
-F00:8624       	dc.b	'A',2
+F00:8623       	dc.b	'A',2
                S02:0000F112:  41
                S02:0000F113:  02
-F00:8625       	dc.w	KEY_ASC-TAB_STAR			* ASC(
+F00:8624       	dc.w	KEY_ASC-TAB_STAR			* ASC(
                S02:0000F114:  00 1B
-F00:8626       	dc.b	'U',5
+F00:8625       	dc.b	'U',5
                S02:0000F116:  55
                S02:0000F117:  05
-F00:8627       	dc.w	KEY_UCASES-TAB_STAR		* UCASE$(
+F00:8626       	dc.w	KEY_UCASES-TAB_STAR		* UCASE$(
                S02:0000F118:  01 76
-F00:8628       	dc.b	'L',5
+F00:8627       	dc.b	'L',5
                S02:0000F11A:  4C
                S02:0000F11B:  05
-F00:8629       	dc.w	KEY_LCASES-TAB_STAR		* LCASE$(
+F00:8628       	dc.w	KEY_LCASES-TAB_STAR		* LCASE$(
                S02:0000F11C:  00 A8
-F00:8630       	dc.b	'C',3
+F00:8629       	dc.b	'C',3
                S02:0000F11E:  43
                S02:0000F11F:  03
-F00:8631       	dc.w	KEY_CHRS-TAB_STAR			* CHR$(
+F00:8630       	dc.w	KEY_CHRS-TAB_STAR			* CHR$(
                S02:0000F120:  00 41
-F00:8632       	dc.b	'H',3
+F00:8631       	dc.b	'H',3
                S02:0000F122:  48
                S02:0000F123:  03
-F00:8633       	dc.w	KEY_HEXS-TAB_STAR			* HEX$(
+F00:8632       	dc.w	KEY_HEXS-TAB_STAR			* HEX$(
                S02:0000F124:  00 93
-F00:8634       	dc.b	'B',3
+F00:8633       	dc.b	'B',3
                S02:0000F126:  42
                S02:0000F127:  03
-F00:8635       	dc.w	KEY_BINS-TAB_STAR			* BIN$(
+F00:8634       	dc.w	KEY_BINS-TAB_STAR			* BIN$(
                S02:0000F128:  00 24
-F00:8636       	dc.b	'B',5
+F00:8635       	dc.b	'B',5
                S02:0000F12A:  42
                S02:0000F12B:  05
-F00:8637       	dc.w	KEY_BITTST-TAB_STAR		* BITTST(
+F00:8636       	dc.w	KEY_BITTST-TAB_STAR		* BITTST(
                S02:0000F12C:  00 35
-F00:8638       	dc.b	'M',2
+F00:8637       	dc.b	'M',2
                S02:0000F12E:  4D
                S02:0000F12F:  02
-F00:8639       	dc.w	KEY_MAX-TAB_STAR			* MAX(
+F00:8638       	dc.w	KEY_MAX-TAB_STAR			* MAX(
                S02:0000F130:  00 D6
-F00:8640       	dc.b	'M',2
+F00:8639       	dc.b	'M',2
                S02:0000F132:  4D
                S02:0000F133:  02
-F00:8641       	dc.w	KEY_MIN-TAB_STAR			* MIN(
+F00:8640       	dc.w	KEY_MIN-TAB_STAR			* MIN(
                S02:0000F134:  00 DF
-F00:8642       	dc.b	'R',5
+F00:8641       	dc.b	'R',5
                S02:0000F136:  52
                S02:0000F137:  05
-F00:8643       	dc.w	KEY_RAM-TAB_STAR			* RAMBASE
+F00:8642       	dc.w	KEY_RAM-TAB_STAR			* RAMBASE
                S02:0000F138:  01 0D
-F00:8644       	dc.b	'P',0
+F00:8643       	dc.b	'P',0
                S02:0000F13A:  50
                S02:0000F13B:  00
-F00:8645       	dc.w	KEY_PI-TAB_STAR			* PI
+F00:8644       	dc.w	KEY_PI-TAB_STAR			* PI
                S02:0000F13C:  00 FD
-F00:8646       	dc.b	'T',3
+F00:8645       	dc.b	'T',3
                S02:0000F13E:  54
                S02:0000F13F:  03
-F00:8647       	dc.w	KEY_TWOPI-TAB_STAR		* TWOPI
+F00:8646       	dc.w	KEY_TWOPI-TAB_STAR		* TWOPI
                S02:0000F140:  01 70
-F00:8648       	dc.b	'V',5
+F00:8647       	dc.b	'V',5
                S02:0000F142:  56
                S02:0000F143:  05
-F00:8649       	dc.w	KEY_VPTR-TAB_STAR			* VARPTR(
+F00:8648       	dc.w	KEY_VPTR-TAB_STAR			* VARPTR(
                S02:0000F144:  01 92
-F00:8650       	dc.b	'S',3
+F00:8649       	dc.b	'S',3
                S02:0000F146:  53
                S02:0000F147:  03
-F00:8651       	dc.w	KEY_SADD-TAB_STAR			* SADD(
+F00:8650       	dc.w	KEY_SADD-TAB_STAR			* SADD(
                S02:0000F148:  01 37
-F00:8652       	dc.b	'L',4
+F00:8651       	dc.b	'L',4
                S02:0000F14A:  4C
                S02:0000F14B:  04
-F00:8653       	dc.w	KEY_LEFTS-TAB_STAR		* LEFT$(
+F00:8652       	dc.w	KEY_LEFTS-TAB_STAR		* LEFT$(
                S02:0000F14C:  00 B4
-F00:8654       	dc.b	'R',5
+F00:8653       	dc.b	'R',5
                S02:0000F14E:  52
                S02:0000F14F:  05
-F00:8655       	dc.w	KEY_RIGHTS-TAB_STAR		* RIGHT$(
+F00:8654       	dc.w	KEY_RIGHTS-TAB_STAR		* RIGHT$(
                S02:0000F150:  01 28
-F00:8656       	dc.b	'M',3
+F00:8655       	dc.b	'M',3
                S02:0000F152:  4D
                S02:0000F153:  03
-F00:8657       	dc.w	KEY_MIDS-TAB_STAR			* MID$(
+F00:8656       	dc.w	KEY_MIDS-TAB_STAR			* MID$(
                S02:0000F154:  00 DA
-F00:8658       	dc.b	'U',5
+F00:8657       	dc.b	'U',5
                S02:0000F156:  55
                S02:0000F157:  05
-F00:8659       	dc.w	KEY_USINGS-TAB_STAR		* USING$(
+F00:8658       	dc.w	KEY_USINGS-TAB_STAR		* USING$(
                S02:0000F158:  01 82
+F00:8659       
 F00:8660       
-F00:8661       
-F00:8662       *************************************************************************************
-F00:8663       *
-F00:8664       * BASIC error messages
-F00:8665       
-F00:8666       LAB_BAER
-F00:8667       	dc.w	LAB_NF-LAB_BAER			* $00 NEXT without FOR
+F00:8661       *************************************************************************************
+F00:8662       *
+F00:8663       * BASIC error messages
+F00:8664       
+F00:8665       LAB_BAER
+F00:8666       	dc.w	LAB_NF-LAB_BAER			* $00 NEXT without FOR
                S02:0000F15A:  00 30
-F00:8668       	dc.w	LAB_SN-LAB_BAER			* $02 syntax
+F00:8667       	dc.w	LAB_SN-LAB_BAER			* $02 syntax
                S02:0000F15C:  00 41
-F00:8669       	dc.w	LAB_RG-LAB_BAER			* $04 RETURN without GOSUB
+F00:8668       	dc.w	LAB_RG-LAB_BAER			* $04 RETURN without GOSUB
                S02:0000F15E:  00 48
-F00:8670       	dc.w	LAB_OD-LAB_BAER			* $06 out of data
+F00:8669       	dc.w	LAB_OD-LAB_BAER			* $06 out of data
                S02:0000F160:  00 5D
-F00:8671       	dc.w	LAB_FC-LAB_BAER			* $08 function call
+F00:8670       	dc.w	LAB_FC-LAB_BAER			* $08 function call
                S02:0000F162:  00 69
-F00:8672       	dc.w	LAB_OV-LAB_BAER			* $0A overflow
+F00:8671       	dc.w	LAB_OV-LAB_BAER			* $0A overflow
                S02:0000F164:  00 77
-F00:8673       	dc.w	LAB_OM-LAB_BAER			* $0C out of memory
+F00:8672       	dc.w	LAB_OM-LAB_BAER			* $0C out of memory
                S02:0000F166:  00 80
-F00:8674       	dc.w	LAB_US-LAB_BAER			* $0E undefined statement
+F00:8673       	dc.w	LAB_US-LAB_BAER			* $0E undefined statement
                S02:0000F168:  00 8E
-F00:8675       	dc.w	LAB_BS-LAB_BAER			* $10 array bounds
+F00:8674       	dc.w	LAB_BS-LAB_BAER			* $10 array bounds
                S02:0000F16A:  00 A2
-F00:8676       	dc.w	LAB_DD-LAB_BAER			* $12 double dimension array
+F00:8675       	dc.w	LAB_DD-LAB_BAER			* $12 double dimension array
                S02:0000F16C:  00 AF
-F00:8677       	dc.w	LAB_D0-LAB_BAER			* $14 divide by 0
+F00:8676       	dc.w	LAB_D0-LAB_BAER			* $14 divide by 0
                S02:0000F16E:  00 C0
-F00:8678       	dc.w	LAB_ID-LAB_BAER			* $16 illegal direct
+F00:8677       	dc.w	LAB_ID-LAB_BAER			* $16 illegal direct
                S02:0000F170:  00 CF
-F00:8679       	dc.w	LAB_TM-LAB_BAER			* $18 type mismatch
+F00:8678       	dc.w	LAB_TM-LAB_BAER			* $18 type mismatch
                S02:0000F172:  00 DE
-F00:8680       	dc.w	LAB_LS-LAB_BAER			* $1A long string
+F00:8679       	dc.w	LAB_LS-LAB_BAER			* $1A long string
                S02:0000F174:  00 EC
-F00:8681       	dc.w	LAB_ST-LAB_BAER			* $1C string too complex
+F00:8680       	dc.w	LAB_ST-LAB_BAER			* $1C string too complex
                S02:0000F176:  00 FC
-F00:8682       	dc.w	LAB_CN-LAB_BAER			* $1E continue error
+F00:8681       	dc.w	LAB_CN-LAB_BAER			* $1E continue error
                S02:0000F178:  01 0F
-F00:8683       	dc.w	LAB_UF-LAB_BAER			* $20 undefined function
+F00:8682       	dc.w	LAB_UF-LAB_BAER			* $20 undefined function
                S02:0000F17A:  01 1E
-F00:8684       	dc.w	LAB_LD-LAB_BAER			* $22 LOOP without DO
+F00:8683       	dc.w	LAB_LD-LAB_BAER			* $22 LOOP without DO
                S02:0000F17C:  01 31
-F00:8685       	dc.w	LAB_UV-LAB_BAER			* $24 undefined variable
+F00:8684       	dc.w	LAB_UV-LAB_BAER			* $24 undefined variable
                S02:0000F17E:  01 41
-F00:8686       	dc.w	LAB_UA-LAB_BAER			* $26 undimensioned array
+F00:8685       	dc.w	LAB_UA-LAB_BAER			* $26 undimensioned array
                S02:0000F180:  01 54
-F00:8687       	dc.w	LAB_WD-LAB_BAER			* $28 wrong dimensions
+F00:8686       	dc.w	LAB_WD-LAB_BAER			* $28 wrong dimensions
                S02:0000F182:  01 68
-F00:8688       	dc.w	LAB_AD-LAB_BAER			* $2A address
+F00:8687       	dc.w	LAB_AD-LAB_BAER			* $2A address
                S02:0000F184:  01 79
-F00:8689       	dc.w	LAB_FO-LAB_BAER			* $2C format
+F00:8688       	dc.w	LAB_FO-LAB_BAER			* $2C format
                S02:0000F186:  01 81
-F00:8690       	dc.w	LAB_NI-LAB_BAER			* $2E not implemented
+F00:8689       	dc.w	LAB_NI-LAB_BAER			* $2E not implemented
                S02:0000F188:  01 88
-F00:8691       
-F00:8692       LAB_NF	dc.b	'NEXT without FOR',$00
+F00:8690       
+F00:8691       LAB_NF	dc.b	'NEXT without FOR',$00
                S02:0000F18A:  4E 45 58 54 20 77 69 74 68 6F 75 74 20 46 4F 52
                S02:0000F19A:  00
-F00:8693       LAB_SN	dc.b	'Syntax',$00
+F00:8692       LAB_SN	dc.b	'Syntax',$00
                S02:0000F19B:  53 79 6E 74 61 78
                S02:0000F1A1:  00
-F00:8694       LAB_RG	dc.b	'RETURN without GOSUB',$00
+F00:8693       LAB_RG	dc.b	'RETURN without GOSUB',$00
                S02:0000F1A2:  52 45 54 55 52 4E 20 77 69 74 68 6F 75 74 20 47
                S02:0000F1B2:  4F 53 55 42
                S02:0000F1B6:  00
-F00:8695       LAB_OD	dc.b	'Out of DATA',$00
+F00:8694       LAB_OD	dc.b	'Out of DATA',$00
                S02:0000F1B7:  4F 75 74 20 6F 66 20 44 41 54 41
                S02:0000F1C2:  00
-F00:8696       LAB_FC	dc.b	'Function call',$00
+F00:8695       LAB_FC	dc.b	'Function call',$00
                S02:0000F1C3:  46 75 6E 63 74 69 6F 6E 20 63 61 6C 6C
                S02:0000F1D0:  00
-F00:8697       LAB_OV	dc.b	'Overflow',$00
+F00:8696       LAB_OV	dc.b	'Overflow',$00
                S02:0000F1D1:  4F 76 65 72 66 6C 6F 77
                S02:0000F1D9:  00
-F00:8698       LAB_OM	dc.b	'Out of memory',$00
+F00:8697       LAB_OM	dc.b	'Out of memory',$00
                S02:0000F1DA:  4F 75 74 20 6F 66 20 6D 65 6D 6F 72 79
                S02:0000F1E7:  00
-F00:8699       LAB_US	dc.b	'Undefined statement',$00
+F00:8698       LAB_US	dc.b	'Undefined statement',$00
                S02:0000F1E8:  55 6E 64 65 66 69 6E 65 64 20 73 74 61 74 65 6D
                S02:0000F1F8:  65 6E 74
                S02:0000F1FB:  00
-F00:8700       LAB_BS	dc.b	'Array bounds',$00
+F00:8699       LAB_BS	dc.b	'Array bounds',$00
                S02:0000F1FC:  41 72 72 61 79 20 62 6F 75 6E 64 73
                S02:0000F208:  00
-F00:8701       LAB_DD	dc.b	'Double dimension',$00
+F00:8700       LAB_DD	dc.b	'Double dimension',$00
                S02:0000F209:  44 6F 75 62 6C 65 20 64 69 6D 65 6E 73 69 6F 6E
                S02:0000F219:  00
-F00:8702       LAB_D0	dc.b	'Divide by zero',$00
+F00:8701       LAB_D0	dc.b	'Divide by zero',$00
                S02:0000F21A:  44 69 76 69 64 65 20 62 79 20 7A 65 72 6F
                S02:0000F228:  00
-F00:8703       LAB_ID	dc.b	'Illegal direct',$00
+F00:8702       LAB_ID	dc.b	'Illegal direct',$00
                S02:0000F229:  49 6C 6C 65 67 61 6C 20 64 69 72 65 63 74
                S02:0000F237:  00
-F00:8704       LAB_TM	dc.b	'Type mismatch',$00
+F00:8703       LAB_TM	dc.b	'Type mismatch',$00
                S02:0000F238:  54 79 70 65 20 6D 69 73 6D 61 74 63 68
                S02:0000F245:  00
-F00:8705       LAB_LS	dc.b	'String too long',$00
+F00:8704       LAB_LS	dc.b	'String too long',$00
                S02:0000F246:  53 74 72 69 6E 67 20 74 6F 6F 20 6C 6F 6E 67
                S02:0000F255:  00
-F00:8706       LAB_ST	dc.b	'String too complex',$00
+F00:8705       LAB_ST	dc.b	'String too complex',$00
                S02:0000F256:  53 74 72 69 6E 67 20 74 6F 6F 20 63 6F 6D 70 6C
                S02:0000F266:  65 78
                S02:0000F268:  00
-F00:8707       LAB_CN	dc.b	'Can''t continue',$00
+F00:8706       LAB_CN	dc.b	'Can''t continue',$00
                S02:0000F269:  43 61 6E 27 74 20 63 6F 6E 74 69 6E 75 65
                S02:0000F277:  00
-F00:8708       LAB_UF	dc.b	'Undefined function',$00
+F00:8707       LAB_UF	dc.b	'Undefined function',$00
                S02:0000F278:  55 6E 64 65 66 69 6E 65 64 20 66 75 6E 63 74 69
                S02:0000F288:  6F 6E
                S02:0000F28A:  00
-F00:8709       LAB_LD	dc.b	'LOOP without DO',$00
+F00:8708       LAB_LD	dc.b	'LOOP without DO',$00
                S02:0000F28B:  4C 4F 4F 50 20 77 69 74 68 6F 75 74 20 44 4F
                S02:0000F29A:  00
-F00:8710       LAB_UV	dc.b	'Undefined variable',$00
+F00:8709       LAB_UV	dc.b	'Undefined variable',$00
                S02:0000F29B:  55 6E 64 65 66 69 6E 65 64 20 76 61 72 69 61 62
                S02:0000F2AB:  6C 65
                S02:0000F2AD:  00
-F00:8711       LAB_UA	dc.b	'Undimensioned array',$00
+F00:8710       LAB_UA	dc.b	'Undimensioned array',$00
                S02:0000F2AE:  55 6E 64 69 6D 65 6E 73 69 6F 6E 65 64 20 61 72
                S02:0000F2BE:  72 61 79
                S02:0000F2C1:  00
-F00:8712       LAB_WD	dc.b	'Wrong dimensions',$00
+F00:8711       LAB_WD	dc.b	'Wrong dimensions',$00
                S02:0000F2C2:  57 72 6F 6E 67 20 64 69 6D 65 6E 73 69 6F 6E 73
                S02:0000F2D2:  00
-F00:8713       LAB_AD	dc.b	'Address',$00
+F00:8712       LAB_AD	dc.b	'Address',$00
                S02:0000F2D3:  41 64 64 72 65 73 73
                S02:0000F2DA:  00
-F00:8714       LAB_FO	dc.b	'Format',$00
+F00:8713       LAB_FO	dc.b	'Format',$00
                S02:0000F2DB:  46 6F 72 6D 61 74
                S02:0000F2E1:  00
-F00:8715       LAB_NI  dc.b    'Not implemented',$00
+F00:8714       LAB_NI  dc.b    'Not implemented',$00
                S02:0000F2E2:  4E 6F 74 20 69 6D 70 6C 65 6D 65 6E 74 65 64
                S02:0000F2F1:  00
+F00:8715       
 F00:8716       
-F00:8717       
-F00:8718       *************************************************************************************
-F00:8719       *
-F00:8720       * keyword table for line (un)crunching
-F00:8721       
-F00:8722       * [keyword,token
-F00:8723       * [keyword,token]]
-F00:8724       * end marker (#$00)
-F00:8725       
-F00:8726       TAB_STAR
-F00:8727       KEY_MULT
-F00:8728       	dc.b TK_MULT,$00				* *
+F00:8717       *************************************************************************************
+F00:8718       *
+F00:8719       * keyword table for line (un)crunching
+F00:8720       
+F00:8721       * [keyword,token
+F00:8722       * [keyword,token]]
+F00:8723       * end marker (#$00)
+F00:8724       
+F00:8725       TAB_STAR
+F00:8726       KEY_MULT
+F00:8727       	dc.b TK_MULT,$00				* *
                S02:0000F2F2:  B4
                S02:0000F2F3:  00
-F00:8729       TAB_PLUS
-F00:8730       KEY_PLUS
-F00:8731       	dc.b TK_PLUS,$00				* +
+F00:8728       TAB_PLUS
+F00:8729       KEY_PLUS
+F00:8730       	dc.b TK_PLUS,$00				* +
                S02:0000F2F4:  B2
                S02:0000F2F5:  00
-F00:8732       TAB_MNUS
-F00:8733       KEY_MINUS
-F00:8734       	dc.b TK_MINUS,$00				* -
+F00:8731       TAB_MNUS
+F00:8732       KEY_MINUS
+F00:8733       	dc.b TK_MINUS,$00				* -
                S02:0000F2F6:  B3
                S02:0000F2F7:  00
-F00:8735       TAB_SLAS
-F00:8736       KEY_DIV
-F00:8737       	dc.b TK_DIV,$00				* /
+F00:8734       TAB_SLAS
+F00:8735       KEY_DIV
+F00:8736       	dc.b TK_DIV,$00				* /
                S02:0000F2F8:  B5
                S02:0000F2F9:  00
-F00:8738       TAB_LESS
-F00:8739       KEY_LSHIFT
-F00:8740       	dc.b	'<',TK_LSHIFT			* <<
+F00:8737       TAB_LESS
+F00:8738       KEY_LSHIFT
+F00:8739       	dc.b	'<',TK_LSHIFT			* <<
                S02:0000F2FA:  3C
                S02:0000F2FB:  BB
-F00:8741       KEY_LT
-F00:8742       	dc.b TK_LT					* <
+F00:8740       KEY_LT
+F00:8741       	dc.b TK_LT					* <
                S02:0000F2FC:  BE
-F00:8743       	dc.b	$00
+F00:8742       	dc.b	$00
                S02:0000F2FD:  00
-F00:8744       TAB_EQUL
-F00:8745       KEY_EQUAL
-F00:8746       	dc.b TK_EQUAL,$00				* =
+F00:8743       TAB_EQUL
+F00:8744       KEY_EQUAL
+F00:8745       	dc.b TK_EQUAL,$00				* =
                S02:0000F2FE:  BD
                S02:0000F2FF:  00
-F00:8747       TAB_MORE
-F00:8748       KEY_RSHIFT
-F00:8749       	dc.b	'>',TK_RSHIFT			* >>
+F00:8746       TAB_MORE
+F00:8747       KEY_RSHIFT
+F00:8748       	dc.b	'>',TK_RSHIFT			* >>
                S02:0000F300:  3E
                S02:0000F301:  BA
-F00:8750       KEY_GT
-F00:8751       	dc.b TK_GT					* >
+F00:8749       KEY_GT
+F00:8750       	dc.b TK_GT					* >
                S02:0000F302:  BC
-F00:8752       	dc.b	$00
+F00:8751       	dc.b	$00
                S02:0000F303:  00
-F00:8753       TAB_QEST
-F00:8754       	dc.b TK_PRINT,$00				* ?
+F00:8752       TAB_QEST
+F00:8753       	dc.b TK_PRINT,$00				* ?
                S02:0000F304:  9E
                S02:0000F305:  00
-F00:8755       TAB_ASCA
-F00:8756       KEY_ABS
-F00:8757       	dc.b	'BS(',TK_ABS			* ABS(
+F00:8754       TAB_ASCA
+F00:8755       KEY_ABS
+F00:8756       	dc.b	'BS(',TK_ABS			* ABS(
                S02:0000F306:  42 53 28
                S02:0000F309:  C1
-F00:8758       KEY_AND
-F00:8759       	dc.b	'ND',TK_AND				* AND
+F00:8757       KEY_AND
+F00:8758       	dc.b	'ND',TK_AND				* AND
                S02:0000F30A:  4E 44
                S02:0000F30C:  B7
-F00:8760       KEY_ASC
-F00:8761       	dc.b	'SC(',TK_ASC			* ASC(
+F00:8759       KEY_ASC
+F00:8760       	dc.b	'SC(',TK_ASC			* ASC(
                S02:0000F30D:  53 43 28
                S02:0000F310:  D3
-F00:8762       KEY_ATN
-F00:8763       	dc.b	'TN(',TK_ATN			* ATN(
+F00:8761       KEY_ATN
+F00:8762       	dc.b	'TN(',TK_ATN			* ATN(
                S02:0000F311:  54 4E 28
                S02:0000F314:  CC
-F00:8764       	dc.b	$00
+F00:8763       	dc.b	$00
                S02:0000F315:  00
-F00:8765       TAB_ASCB
-F00:8766       KEY_BINS
-F00:8767       	dc.b	'IN$(',TK_BINS			* BIN$(
+F00:8764       TAB_ASCB
+F00:8765       KEY_BINS
+F00:8766       	dc.b	'IN$(',TK_BINS			* BIN$(
                S02:0000F316:  49 4E 24 28
                S02:0000F31A:  D8
-F00:8768       KEY_BITCLR
-F00:8769       	dc.b	'ITCLR',TK_BITCLR			* BITCLR
+F00:8767       KEY_BITCLR
+F00:8768       	dc.b	'ITCLR',TK_BITCLR			* BITCLR
                S02:0000F31B:  49 54 43 4C 52
                S02:0000F320:  A7
-F00:8770       KEY_BITSET
-F00:8771       	dc.b	'ITSET',TK_BITSET			* BITSET
+F00:8769       KEY_BITSET
+F00:8770       	dc.b	'ITSET',TK_BITSET			* BITSET
                S02:0000F321:  49 54 53 45 54
                S02:0000F326:  A6
-F00:8772       KEY_BITTST
-F00:8773       	dc.b	'ITTST(',TK_BITTST		* BITTST(
+F00:8771       KEY_BITTST
+F00:8772       	dc.b	'ITTST(',TK_BITTST		* BITTST(
                S02:0000F327:  49 54 54 53 54 28
                S02:0000F32D:  D9
-F00:8774       	dc.b	$00
+F00:8773       	dc.b	$00
                S02:0000F32E:  00
-F00:8775       TAB_ASCC
-F00:8776       KEY_CALL
-F00:8777       	dc.b	'ALL',TK_CALL			* CALL
+F00:8774       TAB_ASCC
+F00:8775       KEY_CALL
+F00:8776       	dc.b	'ALL',TK_CALL			* CALL
                S02:0000F32F:  41 4C 4C
                S02:0000F332:  9B
-F00:8778       KEY_CHRS
-F00:8779       	dc.b	'HR$(',TK_CHRS			* CHR$(
+F00:8777       KEY_CHRS
+F00:8778       	dc.b	'HR$(',TK_CHRS			* CHR$(
                S02:0000F333:  48 52 24 28
                S02:0000F337:  D6
-F00:8780       KEY_CLEAR
-F00:8781       	dc.b	'LEAR',TK_CLEAR			* CLEAR
+F00:8779       KEY_CLEAR
+F00:8780       	dc.b	'LEAR',TK_CLEAR			* CLEAR
                S02:0000F338:  4C 45 41 52
                S02:0000F33C:  A1
-F00:8782       KEY_CONT
-F00:8783       	dc.b	'ONT',TK_CONT			* CONT
+F00:8781       KEY_CONT
+F00:8782       	dc.b	'ONT',TK_CONT			* CONT
                S02:0000F33D:  4F 4E 54
                S02:0000F340:  9F
-F00:8784       KEY_COS
-F00:8785       	dc.b	'OS(',TK_COS			* COS(
+F00:8783       KEY_COS
+F00:8784       	dc.b	'OS(',TK_COS			* COS(
                S02:0000F341:  4F 53 28
                S02:0000F344:  C9
-F00:8786       	dc.b	$00
+F00:8785       	dc.b	$00
                S02:0000F345:  00
-F00:8787       TAB_ASCD
-F00:8788       KEY_DATA
-F00:8789       	dc.b	'ATA',TK_DATA			* DATA
+F00:8786       TAB_ASCD
+F00:8787       KEY_DATA
+F00:8788       	dc.b	'ATA',TK_DATA			* DATA
                S02:0000F346:  41 54 41
                S02:0000F349:  83
-F00:8790       KEY_DEC
-F00:8791       	dc.b	'EC',TK_DEC				* DEC
+F00:8789       KEY_DEC
+F00:8790       	dc.b	'EC',TK_DEC				* DEC
                S02:0000F34A:  45 43
                S02:0000F34C:  88
-F00:8792       KEY_DEEK
-F00:8793       	dc.b	'EEK(',TK_DEEK			* DEEK(
+F00:8791       KEY_DEEK
+F00:8792       	dc.b	'EEK(',TK_DEEK			* DEEK(
                S02:0000F34D:  45 45 4B 28
                S02:0000F351:  CE
-F00:8794       KEY_DEF
-F00:8795       	dc.b	'EF',TK_DEF				* DEF
+F00:8793       KEY_DEF
+F00:8794       	dc.b	'EF',TK_DEF				* DEF
                S02:0000F352:  45 46
                S02:0000F354:  97
-F00:8796       KEY_DIM
-F00:8797       	dc.b	'IM',TK_DIM				* DIM
+F00:8795       KEY_DIM
+F00:8796       	dc.b	'IM',TK_DIM				* DIM
                S02:0000F355:  49 4D
                S02:0000F357:  85
-F00:8798       KEY_DOKE
-F00:8799       	dc.b	'OKE',TK_DOKE			* DOKE
+F00:8797       KEY_DOKE
+F00:8798       	dc.b	'OKE',TK_DOKE			* DOKE
                S02:0000F358:  4F 4B 45
                S02:0000F35B:  99
-F00:8800       KEY_DO
-F00:8801       	dc.b	'O',TK_DO				* DO
+F00:8799       KEY_DO
+F00:8800       	dc.b	'O',TK_DO				* DO
                S02:0000F35C:  4F
                S02:0000F35D:  9C
-F00:8802       	dc.b	$00
+F00:8801       	dc.b	$00
                S02:0000F35E:  00
-F00:8803       TAB_ASCE
-F00:8804       KEY_ELSE
-F00:8805       	dc.b	'LSE',TK_ELSE			* ELSE
+F00:8802       TAB_ASCE
+F00:8803       KEY_ELSE
+F00:8804       	dc.b	'LSE',TK_ELSE			* ELSE
                S02:0000F35F:  4C 53 45
                S02:0000F362:  A9
-F00:8806       KEY_END
-F00:8807       	dc.b	'ND',TK_END				* END
+F00:8805       KEY_END
+F00:8806       	dc.b	'ND',TK_END				* END
                S02:0000F363:  4E 44
                S02:0000F365:  80
-F00:8808       KEY_EOR
-F00:8809       	dc.b	'OR',TK_EOR				* EOR
+F00:8807       KEY_EOR
+F00:8808       	dc.b	'OR',TK_EOR				* EOR
                S02:0000F366:  4F 52
                S02:0000F368:  B8
-F00:8810       KEY_EXP
-F00:8811       	dc.b	'XP(',TK_EXP			* EXP(
+F00:8809       KEY_EXP
+F00:8810       	dc.b	'XP(',TK_EXP			* EXP(
                S02:0000F369:  58 50 28
                S02:0000F36C:  C8
-F00:8812       	dc.b	$00
+F00:8811       	dc.b	$00
                S02:0000F36D:  00
-F00:8813       TAB_ASCF
-F00:8814       KEY_FOR
-F00:8815       	dc.b	'OR',TK_FOR				* FOR
+F00:8812       TAB_ASCF
+F00:8813       KEY_FOR
+F00:8814       	dc.b	'OR',TK_FOR				* FOR
                S02:0000F36E:  4F 52
                S02:0000F370:  81
-F00:8816       KEY_FN
-F00:8817       	dc.b	'N',TK_FN				* FN
+F00:8815       KEY_FN
+F00:8816       	dc.b	'N',TK_FN				* FN
                S02:0000F371:  4E
                S02:0000F372:  AB
-F00:8818       KEY_FRE
-F00:8819       	dc.b	'RE(',TK_FRE			* FRE(
+F00:8817       KEY_FRE
+F00:8818       	dc.b	'RE(',TK_FRE			* FRE(
                S02:0000F373:  52 45 28
                S02:0000F376:  C3
-F00:8820       	dc.b	$00
+F00:8819       	dc.b	$00
                S02:0000F377:  00
-F00:8821       TAB_ASCG
-F00:8822       KEY_GET
-F00:8823       	dc.b	'ET',TK_GET				* GET
+F00:8820       TAB_ASCG
+F00:8821       KEY_GET
+F00:8822       	dc.b	'ET',TK_GET				* GET
                S02:0000F378:  45 54
                S02:0000F37A:  A4
-F00:8824       KEY_GOTO
-F00:8825       	dc.b	'OTO',TK_GOTO			* GOTO
+F00:8823       KEY_GOTO
+F00:8824       	dc.b	'OTO',TK_GOTO			* GOTO
                S02:0000F37B:  4F 54 4F
                S02:0000F37E:  89
-F00:8826       KEY_GOSUB
-F00:8827       	dc.b	'OSUB',TK_GOSUB			* GOSUB
+F00:8825       KEY_GOSUB
+F00:8826       	dc.b	'OSUB',TK_GOSUB			* GOSUB
                S02:0000F37F:  4F 53 55 42
                S02:0000F383:  8D
-F00:8828       	dc.b	$00
+F00:8827       	dc.b	$00
                S02:0000F384:  00
-F00:8829       TAB_ASCH
-F00:8830       KEY_HEXS
-F00:8831       	dc.b	'EX$(',TK_HEXS,$00		* HEX$(
+F00:8828       TAB_ASCH
+F00:8829       KEY_HEXS
+F00:8830       	dc.b	'EX$(',TK_HEXS,$00		* HEX$(
                S02:0000F385:  45 58 24 28
                S02:0000F389:  D7
                S02:0000F38A:  00
-F00:8832       TAB_ASCI
-F00:8833       KEY_IF
-F00:8834       	dc.b	'F',TK_IF				* IF
+F00:8831       TAB_ASCI
+F00:8832       KEY_IF
+F00:8833       	dc.b	'F',TK_IF				* IF
                S02:0000F38B:  46
                S02:0000F38C:  8B
-F00:8835       KEY_INC
-F00:8836       	dc.b	'NC',TK_INC				* INC
+F00:8834       KEY_INC
+F00:8835       	dc.b	'NC',TK_INC				* INC
                S02:0000F38D:  4E 43
                S02:0000F38F:  93
-F00:8837       KEY_INPUT
-F00:8838       	dc.b	'NPUT',TK_INPUT			* INPUT
+F00:8836       KEY_INPUT
+F00:8837       	dc.b	'NPUT',TK_INPUT			* INPUT
                S02:0000F390:  4E 50 55 54
                S02:0000F394:  84
-F00:8839       KEY_INT
-F00:8840       	dc.b	'NT(',TK_INT			* INT(
+F00:8838       KEY_INT
+F00:8839       	dc.b	'NT(',TK_INT			* INT(
                S02:0000F395:  4E 54 28
                S02:0000F398:  C0
-F00:8841       	dc.b	$00
+F00:8840       	dc.b	$00
                S02:0000F399:  00
-F00:8842       TAB_ASCL
-F00:8843       KEY_LCASES
-F00:8844       	dc.b	'CASE$(',TK_LCASES		* LCASE$(
+F00:8841       TAB_ASCL
+F00:8842       KEY_LCASES
+F00:8843       	dc.b	'CASE$(',TK_LCASES		* LCASE$(
                S02:0000F39A:  43 41 53 45 24 28
                S02:0000F3A0:  D5
-F00:8845       KEY_LEEK
-F00:8846       	dc.b	'EEK(',TK_LEEK			* LEEK(
+F00:8844       KEY_LEEK
+F00:8845       	dc.b	'EEK(',TK_LEEK			* LEEK(
                S02:0000F3A1:  45 45 4B 28
                S02:0000F3A5:  CF
-F00:8847       KEY_LEFTS
-F00:8848       	dc.b	'EFT$(',TK_LEFTS			* LEFT$(
+F00:8846       KEY_LEFTS
+F00:8847       	dc.b	'EFT$(',TK_LEFTS			* LEFT$(
                S02:0000F3A6:  45 46 54 24 28
                S02:0000F3AB:  E1
-F00:8849       KEY_LEN
-F00:8850       	dc.b	'EN(',TK_LEN			* LEN(
+F00:8848       KEY_LEN
+F00:8849       	dc.b	'EN(',TK_LEN			* LEN(
                S02:0000F3AC:  45 4E 28
                S02:0000F3AF:  D0
-F00:8851       KEY_LET
-F00:8852       	dc.b	'ET',TK_LET				* LET
+F00:8850       KEY_LET
+F00:8851       	dc.b	'ET',TK_LET				* LET
                S02:0000F3B0:  45 54
                S02:0000F3B2:  87
-F00:8853       KEY_LIST
-F00:8854       	dc.b	'IST',TK_LIST			* LIST
+F00:8852       KEY_LIST
+F00:8853       	dc.b	'IST',TK_LIST			* LIST
                S02:0000F3B3:  49 53 54
                S02:0000F3B6:  A0
-F00:8855       KEY_LOAD
-F00:8856       	dc.b	'OAD',TK_LOAD			* LOAD
+F00:8854       KEY_LOAD
+F00:8855       	dc.b	'OAD',TK_LOAD			* LOAD
                S02:0000F3B7:  4F 41 44
                S02:0000F3BA:  95
-F00:8857       KEY_LOG
-F00:8858       	dc.b	'OG(',TK_LOG			* LOG(
+F00:8856       KEY_LOG
+F00:8857       	dc.b	'OG(',TK_LOG			* LOG(
                S02:0000F3BB:  4F 47 28
                S02:0000F3BE:  C7
-F00:8859       KEY_LOKE
-F00:8860       	dc.b	'OKE',TK_LOKE			* LOKE
+F00:8858       KEY_LOKE
+F00:8859       	dc.b	'OKE',TK_LOKE			* LOKE
                S02:0000F3BF:  4F 4B 45
                S02:0000F3C2:  9A
-F00:8861       KEY_LOOP
-F00:8862       	dc.b	'OOP',TK_LOOP			* LOOP
+F00:8860       KEY_LOOP
+F00:8861       	dc.b	'OOP',TK_LOOP			* LOOP
                S02:0000F3C3:  4F 4F 50
                S02:0000F3C6:  9D
-F00:8863       	dc.b	$00
+F00:8862       	dc.b	$00
                S02:0000F3C7:  00
-F00:8864       TAB_ASCM
-F00:8865       KEY_MAX
-F00:8866       	dc.b	'AX(',TK_MAX			* MAX(
+F00:8863       TAB_ASCM
+F00:8864       KEY_MAX
+F00:8865       	dc.b	'AX(',TK_MAX			* MAX(
                S02:0000F3C8:  41 58 28
                S02:0000F3CB:  DA
-F00:8867       KEY_MIDS
-F00:8868       	dc.b	'ID$(',TK_MIDS			* MID$(
+F00:8866       KEY_MIDS
+F00:8867       	dc.b	'ID$(',TK_MIDS			* MID$(
                S02:0000F3CC:  49 44 24 28
                S02:0000F3D0:  E3
-F00:8869       KEY_MIN
-F00:8870       	dc.b	'IN(',TK_MIN			* MIN(
+F00:8868       KEY_MIN
+F00:8869       	dc.b	'IN(',TK_MIN			* MIN(
                S02:0000F3D1:  49 4E 28
                S02:0000F3D4:  DB
-F00:8871       	dc.b	$00
+F00:8870       	dc.b	$00
                S02:0000F3D5:  00
-F00:8872       TAB_ASCN
-F00:8873       KEY_NEW
-F00:8874       	dc.b	'EW',TK_NEW				* NEW
+F00:8871       TAB_ASCN
+F00:8872       KEY_NEW
+F00:8873       	dc.b	'EW',TK_NEW				* NEW
                S02:0000F3D6:  45 57
                S02:0000F3D8:  A2
-F00:8875       KEY_NEXT
-F00:8876       	dc.b	'EXT',TK_NEXT			* NEXT
+F00:8874       KEY_NEXT
+F00:8875       	dc.b	'EXT',TK_NEXT			* NEXT
                S02:0000F3D9:  45 58 54
                S02:0000F3DC:  82
-F00:8877       KEY_NOT
-F00:8878       	dc.b	'OT',TK_NOT				* NOT
+F00:8876       KEY_NOT
+F00:8877       	dc.b	'OT',TK_NOT				* NOT
                S02:0000F3DD:  4F 54
                S02:0000F3DF:  AE
-F00:8879       KEY_NULL
-F00:8880       	dc.b	'ULL',TK_NULL			* NULL
+F00:8878       KEY_NULL
+F00:8879       	dc.b	'ULL',TK_NULL			* NULL
                S02:0000F3E0:  55 4C 4C
                S02:0000F3E3:  92
-F00:8881       	dc.b	$00
+F00:8880       	dc.b	$00
                S02:0000F3E4:  00
-F00:8882       TAB_ASCO
-F00:8883       KEY_ON
-F00:8884       	dc.b	'N',TK_ON				* ON
+F00:8881       TAB_ASCO
+F00:8882       KEY_ON
+F00:8883       	dc.b	'N',TK_ON				* ON
                S02:0000F3E5:  4E
                S02:0000F3E6:  91
-F00:8885       KEY_OR
-F00:8886       	dc.b	'R',TK_OR				* OR
+F00:8884       KEY_OR
+F00:8885       	dc.b	'R',TK_OR				* OR
                S02:0000F3E7:  52
                S02:0000F3E8:  B9
-F00:8887       	dc.b	$00
+F00:8886       	dc.b	$00
                S02:0000F3E9:  00
-F00:8888       TAB_ASCP
-F00:8889       KEY_PEEK
-F00:8890       	dc.b	'EEK(',TK_PEEK			* PEEK(
+F00:8887       TAB_ASCP
+F00:8888       KEY_PEEK
+F00:8889       	dc.b	'EEK(',TK_PEEK			* PEEK(
                S02:0000F3EA:  45 45 4B 28
                S02:0000F3EE:  CD
-F00:8891       KEY_PI
-F00:8892       	dc.b	'I',TK_PI				* PI
+F00:8890       KEY_PI
+F00:8891       	dc.b	'I',TK_PI				* PI
                S02:0000F3EF:  49
                S02:0000F3F0:  DD
-F00:8893       KEY_POKE
-F00:8894       	dc.b	'OKE',TK_POKE			* POKE
+F00:8892       KEY_POKE
+F00:8893       	dc.b	'OKE',TK_POKE			* POKE
                S02:0000F3F1:  4F 4B 45
                S02:0000F3F4:  98
-F00:8895       KEY_POS
-F00:8896       	dc.b	'OS(',TK_POS			* POS(
+F00:8894       KEY_POS
+F00:8895       	dc.b	'OS(',TK_POS			* POS(
                S02:0000F3F5:  4F 53 28
                S02:0000F3F8:  C4
-F00:8897       KEY_PRINT
-F00:8898       	dc.b	'RINT',TK_PRINT			* PRINT
+F00:8896       KEY_PRINT
+F00:8897       	dc.b	'RINT',TK_PRINT			* PRINT
                S02:0000F3F9:  52 49 4E 54
                S02:0000F3FD:  9E
-F00:8899       	dc.b	$00
+F00:8898       	dc.b	$00
                S02:0000F3FE:  00
-F00:8900       TAB_ASCR
-F00:8901       KEY_RAM
-F00:8902       	dc.b	'AMBASE',TK_RAM			* RAMBASE
+F00:8899       TAB_ASCR
+F00:8900       KEY_RAM
+F00:8901       	dc.b	'AMBASE',TK_RAM			* RAMBASE
                S02:0000F3FF:  41 4D 42 41 53 45
                S02:0000F405:  DC
-F00:8903       KEY_READ
-F00:8904       	dc.b	'EAD',TK_READ			* READ
+F00:8902       KEY_READ
+F00:8903       	dc.b	'EAD',TK_READ			* READ
                S02:0000F406:  45 41 44
                S02:0000F409:  86
-F00:8905       KEY_REM
-F00:8906       	dc.b	'EM',TK_REM				* REM
+F00:8904       KEY_REM
+F00:8905       	dc.b	'EM',TK_REM				* REM
                S02:0000F40A:  45 4D
                S02:0000F40C:  8F
-F00:8907       KEY_RESTORE
-F00:8908       	dc.b	'ESTORE',TK_RESTORE		* RESTORE
+F00:8906       KEY_RESTORE
+F00:8907       	dc.b	'ESTORE',TK_RESTORE		* RESTORE
                S02:0000F40D:  45 53 54 4F 52 45
                S02:0000F413:  8C
-F00:8909       KEY_RETURN
-F00:8910       	dc.b	'ETURN',TK_RETURN			* RETURN
+F00:8908       KEY_RETURN
+F00:8909       	dc.b	'ETURN',TK_RETURN			* RETURN
                S02:0000F414:  45 54 55 52 4E
                S02:0000F419:  8E
-F00:8911       KEY_RIGHTS
-F00:8912       	dc.b	'IGHT$(',TK_RIGHTS		* RIGHT$(
+F00:8910       KEY_RIGHTS
+F00:8911       	dc.b	'IGHT$(',TK_RIGHTS		* RIGHT$(
                S02:0000F41A:  49 47 48 54 24 28
                S02:0000F420:  E2
-F00:8913       KEY_RND
-F00:8914       	dc.b	'ND(',TK_RND			* RND(
+F00:8912       KEY_RND
+F00:8913       	dc.b	'ND(',TK_RND			* RND(
                S02:0000F421:  4E 44 28
                S02:0000F424:  C6
-F00:8915       KEY_RUN
-F00:8916       	dc.b	'UN',TK_RUN				* RUN
+F00:8914       KEY_RUN
+F00:8915       	dc.b	'UN',TK_RUN				* RUN
                S02:0000F425:  55 4E
                S02:0000F427:  8A
-F00:8917       	dc.b	$00
+F00:8916       	dc.b	$00
                S02:0000F428:  00
-F00:8918       TAB_ASCS
-F00:8919       KEY_SADD
-F00:8920       	dc.b	'ADD(',TK_SADD			* SADD(
+F00:8917       TAB_ASCS
+F00:8918       KEY_SADD
+F00:8919       	dc.b	'ADD(',TK_SADD			* SADD(
                S02:0000F429:  41 44 44 28
                S02:0000F42D:  E0
-F00:8921       KEY_SAVE
-F00:8922       	dc.b	'AVE',TK_SAVE			* SAVE
+F00:8920       KEY_SAVE
+F00:8921       	dc.b	'AVE',TK_SAVE			* SAVE
                S02:0000F42E:  41 56 45
                S02:0000F431:  96
-F00:8923       KEY_SGN
-F00:8924       	dc.b	'GN(',TK_SGN			* SGN(
+F00:8922       KEY_SGN
+F00:8923       	dc.b	'GN(',TK_SGN			* SGN(
                S02:0000F432:  47 4E 28
                S02:0000F435:  BF
-F00:8925       KEY_SIN
-F00:8926       	dc.b	'IN(',TK_SIN			* SIN(
+F00:8924       KEY_SIN
+F00:8925       	dc.b	'IN(',TK_SIN			* SIN(
                S02:0000F436:  49 4E 28
                S02:0000F439:  CA
-F00:8927       KEY_SPC
-F00:8928       	dc.b	'PC(',TK_SPC			* SPC(
+F00:8926       KEY_SPC
+F00:8927       	dc.b	'PC(',TK_SPC			* SPC(
                S02:0000F43A:  50 43 28
                S02:0000F43D:  AC
-F00:8929       KEY_SQR
-F00:8930       	dc.b	'QR(',TK_SQR			* SQR(
+F00:8928       KEY_SQR
+F00:8929       	dc.b	'QR(',TK_SQR			* SQR(
                S02:0000F43E:  51 52 28
                S02:0000F441:  C5
-F00:8931       KEY_STEP
-F00:8932       	dc.b	'TEP',TK_STEP			* STEP
+F00:8930       KEY_STEP
+F00:8931       	dc.b	'TEP',TK_STEP			* STEP
                S02:0000F442:  54 45 50
                S02:0000F445:  AF
-F00:8933       KEY_STOP
-F00:8934       	dc.b	'TOP',TK_STOP			* STOP
+F00:8932       KEY_STOP
+F00:8933       	dc.b	'TOP',TK_STOP			* STOP
                S02:0000F446:  54 4F 50
                S02:0000F449:  90
-F00:8935       KEY_STRS
-F00:8936       	dc.b	'TR$(',TK_STRS			* STR$(
+F00:8934       KEY_STRS
+F00:8935       	dc.b	'TR$(',TK_STRS			* STR$(
                S02:0000F44A:  54 52 24 28
                S02:0000F44E:  D1
-F00:8937       KEY_SWAP
-F00:8938       	dc.b	'WAP',TK_SWAP			* SWAP
+F00:8936       KEY_SWAP
+F00:8937       	dc.b	'WAP',TK_SWAP			* SWAP
                S02:0000F44F:  57 41 50
                S02:0000F452:  A5
-F00:8939       	dc.b	$00
+F00:8938       	dc.b	$00
                S02:0000F453:  00
-F00:8940       TAB_ASCT
-F00:8941       KEY_TAB
-F00:8942       	dc.b	'AB(',TK_TAB			* TAB(
+F00:8939       TAB_ASCT
+F00:8940       KEY_TAB
+F00:8941       	dc.b	'AB(',TK_TAB			* TAB(
                S02:0000F454:  41 42 28
                S02:0000F457:  A8
-F00:8943       KEY_TAN
-F00:8944       	dc.b	'AN(',TK_TAN			* TAN
+F00:8942       KEY_TAN
+F00:8943       	dc.b	'AN(',TK_TAN			* TAN
                S02:0000F458:  41 4E 28
                S02:0000F45B:  CB
-F00:8945       KEY_THEN
-F00:8946       	dc.b	'HEN',TK_THEN			* THEN
+F00:8944       KEY_THEN
+F00:8945       	dc.b	'HEN',TK_THEN			* THEN
                S02:0000F45C:  48 45 4E
                S02:0000F45F:  AD
-F00:8947       KEY_TO
-F00:8948       	dc.b	'O',TK_TO				* TO
+F00:8946       KEY_TO
+F00:8947       	dc.b	'O',TK_TO				* TO
                S02:0000F460:  4F
                S02:0000F461:  AA
-F00:8949       KEY_TWOPI
-F00:8950       	dc.b	'WOPI',TK_TWOPI			* TWOPI
+F00:8948       KEY_TWOPI
+F00:8949       	dc.b	'WOPI',TK_TWOPI			* TWOPI
                S02:0000F462:  57 4F 50 49
                S02:0000F466:  DE
-F00:8951       	dc.b	$00
+F00:8950       	dc.b	$00
                S02:0000F467:  00
-F00:8952       TAB_ASCU
-F00:8953       KEY_UCASES
-F00:8954       	dc.b	'CASE$(',TK_UCASES		* UCASE$(
+F00:8951       TAB_ASCU
+F00:8952       KEY_UCASES
+F00:8953       	dc.b	'CASE$(',TK_UCASES		* UCASE$(
                S02:0000F468:  43 41 53 45 24 28
                S02:0000F46E:  D4
-F00:8955       KEY_UNTIL
-F00:8956       	dc.b	'NTIL',TK_UNTIL			* UNTIL
+F00:8954       KEY_UNTIL
+F00:8955       	dc.b	'NTIL',TK_UNTIL			* UNTIL
                S02:0000F46F:  4E 54 49 4C
                S02:0000F473:  B0
-F00:8957       KEY_USINGS
-F00:8958       	dc.b	'SING$(',TK_USINGS		* USING$(
+F00:8956       KEY_USINGS
+F00:8957       	dc.b	'SING$(',TK_USINGS		* USING$(
                S02:0000F474:  53 49 4E 47 24 28
                S02:0000F47A:  E4
-F00:8959       KEY_USR
-F00:8960       	dc.b	'SR(',TK_USR			* USR(
+F00:8958       KEY_USR
+F00:8959       	dc.b	'SR(',TK_USR			* USR(
                S02:0000F47B:  53 52 28
                S02:0000F47E:  C2
-F00:8961       	dc.b	$00
+F00:8960       	dc.b	$00
                S02:0000F47F:  00
-F00:8962       TAB_ASCV
-F00:8963       KEY_VAL
-F00:8964       	dc.b	'AL(',TK_VAL			* VAL(
+F00:8961       TAB_ASCV
+F00:8962       KEY_VAL
+F00:8963       	dc.b	'AL(',TK_VAL			* VAL(
                S02:0000F480:  41 4C 28
                S02:0000F483:  D2
-F00:8965       KEY_VPTR
-F00:8966       	dc.b	'ARPTR(',TK_VPTR			* VARPTR(
+F00:8964       KEY_VPTR
+F00:8965       	dc.b	'ARPTR(',TK_VPTR			* VARPTR(
                S02:0000F484:  41 52 50 54 52 28
                S02:0000F48A:  DF
-F00:8967       	dc.b	$00
+F00:8966       	dc.b	$00
                S02:0000F48B:  00
-F00:8968       TAB_ASCW
-F00:8969       KEY_WAIT
-F00:8970       	dc.b	'AIT',TK_WAIT			* WAIT
+F00:8967       TAB_ASCW
+F00:8968       KEY_WAIT
+F00:8969       	dc.b	'AIT',TK_WAIT			* WAIT
                S02:0000F48C:  41 49 54
                S02:0000F48F:  94
-F00:8971       KEY_WHILE
-F00:8972       	dc.b	'HILE',TK_WHILE			* WHILE
+F00:8970       KEY_WHILE
+F00:8971       	dc.b	'HILE',TK_WHILE			* WHILE
                S02:0000F490:  48 49 4C 45
                S02:0000F494:  B1
-F00:8973       KEY_WIDTH
-F00:8974       	dc.b	'IDTH',TK_WIDTH			* WIDTH
+F00:8972       KEY_WIDTH
+F00:8973       	dc.b	'IDTH',TK_WIDTH			* WIDTH
                S02:0000F495:  49 44 54 48
                S02:0000F499:  A3
-F00:8975       	dc.b	$00
+F00:8974       	dc.b	$00
                S02:0000F49A:  00
-F00:8976       TAB_POWR
-F00:8977       KEY_POWER
-F00:8978       	dc.b	TK_POWER,$00			* ^
+F00:8975       TAB_POWR
+F00:8976       KEY_POWER
+F00:8977       	dc.b	TK_POWER,$00			* ^
                S02:0000F49B:  B6
                S02:0000F49C:  00
+F00:8978       
 F00:8979       
-F00:8980       
-F00:8981       *************************************************************************************
-F00:8982       *
-F00:8983       * just messages
-F00:8984       
-F00:8985       LAB_BMSG
-F00:8986       	dc.b	$0D,$0A,'Break',$00
+F00:8980       *************************************************************************************
+F00:8981       *
+F00:8982       * just messages
+F00:8983       
+F00:8984       LAB_BMSG
+F00:8985       	dc.b	$0D,$0A,'Break',$00
                S02:0000F49D:  0D
                S02:0000F49E:  0A
                S02:0000F49F:  42 72 65 61 6B
                S02:0000F4A4:  00
-F00:8987       LAB_EMSG
-F00:8988       	dc.b	' Error',$00
+F00:8986       LAB_EMSG
+F00:8987       	dc.b	' Error',$00
                S02:0000F4A5:  20 45 72 72 6F 72
                S02:0000F4AB:  00
-F00:8989       LAB_LMSG
-F00:8990       	dc.b	' in line ',$00
+F00:8988       LAB_LMSG
+F00:8989       	dc.b	' in line ',$00
                S02:0000F4AC:  20 69 6E 20 6C 69 6E 65 20
                S02:0000F4B5:  00
-F00:8991       LAB_IMSG
-F00:8992       	dc.b	'Extra ignored',$0D,$0A,$00
+F00:8990       LAB_IMSG
+F00:8991       	dc.b	'Extra ignored',$0D,$0A,$00
                S02:0000F4B6:  45 78 74 72 61 20 69 67 6E 6F 72 65 64
                S02:0000F4C3:  0D
                S02:0000F4C4:  0A
                S02:0000F4C5:  00
-F00:8993       LAB_REDO
-F00:8994       	dc.b	'Redo from start',$0D,$0A,$00
+F00:8992       LAB_REDO
+F00:8993       	dc.b	'Redo from start',$0D,$0A,$00
                S02:0000F4C6:  52 65 64 6F 20 66 72 6F 6D 20 73 74 61 72 74
                S02:0000F4D5:  0D
                S02:0000F4D6:  0A
                S02:0000F4D7:  00
-F00:8995       LAB_RMSG
-F00:8996       	dc.b	$0D,$0A,'Ready',$0D,$0A,$00
+F00:8994       LAB_RMSG
+F00:8995       	dc.b	$0D,$0A,'Ready',$0D,$0A,$00
                S02:0000F4D8:  0D
                S02:0000F4D9:  0A
                S02:0000F4DA:  52 65 61 64 79
                S02:0000F4DF:  0D
                S02:0000F4E0:  0A
                S02:0000F4E1:  00
-F00:8997       LAB_SMSG
-F00:8998       	dc.b	' Bytes free',$0D,$0A,$0A
+F00:8996       LAB_SMSG
+F00:8997       	dc.b	' Bytes free',$0D,$0A,$0A
                S02:0000F4E2:  20 42 79 74 65 73 20 66 72 65 65
                S02:0000F4ED:  0D
                S02:0000F4EE:  0A
                S02:0000F4EF:  0A
-F00:8999       	dc.b	'Enhanced 68k BASIC Version 3.52',$0D,$0A,$00
+F00:8998       	dc.b	'Enhanced 68k BASIC Version 3.52',$0D,$0A,$00
                S02:0000F4F0:  45 6E 68 61 6E 63 65 64 20 36 38 6B 20 42 41 53
                S02:0000F500:  49 43 20 56 65 72 73 69 6F 6E 20 33 2E 35 32
                S02:0000F50F:  0D
                S02:0000F510:  0A
                S02:0000F511:  00
+F00:8999       
 F00:9000       
-F00:9001       
-F00:9002       *************************************************************************************
-F00:9003       * EhBASIC keywords quick reference list								*
-F00:9004       *************************************************************************************
-F00:9005       
-F00:9006       * glossary
-F00:9007       
-F00:9008       *		<.>		  required
-F00:9009       *		{.|.}		  one of required
-F00:9010       *		[.]		  optional
-F00:9011       *		...		  may repeat as last
-F00:9012       
-F00:9013       *		any		= anything
-F00:9014       *		num		= number
-F00:9015       *		state		= statement
-F00:9016       *		n		= positive integer
-F00:9017       *		str		= string
-F00:9018       *		var		= variable
-F00:9019       *		nvar		= numeric variable
-F00:9020       *		svar		= string variable
-F00:9021       *		expr		= expression
-F00:9022       *		nexpr		= numeric expression
-F00:9023       *		sexpr		= string expression
-F00:9024       
-F00:9025       * statement separator
-F00:9026       
-F00:9027       * :		. [<state>] : [<state>]						* done
-F00:9028       
-F00:9029       * number bases
-F00:9030       
-F00:9031       * %		. %<binary num>							* done
-F00:9032       * $		. $<hex num>							* done
-F00:9033       
-F00:9034       * commands
-F00:9035       
-F00:9036       * END		. END									* done
-F00:9037       * FOR		. FOR <nvar>=<nexpr> TO <nexpr> [STEP <nexpr>]		* done
-F00:9038       * NEXT	. NEXT [<nvar>[,<nvar>]...]					* done
-F00:9039       * DATA	. DATA [{num|["]str["]}[,{num|["]str["]}]...]		* done
-F00:9040       * INPUT	. INPUT [<">str<">;] <var>[,<var>[,<var>]...]		* done
-F00:9041       * DIM		. DIM <var>(<nexpr>[,<nexpr>[,<nexpr>]])			* done
-F00:9042       * READ	. READ <var>[,<var>[,<var>]...]				* done
-F00:9043       * LET		. [LET] <var>=<expr>						* done
-F00:9044       * DEC		. DEC <nvar>[,<nvar>[,<nvar>]...]				* done
-F00:9045       * GOTO	. GOTO <n>								* done
-F00:9046       * RUN		. RUN [<n>]								* done
-F00:9047       * IF		. IF <expr>{GOTO<n>|THEN<{n|comm}>}[ELSE <{n|comm}>]	* done
-F00:9048       * RESTORE	. RESTORE [<n>]							* done
-F00:9049       * GOSUB	. GOSUB <n>								* done
-F00:9050       * RETURN	. RETURN								* done
-F00:9051       * REM		. REM [<any>]							* done
-F00:9052       * STOP	. STOP								* done
-F00:9053       * ON		. ON <nexpr>{GOTO|GOSUB}<n>[,<n>[,<n>]...]		* done
-F00:9054       * NULL	. NULL <nexpr>							* done
-F00:9055       * INC		. INC <nvar>[,<nvar>[,<nvar>]...]				* done
-F00:9056       * WAIT	. WAIT <nexpr>,<nexpr>[,<nexpr>]				* done
-F00:9057       * LOAD	. LOAD [<sexpr>]							* done for sim
-F00:9058       * SAVE	. SAVE [<sexpr>][,[<n>][-<n>]]				* done for sim
-F00:9059       * DEF		. DEF FN<var>(<var>)=<expr>					* done
-F00:9060       * POKE	. POKE <nexpr>,<nexpr>						* done
-F00:9061       * DOKE	. DOKE <nexpr>,<nexpr>						* done
-F00:9062       * LOKE	. LOKE <nexpr>,<nexpr>						* done
-F00:9063       * CALL	. CALL <nexpr>							* done
-F00:9064       * DO		. DO									* done
-F00:9065       * LOOP	. LOOP [{WHILE|UNTIL}<nexpr>]					* done
-F00:9066       * PRINT	. PRINT [{;|,}][<expr>][{;|,}[<expr>]...]			* done
-F00:9067       * CONT	. CONT								* done
-F00:9068       * LIST	. LIST [<n>][-<n>]						* done
-F00:9069       * CLEAR	. CLEAR								* done
-F00:9070       * NEW		. NEW									* done
-F00:9071       * WIDTH	. WIDTH [<n>][,<n>]						* done
-F00:9072       * GET		. GET <var>								* done
-F00:9073       * SWAP	. SWAP <var>,<var>						* done
-F00:9074       * BITSET	. BITSET <nexpr>,<nexpr>					* done
-F00:9075       * BITCLR	. BITCLR <nexpr>,<nexpr>					* done
-F00:9076       
-F00:9077       * sub commands (may not start a statement)
-F00:9078       
-F00:9079       * TAB		. TAB(<nexpr>)							* done
-F00:9080       * ELSE	. IF <expr>{GOTO<n>|THEN<{n|comm}>}[ELSE <{n|comm}>]	* done
-F00:9081       * TO		. FOR <nvar>=<nexpr> TO <nexpr> [STEP <nexpr>]		* done
-F00:9082       * FN		. FN <var>(<expr>)						* done
-F00:9083       * SPC		. SPC(<nexpr>)							* done
-F00:9084       * THEN	. IF <nexpr> {THEN <{n|comm}>|GOTO <n>}			* done
-F00:9085       * NOT		. NOT <nexpr>							* done
-F00:9086       * STEP	. FOR <nvar>=<nexpr> TO <nexpr> [STEP <nexpr>]		* done
-F00:9087       * UNTIL	. LOOP [{WHILE|UNTIL}<nexpr>]					* done
-F00:9088       * WHILE	. LOOP [{WHILE|UNTIL}<nexpr>]					* done
-F00:9089       
-F00:9090       * operators
-F00:9091       
-F00:9092       * +		. [expr] + <expr>							* done
-F00:9093       * -		. [nexpr] - <nexpr>						* done
-F00:9094       * *		. <nexpr> * <nexpr>						* done fast hardware
-F00:9095       * /		. <nexpr> / <nexpr>						* done fast hardware
-F00:9096       * ^		. <nexpr> ^ <nexpr>						* done
-F00:9097       * AND		. <nexpr> AND <nexpr>						* done
-F00:9098       * EOR		. <nexpr> EOR <nexpr>						* done
-F00:9099       * OR		. <nexpr> OR <nexpr>						* done
-F00:9100       * >>		. <nexpr> >> <nexpr>						* done
-F00:9101       * <<		. <nexpr> << <nexpr>						* done
-F00:9102       
-F00:9103       * compare functions
-F00:9104       
-F00:9105       * <		. <expr> < <expr>							* done
-F00:9106       * =		. <expr> = <expr>							* done
-F00:9107       * >		. <expr> > <expr>							* done
-F00:9108       
-F00:9109       * functions
-F00:9110       
-F00:9111       * SGN		. SGN(<nexpr>)							* done
-F00:9112       * INT		. INT(<nexpr>)							* done
-F00:9113       * ABS		. ABS(<nexpr>)							* done
-F00:9114       * USR		. USR(<expr>)							* done
-F00:9115       * FRE		. FRE(<expr>)							* done
-F00:9116       * POS		. POS(<expr>)							* done
-F00:9117       * SQR		. SQR(<nexpr>)							* done fast shift/sub
-F00:9118       * RND		. RND(<nexpr>)							* done 32 bit PRNG
-F00:9119       * LOG		. LOG(<nexpr>)							* done fast cordic
-F00:9120       * EXP		. EXP(<nexpr>)							* done fast cordic
-F00:9121       * COS		. COS(<nexpr>)							* done fast cordic
-F00:9122       * SIN		. SIN(<nexpr>)							* done fast cordic
-F00:9123       * TAN		. TAN(<nexpr>)							* done fast cordic
-F00:9124       * ATN		. ATN(<nexpr>)							* done fast cordic
-F00:9125       * PEEK	. PEEK(<nexpr>)							* done
-F00:9126       * DEEK	. DEEK(<nexpr>)							* done
-F00:9127       * LEEK	. LEEK(<nexpr>)							* done
-F00:9128       * LEN		. LEN(<sexpr>)							* done
-F00:9129       * STR$	. STR$(<nexpr>)							* done
-F00:9130       * VAL		. VAL(<sexpr>)							* done
-F00:9131       * ASC		. ASC(<sexpr>)							* done
-F00:9132       * UCASE$	. UCASE$(<sexpr>)							* done
-F00:9133       * LCASE$	. LCASE$(<sexpr>)							* done
-F00:9134       * CHR$	. CHR$(<nexpr>)							* done
-F00:9135       * HEX$	. HEX$(<nexpr>)							* done
-F00:9136       * BIN$	. BIN$(<nexpr>)							* done
-F00:9137       * BTST	. BTST(<nexpr>,<nexpr>)						* done
-F00:9138       * MAX		. MAX(<nexpr>[,<nexpr>[,<nexpr>]...])			* done
-F00:9139       * MIN		. MIN(<nexpr>[,<nexpr>[,<nexpr>]...])			* done
-F00:9140       * PI		. PI									* done
-F00:9141       * TWOPI	. TWOPI								* done
-F00:9142       * VARPTR	. VARPTR(<var>)							* done
-F00:9143       * SADD	. SADD(<svar>)							* done
-F00:9144       * LEFT$	. LEFT$(<sexpr>,<nexpr>)					* done
-F00:9145       * RIGHT$	. RIGHT$(<sexpr>,<nexpr>)					* done
-F00:9146       * MID$	. MID$(<sexpr>,<nexpr>[,<nexpr>])				* done
-F00:9147       * USING$	. USING$(<sexpr>,<nexpr>[,<nexpr>]...])			* done
+F00:9001       *************************************************************************************
+F00:9002       * EhBASIC keywords quick reference list								*
+F00:9003       *************************************************************************************
+F00:9004       
+F00:9005       * glossary
+F00:9006       
+F00:9007       *		<.>		  required
+F00:9008       *		{.|.}		  one of required
+F00:9009       *		[.]		  optional
+F00:9010       *		...		  may repeat as last
+F00:9011       
+F00:9012       *		any		= anything
+F00:9013       *		num		= number
+F00:9014       *		state		= statement
+F00:9015       *		n		= positive integer
+F00:9016       *		str		= string
+F00:9017       *		var		= variable
+F00:9018       *		nvar		= numeric variable
+F00:9019       *		svar		= string variable
+F00:9020       *		expr		= expression
+F00:9021       *		nexpr		= numeric expression
+F00:9022       *		sexpr		= string expression
+F00:9023       
+F00:9024       * statement separator
+F00:9025       
+F00:9026       * :		. [<state>] : [<state>]						* done
+F00:9027       
+F00:9028       * number bases
+F00:9029       
+F00:9030       * %		. %<binary num>							* done
+F00:9031       * $		. $<hex num>							* done
+F00:9032       
+F00:9033       * commands
+F00:9034       
+F00:9035       * END		. END									* done
+F00:9036       * FOR		. FOR <nvar>=<nexpr> TO <nexpr> [STEP <nexpr>]		* done
+F00:9037       * NEXT	. NEXT [<nvar>[,<nvar>]...]					* done
+F00:9038       * DATA	. DATA [{num|["]str["]}[,{num|["]str["]}]...]		* done
+F00:9039       * INPUT	. INPUT [<">str<">;] <var>[,<var>[,<var>]...]		* done
+F00:9040       * DIM		. DIM <var>(<nexpr>[,<nexpr>[,<nexpr>]])			* done
+F00:9041       * READ	. READ <var>[,<var>[,<var>]...]				* done
+F00:9042       * LET		. [LET] <var>=<expr>						* done
+F00:9043       * DEC		. DEC <nvar>[,<nvar>[,<nvar>]...]				* done
+F00:9044       * GOTO	. GOTO <n>								* done
+F00:9045       * RUN		. RUN [<n>]								* done
+F00:9046       * IF		. IF <expr>{GOTO<n>|THEN<{n|comm}>}[ELSE <{n|comm}>]	* done
+F00:9047       * RESTORE	. RESTORE [<n>]							* done
+F00:9048       * GOSUB	. GOSUB <n>								* done
+F00:9049       * RETURN	. RETURN								* done
+F00:9050       * REM		. REM [<any>]							* done
+F00:9051       * STOP	. STOP								* done
+F00:9052       * ON		. ON <nexpr>{GOTO|GOSUB}<n>[,<n>[,<n>]...]		* done
+F00:9053       * NULL	. NULL <nexpr>							* done
+F00:9054       * INC		. INC <nvar>[,<nvar>[,<nvar>]...]				* done
+F00:9055       * WAIT	. WAIT <nexpr>,<nexpr>[,<nexpr>]				* done
+F00:9056       * LOAD	. LOAD [<sexpr>]							* done for sim
+F00:9057       * SAVE	. SAVE [<sexpr>][,[<n>][-<n>]]				* done for sim
+F00:9058       * DEF		. DEF FN<var>(<var>)=<expr>					* done
+F00:9059       * POKE	. POKE <nexpr>,<nexpr>						* done
+F00:9060       * DOKE	. DOKE <nexpr>,<nexpr>						* done
+F00:9061       * LOKE	. LOKE <nexpr>,<nexpr>						* done
+F00:9062       * CALL	. CALL <nexpr>							* done
+F00:9063       * DO		. DO									* done
+F00:9064       * LOOP	. LOOP [{WHILE|UNTIL}<nexpr>]					* done
+F00:9065       * PRINT	. PRINT [{;|,}][<expr>][{;|,}[<expr>]...]			* done
+F00:9066       * CONT	. CONT								* done
+F00:9067       * LIST	. LIST [<n>][-<n>]						* done
+F00:9068       * CLEAR	. CLEAR								* done
+F00:9069       * NEW		. NEW									* done
+F00:9070       * WIDTH	. WIDTH [<n>][,<n>]						* done
+F00:9071       * GET		. GET <var>								* done
+F00:9072       * SWAP	. SWAP <var>,<var>						* done
+F00:9073       * BITSET	. BITSET <nexpr>,<nexpr>					* done
+F00:9074       * BITCLR	. BITCLR <nexpr>,<nexpr>					* done
+F00:9075       
+F00:9076       * sub commands (may not start a statement)
+F00:9077       
+F00:9078       * TAB		. TAB(<nexpr>)							* done
+F00:9079       * ELSE	. IF <expr>{GOTO<n>|THEN<{n|comm}>}[ELSE <{n|comm}>]	* done
+F00:9080       * TO		. FOR <nvar>=<nexpr> TO <nexpr> [STEP <nexpr>]		* done
+F00:9081       * FN		. FN <var>(<expr>)						* done
+F00:9082       * SPC		. SPC(<nexpr>)							* done
+F00:9083       * THEN	. IF <nexpr> {THEN <{n|comm}>|GOTO <n>}			* done
+F00:9084       * NOT		. NOT <nexpr>							* done
+F00:9085       * STEP	. FOR <nvar>=<nexpr> TO <nexpr> [STEP <nexpr>]		* done
+F00:9086       * UNTIL	. LOOP [{WHILE|UNTIL}<nexpr>]					* done
+F00:9087       * WHILE	. LOOP [{WHILE|UNTIL}<nexpr>]					* done
+F00:9088       
+F00:9089       * operators
+F00:9090       
+F00:9091       * +		. [expr] + <expr>							* done
+F00:9092       * -		. [nexpr] - <nexpr>						* done
+F00:9093       * *		. <nexpr> * <nexpr>						* done fast hardware
+F00:9094       * /		. <nexpr> / <nexpr>						* done fast hardware
+F00:9095       * ^		. <nexpr> ^ <nexpr>						* done
+F00:9096       * AND		. <nexpr> AND <nexpr>						* done
+F00:9097       * EOR		. <nexpr> EOR <nexpr>						* done
+F00:9098       * OR		. <nexpr> OR <nexpr>						* done
+F00:9099       * >>		. <nexpr> >> <nexpr>						* done
+F00:9100       * <<		. <nexpr> << <nexpr>						* done
+F00:9101       
+F00:9102       * compare functions
+F00:9103       
+F00:9104       * <		. <expr> < <expr>							* done
+F00:9105       * =		. <expr> = <expr>							* done
+F00:9106       * >		. <expr> > <expr>							* done
+F00:9107       
+F00:9108       * functions
+F00:9109       
+F00:9110       * SGN		. SGN(<nexpr>)							* done
+F00:9111       * INT		. INT(<nexpr>)							* done
+F00:9112       * ABS		. ABS(<nexpr>)							* done
+F00:9113       * USR		. USR(<expr>)							* done
+F00:9114       * FRE		. FRE(<expr>)							* done
+F00:9115       * POS		. POS(<expr>)							* done
+F00:9116       * SQR		. SQR(<nexpr>)							* done fast shift/sub
+F00:9117       * RND		. RND(<nexpr>)							* done 32 bit PRNG
+F00:9118       * LOG		. LOG(<nexpr>)							* done fast cordic
+F00:9119       * EXP		. EXP(<nexpr>)							* done fast cordic
+F00:9120       * COS		. COS(<nexpr>)							* done fast cordic
+F00:9121       * SIN		. SIN(<nexpr>)							* done fast cordic
+F00:9122       * TAN		. TAN(<nexpr>)							* done fast cordic
+F00:9123       * ATN		. ATN(<nexpr>)							* done fast cordic
+F00:9124       * PEEK	. PEEK(<nexpr>)							* done
+F00:9125       * DEEK	. DEEK(<nexpr>)							* done
+F00:9126       * LEEK	. LEEK(<nexpr>)							* done
+F00:9127       * LEN		. LEN(<sexpr>)							* done
+F00:9128       * STR$	. STR$(<nexpr>)							* done
+F00:9129       * VAL		. VAL(<sexpr>)							* done
+F00:9130       * ASC		. ASC(<sexpr>)							* done
+F00:9131       * UCASE$	. UCASE$(<sexpr>)							* done
+F00:9132       * LCASE$	. LCASE$(<sexpr>)							* done
+F00:9133       * CHR$	. CHR$(<nexpr>)							* done
+F00:9134       * HEX$	. HEX$(<nexpr>)							* done
+F00:9135       * BIN$	. BIN$(<nexpr>)							* done
+F00:9136       * BTST	. BTST(<nexpr>,<nexpr>)						* done
+F00:9137       * MAX		. MAX(<nexpr>[,<nexpr>[,<nexpr>]...])			* done
+F00:9138       * MIN		. MIN(<nexpr>[,<nexpr>[,<nexpr>]...])			* done
+F00:9139       * PI		. PI									* done
+F00:9140       * TWOPI	. TWOPI								* done
+F00:9141       * VARPTR	. VARPTR(<var>)							* done
+F00:9142       * SADD	. SADD(<svar>)							* done
+F00:9143       * LEFT$	. LEFT$(<sexpr>,<nexpr>)					* done
+F00:9144       * RIGHT$	. RIGHT$(<sexpr>,<nexpr>)					* done
+F00:9145       * MID$	. MID$(<sexpr>,<nexpr>[,<nexpr>])				* done
+F00:9146       * USING$	. USING$(<sexpr>,<nexpr>[,<nexpr>]...])			* done
+F00:9147       
 F00:9148       
-F00:9149       
-F00:9150       *************************************************************************************
-F00:9151       
-F00:9152       	END	code_start
-F00:9153       
-F00:9154       *************************************************************************************
-F00:9155       
+F00:9149       *************************************************************************************
+F00:9150       
+F00:9151       	END	code_start
+F00:9152       
+F00:9153       *************************************************************************************
+F00:9154       
 
 
 Sections:
@@ -14228,7 +14227,7 @@ TAB_LESS EXPR(62202=0xf2fa) ABS
 TAB_SLAS EXPR(62200=0xf2f8) ABS 
 TAB_MNUS EXPR(62198=0xf2f6) ABS 
 TAB_PLUS EXPR(62196=0xf2f4) ABS 
-n EXPR(2=0x2) EQU 
+n EXPR(2=0x2) UNUSED EQU 
 LAB_1D96 EXPR(60828=0xed9c) UNUSED ABS 
 TK_USINGS EXPR(228=0xe4) EQU 
 TK_MIDS EXPR(227=0xe3) EQU 
@@ -14469,7 +14468,7 @@ LAB_EXNN EXPR(57518=0xe0ae) ABS
 LAB_EXRN EXPR(57524=0xe0b4) ABS 
 LAB_EXPL EXPR(57512=0xe0a8) ABS 
 LAB_EXCC EXPR(57538=0xe0c2) ABS 
-KFCTSEED EXPR(-425471728=0xe6a3d110) EQU 
+KFCTSEED EXPR(648270096=0x26a3d110) EQU 
 LAB_ESML EXPR(57426=0xe052) ABS 
 LAB_EXPS EXPR(57350=0xe006) ABS 
 LAB_EXCM EXPR(57332=0xdff4) ABS 
@@ -15170,7 +15169,7 @@ ram_base EXPR(1024=0x400) ABS
 ram_strt EXPR(0=0x0) UNUSED ABS 
 nobrk EXPR(0=0x0) EQU 
 novar EXPR(0=0x0) EQU 
-__LINE__ EXPR(9152=0x23c0) INTERNAL 
+__LINE__ EXPR(9151=0x23bf) INTERNAL 
 __FO EXPR(0=0x0) INTERNAL 
 __RS EXPR(0=0x0) INTERNAL 
 REPTN EXPR(-1=0xffffffff) INTERNAL 
