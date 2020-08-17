@@ -18,8 +18,10 @@
 *										    *
 *************************************************************************************
 
-* Ver 3.52
+* Ver 3.53
 
+* Ver 3.53 fixes math error that affected exponentiation ("^") and
+*  EXP() function. Thanks to joelang for fix.
 * Ver 3.52 stops USING$() from reading beyond the end of the format string
 * Ver 3.51 fixes the UCASE$() and LCASE$() functions for null strings
 * Ver 3.50 unary minus in concatenate generates a type mismatch error
@@ -8995,7 +8997,7 @@ LAB_RMSG
 	dc.b	$0D,$0A,'Ready',$0D,$0A,$00
 LAB_SMSG
 	dc.b	' Bytes free',$0D,$0A,$0A
-	dc.b	'Enhanced 68k BASIC Version 3.52',$0D,$0A,$00
+	dc.b	'Enhanced 68k BASIC Version 3.53',$0D,$0A,$00
 
 
 *************************************************************************************
