@@ -5,11 +5,51 @@ It should be assembled using the VASM retargetable assembler. It can
 be loaded into RAM and started from address $0800 or built to run
 from EPROM at $C000.
 
+The following notes may be useful when porting programs written for
+other Basic language dialects:
+
+Keywords must be in all uppercase, but variable names can be upper or
+lowercase and variables that different in case only (e.g. "X" and "x")
+are considered distinct. The first three letters of variable names are
+used to determine if the variables are unique.
+
+The RND() function has different behavior from Microsoft-derived
+Basics. You can read the documentation for details, but essentially,
+if you want a series of random numbers you should call RND(0). Most
+programs written for other Basic dialects typically call RND(1).
+
+While most Microsoft-derived Basics assume an array size of 10 if you
+don't specify otherwise, you need to explicitly specify the size of
+arrays using the DIM statement.
+
+By default, using the value of a variable that has not been
+initialized will generate an Undefined Variable error. You can change
+this to make it more compatible with other basic dialects, using a
+build time option (novar).
+
+By default, an INPUT statement with an empty response will cause the
+program to break. This can be changed using a build time option
+(nobrk).
+
+PRINT statements do not output any extra spaces between items. So, for
+example,
+
+  PRINT A";"B"
+
+Will output "AB", whereas in many dialects of Basic it will be "A B".
+
+In the 68000 version, the interrupt related commands (ON IRQ|NMI, IRQ
+ON|OFF|CLEAR, NMI ON|OFF|CLEAR, RETIRQ, and RETNMI) are not present.
+
+Also, unlike the 6502 version, there is no warm/cold start or memory
+size? prompt on startup.
+
 References:
 
-1. http://retro.hansotten.nl/home/lee-davison-web-site/
-2. http://www.easy68k.com/applications.htm
-3. http://sun.hasenbraten.de/vasm/
+1. http://www.sunrise-ev.com/photos/6502/EhBASIC-manual.pdf
+2. http://retro.hansotten.nl/home/lee-davison-web-site/
+3. http://www.easy68k.com/applications.htm
+4. http://sun.hasenbraten.de/vasm/
 
 ------------------------------------------------------------------------
 
@@ -29,5 +69,3 @@ References:
  please visit my site at ..
 
 	 http://mycorner.no-ip.org/index.html
-
-
