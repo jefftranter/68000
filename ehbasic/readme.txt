@@ -38,6 +38,20 @@ example,
 
 Will output "AB", whereas in many dialects of Basic it will be "A B".
 
+It appears that a RETURN statement is not valid in some sittationsa,
+such as when control flow leaves from inside a FOR/NEXT loop. The
+following program will display "RETURN without GOSUB Error in line
+210" when run:
+
+10 GOSUB 100
+20 STOP
+100 FOR I = 1 TO 10
+110 IF I = 3 THEN 200
+120 NEXT I
+130 RETURN
+200 PRINT "HERE"
+210 RETURN
+
 In the 68000 version, the interrupt related commands (ON IRQ|NMI, IRQ
 ON|OFF|CLEAR, NMI ON|OFF|CLEAR, RETIRQ, and RETNMI) are not present.
 
