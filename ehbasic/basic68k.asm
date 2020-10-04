@@ -18,8 +18,9 @@
 *										    *
 *************************************************************************************
 
-* Ver 3.53
+* Ver 3.54
 
+* Ver 3.54 adds support for LOAD/SAVE using Hobbytronics USB Flash Drive Host Board
 * Ver 3.53 fixes math error that affected exponentiation ("^") and
 *  EXP() function. Thanks to joelang for fix.
 * Ver 3.52 stops USING$() from reading beyond the end of the format string
@@ -72,11 +73,12 @@ nobrk		EQU	0				* null response to INPUT causes a break
 							* RAM offset definitions
 
 * Use this value to run out of ROM
-	ORG		$00C000			* past the vectors in a real system
+*	ORG		$00C000			* past the vectors in a real system
 * Use this value to run out of RAM
-*	ORG		$000800			* past the vectors in a real system
+	ORG		$000800			* past the vectors in a real system
 
 ACIA_1   =      $00010040        * Console ACIA base address
+ACIA_2   =      $00010041        * Auxiliary ACIA base address
 
          BRA    code_start       * For convenience, so you can start from first address
 
@@ -90,11 +92,22 @@ VEC_OUT
         MOVEM.L  A0/D1,-(A7)    * Save working registers
         LEA.L    ACIA_1,A0      * A0 points to console ACIA
 TXNOTREADY
-        MOVE.B   (A0),D1        * Read ACIA status
+        MOVE.b   (A0),D1        * Read ACIA status
         BTST     #1,D1          * Test TDRE bit
         BEQ.S    TXNOTREADY     * Until ACIA Tx ready
-        MOVE.B   D0,2(A0)       * Write character to send
-        MOVEM.L  (A7)+,A0/D1    * Restore working registers
+        MOVE.b   D0,2(A0)       * Write character to send
+        MOVEM.l  (A7)+,A0/D1    * Restore working registers
+        RTS
+
+VEC_OUT2
+        MOVEM.l  A0/D1,-(A7)    * Save working registers
+        LEA.l    ACIA_2,A0      * A0 points to console ACIA
+TXNOTREADY1
+        MOVE.b   (A0),D1        * Read ACIA status
+        BTST     #1,D1          * Test TDRE bit
+        BEQ.s    TXNOTREADY1    * Until ACIA Tx ready
+        MOVE.b   D0,2(A0)       * Write character to send
+        MOVEM.l  (A7)+,A0/D1    * Restore working registers
         RTS
 
 *************************************************************************************
@@ -112,35 +125,113 @@ VEC_IN
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
 	ORI.b	 #1,CCR	        * Set the carry, flag we got a byte
         RTS                     * Return
-RXNOTREADY:
+RXNOTREADY
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
-	ANDI.b	#$FE,CCR	* Clear the carry, flag character available
+	ANDI.b	#$FE,CCR	* Clear the carry, flag character not available
+	RTS
+
+VEC_IN2
+        MOVEM.L  A0/D1,-(A7)    * Save working registers
+        LEA.L    ACIA_2,A0      * A0 points to console ACIA
+        MOVE.B   (A0),D1        * Read ACIA status
+        BTST     #0,D1          * Test RDRF bit
+        BEQ.S    RXNOTREADY2    * Branch If ACIA Rx not ready
+        MOVE.B   2(A0),D0       * Read character received
+
+* Check for end of file character (Control-D) and if found, redirect
+* input back to console port.
+
+        CMP.B   #'~',D0         * End of file marker?
+        BNE     NOTEOF
+        LEA.L   VEC_IN,A0       * Redirect input back to console port.
+        MOVE.L  A0,V_INPTv(a3)
+NOTEOF
+        MOVEM.L  (A7)+,A0/D1    * Restore working registers
+	ORI.b	 #1,CCR	        * Set the carry, flag we got a byte
+        RTS                     * Return
+RXNOTREADY2
+        MOVEM.L  (A7)+,A0/D1    * Restore working registers
+	ANDI.b	#$FE,CCR	* Clear the carry, flag character not available
 	RTS
 
 *************************************************************************************
 *
-* LOAD routine for the TS2 computer (not implemented)
+* SAVE routine for the TS2 computer. Supports a Hobbytronics USB Flash
+* Drive Host Board connected to the auxiliary serial port.
 
 VEC_LD
-	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
-	BRA		LAB_XERR			* do error #d7, then warm start
+
+* TODO: Prompt for filename. Maybe exit if empty? "?" to show directory?
+
+        LEA.L           VEC_OUT2,A0                     * Redirect output to aux. port.
+        MOVE.L          A0,V_OUTPv(a3)
+
+        LEA.L           VEC_IN2,A0                      * Redirect input from aux. port.
+        MOVE.L          A0,V_INPTv(a3)
+
+        LEA             LAB_TYPE(pc),a0                 * Send TYPE command string
+        BSR             LAB_18C3                        * Print null terminated string
+
+        LEA.L           VEC_OUT,A0                      * Redirect output back to console port.
+        MOVE.L          A0,V_OUTPv(a3)
+
+* Input routine will detect end of file character (Control-D) and
+* redirect input back to console port.
+
+        RTS
 
 *************************************************************************************
 *
-* SAVE routine for the TS2 computer (not implemented)
+* SAVE routine for the TS2 computer. Supports a Hobbytronics USB Flash
+* Drive Host Board connected to the auxiliary serial port.
+
+* TODO: Make configurable at build time
 
 VEC_SV
-	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
-	BRA		LAB_XERR			* do error #d7, then warm start
+
+* TODO: Prompt for filename. Maybe exit if empty? "?" to show directory?
+
+        LEA.L           VEC_OUT2,A0                     * Redirect output to aux. port.
+        MOVE.L          A0,V_OUTPv(a3)
+
+        LEA             LAB_WRITE(pc),a0                * Send WRITE command string
+        BSR             LAB_18C3                        * Print null terminated string
+
+        MOVE.l          #356000,d0                      * Delay approx. 1 second to allow USB to create file
+DELAY   SUBQ.l          #1,d0
+        BNE             DELAY
+
+        MOVEQ           #0,d0                           * Tells LIST no arguments
+        ANDI.b          #$FE,CCR                        * Clear carry
+        BSR             LAB_LIST                        * Call LIST routine
+
+        MOVEQ           #'~',d0                         * Send tilde symbol indicate end of file (used when loading)
+        BSR             LAB_PRNA
+
+        MOVEQ           #26,d0                          * Send Control-Z to indicate end of file save operation
+        BSR             LAB_PRNA
+
+        LEA.L           VEC_OUT,A0                      * Redirect output back to console port.
+        MOVE.L          A0,V_OUTPv(a3)
+        RTS                                             * Return
+
+LAB_WRITE
+        dc.b            '$WRITE SAVE.BAS',$0D,$0A,$00
+
+LAB_TYPE
+        dc.b            '$TYPE SAVE.BAS',$0D,$0A,$00
+
+        even
 
 *************************************************************************************
-*
-* turn off simulator key echo
 
 code_start
                                 * Set up ACIA parameters
         LEA.L   ACIA_1,A0       * A0 points to console ACIA
         MOVE.B  #$15,(A0)       * Set up ACIA1 constants (no IRQ,
+                                * RTS* low, 8 bit, no parity, 1 stop)
+        LEA.L   ACIA_2,A0       * A0 points to aux. ACIA
+        MOVE.B  #$15,(A0)       * Set up ACIA2 constants (no IRQ,
                                 * RTS* low, 8 bit, no parity, 1 stop)
 
 * to tell EhBASIC where and how much RAM it has pass the address in a0 and the size
@@ -8997,7 +9088,7 @@ LAB_RMSG
 	dc.b	$0D,$0A,'Ready',$0D,$0A,$00
 LAB_SMSG
 	dc.b	' Bytes free',$0D,$0A,$0A
-	dc.b	'Enhanced 68k BASIC Version 3.53',$0D,$0A,$00
+	dc.b	'Enhanced 68k BASIC Version 3.54',$0D,$0A,$00
 
 
 *************************************************************************************
