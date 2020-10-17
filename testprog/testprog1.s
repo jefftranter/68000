@@ -2,7 +2,7 @@
 ; Displays a "Hello, world!" message on the console.
 ; Calls code in the TS2 monitor ROM.
 
-        ORG	$2000              Located in RAM
+        ORG	$2000              Locate in RAM
 
 PSTRING EQU     $0000807C          Monitor routine to display the string pointed to by A4
 

@@ -2,7 +2,7 @@
 ; Displays decimal numbers 1 through 1000 on the console.
 ; Calls code in the TUTOR monitor ROM.
 
-        ORG	$2000                   Located in RAM
+        ORG	$2000                   Locate in RAM
 
 ; TRAP 14 functions
 OUTPUT  EQU     243
