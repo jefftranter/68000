@@ -46,9 +46,11 @@ HANDLER MOVEM.L  A0/A1/D0/D1,-(A7)      Save working registers
         CLR.L    D1                     Clear all of D1
         MOVE.B   POS,D1                 D1 contains buffer position
         MOVE.B   2(A0),D0               Read character received
+        CMP.B    #80,D1                 Buffer full (8 characters?)
+        BGE      CRCHK                  If so, skip storing it
         MOVE.B   D0,(A1,D1)             Write to buffer
         ADDQ.B   #1,POS                 Increment buffer position
-        CMP.B    #CR,D0                 Is it CR?
+CRCHK   CMP.B    #CR,D0                 Is it CR?
         BNE      RETURN                 Branch of not
         MOVE.B   #1,EXIT                Set exit flag
 
