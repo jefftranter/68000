@@ -188,19 +188,23 @@ ccflag	ds.b	1			* CTRL-C check flag
 ccbyte	ds.b	1			* CTRL-C last received byte
 ccnull	ds.b	1			* CTRL-C last received byte 'life' timer
 
-* these variables for simulator load/save routines
+* Circular buffer used for interrupt-driven version of input.
 
-file_byte	ds.b	1			* load/save data byte
-file_id	ds.l	1			* load/save file ID
+		even			* Align on even address
+
+buff_size       EQU     64              * Size of input buffer
+buff_head       ds.l    1               * Pointer to start of buffer
+buff_tail       ds.l    1               * Pointer to end of buffer
+buff            ds.b    buff_size       * Input buffer
 
 		even			        * dummy even value and zero pad byte
 
 prg_strt
 
 * Use these two lines when running from ROM
-ram_addr	EQU	$02000		* RAM start address
-ram_size	EQU	$06000		* RAM size
+*ram_addr	EQU	$02000		* RAM start address
+*ram_size	EQU	$06000		* RAM size
 
 * Use these two lines when running from RAM
-*ram_addr	EQU	$04000		* RAM start address
-*ram_size	EQU	$04000		* RAM size
+ram_addr	EQU	$04000		* RAM start address
+ram_size	EQU	$04000		* RAM size

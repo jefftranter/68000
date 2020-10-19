@@ -18,8 +18,9 @@
 *										    *
 *************************************************************************************
 
-* Ver 3.53
+* Ver 3.54
 
+* Ver 3.54 Adds interrupt driven input for the TS2 single board computer
 * Ver 3.53 fixes math error that affected exponentiation ("^") and
 *  EXP() function. Thanks to joelang for fix.
 * Ver 3.52 stops USING$() from reading beyond the end of the format string
@@ -64,58 +65,107 @@ nobrk		EQU	0				* null response to INPUT causes a break
 * pointer in a3. this means that this could now be run as a task on a multitasking
 * system where memory resources may change.
 
-
 *************************************************************************************
-
 
 	INCLUDE	"basic68k.inc"
 							* RAM offset definitions
 
 * Use this value to run out of ROM
-	ORG		$00C000			* past the vectors in a real system
+*	ORG		$00C000			* past the vectors in a real system
 * Use this value to run out of RAM
-*	ORG		$000800			* past the vectors in a real system
+	ORG		$000800			* past the vectors in a real system
 
 ACIA_1   =      $00010040        * Console ACIA base address
+AV5      =      $00000074        * Interrupt vector for console UART (IRQ5 autovector)
 
          BRA    code_start       * For convenience, so you can start from first address
 
 *************************************************************************************
 *
-* the following code is simulator specific, change to suit your system
-
-* output character to the console from register d0.b
+* The following code is simulator specific, change to suit your system.
+* Output character to the console from register D0.b
 
 VEC_OUT
-        MOVEM.L  A0/D1,-(A7)    * Save working registers
-        LEA.L    ACIA_1,A0      * A0 points to console ACIA
+        MOVEM.L A0/D1,-(A7)    * Save working registers
+        LEA.L   ACIA_1,A0      * A0 points to console ACIA
 TXNOTREADY
-        MOVE.B   (A0),D1        * Read ACIA status
-        BTST     #1,D1          * Test TDRE bit
-        BEQ.S    TXNOTREADY     * Until ACIA Tx ready
-        MOVE.B   D0,2(A0)       * Write character to send
-        MOVEM.L  (A7)+,A0/D1    * Restore working registers
+        MOVE.B  (A0),D1        * Read ACIA status
+        BTST    #1,D1          * Test TDRE bit
+        BEQ.S   TXNOTREADY     * Until ACIA Tx ready
+        MOVE.B  D0,2(A0)       * Write character to send
+        MOVEM.L (A7)+,A0/D1    * Restore working registers
         RTS
 
 *************************************************************************************
 *
-* input a character from the console into register d0
-* else return Cb=0 if there's no character available
+* Return a character from the input buffer into register D0
+* else return with carry clear if there's no character available
 
-VEC_IN
-        MOVEM.L  A0/D1,-(A7)    * Save working registers
-        LEA.L    ACIA_1,A0      * A0 points to console ACIA
-        MOVE.B   (A0),D1        * Read ACIA status
-        BTST     #0,D1          * Test RDRF bit
-        BEQ.S    RXNOTREADY     * Branch If ACIA Rx not ready
-        MOVE.B   2(A0),D0       * Read character received
-        MOVEM.L  (A7)+,A0/D1    * Restore working registers
-	ORI.b	 #1,CCR	        * Set the carry, flag we got a byte
-        RTS                     * Return
+VEC_IN  MOVEM.L A0/A1/D1,-(A7)          Save working registers
+
+* If buffer is empty (HEAD == TAIL), return no data available
+
+        MOVE.L  buff_head(A3),D1        Get head
+        CMP.L   buff_tail(A3),D1        Compare to tail
+        BEQ.S   RXNOTREADY              Branch If ACIA Rx not ready
+
+        ADDQ.L  #1,D1                   Advance head by one
+
+; Check if we hit end of buffer, i.e. buff_head is buff + buff_size.
+; If so, wrap around to start.
+
+        LEA.L   buff(A3),A1             Get address of buff
+        MOVE.L  A1,D0                   Put in data register
+        ADD.L   #buff_size,D0           Add buff_size
+        CMP     D0,D1                   The same?
+        BNE     SKIP0                   Branch if not
+        MOVE.L  buff(A3),D1             End of buffer, so reset buff_tail to buff
+
+SKIP0:  MOVE.L  D1,buff_head(A3)        Write new value of buff_head
+        MOVE.L  D1,A1                   Save in address register
+        MOVE.B  (A1),D0                 Get character from buffer head
+
+        MOVEM.L (A7)+,A0/A1/D1          Restore working registers
+	ORI.b	#1,CCR	                Set the carry, flag we got a byte
+        RTS                             Return
+
 RXNOTREADY:
-        MOVEM.L  (A7)+,A0/D1    * Restore working registers
-	ANDI.b	#$FE,CCR	* Clear the carry, flag character available
+        MOVEM.L (A7)+,A0/A1/D1          Restore working registers
+	ANDI.b	#$FE,CCR	        Clear the carry, flag character available
 	RTS
+
+* Interrupt handler for input
+
+HANDLER MOVEM.L A0/A1/D0/D1,-(A7)       Save working registers
+
+        LEA.L   ACIA_1,A0               A0 points to console ACIA
+        MOVE.B  (A0),D0                 Read ACIA status
+        BTST    #0,D0                   Test RDRF bit
+        BEQ.S   RETURN                  Branch if ACIA RX not ready
+
+* TODO: Add check for buffer full, i.e. (TAIL+1) % LENGTH == HEAD
+
+        MOVE.L  buff_tail(A3),D1        Get buff_tail
+        ADDQ.L  #1,D1                   Increment buff_tail
+
+; Check if we hit end of buffer, i.e. buff_tail is buff + buff_size.
+; If so, wrap around to start.
+
+        LEA.L   buff(A3),A1             Get address of buff
+        MOVE.L  A1,D0                   Put in data register
+        ADD.L   #buff_size,D0           Add buff_size
+        CMP     D0,D1                   The same?
+        BNE     SKIP1                   Branch if not
+        MOVE.L  buff(A3),D1             End of buffer, so reset buff_tail to buff
+
+SKIP1:  MOVE.L  D1,buff_tail(A3)        Write new value of buff_tail
+        MOVE.L  D1,A1                   Save in address register
+
+        MOVE.B  2(A0),D0                Read character received
+        MOVE.B  D0,(A1)                 Write to buffer tail
+
+RETURN  MOVEM.L (A7)+,A0/A1/D0/D1       Restore working registers
+        RTE                             Return from exception
 
 *************************************************************************************
 *
@@ -135,22 +185,14 @@ VEC_SV
 
 *************************************************************************************
 *
-* turn off simulator key echo
 
 code_start
-                                * Set up ACIA parameters
-        LEA.L   ACIA_1,A0       * A0 points to console ACIA
-        MOVE.B  #$15,(A0)       * Set up ACIA1 constants (no IRQ,
-                                * RTS* low, 8 bit, no parity, 1 stop)
 
 * to tell EhBASIC where and how much RAM it has pass the address in a0 and the size
 * in d0. these values are at the end of the .inc file
 
 	MOVEA.l	#ram_addr,a0		* tell BASIC where RAM starts
 	MOVE.l	#ram_size,d0		* tell BASIC how big RAM is
-
-* end of simulator specific code
-
 
 ****************************************************************************************
 ****************************************************************************************
@@ -218,6 +260,16 @@ LAB_sizok
 	MOVE.l	a1,(a0)+			* set vector
 
 * set-up start values
+
+        LEA.L    buff(A3),A0            * Get address of input buffer
+        MOVE.L   A0,buff_head(A3)       * Initialize head to start of buffer
+        MOVE.L   A0,buff_tail(A3)       * Initialize tail to start of buffer
+                                        * Set up ACIA parameters
+        LEA.L   ACIA_1,A0               * A0 points to console ACIA
+        MOVE.B  #$95,(A0)               * Set up ACIA1 (RX IRQ, RTS low, 8N1, clock divide by 16)
+        LEA.L   HANDLER,A0              * Get address of interrupt handler
+        MOVE.L  A0,AV5                  * Write to interrupt vector
+        AND     #%1111100011111111,SR   * Set ISR bits to all zeroes to enable all interrupts
 
 *##LAB_GMEM
 	MOVEQ		#$00,d0			* clear d0
@@ -8997,7 +9049,7 @@ LAB_RMSG
 	dc.b	$0D,$0A,'Ready',$0D,$0A,$00
 LAB_SMSG
 	dc.b	' Bytes free',$0D,$0A,$0A
-	dc.b	'Enhanced 68k BASIC Version 3.53',$0D,$0A,$00
+	dc.b	'Enhanced 68k BASIC Version 3.54',$0D,$0A,$00
 
 
 *************************************************************************************
