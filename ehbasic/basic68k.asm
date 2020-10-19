@@ -103,6 +103,9 @@ TXNOTREADY
 
 VEC_IN  MOVEM.L A0/A1/D1,-(A7)          Save working registers
 
+* TODO: Mask interrupts during processing so interrupt handler does
+* not run and potentially conflict with our changes?
+
 * If buffer is empty (HEAD == TAIL), return no data available
 
         MOVE.L  buff_head(A3),D1        Get head
@@ -121,7 +124,7 @@ VEC_IN  MOVEM.L A0/A1/D1,-(A7)          Save working registers
         BNE     SKIP0                   Branch if not
         MOVE.L  buff(A3),D1             End of buffer, so reset buff_tail to buff
 
-SKIP0:  MOVE.L  D1,buff_head(A3)        Write new value of buff_head
+SKIP0   MOVE.L  D1,buff_head(A3)        Write new value of buff_head
         MOVE.L  D1,A1                   Save in address register
         MOVE.B  (A1),D0                 Get character from buffer head
 
@@ -129,7 +132,7 @@ SKIP0:  MOVE.L  D1,buff_head(A3)        Write new value of buff_head
 	ORI.b	#1,CCR	                Set the carry, flag we got a byte
         RTS                             Return
 
-RXNOTREADY:
+RXNOTREADY
         MOVEM.L (A7)+,A0/A1/D1          Restore working registers
 	ANDI.b	#$FE,CCR	        Clear the carry, flag character available
 	RTS
@@ -142,8 +145,6 @@ HANDLER MOVEM.L A0/A1/D0/D1,-(A7)       Save working registers
         MOVE.B  (A0),D0                 Read ACIA status
         BTST    #0,D0                   Test RDRF bit
         BEQ.S   RETURN                  Branch if ACIA RX not ready
-
-* TODO: Add check for buffer full, i.e. (TAIL+1) % LENGTH == HEAD
 
         MOVE.L  buff_tail(A3),D1        Get buff_tail
         ADDQ.L  #1,D1                   Increment buff_tail
@@ -158,7 +159,12 @@ HANDLER MOVEM.L A0/A1/D0/D1,-(A7)       Save working registers
         BNE     SKIP1                   Branch if not
         MOVE.L  buff(A3),D1             End of buffer, so reset buff_tail to buff
 
-SKIP1:  MOVE.L  D1,buff_tail(A3)        Write new value of buff_tail
+* Check for buffer full, i.e. TAIL+1 = HEAD
+
+SKIP1   CMP.L   buff_head(A3),D1       Compare head to new tail
+        BEQ     RETURN                 If buffer full, return (losing character)
+
+        MOVE.L  D1,buff_tail(A3)        Write new value of buff_tail
         MOVE.L  D1,A1                   Save in address register
 
         MOVE.B  2(A0),D0                Read character received
