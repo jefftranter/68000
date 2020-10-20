@@ -103,8 +103,10 @@ TXNOTREADY
 
 VEC_IN  MOVEM.L A0/A1/D1,-(A7)          Save working registers
 
-* TODO: Mask interrupts during processing so interrupt handler does
-* not run and potentially conflict with our changes?
+* Mask interrupts during processing so interrupt handler does not run
+* and potentially conflict with our changes to pointers.
+
+        OR      #%0000011100000000,SR   Set SR bits to all ones to disable all interrupts
 
 * If buffer is empty (HEAD == TAIL), return no data available
 
@@ -132,11 +134,13 @@ SKIP0   MOVE.L  D1,buff_head(A3)        Write new value of buff_head
 
         MOVEM.L (A7)+,A0/A1/D1          Restore working registers
 	ORI.b	#1,CCR	                Set the carry, flag we got a byte
+        AND     #%1111100011111111,SR   Set SR bits to all zeroes to enable all interrupts
         RTS                             Return
 
 RXNOTREADY
         MOVEM.L (A7)+,A0/A1/D1          Restore working registers
 	ANDI.b	#$FE,CCR	        Clear the carry, flag character available
+        AND     #%1111100011111111,SR   Set SR bits to all zeroes to enable all interrupts
 	RTS
 
 * Interrupt handler for input

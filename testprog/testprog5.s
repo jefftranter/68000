@@ -21,7 +21,7 @@ START   CLR.B   POS                     Initialize buffer position to zero
         LEA.L   ACIA1,A0                A0 points to console ACIA
         MOVE.B  #$95,(A0)               Set up ACIA1 (RX IRQ, RTS low, 8N1, clock divide by 16)
 
-        AND #%1111100011111111,SR       Set ISR bits to all zeroes to enable all interrupts
+        AND #%1111100011111111,SR       Set SR bits to all zeroes to enable all interrupts
 
 * Perform endless busy loop until exit flag is set
 

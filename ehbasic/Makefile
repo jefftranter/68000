@@ -16,7 +16,7 @@ upload: basic68k.run
 	/bin/echo -e "LO1\r\n" >/dev/ttyUSB0
 	sleep 1
 	ascii-xfr -s -l 50 basic68k.run | sed  's/S5/S9/' > /dev/ttyUSB0
-	#/bin/echo -e "GO 800\r\n" >/dev/ttyUSB0
+	/bin/echo -e "GO 800\r\n" >/dev/ttyUSB0
 
 clean:
 	$(RM) basic68k.run basic68k_even.run basic68k_odd.run basic68k.lst basic68k.hex
