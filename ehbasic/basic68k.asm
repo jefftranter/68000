@@ -114,15 +114,17 @@ VEC_IN  MOVEM.L A0/A1/D1,-(A7)          Save working registers
 
         ADDQ.L  #1,D1                   Advance head by one
 
-; Check if we hit end of buffer, i.e. buff_head is buff + buff_size.
+; Check if we hit end of buffer, i.e. buff_head is buff + buff_size -1.
 ; If so, wrap around to start.
 
         LEA.L   buff(A3),A1             Get address of buff
         MOVE.L  A1,D0                   Put in data register
         ADD.L   #buff_size,D0           Add buff_size
+        SUBQ.B  #1,D0                   Subtract one
         CMP     D0,D1                   The same?
         BNE     SKIP0                   Branch if not
-        MOVE.L  buff(A3),D1             End of buffer, so reset buff_tail to buff
+        LEA.L   buff(A3),A1             End of buffer, so reset buff_head to buff
+        MOVE.L  A1,D1
 
 SKIP0   MOVE.L  D1,buff_head(A3)        Write new value of buff_head
         MOVE.L  D1,A1                   Save in address register
@@ -149,20 +151,22 @@ HANDLER MOVEM.L A0/A1/D0/D1,-(A7)       Save working registers
         MOVE.L  buff_tail(A3),D1        Get buff_tail
         ADDQ.L  #1,D1                   Increment buff_tail
 
-; Check if we hit end of buffer, i.e. buff_tail is buff + buff_size.
+; Check if we hit end of buffer, i.e. buff_tail is buff + buff_size - 1.
 ; If so, wrap around to start.
 
         LEA.L   buff(A3),A1             Get address of buff
         MOVE.L  A1,D0                   Put in data register
         ADD.L   #buff_size,D0           Add buff_size
+        SUBQ.B  #1,D0                   Subtract one
         CMP     D0,D1                   The same?
         BNE     SKIP1                   Branch if not
-        MOVE.L  buff(A3),D1             End of buffer, so reset buff_tail to buff
+        LEA.L   buff(A3),A1             End of buffer, so reset buff_tail to buff
+        MOVE.L  A1,D1
 
 * Check for buffer full, i.e. TAIL+1 = HEAD
 
-SKIP1   CMP.L   buff_head(A3),D1       Compare head to new tail
-        BEQ     RETURN                 If buffer full, return (losing character)
+SKIP1   CMP.L   buff_head(A3),D1        Compare head to new tail
+        BEQ     RETURN                  If buffer full, return (losing character)
 
         MOVE.L  D1,buff_tail(A3)        Write new value of buff_tail
         MOVE.L  D1,A1                   Save in address register
