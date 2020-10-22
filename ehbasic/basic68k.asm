@@ -170,16 +170,19 @@ HANDLER MOVEM.L A0/A1/D0/D1,-(A7)       Save working registers
 * Check for buffer full, i.e. TAIL+1 = HEAD
 
 SKIP1   CMP.L   buff_head(A3),D1        Compare head to new tail
-        BEQ     RETURN                  If buffer full, return (losing character)
+        BEQ     FULL                    If buffer full, return (losing character)
 
         MOVE.L  D1,buff_tail(A3)        Write new value of buff_tail
         MOVE.L  D1,A1                   Save in address register
 
-        MOVE.B  2(A0),D0                Read character received
+        MOVE.B  2(A0),D0                Read character from UART
         MOVE.B  D0,(A1)                 Write to buffer tail
 
 RETURN  MOVEM.L (A7)+,A0/A1/D0/D1       Restore working registers
         RTE                             Return from exception
+
+FULL    MOVE.B  2(A0),D0                Read character from UART (but throw away)
+        BRA     RETURN
 
 *************************************************************************************
 *
