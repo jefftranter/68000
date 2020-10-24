@@ -1,4 +1,4 @@
-This is an example of a C program that run on a standalone 68000-based
+This is an example of a C program that runs on a standalone 68000-based
 computer like my TS2 or the Motorola Educational Computer Board (ECB).
 
 You will need a version of gcc built as a cross-compiler for the 68k
