@@ -27,7 +27,7 @@ This is version 2.1 that makes the following additional changes:
 See more details on my blog at http://jefftranter.blogspot.ca/
 
 ## PCB printing
-For your convenience, a [v2.1-gerbers.zip](v2.1-gerbers.zip) zip file is included here that you can directly feed to a printing facility. It includes the gerber files for the cupper tracings, soldermasks, silk screens, drill file and other printing requirements. 
+For your convenience, a [v2.1-gerbers.zip](v2.1-gerbers.zip) zip file is included here that you can directly feed to a printing facility. It includes the gerber files for the copper tracings, soldermasks, silk screens, drill file and other printing requirements. 
 
 The individual gerber files are included (duplicated) as well in this directory for direct inspection in KiCad. Don't forget to update the files in the zip if you export using different settings.
 
