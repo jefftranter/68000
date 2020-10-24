@@ -31,7 +31,7 @@ For your convenience, a [v2.1-gerbers.zip](v2.1-gerbers.zip) zip file is include
 
 The individual gerber files are included (duplicated) as well in this directory for direct inspection in KiCad. Don't forget to update the files in the zip if you export using different settings.
 
-The files were generated with KiCad v5.14 using the following settings. Note that your PCB manufacturer may require other settings. Check their site for the proper gerber and drill file export settings - don't use a printing facility that doesn't specify how to export the files!
+The files were generated with KiCad v5.1.4 using the following settings. Note that your PCB manufacturer may require other settings. Check their site for the proper gerber and drill file export settings - don't use a printing facility that doesn't specify how to export the files!
 
 ### Gerber export settings
 ![gerber exports](images/gerber-export-settings.png)
