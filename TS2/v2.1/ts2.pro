@@ -1,22 +1,7 @@
-update=Mon 29 May 2017 09:32:41 PM EDT
+update=10/24/20 16:48:02
 last_client=kicad
 [general]
 version=1
-[eeschema]
-version=1
-LibDir=
-[eeschema/libraries]
-LibName1=power
-LibName2=device
-LibName3=transistors
-LibName4=conn
-LibName5=linear
-LibName6=regul
-LibName7=74xx
-LibName8=cmos4000
-LibName9=adc-dac
-LibName10=memory
-LibName11=xilinx
 [schematic_editor]
 version=1
 PageLayoutDescrFile=
@@ -27,3 +12,6 @@ NetFmtName=
 SpiceForceRefPrefix=0
 SpiceUseNetNumbers=0
 LabSize=60
+[eeschema]
+version=1
+LibDir=
