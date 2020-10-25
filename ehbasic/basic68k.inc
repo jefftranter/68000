@@ -191,6 +191,7 @@ ccnull	ds.b	1			* CTRL-C last received byte 'life' timer
 * these variables for load/save routines
 
 load_first      ds.b    1               * Boolean indicating if first byte read
+load_filename   ds.b    12              * Hold LOAD/SAVE filename (DOS 8.3 format)
 
 		even			* dummy even value and zero pad byte
 

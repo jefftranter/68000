@@ -215,15 +215,31 @@ VEC_LD
 
 * TODO: Make configurable at build time
 
-VEC_SV
+VEC_SV  LEA             LAB_FILENAME(PC),A0             * Prompt for filename.
+        BSR             LAB_18C3                        * Print null terminated string
+        MOVE.L          A3,A2                           * Save pointer to RAM variables
+GETFN   JSR             VEC_IN                          * Get character
+        BCC             GETFN                           * Go back if carry clear, indicating no key pressed
+        JSR             VEC_OUT                         * Echo the character
+        CMP             #$0D,D0                         * Was it <Return>?
+        BEQ             ENDLN                           * If so, branch
+        MOVE.B          D0,load_filename(A2)            * Save in buffer
+        ADDQ.L          #1,A2                           * Advance string pointer
+        BRA             GETFN                           * Go back and get next character
 
-* TODO: Prompt for filename. Maybe exit if empty? "?" to show directory?
+ENDLN   MOVE.B          #0,load_filename(A2)            * Add terminating null to filename
 
         LEA.L           VEC_OUT2,A0                     * Redirect output to aux. port.
         MOVE.L          A0,V_OUTPv(a3)
 
-        LEA             LAB_WRITE(pc),a0                * Send WRITE command string
+        LEA             LAB_WRITE(pc),A0                * Send WRITE command string
         BSR             LAB_18C3                        * Print null terminated string
+
+        LEA             load_filename(A3),A0            * Send filename string
+        BSR             LAB_18C3                        * Print null terminated string
+
+        MOVE.B          #$0D,D0                         * Send <Return>
+        JSR             VEC_OUT2
 
         MOVE.l          #356000,d0                      * Delay approx. 1 second to allow USB to create file
 DELAY   SUBQ.l          #1,d0
@@ -244,13 +260,16 @@ DELAY   SUBQ.l          #1,d0
         RTS                                             * Return
 
 LAB_WRITE
-        dc.b            '$WRITE SAVE.BAS',$0D,$00
+        dc.b            '$WRITE ',$00
 
 LAB_READ1
         dc.b            '$READ SAVE.BAS 1 1',$0D,$00
 
 LAB_READN
         dc.b            '$READ SAVE.BAS n 1',$0D,$00
+
+LAB_FILENAME
+        dc.b            'Filename? ',$00
 
         even
 
