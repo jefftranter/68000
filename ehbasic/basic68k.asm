@@ -99,6 +99,8 @@ TXNOTREADY
         MOVEM.l  (A7)+,A0/D1    * Restore working registers
         RTS
 
+* output character to the second (aux) serial port from register d0.b
+
 VEC_OUT2
         MOVEM.l  A0/D1,-(A7)    * Save working registers
         LEA.l    ACIA_2,A0      * A0 points to console ACIA
@@ -127,56 +129,63 @@ VEC_IN
         RTS                     * Return
 RXNOTREADY
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
-	ANDI.b	#$FE,CCR	* Clear the carry, flag character not available
+	ANDI.b	 #$FE,CCR	* Clear the carry, flag character not available
 	RTS
+
+* Input routine used in LOAD mode to read file from USB flash storage.
 
 VEC_IN2
         MOVEM.L  A0/D1,-(A7)    * Save working registers
+
+* Send READ <filename> n 1
+
+        LEA.L    VEC_OUT2,A0    * Redirect output to aux. port.
+        MOVE.L   A0,V_OUTPv(a3)
+        LEA      LAB_READN(pc),A0 * Send command string
+        BSR      LAB_18C3       * Print null terminated string
+        LEA.L    VEC_OUT,A0     * Redirect output back to console port.
+        MOVE.L   A0,V_OUTPv(a3)
+
+* Read one byte from USB host
+
         LEA.L    ACIA_2,A0      * A0 points to console ACIA
+RXNOTREADY2
         MOVE.B   (A0),D1        * Read ACIA status
         BTST     #0,D1          * Test RDRF bit
         BEQ.S    RXNOTREADY2    * Branch If ACIA Rx not ready
         MOVE.B   2(A0),D0       * Read character received
+        JSR      VEC_OUT        * Echo it for debug
 
-* Check for end of file character (Control-D) and if found, redirect
+* TODO: Stop when <length> bytes read.
+* Check for end of file character ('~') and if found, redirect
 * input back to console port.
 
-        CMP.B   #'~',D0         * End of file marker?
-        BNE     NOTEOF
-        LEA.L   VEC_IN,A0       * Redirect input back to console port.
-        MOVE.L  A0,V_INPTv(a3)
+        CMP.B    #'~',D0        * End of file marker?
+        BNE      NOTEOF
+        MOVE.B   #$0D,D0        * Convert '~' to a Return
+        LEA.L    VEC_IN,A0      * Redirect input back to console port.
+        MOVE.L   A0,V_INPTv(a3)
 NOTEOF
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
 	ORI.b	 #1,CCR	        * Set the carry, flag we got a byte
         RTS                     * Return
-RXNOTREADY2
-        MOVEM.L  (A7)+,A0/D1    * Restore working registers
-	ANDI.b	#$FE,CCR	* Clear the carry, flag character not available
-	RTS
 
 *************************************************************************************
 *
-* SAVE routine for the TS2 computer. Supports a Hobbytronics USB Flash
+* LOAD routine for the TS2 computer. Supports a Hobbytronics USB Flash
 * Drive Host Board connected to the auxiliary serial port.
 
 VEC_LD
 
 * TODO: Prompt for filename. Maybe exit if empty? "?" to show directory?
 
-        LEA.L           VEC_OUT2,A0                     * Redirect output to aux. port.
-        MOVE.L          A0,V_OUTPv(a3)
-
         LEA.L           VEC_IN2,A0                      * Redirect input from aux. port.
         MOVE.L          A0,V_INPTv(a3)
 
-        LEA             LAB_TYPE(pc),a0                 * Send TYPE command string
-        BSR             LAB_18C3                        * Print null terminated string
+* TODO: Send SIZE <filename> BYTE to get length and store it
 
-        LEA.L           VEC_OUT,A0                      * Redirect output back to console port.
-        MOVE.L          A0,V_OUTPv(a3)
-
-* Input routine will detect end of file character (Control-D) and
-* redirect input back to console port.
+* Input routine will detect end of file and redirect input back to
+* console port.
 
         RTS
 
@@ -216,10 +225,10 @@ DELAY   SUBQ.l          #1,d0
         RTS                                             * Return
 
 LAB_WRITE
-        dc.b            '$WRITE SAVE.BAS',$0D,$0A,$00
+        dc.b            '$WRITE SAVE.BAS',$0D,$00
 
-LAB_TYPE
-        dc.b            '$TYPE SAVE.BAS',$0D,$0A,$00
+LAB_READN
+        dc.b            '$READ SAVE.BAS n 1',$0D,$00
 
         even
 
@@ -9088,7 +9097,7 @@ LAB_RMSG
 	dc.b	$0D,$0A,'Ready',$0D,$0A,$00
 LAB_SMSG
 	dc.b	' Bytes free',$0D,$0A,$0A
-	dc.b	'Enhanced 68k BASIC Version 3.54',$0D,$0A,$00
+	dc.b	'Enhanced 68k BASIC Version 3.54 (experimental)',$0D,$0A,$00
 
 
 *************************************************************************************
