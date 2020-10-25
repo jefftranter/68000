@@ -154,7 +154,6 @@ RXNOTREADY2
         BTST     #0,D1          * Test RDRF bit
         BEQ.S    RXNOTREADY2    * Branch If ACIA Rx not ready
         MOVE.B   2(A0),D0       * Read character received
-        JSR      VEC_OUT        * Echo it for debug
 
 * TODO: Stop when <length> bytes read.
 * Check for end of file character ('~') and if found, redirect
