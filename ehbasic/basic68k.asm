@@ -137,11 +137,29 @@ RXNOTREADY
 VEC_IN2
         MOVEM.L  A0/D1,-(A7)    * Save working registers
 
-* Send READ <filename> n 1
+* Flush any previous data from serial port
 
-        LEA.L    VEC_OUT2,A0    * Redirect output to aux. port.
+        LEA.L    ACIA_2,A0      * A0 points to console ACIA
+RXREADY MOVE.B   (A0),D1        * Read ACIA status
+        BTST     #0,D1          * Test RDRF bit
+        BEQ.S    FLUSHED        * Branch If ACIA Rx not ready
+        MOVE.B   2(A0),D0       * Read character received
+        BRA.S    RXREADY
+
+FLUSHED LEA.L    VEC_OUT2,A0    * Redirect output to aux. port.
         MOVE.L   A0,V_OUTPv(a3)
+
+* The first time, send READ <filename> 1 1
+* Subsequent times, send READ <filename> n 1
+
+        CMP.B    #1,load_first(A3) * First time?
+        BNE      NOTFIRST
+        LEA      LAB_READ1(pc),A0 * Send command string
+        CLR.B    load_first(A3)  * Clear first flag
+        BRA      SENDCMD
+NOTFIRST
         LEA      LAB_READN(pc),A0 * Send command string
+SENDCMD
         BSR      LAB_18C3       * Print null terminated string
         LEA.L    VEC_OUT,A0     * Redirect output back to console port.
         MOVE.L   A0,V_OUTPv(a3)
@@ -180,6 +198,8 @@ VEC_LD
 
         LEA.L           VEC_IN2,A0                      * Redirect input from aux. port.
         MOVE.L          A0,V_INPTv(a3)
+
+        MOVE.B         #1,load_first(A3)                * Set load_first flag
 
 * TODO: Send SIZE <filename> BYTE to get length and store it
 
@@ -225,6 +245,9 @@ DELAY   SUBQ.l          #1,d0
 
 LAB_WRITE
         dc.b            '$WRITE SAVE.BAS',$0D,$00
+
+LAB_READ1
+        dc.b            '$READ SAVE.BAS 1 1',$0D,$00
 
 LAB_READN
         dc.b            '$READ SAVE.BAS n 1',$0D,$00
