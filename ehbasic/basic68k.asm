@@ -152,15 +152,31 @@ FLUSHED LEA.L    VEC_OUT2,A0    * Redirect output to aux. port.
 * The first time, send READ <filename> 1 1
 * Subsequent times, send READ <filename> n 1
 
-        CMP.B    #1,load_first(A3) * First time?
-        BNE      NOTFIRST
-        LEA      LAB_READ1(pc),A0 * Send command string
-        CLR.B    load_first(A3)  * Clear first flag
-        BRA      SENDCMD
-NOTFIRST
-        LEA      LAB_READN(pc),A0 * Send command string
-SENDCMD
+        LEA      LAB_READN(pc),A0 * Send READ command string
         BSR      LAB_18C3       * Print null terminated string
+
+        LEA      load_filename(A3),A0 * Send filename string
+        BSR      LAB_18C3       * Print null terminated string
+
+        MOVE.B    #' ',D0       * Send space
+        JSR       VEC_OUT2
+
+        CMP.B    #1,load_first(A3) * First time?
+        BNE      NOTFIRST1
+        MOVE.B   #'1',D0        * Send '1'
+        CLR.B    load_first(A3) * Clear first flag
+        BRA      SENDCMD1
+NOTFIRST1
+        MOVE.B   #'n',D0        * Send 'n'
+SENDCMD1
+        JSR      VEC_OUT2
+        MOVE.B   #' ',D0        * Send space
+        JSR      VEC_OUT2
+        MOVE.B   #'1',D0        * Send '1'
+        JSR      VEC_OUT2
+        MOVE.B   #$0D,D0        * Send <Return>
+        JSR      VEC_OUT2
+
         LEA.L    VEC_OUT,A0     * Redirect output back to console port.
         MOVE.L   A0,V_OUTPv(a3)
 
@@ -173,7 +189,6 @@ RXNOTREADY2
         BEQ.S    RXNOTREADY2    * Branch If ACIA Rx not ready
         MOVE.B   2(A0),D0       * Read character received
 
-* TODO: Stop when <length> bytes read.
 * Check for end of file character ('~') and if found, redirect
 * input back to console port.
 
@@ -192,16 +207,24 @@ NOTEOF
 * LOAD routine for the TS2 computer. Supports a Hobbytronics USB Flash
 * Drive Host Board connected to the auxiliary serial port.
 
-VEC_LD
+VEC_LD  LEA             LAB_FILENAME(PC),A0             * Prompt for filename.
+        BSR             LAB_18C3                        * Print null terminated string
+        MOVE.L          A3,A2                           * Save pointer to RAM variables
+GETFN1  JSR             VEC_IN                          * Get character
+        BCC             GETFN1                          * Go back if carry clear, indicating no key pressed
+        JSR             VEC_OUT                         * Echo the character
+        CMP             #$0D,D0                         * Was it <Return>?
+        BEQ             ENDLN1                          * If so, branch
+        MOVE.B          D0,load_filename(A2)            * Save in buffer
+        ADDQ.L          #1,A2                           * Advance string pointer
+        BRA             GETFN1                          * Go back and get next character
 
-* TODO: Prompt for filename. Maybe exit if empty? "?" to show directory?
+ENDLN1  MOVE.B          #0,load_filename(A2)            * Add terminating null to filename
 
         LEA.L           VEC_IN2,A0                      * Redirect input from aux. port.
         MOVE.L          A0,V_INPTv(a3)
 
-        MOVE.B         #1,load_first(A3)                * Set load_first flag
-
-* TODO: Send SIZE <filename> BYTE to get length and store it
+        MOVE.B          #1,load_first(A3)               * Set load_first flag
 
 * Input routine will detect end of file and redirect input back to
 * console port.
@@ -262,11 +285,8 @@ DELAY   SUBQ.l          #1,d0
 LAB_WRITE
         dc.b            '$WRITE ',$00
 
-LAB_READ1
-        dc.b            '$READ SAVE.BAS 1 1',$0D,$00
-
 LAB_READN
-        dc.b            '$READ SAVE.BAS n 1',$0D,$00
+        dc.b            '$READ ',$00
 
 LAB_FILENAME
         dc.b            'Filename? ',$00
