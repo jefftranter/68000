@@ -125,12 +125,12 @@ VEC_IN
         BEQ.S    RXNOTREADY     * Branch If ACIA Rx not ready
         MOVE.B   2(A0),D0       * Read character received
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
-	ORI.b	 #1,CCR	        * Set the carry, flag we got a byte
+        ORI.b    #1,CCR         * Set the carry, flag we got a byte
         RTS                     * Return
 RXNOTREADY
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
-	ANDI.b	 #$FE,CCR	* Clear the carry, flag character not available
-	RTS
+        ANDI.b   #$FE,CCR       * Clear the carry, flag character not available
+        RTS
 
 * Input routine used in LOAD mode to read file from USB flash storage.
 
@@ -197,9 +197,10 @@ RXNOTREADY2
         MOVE.B   #$0D,D0        * Convert '~' to a Return
         LEA.L    VEC_IN,A0      * Redirect input back to console port.
         MOVE.L   A0,V_INPTv(a3)
+        MOVE.b   #1,ccflag(a3)  * Enable CTRL-C check
 NOTEOF
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
-	ORI.b	 #1,CCR	        * Set the carry, flag we got a byte
+        ORI.b    #1,CCR         * Set the carry, flag we got a byte
         RTS                     * Return
 
 *************************************************************************************
@@ -221,6 +222,7 @@ GETFN1  JSR             VEC_IN                          * Get character
 
 ENDLN1  MOVE.B          #0,load_filename(A2)            * Add terminating null to filename
 
+        MOVE.b          #1,ccflag(a3)                   * Disable CTRL-C check
         LEA.L           VEC_IN2,A0                      * Redirect input from aux. port.
         MOVE.L          A0,V_INPTv(a3)
 
