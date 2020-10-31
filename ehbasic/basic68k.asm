@@ -225,8 +225,14 @@ GETFN1  JSR             VEC_IN                          * Get character
         JSR             VEC_OUT                         * Echo the character
         CMP             #$0D,D0                         * Was it <Return>?
         BEQ             ENDLN1                          * If so, branch
+        CMP             #$7F,D0                         * Was it <Delete>?
+        BEQ             DELETE                          * If so, handle delete
+        CMP             #$08,D0                         * Was it <Backspace?
+        BEQ             DELETE                          * If so, handle delete
         MOVE.B          D0,load_filename(A2)            * Save in buffer
         ADDQ.L          #1,A2                           * Advance string pointer
+        BRA             GETFN1                          * Go back and get next character
+DELETE  SUBQ.L          #1,A2                           * Delete last character entered
         BRA             GETFN1                          * Go back and get next character
 
 ENDLN1  MOVE.B          #0,load_filename(A2)            * Add terminating null to filename
