@@ -110,9 +110,9 @@ TXNOTREADY1
         BEQ.s    TXNOTREADY1    * Until ACIA Tx ready
         MOVE.b   D0,2(A0)       * Write character to send
 
-        MOVE.l          #3560,d1                      * Delay to allow USB flash to respond
-RDELAY  SUBQ.l          #1,d1
-        BNE             RDELAY
+        MOVE.l          #3000,d1  * Delay to allow USB flash to respond
+DELAY1  SUBQ.l          #1,d1
+        BNE             DELAY1
 
         MOVEM.l  (A7)+,A0/D1    * Restore working registers
         RTS
@@ -185,9 +185,9 @@ SENDCMD1
         LEA.L    VEC_OUT,A0     * Redirect output back to console port.
         MOVE.L   A0,V_OUTPv(a3)
 
-        MOVE.l          #3560,d0                       * Delay allow USB flash to respond
-SDELAY  SUBQ.l          #1,d0
-        BNE             SDELAY
+        MOVE.l          #3000,d0  * Delay allow USB flash to respond
+DELAY2  SUBQ.l          #1,d0
+        BNE             DELAY2
 
 * Read one byte from USB host
 
