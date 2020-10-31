@@ -109,6 +109,11 @@ TXNOTREADY1
         BTST     #1,D1          * Test TDRE bit
         BEQ.s    TXNOTREADY1    * Until ACIA Tx ready
         MOVE.b   D0,2(A0)       * Write character to send
+
+        MOVE.l          #3560,d1                      * Delay to allow USB flash to respond
+RDELAY  SUBQ.l          #1,d1
+        BNE             RDELAY
+
         MOVEM.l  (A7)+,A0/D1    * Restore working registers
         RTS
 
@@ -122,7 +127,7 @@ VEC_IN
         LEA.L    ACIA_1,A0      * A0 points to console ACIA
         MOVE.B   (A0),D1        * Read ACIA status
         BTST     #0,D1          * Test RDRF bit
-        BEQ.S    RXNOTREADY     * Branch If ACIA Rx not ready
+        BEQ.S    RXNOTREADY     * Branch if ACIA Rx not ready
         MOVE.B   2(A0),D0       * Read character received
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
         ORI.b    #1,CCR         * Set the carry, flag we got a byte
@@ -142,7 +147,7 @@ VEC_IN2
         LEA.L    ACIA_2,A0      * A0 points to console ACIA
 RXREADY MOVE.B   (A0),D1        * Read ACIA status
         BTST     #0,D1          * Test RDRF bit
-        BEQ.S    FLUSHED        * Branch If ACIA Rx not ready
+        BEQ.S    FLUSHED        * Branch if ACIA Rx not ready
         MOVE.B   2(A0),D0       * Read character received
         BRA.S    RXREADY
 
@@ -180,13 +185,17 @@ SENDCMD1
         LEA.L    VEC_OUT,A0     * Redirect output back to console port.
         MOVE.L   A0,V_OUTPv(a3)
 
+        MOVE.l          #3560,d0                       * Delay allow USB flash to respond
+SDELAY  SUBQ.l          #1,d0
+        BNE             SDELAY
+
 * Read one byte from USB host
 
         LEA.L    ACIA_2,A0      * A0 points to console ACIA
 RXNOTREADY2
         MOVE.B   (A0),D1        * Read ACIA status
         BTST     #0,D1          * Test RDRF bit
-        BEQ.S    RXNOTREADY2    * Branch If ACIA Rx not ready
+        BEQ.S    RXNOTREADY2    * Branch if ACIA Rx not ready
         MOVE.B   2(A0),D0       * Read character received
 
 * Check for end of file character ('~') and if found, redirect
@@ -221,11 +230,9 @@ GETFN1  JSR             VEC_IN                          * Get character
         BRA             GETFN1                          * Go back and get next character
 
 ENDLN1  MOVE.B          #0,load_filename(A2)            * Add terminating null to filename
-
         MOVE.b          #1,ccflag(a3)                   * Disable CTRL-C check
         LEA.L           VEC_IN2,A0                      * Redirect input from aux. port.
         MOVE.L          A0,V_INPTv(a3)
-
         MOVE.B          #1,load_first(A3)               * Set load_first flag
 
 * Input routine will detect end of file and redirect input back to
