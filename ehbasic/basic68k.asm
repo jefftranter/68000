@@ -86,36 +86,57 @@ ACIA_2   =      $00010041        * Auxiliary ACIA base address
 *
 * the following code is simulator specific, change to suit your system
 
-* output character to the console from register d0.b
+* Output character to the console from register d0.b
 
 VEC_OUT
         MOVEM.L  A0/D1,-(A7)    * Save working registers
         LEA.L    ACIA_1,A0      * A0 points to console ACIA
 TXNOTREADY
-        MOVE.b   (A0),D1        * Read ACIA status
+        MOVE.B   (A0),D1        * Read ACIA status
         BTST     #1,D1          * Test TDRE bit
         BEQ.S    TXNOTREADY     * Until ACIA Tx ready
-        MOVE.b   D0,2(A0)       * Write character to send
-        MOVEM.l  (A7)+,A0/D1    * Restore working registers
+        MOVE.B   D0,2(A0)       * Write character to send
+        MOVEM.L  (A7)+,A0/D1    * Restore working registers
         RTS
 
-* output character to the second (aux) serial port from register d0.b
+* Output character to the second (aux) serial port from register d0.b
 
 VEC_OUT2
-        MOVEM.l  A0/D1,-(A7)    * Save working registers
-        LEA.l    ACIA_2,A0      * A0 points to console ACIA
+        MOVEM.L  A0/D1,-(A7)    * Save working registers
+        LEA.L    ACIA_2,A0      * A0 points to console ACIA
 TXNOTREADY1
-        MOVE.b   (A0),D1        * Read ACIA status
+        MOVE.B   (A0),D1        * Read ACIA status
         BTST     #1,D1          * Test TDRE bit
         BEQ.s    TXNOTREADY1    * Until ACIA Tx ready
-        MOVE.b   D0,2(A0)       * Write character to send
-
-*        MOVE.l          #3000,d1  * Delay to allow USB flash to respond
-*DELAY1  SUBQ.l          #1,d1
-*        BNE             DELAY1
-
-        MOVEM.l  (A7)+,A0/D1    * Restore working registers
+        MOVE.B   D0,2(A0)       * Write character to send
+        MOVEM.L  (A7)+,A0/D1    * Restore working registers
         RTS
+
+* Output null terminated string pointed to by A0 to first serial port.
+
+PRINTSTRING1
+        MOVEM.L  A0/D0,-(A7)    * Save working registers
+LP1     CMP.B    #0,(A0)        * Is it null?
+        BEQ      RET1           * If so, return
+        MOVE.B   (A0)+,D0       * Get character and advance pointer
+        JSR      VEC_OUT        * Output it
+        BRA      LP1            * Continue for rest of string
+
+RET1    MOVEM.L  (A7)+,A0/D0    * Restore working registers
+        RTS                     * Return
+
+* Output null terminated string pointed to by A0 to second serial port.
+
+PRINTSTRING2
+        MOVEM.L  A0/D0,-(A7)    * Save working registers
+LP2     CMP.B    #0,(A0)        * Is it null?
+        BEQ      RET2           * If so, return
+        MOVE.B   (A0)+,D0       * Get character and advance pointer
+        JSR      VEC_OUT2       * Output it
+        BRA      LP2            * Continue for rest of string
+
+RET2    MOVEM.L  (A7)+,A0/D0    * Restore working registers
+        RTS                     * Return
 
 *************************************************************************************
 *
@@ -130,11 +151,11 @@ VEC_IN
         BEQ.S    RXNOTREADY     * Branch if ACIA Rx not ready
         MOVE.B   2(A0),D0       * Read character received
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
-        ORI.b    #1,CCR         * Set the carry, flag we got a byte
+        ORI.B    #1,CCR         * Set the carry, flag we got a byte
         RTS                     * Return
 RXNOTREADY
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
-        ANDI.b   #$FE,CCR       * Clear the carry, flag character not available
+        ANDI.B   #$FE,CCR       * Clear the carry, flag character not available
         RTS
 
 * Input routine used in LOAD mode to read file from USB flash storage.
@@ -158,42 +179,13 @@ FLUSHED LEA.L    VEC_OUT2,A0    * Redirect output to aux. port.
 * Subsequent times, send READ <filename> n 1
 
         LEA      LAB_READN(pc),A0 * Send READ command string
+        BSR      PRINTSTRING2   * Print null terminated string
 
-        MOVE.B   #'$',D0
-        JSR      VEC_OUT2
-        MOVE.B   #'R',D0
-        JSR      VEC_OUT2
-        MOVE.B   #'E',D0
-        JSR      VEC_OUT2
-        MOVE.B   #'A',D0
-        JSR      VEC_OUT2
-        MOVE.B   #'D',D0
-        JSR      VEC_OUT2
-        MOVE.B   #' ',D0
-        JSR      VEC_OUT2
+        LEA      load_filename(A3),A0 * Send filename string
+        BSR      PRINTSTRING2   * Print null terminated string
 
-*       BSR      LAB_18C3       * Print null terminated string
-
-        MOVE.B   #'T',D0
+        MOVE.B   #' ',D0       * Send space
         JSR      VEC_OUT2
-        MOVE.B   #'T',D0
-        JSR      VEC_OUT2
-        MOVE.B   #'T',D0
-        JSR      VEC_OUT2
-        MOVE.B   #'.',D0
-        JSR      VEC_OUT2
-        MOVE.B   #'B',D0
-        JSR      VEC_OUT2
-        MOVE.B   #'A',D0
-        JSR      VEC_OUT2
-        MOVE.B   #'S',D0
-        JSR      VEC_OUT2
-
-*        LEA      load_filename(A3),A0 * Send filename string
-*        BSR      LAB_18C3       * Print null terminated string
-
-        MOVE.B    #' ',D0       * Send space
-        JSR       VEC_OUT2
 
         CMP.B    #1,load_first(A3) * First time?
         BNE      NOTFIRST1
@@ -214,10 +206,6 @@ SENDCMD1
         LEA.L    VEC_OUT,A0     * Redirect output back to console port.
         MOVE.L   A0,V_OUTPv(a3)
 
-*       MOVE.l          #3000,d0  * Delay allow USB flash to respond
-*DELAY2  SUBQ.l          #1,d0
-*        BNE             DELAY2
-
 * Read one byte from USB host
 
         LEA.L    ACIA_2,A0      * A0 points to console ACIA
@@ -235,7 +223,7 @@ RXNOTREADY2
         MOVE.B   #$0D,D0        * Convert '~' to a Return
         LEA.L    VEC_IN,A0      * Redirect input back to console port.
         MOVE.L   A0,V_INPTv(a3)
-        MOVE.b   #1,ccflag(a3)  * Enable CTRL-C check
+        MOVE.B   #1,ccflag(a3)  * Enable CTRL-C check
 NOTEOF
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
         ORI.b    #1,CCR         * Set the carry, flag we got a byte
@@ -246,28 +234,26 @@ NOTEOF
 * LOAD routine for the TS2 computer. Supports a Hobbytronics USB Flash
 * Drive Host Board connected to the auxiliary serial port.
 
-VEC_LD
+VEC_LD  LEA             LAB_FILENAME(PC),A0             * Prompt for filename.
+        BSR             PRINTSTRING1                    * Print null terminated string
+        MOVE.L          A3,A2                           * Save pointer to RAM variables
+GETFN1  JSR             VEC_IN                          * Get character
+        BCC             GETFN1                          * Go back if carry clear, indicating no key pressed
+        JSR             VEC_OUT                         * Echo the character
+        CMP.B           #$0D,D0                         * Was it <Return>?
+        BEQ             ENDLN1                          * If so, branch
+        CMP.B           #$7F,D0                         * Was it <Delete>?
+        BEQ             DELETE                          * If so, handle delete
+        CMP.B           #$08,D0                         * Was it <Backspace?
+        BEQ             DELETE                          * If so, handle as delete
+        MOVE.B          D0,load_filename(A2)            * Save in buffer
+        ADDQ.L          #1,A2                           * Advance string pointer
+        BRA             GETFN1                          * Go back and get next character
+DELETE  SUBQ.L          #1,A2                           * Delete last character entered
+        BRA             GETFN1                          * Go back and get next character
 
-*VEC_LD  LEA             LAB_FILENAME(PC),A0             * Prompt for filename.
-*        BSR             LAB_18C3                        * Print null terminated string
-*        MOVE.L          A3,A2                           * Save pointer to RAM variables
-*GETFN1  JSR             VEC_IN                          * Get character
-*        BCC             GETFN1                          * Go back if carry clear, indicating no key pressed
-*        JSR             VEC_OUT                         * Echo the character
-*        CMP             #$0D,D0                         * Was it <Return>?
-*        BEQ             ENDLN1                          * If so, branch
-*        CMP             #$7F,D0                         * Was it <Delete>?
-*        BEQ             DELETE                          * If so, handle delete
-*        CMP             #$08,D0                         * Was it <Backspace?
-*        BEQ             DELETE                          * If so, handle delete
-*        MOVE.B          D0,load_filename(A2)            * Save in buffer
-*        ADDQ.L          #1,A2                           * Advance string pointer
-*        BRA             GETFN1                          * Go back and get next character
-*DELETE  SUBQ.L          #1,A2                           * Delete last character entered
-*        BRA             GETFN1                          * Go back and get next character
-
-*ENDLN1  MOVE.B          #0,load_filename(A2)            * Add terminating null to filename
-        MOVE.b          #1,ccflag(a3)                   * Disable CTRL-C check
+ENDLN1  MOVE.B          #0,load_filename(A2)            * Add terminating null to filename
+        MOVE.B          #1,ccflag(a3)                   * Disable CTRL-C check
         LEA.L           VEC_IN2,A0                      * Redirect input from aux. port.
         MOVE.L          A0,V_INPTv(a3)
         MOVE.B          #1,load_first(A3)               * Set load_first flag
@@ -285,12 +271,12 @@ VEC_LD
 * TODO: Make configurable at build time
 
 VEC_SV  LEA             LAB_FILENAME(PC),A0             * Prompt for filename.
-        BSR             LAB_18C3                        * Print null terminated string
+        BSR             PRINTSTRING1                    * Print null terminated string
         MOVE.L          A3,A2                           * Save pointer to RAM variables
 GETFN   JSR             VEC_IN                          * Get character
         BCC             GETFN                           * Go back if carry clear, indicating no key pressed
         JSR             VEC_OUT                         * Echo the character
-        CMP             #$0D,D0                         * Was it <Return>?
+        CMP.B           #$0D,D0                         * Was it <Return>?
         BEQ             ENDLN                           * If so, branch
         MOVE.B          D0,load_filename(A2)            * Save in buffer
         ADDQ.L          #1,A2                           * Advance string pointer
@@ -302,10 +288,10 @@ ENDLN   MOVE.B          #0,load_filename(A2)            * Add terminating null t
         MOVE.L          A0,V_OUTPv(a3)
 
         LEA             LAB_WRITE(pc),A0                * Send WRITE command string
-        BSR             LAB_18C3                        * Print null terminated string
+        BSR             PRINTSTRING2                    * Print null terminated string
 
         LEA             load_filename(A3),A0            * Send filename string
-        BSR             LAB_18C3                        * Print null terminated string
+        BSR             PRINTSTRING2                    * Print null terminated string
 
         MOVE.B          #$0D,D0                         * Send <Return>
         JSR             VEC_OUT2
