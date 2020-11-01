@@ -2661,9 +2661,9 @@ F00:1801
 F00:1802       LAB_174E
 F00:1803       	MOVE.b	(a5)+,d0			* faster increment past THEN
                S02:0000C7B8:  10 1D
-F00:1804 E2028 	MOVEQ		#TK_ELSE,d3			* set search for ELSE token
+F00:1804       	MOVEQ		#TK_ELSE,d3			* set search for ELSE token
                S02:0000C7BA:  76 A9
-F00:1805 E2028 	MOVEQ		#TK_IF,d4			* set search for IF token
+F00:1805       	MOVEQ		#TK_IF,d4			* set search for IF token
                S02:0000C7BC:  78 8B
 F00:1806       	MOVEQ		#0,d5				* clear the nesting depth
                S02:0000C7BE:  7A 00
@@ -4281,7 +4281,7 @@ F00:2914       	CMP.b		#$3A,d0			* compare with ":"
 F00:2915       	BCC.s		RTS_001			* exit if >= (not numeric, carry clear)
                S02:0000CDD8:  64 06
 F00:2916       
-F00:2917 E2028 	MOVEQ		#$D0,d6			* set -"0"
+F00:2917       	MOVEQ		#$D0,d6			* set -"0"
                S02:0000CDDA:  7C D0
 F00:2918       	ADD.b		d6,d0				* add -"0"
                S02:0000CDDC:  D0 06
@@ -6887,7 +6887,7 @@ F00:4707       LAB_EVBY
 F00:4708       	BSR		LAB_EVPI			* evaluate positive integer expression
                S02:0000D728:  61 00 F9 DC
 F00:4709       							* result in d0 and Itemp
-F00:4710 E2028 	MOVEQ		#$80,d1			* set mask/2
+F00:4710       	MOVEQ		#$80,d1			* set mask/2
                S02:0000D72C:  72 80
 F00:4711       	ADD.l		d1,d1				* =$FFFFFF00
                S02:0000D72E:  D2 81
@@ -8474,7 +8474,7 @@ F00:5820       	BEQ.s		LAB_284J			* branch if mantissa = 0
 F00:5821       
 F00:5822       	MOVE.l	d1,-(sp)			* save d1
                S02:0000DC74:  2F 01
-F00:5823 E2028 	MOVEQ		#$A0,d1			* set for no floating bits
+F00:5823       	MOVEQ		#$A0,d1			* set for no floating bits
                S02:0000DC76:  72 A0
 F00:5824       	SUB.b		FAC1_e(a3),d1		* subtract FAC1 exponent
                S02:0000DC78:  92 2B 05 94
@@ -8531,7 +8531,7 @@ F00:5857       *
 F00:5858       * perform INT()
 F00:5859       
 F00:5860       LAB_INT
-F00:5861 E2028 	MOVEQ		#$A0,d0			* set for no floating bits
+F00:5861       	MOVEQ		#$A0,d0			* set for no floating bits
                S02:0000DCAA:  70 A0
 F00:5862       	SUB.b		FAC1_e(a3),d0		* subtract FAC1 exponent
                S02:0000DCAC:  90 2B 05 94
@@ -9770,7 +9770,7 @@ F00:6661       	MOVE.b	#$FF,cosout(a3)		* set inverse result needed
 F00:6662       LAB_ATLE
 F00:6663       	MOVE.l	FAC1_m(a3),d0		* get FAC1 mantissa
                S02:0000E25A:  20 2B 05 90
-F00:6664 E2028 	MOVEQ		#$82,d1			* set to correct exponent
+F00:6664       	MOVEQ		#$82,d1			* set to correct exponent
                S02:0000E25E:  72 82
 F00:6665       	SUB.b		FAC1_e(a3),d1		* subtract FAC1 exponent (always <= 1)
                S02:0000E260:  92 2B 05 94
