@@ -223,7 +223,6 @@ RXNOTREADY2
         MOVE.B   #$0D,D0        * Convert '~' to a Return
         LEA.L    VEC_IN,A0      * Redirect input back to console port.
         MOVE.L   A0,V_INPTv(a3)
-        MOVE.B   #1,ccflag(a3)  * Enable CTRL-C check
 NOTEOF
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
         ORI.b    #1,CCR         * Set the carry, flag we got a byte
@@ -253,7 +252,6 @@ DELETE  SUBQ.L          #1,A2                           * Delete last character 
         BRA             GETFN1                          * Go back and get next character
 
 ENDLN1  MOVE.B          #0,load_filename(A2)            * Add terminating null to filename
-        MOVE.B          #1,ccflag(a3)                   * Disable CTRL-C check
         LEA.L           VEC_IN2,A0                      * Redirect input from aux. port.
         MOVE.L          A0,V_INPTv(a3)
         MOVE.B          #1,load_first(A3)               * Set load_first flag
@@ -416,7 +414,7 @@ LAB_sizok
 	MOVEQ		#$00,d0			* clear d0
 	MOVE.b	d0,Nullct(a3)		* default NULL count
 	MOVE.b	d0,TPos(a3)			* clear terminal position
-	MOVE.b	#1,ccflag(a3)		* allow CTRL-C check
+	MOVE.b	d0,ccflag(a3)		* allow CTRL-C check
 	MOVE.w	d0,prg_strt-2(a3)		* clear start word
 	MOVE.w	d0,BHsend(a3)		* clear value to string end word
 
