@@ -20,7 +20,8 @@
 
 * Ver 3.54
 
-* Ver 3.54 adds support for LOAD/SAVE using Hobbytronics USB Flash Drive Host Board
+* Ver 3.54 adds experimental support for LOAD/SAVE using Hobbytronics
+* USB Flash Drive Host Board
 * Ver 3.53 fixes math error that affected exponentiation ("^") and
 *  EXP() function. Thanks to joelang for fix.
 * Ver 3.52 stops USING$() from reading beyond the end of the format string
@@ -39,6 +40,11 @@
 
 novar		EQU	0				* non existant variables cause errors
 
+* Set the symbol FLASH_SUPPORT to 1 if you want to enable experimental
+* support for LOAD/SAVE using a Hobbytronics USB Flash Drive Host
+* Board.
+
+FLASH_SUPPORT   EQU     0      1
 
 *************************************************************************************
 
@@ -101,6 +107,8 @@ TXNOTREADY
 
 * Output character to the second (aux) serial port from register d0.b
 
+ ifne   FLASH_SUPPORT
+
 VEC_OUT2
         MOVEM.L  A0/D1,-(A7)    * Save working registers
         LEA.L    ACIA_2,A0      * A0 points to console ACIA
@@ -138,6 +146,8 @@ LP2     CMP.B    #0,(A0)        * Is it null?
 RET2    MOVEM.L  (A7)+,A0/D0    * Restore working registers
         RTS                     * Return
 
+ endc
+
 *************************************************************************************
 *
 * input a character from the console into register d0
@@ -159,6 +169,8 @@ RXNOTREADY
         RTS
 
 * Input routine used in LOAD mode to read file from USB flash storage.
+
+ ifne   FLASH_SUPPORT
 
 VEC_IN2
         MOVEM.L  A0/D1,-(A7)    * Save working registers
@@ -218,10 +230,24 @@ NOTEOF
         ORI.b    #1,CCR         * Set the carry, flag we got a byte
         RTS                     * Return
 
+ endc
+
 *************************************************************************************
 *
+* LOAD routine for the TS2 computer (not implemented)
+
+ ifeq   FLASH_SUPPORT
+
+VEC_LD
+       MOVEQ           #$2E,d7                         * error code $2E "Not implemented" error
+       BRA             LAB_XERR                        * do error #d7, then warm start
+
+ endc
+
 * LOAD routine for the TS2 computer. Supports a Hobbytronics USB Flash
 * Drive Host Board connected to the auxiliary serial port.
+
+ ifne   FLASH_SUPPORT
 
 VEC_LD  LEA             LAB_FILENAME(PC),A0             * Prompt for filename.
         BSR             PRINTSTRING1                    * Print null terminated string
@@ -232,13 +258,13 @@ GETFN1  JSR             VEC_IN                          * Get character
         CMP.B           #$0D,D0                         * Was it <Return>?
         BEQ             ENDLN1                          * If so, branch
         CMP.B           #$7F,D0                         * Was it <Delete>?
-        BEQ             DELETE                          * If so, handle delete
+        BEQ             DELETE1                         * If so, handle delete
         CMP.B           #$08,D0                         * Was it <Backspace?
-        BEQ             DELETE                          * If so, handle as delete
+        BEQ             DELETE1                         * If so, handle as delete
         MOVE.B          D0,load_filename(A2)            * Save in buffer
         ADDQ.L          #1,A2                           * Advance string pointer
         BRA             GETFN1                          * Go back and get next character
-DELETE  SUBQ.L          #1,A2                           * Delete last character entered
+DELETE1 SUBQ.L          #1,A2                           * Delete last character entered
         BRA             GETFN1                          * Go back and get next character
 
 ENDLN1  MOVE.B          #0,load_filename(A2)            * Add terminating null to filename
@@ -251,8 +277,20 @@ ENDLN1  MOVE.B          #0,load_filename(A2)            * Add terminating null t
 
         RTS
 
+ endc
+
 *************************************************************************************
 *
+* SAVE routine for the TS2 computer (not implemented)
+
+ ifeq   FLASH_SUPPORT
+VEC_SV
+       MOVEQ           #$2E,d7                         * error code $2E "Not implemented" error
+       BRA             LAB_XERR                        * do error #d7, then warm start
+ endc
+
+ ifne   FLASH_SUPPORT
+
 * SAVE routine for the TS2 computer. Supports a Hobbytronics USB Flash
 * Drive Host Board connected to the auxiliary serial port.
 
@@ -266,8 +304,14 @@ GETFN   JSR             VEC_IN                          * Get character
         JSR             VEC_OUT                         * Echo the character
         CMP.B           #$0D,D0                         * Was it <Return>?
         BEQ             ENDLN                           * If so, branch
+        CMP.B           #$7F,D0                         * Was it <Delete>?
+        BEQ             DELETE                          * If so, handle delete
+        CMP.B           #$08,D0                         * Was it <Backspace?
+        BEQ             DELETE                          * If so, handle as delete
         MOVE.B          D0,load_filename(A2)            * Save in buffer
         ADDQ.L          #1,A2                           * Advance string pointer
+        BRA             GETFN                           * Go back and get next character
+DELETE  SUBQ.L          #1,A2                           * Delete last character entered
         BRA             GETFN                           * Go back and get next character
 
 ENDLN   MOVE.B          #0,load_filename(A2)            * Add terminating null to filename
@@ -311,6 +355,7 @@ LAB_READN
 LAB_FILENAME
         dc.b            'Filename? ',$00
 
+ endc
         even
 
 *************************************************************************************
@@ -9178,7 +9223,7 @@ LAB_RMSG
 	dc.b	$0D,$0A,'Ready',$0D,$0A,$00
 LAB_SMSG
 	dc.b	' Bytes free',$0D,$0A,$0A
-	dc.b	'Enhanced 68k BASIC Version 3.54 (experimental)',$0D,$0A,$00
+	dc.b	'Enhanced 68k BASIC Version 3.54',$0D,$0A,$00
 
 
 *************************************************************************************
