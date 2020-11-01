@@ -162,17 +162,7 @@ RXNOTREADY
 
 VEC_IN2
         MOVEM.L  A0/D1,-(A7)    * Save working registers
-
-* Flush any previous data from serial port
-
-        LEA.L    ACIA_2,A0      * A0 points to console ACIA
-RXREADY MOVE.B   (A0),D1        * Read ACIA status
-        BTST     #0,D1          * Test RDRF bit
-        BEQ.S    FLUSHED        * Branch if ACIA Rx not ready
-        MOVE.B   2(A0),D0       * Read character received
-        BRA.S    RXREADY
-
-FLUSHED LEA.L    VEC_OUT2,A0    * Redirect output to aux. port.
+        LEA.L    VEC_OUT2,A0    * Redirect output to aux. port.
         MOVE.L   A0,V_OUTPv(a3)
 
 * The first time, send READ <filename> 1 1
