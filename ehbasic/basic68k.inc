@@ -188,12 +188,16 @@ ccflag	ds.b	1			* CTRL-C check flag
 ccbyte	ds.b	1			* CTRL-C last received byte
 ccnull	ds.b	1			* CTRL-C last received byte 'life' timer
 
-* these variables for simulator load/save routines
+* these variables for load/save routines
 
-file_byte	ds.b	1			* load/save data byte
-file_id	ds.l	1			* load/save file ID
+ ifne   FLASH_SUPPORT
 
-		even			        * dummy even value and zero pad byte
+load_first      ds.b    1               * Boolean indicating if first byte read
+load_filename   ds.b    13              * Hold LOAD/SAVE filename (DOS 8.3 format plus terminating null)
+
+ endc
+
+		even			* dummy even value and zero pad byte
 
 prg_strt
 

@@ -18,8 +18,10 @@
 *										    *
 *************************************************************************************
 
-* Ver 3.53
+* Ver 3.54
 
+* Ver 3.54 adds experimental support for LOAD/SAVE using Hobbytronics
+* USB Flash Drive Host Board
 * Ver 3.53 fixes math error that affected exponentiation ("^") and
 *  EXP() function. Thanks to joelang for fix.
 * Ver 3.52 stops USING$() from reading beyond the end of the format string
@@ -38,6 +40,11 @@
 
 novar		EQU	0				* non existant variables cause errors
 
+* Set the symbol FLASH_SUPPORT to 1 if you want to enable experimental
+* support for LOAD/SAVE using a Hobbytronics USB Flash Drive Host
+* Board.
+
+FLASH_SUPPORT   EQU     0
 
 *************************************************************************************
 
@@ -77,6 +84,7 @@ nobrk		EQU	0				* null response to INPUT causes a break
 *	ORG		$000800			* past the vectors in a real system
 
 ACIA_1   =      $00010040        * Console ACIA base address
+ACIA_2   =      $00010041        * Auxiliary ACIA base address
 
          BRA    code_start       * For convenience, so you can start from first address
 
@@ -84,7 +92,7 @@ ACIA_1   =      $00010040        * Console ACIA base address
 *
 * the following code is simulator specific, change to suit your system
 
-* output character to the console from register d0.b
+* Output character to the console from register d0.b
 
 VEC_OUT
         MOVEM.L  A0/D1,-(A7)    * Save working registers
@@ -97,6 +105,49 @@ TXNOTREADY
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
         RTS
 
+* Output character to the second (aux) serial port from register d0.b
+
+ ifne   FLASH_SUPPORT
+
+VEC_OUT2
+        MOVEM.L  A0/D1,-(A7)    * Save working registers
+        LEA.L    ACIA_2,A0      * A0 points to console ACIA
+TXNOTREADY1
+        MOVE.B   (A0),D1        * Read ACIA status
+        BTST     #1,D1          * Test TDRE bit
+        BEQ.s    TXNOTREADY1    * Until ACIA Tx ready
+        MOVE.B   D0,2(A0)       * Write character to send
+        MOVEM.L  (A7)+,A0/D1    * Restore working registers
+        RTS
+
+* Output null terminated string pointed to by A0 to first serial port.
+
+PRINTSTRING1
+        MOVEM.L  A0/D0,-(A7)    * Save working registers
+LP1     CMP.B    #0,(A0)        * Is it null?
+        BEQ      RET1           * If so, return
+        MOVE.B   (A0)+,D0       * Get character and advance pointer
+        JSR      VEC_OUT        * Output it
+        BRA      LP1            * Continue for rest of string
+
+RET1    MOVEM.L  (A7)+,A0/D0    * Restore working registers
+        RTS                     * Return
+
+* Output null terminated string pointed to by A0 to second serial port.
+
+PRINTSTRING2
+        MOVEM.L  A0/D0,-(A7)    * Save working registers
+LP2     CMP.B    #0,(A0)        * Is it null?
+        BEQ      RET2           * If so, return
+        MOVE.B   (A0)+,D0       * Get character and advance pointer
+        JSR      VEC_OUT2       * Output it
+        BRA      LP2            * Continue for rest of string
+
+RET2    MOVEM.L  (A7)+,A0/D0    * Restore working registers
+        RTS                     * Return
+
+ endc
+
 *************************************************************************************
 *
 * input a character from the console into register d0
@@ -107,40 +158,215 @@ VEC_IN
         LEA.L    ACIA_1,A0      * A0 points to console ACIA
         MOVE.B   (A0),D1        * Read ACIA status
         BTST     #0,D1          * Test RDRF bit
-        BEQ.S    RXNOTREADY     * Branch If ACIA Rx not ready
+        BEQ.S    RXNOTREADY     * Branch if ACIA Rx not ready
         MOVE.B   2(A0),D0       * Read character received
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
-	ORI.b	 #1,CCR	        * Set the carry, flag we got a byte
+        ORI.B    #1,CCR         * Set the carry, flag we got a byte
         RTS                     * Return
-RXNOTREADY:
+RXNOTREADY
         MOVEM.L  (A7)+,A0/D1    * Restore working registers
-	ANDI.b	#$FE,CCR	* Clear the carry, flag character available
-	RTS
+        ANDI.B   #$FE,CCR       * Clear the carry, flag character not available
+        RTS
+
+* Input routine used in LOAD mode to read file from USB flash storage.
+
+ ifne   FLASH_SUPPORT
+
+VEC_IN2
+        MOVEM.L  A0/D1,-(A7)    * Save working registers
+        LEA.L    VEC_OUT2,A0    * Redirect output to aux. port.
+        MOVE.L   A0,V_OUTPv(a3)
+
+* The first time, send READ <filename> 1 1
+* Subsequent times, send READ <filename> n 1
+
+        LEA      LAB_READN(pc),A0 * Send READ command string
+        BSR      PRINTSTRING2   * Print null terminated string
+
+        LEA      load_filename(A3),A0 * Send filename string
+        BSR      PRINTSTRING2   * Print null terminated string
+
+        MOVE.B   #' ',D0       * Send space
+        JSR      VEC_OUT2
+
+        CMP.B    #1,load_first(A3) * First time?
+        BNE      NOTFIRST1
+        MOVE.B   #'1',D0        * Send '1'
+        CLR.B    load_first(A3) * Clear first flag
+        BRA      SENDCMD1
+NOTFIRST1
+        MOVE.B   #'n',D0        * Send 'n'
+SENDCMD1
+        JSR      VEC_OUT2
+        MOVE.B   #' ',D0        * Send space
+        JSR      VEC_OUT2
+        MOVE.B   #'1',D0        * Send '1'
+        JSR      VEC_OUT2
+        MOVE.B   #$0D,D0        * Send <Return>
+        JSR      VEC_OUT2
+
+        LEA.L    VEC_OUT,A0     * Redirect output back to console port.
+        MOVE.L   A0,V_OUTPv(a3)
+
+* Read one byte from USB host
+
+        LEA.L    ACIA_2,A0      * A0 points to console ACIA
+RXNOTREADY2
+        MOVE.B   (A0),D1        * Read ACIA status
+        BTST     #0,D1          * Test RDRF bit
+        BEQ.S    RXNOTREADY2    * Branch if ACIA Rx not ready
+        MOVE.B   2(A0),D0       * Read character received
+
+* Check for end of file character ('~') and if found, redirect
+* input back to console port.
+
+        CMP.B    #'~',D0        * End of file marker?
+        BNE      NOTEOF
+        MOVE.B   #$0D,D0        * Convert '~' to a Return
+        LEA.L    VEC_IN,A0      * Redirect input back to console port.
+        MOVE.L   A0,V_INPTv(a3)
+NOTEOF
+        MOVEM.L  (A7)+,A0/D1    * Restore working registers
+        ORI.b    #1,CCR         * Set the carry, flag we got a byte
+        RTS                     * Return
+
+ endc
 
 *************************************************************************************
 *
 * LOAD routine for the TS2 computer (not implemented)
 
+ ifeq   FLASH_SUPPORT
+
 VEC_LD
-	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
-	BRA		LAB_XERR			* do error #d7, then warm start
+       MOVEQ           #$2E,d7                         * error code $2E "Not implemented" error
+       BRA             LAB_XERR                        * do error #d7, then warm start
+
+ endc
+
+* LOAD routine for the TS2 computer. Supports a Hobbytronics USB Flash
+* Drive Host Board connected to the auxiliary serial port.
+
+ ifne   FLASH_SUPPORT
+
+VEC_LD  LEA             LAB_FILENAME(PC),A0             * Prompt for filename.
+        BSR             PRINTSTRING1                    * Print null terminated string
+        MOVE.L          A3,A2                           * Save pointer to RAM variables
+GETFN1  JSR             VEC_IN                          * Get character
+        BCC             GETFN1                          * Go back if carry clear, indicating no key pressed
+        JSR             VEC_OUT                         * Echo the character
+        CMP.B           #$0D,D0                         * Was it <Return>?
+        BEQ             ENDLN1                          * If so, branch
+        CMP.B           #$7F,D0                         * Was it <Delete>?
+        BEQ             DELETE1                         * If so, handle delete
+        CMP.B           #$08,D0                         * Was it <Backspace?
+        BEQ             DELETE1                         * If so, handle as delete
+        MOVE.B          D0,load_filename(A2)            * Save in buffer
+        ADDQ.L          #1,A2                           * Advance string pointer
+        BRA             GETFN1                          * Go back and get next character
+DELETE1 SUBQ.L          #1,A2                           * Delete last character entered
+        BRA             GETFN1                          * Go back and get next character
+
+ENDLN1  MOVE.B          #0,load_filename(A2)            * Add terminating null to filename
+        LEA.L           VEC_IN2,A0                      * Redirect input from aux. port.
+        MOVE.L          A0,V_INPTv(a3)
+        MOVE.B          #1,load_first(A3)               * Set load_first flag
+
+* Input routine will detect end of file and redirect input back to
+* console port.
+
+        RTS
+
+ endc
 
 *************************************************************************************
 *
 * SAVE routine for the TS2 computer (not implemented)
 
+ ifeq   FLASH_SUPPORT
 VEC_SV
-	MOVEQ		#$2E,d7			        * error code $2E "Not implemented" error
-	BRA		LAB_XERR			* do error #d7, then warm start
+       MOVEQ           #$2E,d7                         * error code $2E "Not implemented" error
+       BRA             LAB_XERR                        * do error #d7, then warm start
+ endc
+
+ ifne   FLASH_SUPPORT
+
+* SAVE routine for the TS2 computer. Supports a Hobbytronics USB Flash
+* Drive Host Board connected to the auxiliary serial port.
+
+* TODO: Make configurable at build time
+
+VEC_SV  LEA             LAB_FILENAME(PC),A0             * Prompt for filename.
+        BSR             PRINTSTRING1                    * Print null terminated string
+        MOVE.L          A3,A2                           * Save pointer to RAM variables
+GETFN   JSR             VEC_IN                          * Get character
+        BCC             GETFN                           * Go back if carry clear, indicating no key pressed
+        JSR             VEC_OUT                         * Echo the character
+        CMP.B           #$0D,D0                         * Was it <Return>?
+        BEQ             ENDLN                           * If so, branch
+        CMP.B           #$7F,D0                         * Was it <Delete>?
+        BEQ             DELETE                          * If so, handle delete
+        CMP.B           #$08,D0                         * Was it <Backspace?
+        BEQ             DELETE                          * If so, handle as delete
+        MOVE.B          D0,load_filename(A2)            * Save in buffer
+        ADDQ.L          #1,A2                           * Advance string pointer
+        BRA             GETFN                           * Go back and get next character
+DELETE  SUBQ.L          #1,A2                           * Delete last character entered
+        BRA             GETFN                           * Go back and get next character
+
+ENDLN   MOVE.B          #0,load_filename(A2)            * Add terminating null to filename
+
+        LEA.L           VEC_OUT2,A0                     * Redirect output to aux. port.
+        MOVE.L          A0,V_OUTPv(a3)
+
+        LEA             LAB_WRITE(pc),A0                * Send WRITE command string
+        BSR             PRINTSTRING2                    * Print null terminated string
+
+        LEA             load_filename(A3),A0            * Send filename string
+        BSR             PRINTSTRING2                    * Print null terminated string
+
+        MOVE.B          #$0D,D0                         * Send <Return>
+        JSR             VEC_OUT2
+
+        MOVE.l          #356000,d0                      * Delay approx. 1 second to allow USB to create file
+DELAY   SUBQ.l          #1,d0
+        BNE             DELAY
+
+        MOVEQ           #0,d0                           * Tells LIST no arguments
+        ANDI.b          #$FE,CCR                        * Clear carry
+        BSR             LAB_LIST                        * Call LIST routine
+
+        MOVEQ           #'~',d0                         * Send tilde symbol indicate end of file (used when loading)
+        BSR             LAB_PRNA
+
+        MOVEQ           #26,d0                          * Send Control-Z to indicate end of file save operation
+        BSR             LAB_PRNA
+
+        LEA.L           VEC_OUT,A0                      * Redirect output back to console port.
+        MOVE.L          A0,V_OUTPv(a3)
+        RTS                                             * Return
+
+LAB_WRITE
+        dc.b            '$WRITE ',$00
+
+LAB_READN
+        dc.b            '$READ ',$00
+
+LAB_FILENAME
+        dc.b            'Filename? ',$00
+
+ endc
+        even
 
 *************************************************************************************
-*
-* turn off simulator key echo
 
 code_start
                                 * Set up ACIA parameters
         LEA.L   ACIA_1,A0       * A0 points to console ACIA
         MOVE.B  #$15,(A0)       * Set up ACIA1 constants (no IRQ,
+                                * RTS* low, 8 bit, no parity, 1 stop)
+        LEA.L   ACIA_2,A0       * A0 points to aux. ACIA
+        MOVE.B  #$15,(A0)       * Set up ACIA2 constants (no IRQ,
                                 * RTS* low, 8 bit, no parity, 1 stop)
 
 * to tell EhBASIC where and how much RAM it has pass the address in a0 and the size
@@ -8997,7 +9223,7 @@ LAB_RMSG
 	dc.b	$0D,$0A,'Ready',$0D,$0A,$00
 LAB_SMSG
 	dc.b	' Bytes free',$0D,$0A,$0A
-	dc.b	'Enhanced 68k BASIC Version 3.53',$0D,$0A,$00
+	dc.b	'Enhanced 68k BASIC Version 3.54',$0D,$0A,$00
 
 
 *************************************************************************************
