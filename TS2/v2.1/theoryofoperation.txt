@@ -369,7 +369,8 @@ terminal interface directly to the host port whenever RTS from U29 was
 high. This means that the TS2 monitor TRAN and TUTOR TM commands will
 not operate correctly, but the transparent mode is of little use
 unless the console is actually a dumb terminal rather than a host
-computer.
+computer. Update: I have modified TUTOR so that transparent mode (and
+the TM command) is implemented for the TS2 board in software.
 
 If desired, the second (host) 6850 ACIA can be omitted as it is not
 particularly useful. If the console port is connected to a computer,
