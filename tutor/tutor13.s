@@ -3591,21 +3591,25 @@ P2CMD01: MOVE.B  #BLANK,(%A6)+
          MOVE.W  #0x0D0A,(%A6)+
          BSR     OUT1CR         | GO PRINT BUFFER WITH CRLF
 
-         MOVE.B  MD1CON.L,%D0   | PROGRAM ACIA FOR TRANSPARENT MODE
-         ANDI.B  #0x9F,%D0
-         ORI.B   #0x40,%D0      | FORCE RTS HIGH
-         MOVE.B  %D0,(%A0)
-P2CMD2:  BTST.B  #0x0,(%A0)     | READ STATUS
-         BEQ.S   P2CMD2
+P2CMD2:  BSR     GETSER1        | ADDRESS FOR PORT1 INTO A0
+         BTST.B  #0x0,(%A0)     | READ STATUS
+         BEQ.S   P3CMD3         | BRANCH IF NO CHARACTER
          MOVE.B  2(%A0),%D0     | RECEIVE CHAR FROM PORT 1
-         ANDI.B  #0x7F,%D0
+         ANDI.B  #0x7F,%D0      | CONVERT TO 7 BIT ASCII
          CMP.B   %D7,%D0        | SEE IF QUIT CHARACTER (CTL A USUALLY)
-         BNE.S   P2CMD2
-         MOVE.B  MD1CON.L,%D0   | REPROGRAM FOR NON-TRANSPARENT
-         ANDI.B  #0x9F,%D0
-         MOVE.B  %D0,(%A0)
+         BEQ.S   QUITCH         | BRANCH IF IT IS
+         BSR     GETSER2        | ADDRESS FOR PORT2 INTO A0
+         MOVE.B  %D0,2(%A0)     | SEND CHAR TO PORT 2
 
-         ASR.W   #8,%D7
+P3CMD3:  BSR     GETSER2        | ADDRESS FOR PORT2 INTO A0
+         BTST.B  #0x0,(%A0)     | READ STATUS
+         BEQ.S   P2CMD2         | BRANCH IF NO CHARACTER
+         MOVE.B  2(%A0),%D0     | RECEIVE CHAR FROM PORT 2
+         BSR     GETSER1        | ADDRESS FOR PORT1 INTO A0
+         MOVE.B  %D0,2(%A0)     | SEND CHAR TO PORT 1
+         BRA.S   P2CMD2         | GO BACK AND CONTINUE
+
+QUITCH:  ASR.W   #8,%D7
          TST.B   %D7
          BEQ.S   P2CMD6
 * SPECIAL SECOND CHAR TO HOST SEQUENCE
@@ -8338,7 +8342,7 @@ F120:    BSR     OUTPUT         | OUTPUT STRING,CR,LF PORT1 (A5) (A6)
          BSR.S   F100           | OUTPUT CHAR
          RTS
 
-         .fill   0x54,1,0       | PAD BYTES
+         .fill   0x4C,1,0       | PAD BYTES
 
 *-------------------------------------------------------------------------
 * File YROM      Version/checksum/identification                  07/29/82
