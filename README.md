@@ -6,14 +6,16 @@ Designs and code related to the Motorola 68000 microprocessor.
 2. Order the parts from the [bill of materials (BOM)](TS2/v2.1/bom.pdf)
 3. Order the two FT232 USB -> serial breakout boards
 4. Order the chip sockets:
+
 | Layout    | Qty   | Notes                                 |
-|:---       |:---:  |---:                                   |
+|:---       | ---:  | :---                                  |
 | DIP-8     | 1     | For the 555 timer                     |
 | DIP-14    | 17    | For a lot                             |
 | DIP-16    | 8     | For even more                         |
 | DIP-24    | 2     | Double width: for serial interface    |
 | DIP-28    | 8     | Double width: for RAM & ROM           |
 | DIP-64    | 1     | Triple width: for CPU.                |
+
 The DIP-64 can be a little hard to obtain, you could cut DIP-40 sockets to same effect. However, it's inadvisable to 
 directly solder the CPU directly to the board. If the heat damages the chip, there's 64 pins to de-solder.
 5. Solder in the sockets
