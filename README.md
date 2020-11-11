@@ -18,6 +18,7 @@ Designs and code related to the Motorola 68000 microprocessor.
 
 The DIP-64 can be a little hard to obtain, you could cut DIP-40 sockets to same effect. However, it's inadvisable to 
 directly solder the CPU directly to the board. If the heat damages the chip, there's 64 pins to de-solder.
+
 5. Solder in the sockets
 6. Solder in the rest of the components
 7. [Flash the ROM chips](http://jefftranter.blogspot.com/2016/12/building-68000-single-board-computer_7.html)
