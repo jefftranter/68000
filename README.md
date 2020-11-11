@@ -7,7 +7,7 @@ Designs and code related to the Motorola 68000 microprocessor.
 3. Order the two FT232 USB -> serial breakout boards
 4. Order the chip sockets:
 | Layout    | Qty   | Notes                                 |
-|---        |---    |---                                    |
+|:---       |:---:  |---:                                   |
 | DIP-8     | 1     | For the 555 timer                     |
 | DIP-14    | 17    | For a lot                             |
 | DIP-16    | 8     | For even more                         |
