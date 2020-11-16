@@ -1,16 +1,19 @@
-%.bin : %.s
-	$(AS) $(ASFLAGS) -L $*.lst -o $@ $<
-
-AS	= vasmm68k_mot
+AS = vasmm68k_mot
 ASFLAGS = -quiet -m68000 -no-opt -Fbin
 
-all:	testprog.bin pep8
+%.bin: %.s
+	$(AS) $(ASFLAGS) -L $*.lst -o $@ $<
+
+all: testprog.bin pep8
+
+install:
+	pip3 install --user pipenv; ~/.local/bin/pipenv --three install --dev
 
 pep8:
-	pycodestyle --max-line-length=256 disasm68k.py
+	~/.local/bin/pipenv run pycodestyle --max-line-length=121 disasm68k.py
 
 output.s: testprog.bin
-	./disasm68k.py -n testprog.bin >output.s
+	~/.local/bin/pipenv run python disasm68k.py -n testprog.bin >output.s
 
 compare: output.bin output.s
 	hexdump -C testprog.bin >testprog.hex
