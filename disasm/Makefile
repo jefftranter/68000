@@ -10,9 +10,10 @@ install:
 	echo "Installing Python dependencies"
 	pip3 install --user pipenv; ~/.local/bin/pipenv --three install --dev
 	echo "Installing VASM dependencies"
-	curl --fail --location --silent http://sun.hasenbraten.de/vasm/release/vasm.tar.gz -O vasm.tar.gz
+	wget http://sun.hasenbraten.de/vasm/release/vasm.tar.gz
 	tar xvzf vasm.tar.gz
 	cd vasm && make CPU=m68k SYNTAX=mot && cd ..
+	echo "All dependencies successfully installed"
 
 pep8:
 	~/.local/bin/pipenv run pycodestyle --max-line-length=121 disasm68k.py
