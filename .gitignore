@@ -269,3 +269,6 @@ fabric.properties
 # Ignore source and compiled vasm
 /disasm/vasm.tar.gz
 /disasm/vasm/
+
+tutor/minipro-0.5
+tutor/minipro-0.5.tar.gz

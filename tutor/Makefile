@@ -1,5 +1,24 @@
 all:	tutor13.run tutor13.bin tutor13.hex tutor13_even.bin tutor13_odd.bin
 
+gcc-install:
+	wget https://github.com/kentosama/m68k-elf-gcc/archive/master.zip -O m68k-elf-gcc.zip
+	unzip m68k-elf-gcc.zip
+
+minipro:
+	wget https://gitlab.com/DavidGriffith/minipro/-/archive/0.5/minipro-0.5.tar.gz
+	tar xvzf minipro-0.5.tar.gz
+	cd minipro-0.5 && make
+	minipro-05/minipro --list
+
+minipro-install: minipro-0.5/udev
+	sudo cp minipro-0.5/udev/*.rules /etc/udev/rules.d/
+	sudo udevadm trigger
+	sudo usermod -a -G plugdev ${USER}
+	echo "You need to log out and in again for the rules to take effect"
+
+rom: minipro-0.5/minipro
+
+
 tutor13.o: tutor13.s
 	m68k-elf-as -m68000 -alms -a=tutor13.lst -o tutor13.o tutor13.s
 
