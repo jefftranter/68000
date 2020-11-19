@@ -8,7 +8,8 @@ all: testprog.bin pep8
 
 install:
 	echo "Installing Python dependencies"
-	pip3 install --user pipenv; ~/.local/bin/pipenv --three install --dev
+	pip3 install --user pipenv
+	~/.local/bin/pipenv --three install --dev
 	echo "Installing VASM dependencies"
 	wget http://sun.hasenbraten.de/vasm/release/vasm.tar.gz
 	tar xvzf vasm.tar.gz
