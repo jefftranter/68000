@@ -17,7 +17,7 @@ install:
 	echo "All dependencies successfully installed"
 
 pep8:
-	~/.local/bin/pipenv run pycodestyle --max-line-length=121 disasm68k.py
+	~/.local/bin/pipenv run pycodestyle --max-line-length=150 disasm68k.py
 
 test: vasm/vasmm68k_mot testprog.s disasm68k.py
 	echo "Compiling S-record to binary"
