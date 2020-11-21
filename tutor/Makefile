@@ -9,7 +9,7 @@ minipro-install:
 	@echo $(dpkg -l | grep libusb-1.0) || (echo "libusb-1.0 is not installed; install using sudo apt-get install libusb-1.0"; exit 1)
 	wget https://gitlab.com/DavidGriffith/minipro/-/archive/0.5/minipro-0.5.tar.gz
 	tar xvzf minipro-0.5.tar.gz
-	cd minipro-0.5 && make && minipro --version
+	cd minipro-0.5 && make && ./minipro --version
 	sudo cp minipro-0.5/udev/*.rules /etc/udev/rules.d/
 	sudo udevadm trigger
 	sudo usermod -a -G plugdev ${USER}
