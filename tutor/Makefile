@@ -1,8 +1,19 @@
+GCC_VER=5.4.0
 all:	tutor13.run tutor13.bin tutor13.hex tutor13_even.bin tutor13_odd.bin
 
 gcc-install:
-	wget https://github.com/kentosama/m68k-elf-gcc/archive/master.zip -O m68k-elf-gcc.zip
-	unzip m68k-elf-gcc.zip
+	# wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VER}/gcc-${GCC_VER}.tar.gz
+	@echo "*** Extracting gcc source ***"
+	# tar xzf gcc-${GCC_VER}.tar.gz
+	@echo "*** Downloading compile dependencies ***"
+	# cd gcc-${GCC_VER} && ./contrib/download_prerequisites
+	mkdir -p gcc-build
+	@echo "*** Configuring gcc ***"
+	cd gcc-build && ../gcc-${GCC_VER}/configure -q --prefix=/opt/gcc-${GCC_VER} --target=m68k-elf --enable-languages=c --disable-libssp
+	@echo "*** Building gcc ***"
+	cd gcc-build && make -s -j4
+	@echo "*** Installing gcc ***"
+	cd gcc-build && sudo make -s install
 
 minipro-install:
 	@echo $(pkg-config --version) || (echo "pkg-config is not installed; install with sudo apt-get install pkg-config"; exit 1)
