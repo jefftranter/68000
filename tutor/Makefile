@@ -4,20 +4,22 @@ gcc-install:
 	wget https://github.com/kentosama/m68k-elf-gcc/archive/master.zip -O m68k-elf-gcc.zip
 	unzip m68k-elf-gcc.zip
 
-minipro:
+minipro-install:
+	@echo $(pkg-config --version) || (echo "pkg-config is not installed; install with sudo apt-get install pkg-config"; exit 1)
+	@echo $(dpkg -l | grep libusb-1.0) || (echo "libusb-1.0 is not installed; install using sudo apt-get install libusb-1.0"; exit 1)
 	wget https://gitlab.com/DavidGriffith/minipro/-/archive/0.5/minipro-0.5.tar.gz
 	tar xvzf minipro-0.5.tar.gz
-	cd minipro-0.5 && make
-	minipro-05/minipro --list
-
-minipro-install: minipro-0.5/udev
+	cd minipro-0.5 && make && minipro --version
 	sudo cp minipro-0.5/udev/*.rules /etc/udev/rules.d/
 	sudo udevadm trigger
 	sudo usermod -a -G plugdev ${USER}
-	echo "You need to log out and in again for the rules to take effect"
+	@echo "You need to log out and in again for the rules to take effect"
 
-rom: minipro-0.5/minipro
+rom-odd: minipro-0.5/minipro tutor13.bin
+	od -w2 -t u1 -v tutor13.bin | awk ' { printf("%c", strtonum($2)) } ' > tutor13_odd.bin
 
+rom-even: minipro-0.5/minipro tutor13.bin
+	od -w2 -t u1 -v tutor13.bin | awk ' { printf("%c", strtonum($3)) } ' > tutor13_even.bin
 
 tutor13.o: tutor13.s
 	m68k-elf-as -m68000 -alms -a=tutor13.lst -o tutor13.o tutor13.s
