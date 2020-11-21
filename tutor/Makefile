@@ -13,7 +13,7 @@ minipro-install:
 	sudo cp minipro-0.5/udev/*.rules /etc/udev/rules.d/
 	sudo udevadm trigger
 	sudo usermod -a -G plugdev ${USER}
-	@echo "You need to log out and in again for the rules to take effect"
+	@echo "You need to log out and in again for the rules to take effect. Or: you can run the make recipes for burning the ROMs as root with sudo."
 
 rom-odd: minipro-0.5/minipro tutor13.bin
 	od -w2 -t u1 -v tutor13.bin | awk ' { printf("%c", strtonum($2)) } ' > tutor13_odd.bin
