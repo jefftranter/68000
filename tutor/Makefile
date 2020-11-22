@@ -28,8 +28,7 @@ gcc-install:
 	cd ${GCC_BUILD} && sudo make install-gcc
 
 minipro-install:
-	@echo $(pkg-config --version) || (echo "pkg-config is not installed; install with sudo apt-get install pkg-config"; exit 1)
-	@echo $(dpkg -l | grep libusb-1.0) || (echo "libusb-1.0 is not installed; install using sudo apt-get install libusb-1.0"; exit 1)
+ifeq ($(pkg-config --version && $(dpkg -l | grep libusb-1.0)), 0)
 	wget https://gitlab.com/DavidGriffith/minipro/-/archive/0.5/minipro-0.5.tar.gz -O /tmp/minipro-0.5.tar.gz
 	tar xvzf minipro-0.5.tar.gz
 	cd minipro-0.5 && make && ./minipro --version
@@ -37,14 +36,27 @@ minipro-install:
 	sudo udevadm trigger
 	sudo usermod -a -G plugdev ${USER}
 	@echo "You need to log out and in again for the rules to take effect. Or: you can run the make recipes for burning the ROMs as root with sudo."
+else
+	@echo "pkg-config and libusb-1.0 are required; install with sudo apt-get install pkg-config libusb-1.0"; exit 1
+endif
 
 rom-odd: minipro-0.5/minipro
+ifeq ($(minipro-0.5/minipro --devices), 0)
 	@# Method from https://www.linuxquestions.org/questions/linux-general-1/linux-command-to-copy-every-other-byte-from-file-708566/#post3462413
 	@# We need two $$ signs to escape to a single $ in Makefile
 	od -w2 -t u1 -v tutor13.bin | awk ' { printf("%c", strtonum($$2)) } ' > tutor13_odd.bin
+	minipro --write tutor13_odd.bin
+else
+	@echo "No minipro device detected, please connect one"; exit 1
+endif
 
 rom-even: minipro-0.5/minipro
+ifeq ($(minipro-0.5/minipro --devices), 0)
 	od -w2 -t u1 -v tutor13.bin | awk ' { printf("%c", strtonum($$3)) } ' > tutor13_even.bin
+	minipro --write tutor13_even.bin
+else
+	@echo "No minipro device detected, please connect one"; exit 1
+endif
 
 tutor13.o: tutor13.s
 	m68k-elf-as -m68000 -alms -a=tutor13.lst -o tutor13.o tutor13.s
