@@ -1,23 +1,36 @@
+# gcc version to build
 GCC_VER=5.4.0
+# directory to save source files into
+TMP := /tmp
+GCC_SRC := ${TMP}/gcc-${GCC_VER}
+GCC_BUILD := ${HOME}/.gcc-build
+GCC_INSTALL := ${HOME}/gcc-elf-m68k-${GCC_VER}
 
 gcc-install:
-	# wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VER}/gcc-${GCC_VER}.tar.gz
+	wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VER}/gcc-${GCC_VER}.tar.gz -O ${GCC_SRC}.tar.gz
 	@echo "*** Extracting gcc source ***"
-	# tar xzf gcc-${GCC_VER}.tar.gz
+	cd ${TMP} && tar xzf gcc-${GCC_VER}.tar.gz
 	@echo "*** Downloading compile dependencies ***"
-	# cd gcc-${GCC_VER} && ./contrib/download_prerequisites
-	mkdir -p gcc-build
+	cd ${GCC_SRC} && contrib/download_prerequisites
 	@echo "*** Configuring gcc ***"
-	cd gcc-build && ../gcc-${GCC_VER}/configure -q --prefix=/opt/gcc-${GCC_VER} --target=m68k-elf --enable-languages=c --disable-libssp
+	mkdir -p ${GCC_BUILD}
+	cd ${GCC_BUILD} && ${GCC_SRC}/configure \
+		-q \
+		--prefix=${GCC_INSTALL} \
+		--target=m68k-elf \
+		--enable-languages=c \
+		--disable-libssp \
+		--disable-nls \
+		--disable-multilib
 	@echo "*** Building gcc ***"
-	cd gcc-build && make -s -j4
+	cd ${GCC_BUILD} && make all-gcc -s -j4
 	@echo "*** Installing gcc ***"
-	cd gcc-build && sudo make -s install
+	cd ${GCC_BUILD} && sudo make install-gcc
 
 minipro-install:
 	@echo $(pkg-config --version) || (echo "pkg-config is not installed; install with sudo apt-get install pkg-config"; exit 1)
 	@echo $(dpkg -l | grep libusb-1.0) || (echo "libusb-1.0 is not installed; install using sudo apt-get install libusb-1.0"; exit 1)
-	wget https://gitlab.com/DavidGriffith/minipro/-/archive/0.5/minipro-0.5.tar.gz
+	wget https://gitlab.com/DavidGriffith/minipro/-/archive/0.5/minipro-0.5.tar.gz -O /tmp/minipro-0.5.tar.gz
 	tar xvzf minipro-0.5.tar.gz
 	cd minipro-0.5 && make && ./minipro --version
 	sudo cp minipro-0.5/udev/*.rules /etc/udev/rules.d/
@@ -26,6 +39,7 @@ minipro-install:
 	@echo "You need to log out and in again for the rules to take effect. Or: you can run the make recipes for burning the ROMs as root with sudo."
 
 rom-odd: minipro-0.5/minipro tutor13.bin
+	# Method from https://www.linuxquestions.org/questions/linux-general-1/linux-command-to-copy-every-other-byte-from-file-708566/#post3462413
 	od -w2 -t u1 -v tutor13.bin | awk ' { printf("%c", strtonum($2)) } ' > tutor13_odd.bin
 
 rom-even: minipro-0.5/minipro tutor13.bin
