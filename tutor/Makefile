@@ -40,12 +40,13 @@ minipro-install:
 	sudo usermod -a -G plugdev ${USER}
 	@echo "You need to log out and in again for the rules to take effect. Or: you can run the make recipes for burning the ROMs as root with sudo."
 
-rom-odd: minipro-0.5/minipro tutor13.bin
-	# Method from https://www.linuxquestions.org/questions/linux-general-1/linux-command-to-copy-every-other-byte-from-file-708566/#post3462413
-	od -w2 -t u1 -v tutor13.bin | awk ' { printf("%c", strtonum($2)) } ' > tutor13_odd.bin
+rom-odd: minipro-0.5/minipro
+	@# Method from https://www.linuxquestions.org/questions/linux-general-1/linux-command-to-copy-every-other-byte-from-file-708566/#post3462413
+	@# We need two $$ signs to escape to a single $ in Makefile
+	od -w2 -t u1 -v tutor13.bin | awk ' { printf("%c", strtonum($$2)) } ' > tutor13_odd.bin
 
-rom-even: minipro-0.5/minipro tutor13.bin
-	od -w2 -t u1 -v tutor13.bin | awk ' { printf("%c", strtonum($3)) } ' > tutor13_even.bin
+rom-even: minipro-0.5/minipro
+	od -w2 -t u1 -v tutor13.bin | awk ' { printf("%c", strtonum($$3)) } ' > tutor13_even.bin
 
 tutor13.o: tutor13.s
 	m68k-elf-as -m68000 -alms -a=tutor13.lst -o tutor13.o tutor13.s
