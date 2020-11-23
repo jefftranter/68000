@@ -42,22 +42,27 @@ else
 	@echo "pkg-config and libusb-1.0 are required; install with sudo apt-get install pkg-config libusb-1.0"; exit 1
 endif
 
+# Capture output from stderr from minipro to see whether the device is connected
+CONNECTED := "$(shell minipro-0.5/minipro --presence_check 2>&1)"
+
 rom-odd: minipro-0.5/minipro
-ifeq ($(minipro-0.5/minipro --devices), 0)
+ifeq ($(CONNECTED), "[No programmer found]")
+	@echo "No minipro device detected, please connect one"; exit 1
+else
+	@$(if $(shell which gawk), echo "found gawk", $(error "You need to install gawk to run this command"))
 	@# Method from https://www.linuxquestions.org/questions/linux-general-1/linux-command-to-copy-every-other-byte-from-file-708566/#post3462413
 	@# We need two $$ signs to escape to a single $ in Makefile
-	od -w2 -t u1 -v tutor13.bin | awk ' { printf("%c", strtonum($$2)) } ' > tutor13_odd.bin
-	minipro --write tutor13_odd.bin
-else
-	@echo "No minipro device detected, please connect one"; exit 1
+	$(shell od -w2 -t u1 -v tutor13.bin | gawk ' { printf("%c", strtonum($$2)) } ' > tutor13_odd.bin)
+	cd minipro-0.5 && ./minipro --write ../tutor13_odd.bin --device=28C64B
 endif
 
 rom-even: minipro-0.5/minipro
-ifeq ($(minipro-0.5/minipro --devices), 0)
-	od -w2 -t u1 -v tutor13.bin | awk ' { printf("%c", strtonum($$3)) } ' > tutor13_even.bin
-	minipro --write tutor13_even.bin
-else
+ifeq ($(CONNECTED), "[No programmer found]")
 	@echo "No minipro device detected, please connect one"; exit 1
+else
+	@$(if $(shell which gawk), echo "found gawk", $(error "You need to install gawk to run this command"))
+	$(shell od -w2 -t u1 -v tutor13.bin | gawk ' { printf("%c", strtonum($$3)) } ' > tutor13_even.bin)
+	cd minipro-0.5 && ./minipro --write ../tutor13_even.bin --device=28C64B
 endif
 
 tutor13.o: tutor13.s
