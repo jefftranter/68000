@@ -1,7 +1,26 @@
-# gcc version to build
-GCC_VER=5.4.0
 # directory to save source files into
 TMP := /tmp
+
+SREC_VER := 151
+SREC_BUILD := ${HOME}/.local/srec
+SREC_FOUND := "You can now use bin2srec, srec2bin and binsplit from the command line."
+SREC_NOT_FOUND := "bin2srec, srec2bin and binsplit are in ~/.local/bin but this folder isn't in your PATH, \
+					please add it: \"echo PATH=, see https://www.howtogeek.com/658904/how-to-add-a-directory-to-your-path-in-linux/."
+
+srec-install:
+	wget http://www.goffart.co.uk/s-record/download/srec_${SREC_VER}_src.zip -O ${TMP}/srec.zip
+	unzip ${TMP}/srec.zip -d ${SREC_BUILD}
+	cd ${SREC_BUILD} && make
+	@mkdir -p ~/.local/bin
+	@mv ${SREC_BUILD}/bin2srec ~/.local/bin/
+	@mv ${SREC_BUILD}/srec2bin ~/.local/bin/
+	@mv ${SREC_BUILD}/binsplit ~/.local/bin/
+	@rm ${TMP}/srec.zip
+	@rm -r ${SREC_BUILD}
+	@$(if $(shell which bin2srec), echo ${SREC_FOUND}, $(error ${SREC_NOT_FOUND}))
+
+# gcc version to build
+GCC_VER := 5.4.0
 GCC_SRC := ${TMP}/gcc-${GCC_VER}
 GCC_BUILD := ${HOME}/.gcc-build
 GCC_INSTALL := ${HOME}/gcc-elf-m68k-${GCC_VER}
