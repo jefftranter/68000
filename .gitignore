@@ -266,5 +266,5 @@ fabric.properties
 # Android studio 3.1+ serialized cache file
 .idea/caches/build_file_checksums.ser
 
-tutor/minipro-0.5
-tutor/minipro-0.5.tar.gz
+# Add minipro ic list, it's copied here by the makefile for tutor/Makefile make minipro-install recipe
+/tutor/infoic.xml
