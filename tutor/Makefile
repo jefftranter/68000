@@ -1,11 +1,11 @@
 # directory to save source files into
-TMP := /tmp
+TMP ?= /tmp
 
 SREC_VER := 151
-SREC_BUILD := ${HOME}/.local/srec
-SREC_FOUND := "You can now use bin2srec, srec2bin and binsplit from the command line."
-SREC_NOT_FOUND := "bin2srec, srec2bin and binsplit are in ~/.local/bin but this folder isn't in your PATH, \
-					please add it: \"echo PATH=, see https://www.howtogeek.com/658904/how-to-add-a-directory-to-your-path-in-linux/."
+SREC_BUILD := ${HOME}/.srec
+SREC_FOUND := 		"You can now use bin2srec, srec2bin and binsplit from the command line."
+SREC_NOT_FOUND := 	"bin2srec, srec2bin and binsplit are in ~/.local/bin but this folder isn't in your PATH, please \
+					add it: see https://www.howtogeek.com/658904/how-to-add-a-directory-to-your-path-in-linux/."
 
 srec-install:
 	wget http://www.goffart.co.uk/s-record/download/srec_${SREC_VER}_src.zip -O ${TMP}/srec.zip
@@ -23,10 +23,10 @@ srec-install:
 GCC_VER := 5.4.0
 GCC_SRC := ${TMP}/gcc-${GCC_VER}
 GCC_BUILD := ${HOME}/.gcc-build
-GCC_INSTALL := ${HOME}/gcc-elf-m68k-${GCC_VER}
+GCC_INSTALL := ${HOME}/.local
 
 gcc-install:
-	wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VER}/gcc-${GCC_VER}.tar.gz -O ${GCC_SRC}.tar.gz
+	wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VER}/gcc-${GCC_VER}.tar.gz -O ${TMP}/gcc-${GCC_SRC}.tar.gz
 	@echo "*** Extracting gcc source ***"
 	cd ${TMP} && tar xzf gcc-${GCC_VER}.tar.gz
 	@echo "*** Downloading compile dependencies ***"
@@ -46,40 +46,35 @@ gcc-install:
 	@echo "*** Installing gcc ***"
 	cd ${GCC_BUILD} && sudo make install-gcc
 
+MINIPRO_VER := 0.5
+MINIPRO_BUILD := ~/.local/minipro
+
 minipro-install:
-ifeq ($(pkg-config --version && $(dpkg -l | grep libusb-1.0)), 0)
-	wget https://gitlab.com/DavidGriffith/minipro/-/archive/0.5/minipro-0.5.tar.gz -O /tmp/minipro-0.5.tar.gz
-	tar xvzf minipro-0.5.tar.gz
-	cd minipro-0.5 && make && ./minipro --version
-	sudo cp minipro-0.5/udev/*.rules /etc/udev/rules.d/
-	sudo udevadm trigger
-	sudo usermod -a -G plugdev ${USER}
-	@echo "You need to log out and in again for the rules to take effect. Or: you can run the make recipes for burning the ROMs as root with sudo."
-else
-	@echo "pkg-config and libusb-1.0 are required; install with sudo apt-get install pkg-config libusb-1.0"; exit 1
-endif
+	@wget https://gitlab.com/DavidGriffith/minipro/-/archive/${MINIPRO_VER}/minipro-${MINIPRO_VER}.tar.gz -O ${TMP}/minipro.tar.gz
+	@mkdir -p ${MINIPRO_BUILD}
+	@tar xvzf ${TMP}/minipro.tar.gz --directory ${MINIPRO_BUILD}
+	@cd ${MINIPRO_BUILD}/minipro-${MINIPRO_VER} && make && sudo make install
+	minipro --version
+	@sudo udevadm trigger
+	@sudo usermod -a -G plugdev ${USER}
+	@echo "You need to log out and in again for the rules for user access to the programmer over USB to take effect. \
+			Or: you can run the make recipes for burning the ROMs as root with sudo: e.g. sudo make rom-odd"
 
 # Capture output from stderr from minipro to see whether the device is connected
 CONNECTED := "$(shell minipro-0.5/minipro --presence_check 2>&1)"
 
-rom-odd: minipro-0.5/minipro
+rom-odd:
 ifeq ($(CONNECTED), "[No programmer found]")
 	@echo "No minipro device detected, please connect one"; exit 1
 else
-	@$(if $(shell which gawk), echo "found gawk", $(error "You need to install gawk to run this command"))
-	@# Method from https://www.linuxquestions.org/questions/linux-general-1/linux-command-to-copy-every-other-byte-from-file-708566/#post3462413
-	@# We need two $$ signs to escape to a single $ in Makefile
-	$(shell od -w2 -t u1 -v tutor13.bin | gawk ' { printf("%c", strtonum($$2)) } ' > tutor13_odd.bin)
-	cd minipro-0.5 && ./minipro --write ../tutor13_odd.bin --device=28C64B
+	minipro --write=tutor13_odd.bin --device=28C64B
 endif
 
-rom-even: minipro-0.5/minipro
+rom-even:
 ifeq ($(CONNECTED), "[No programmer found]")
 	@echo "No minipro device detected, please connect one"; exit 1
 else
-	@$(if $(shell which gawk), echo "found gawk", $(error "You need to install gawk to run this command"))
-	$(shell od -w2 -t u1 -v tutor13.bin | gawk ' { printf("%c", strtonum($$3)) } ' > tutor13_even.bin)
-	cd minipro-0.5 && ./minipro --write ../tutor13_even.bin --device=28C64B
+	minipro --write=tutor13_even.bin --device=28C64B
 endif
 
 tutor13.o: tutor13.s
