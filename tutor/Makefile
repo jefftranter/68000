@@ -8,16 +8,17 @@ SREC_NOT_FOUND := 	"bin2srec, srec2bin and binsplit are in ~/.local/bin but this
 					add it: see https://www.howtogeek.com/658904/how-to-add-a-directory-to-your-path-in-linux/."
 
 srec-install:
-	wget http://www.goffart.co.uk/s-record/download/srec_${SREC_VER}_src.zip -O ${TMP}/srec.zip
-	unzip ${TMP}/srec.zip -d ${SREC_BUILD}
-	cd ${SREC_BUILD} && make
+	$(if $(shell which unzip), echo "unzip found", $(error "please install unzip"))
+	@wget http://www.goffart.co.uk/s-record/download/srec_${SREC_VER}_src.zip -O ${TMP}/srec.zip
+	@mkdir -p ${SREC_BUILD}
+	@unzip ${TMP}/srec.zip -d ${SREC_BUILD}
+	@cd ${SREC_BUILD} && make
 	@mkdir -p ~/.local/bin
 	@mv ${SREC_BUILD}/bin2srec ~/.local/bin/
 	@mv ${SREC_BUILD}/srec2bin ~/.local/bin/
 	@mv ${SREC_BUILD}/binsplit ~/.local/bin/
 	@rm ${TMP}/srec.zip
 	@rm -r ${SREC_BUILD}
-	@$(if $(shell which bin2srec), echo ${SREC_FOUND}, $(error ${SREC_NOT_FOUND}))
 
 # gcc version to build
 GCC_VER := 5.4.0
@@ -26,9 +27,9 @@ GCC_BUILD := ${HOME}/.gcc-build
 GCC_INSTALL := ${HOME}/.local
 
 gcc-install:
-	wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VER}/gcc-${GCC_VER}.tar.gz -O ${TMP}/gcc-${GCC_SRC}.tar.gz
+	wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VER}/gcc-${GCC_VER}.tar.gz -O ${TMP}/gcc.tar.gz
 	@echo "*** Extracting gcc source ***"
-	cd ${TMP} && tar xzf gcc-${GCC_VER}.tar.gz
+	cd ${TMP} && tar xzf gcc.tar.gz
 	@echo "*** Downloading compile dependencies ***"
 	cd ${GCC_SRC} && contrib/download_prerequisites
 	@echo "*** Configuring gcc ***"
@@ -49,6 +50,9 @@ gcc-install:
 MINIPRO_VER := 0.5
 MINIPRO_BUILD := ~/.local/minipro
 
+# Capture output from stderr from minipro to see whether the device is connected
+CONNECTED := "$(shell minipro-0.5/minipro --presence_check 2>&1)"
+
 minipro-install:
 	@wget https://gitlab.com/DavidGriffith/minipro/-/archive/${MINIPRO_VER}/minipro-${MINIPRO_VER}.tar.gz -O ${TMP}/minipro.tar.gz
 	@mkdir -p ${MINIPRO_BUILD}
@@ -59,9 +63,6 @@ minipro-install:
 	@sudo usermod -a -G plugdev ${USER}
 	@echo "You need to log out and in again for the rules for user access to the programmer over USB to take effect. \
 			Or: you can run the make recipes for burning the ROMs as root with sudo: e.g. sudo make rom-odd"
-
-# Capture output from stderr from minipro to see whether the device is connected
-CONNECTED := "$(shell minipro-0.5/minipro --presence_check 2>&1)"
 
 rom-odd:
 ifeq ($(CONNECTED), "[No programmer found]")
