@@ -12,13 +12,14 @@ srec-install:
 	@wget http://www.goffart.co.uk/s-record/download/srec_${SREC_VER}_src.zip -O ${TMP}/srec.zip
 	@mkdir -p ${SREC_BUILD}
 	@unzip ${TMP}/srec.zip -d ${SREC_BUILD}
-	@cd ${SREC_BUILD} && make
+	${MAKE} -C ${SREC_BUILD}
 	@mkdir -p ~/.local/bin
-	@mv ${SREC_BUILD}/bin2srec ~/.local/bin/
-	@mv ${SREC_BUILD}/srec2bin ~/.local/bin/
-	@mv ${SREC_BUILD}/binsplit ~/.local/bin/
-	@rm ${TMP}/srec.zip
-	@rm -r ${SREC_BUILD}
+	mv ${SREC_BUILD}/bin2srec ~/.local/bin/
+	mv ${SREC_BUILD}/srec2bin ~/.local/bin/
+	mv ${SREC_BUILD}/binsplit ~/.local/bin/
+	rm ${TMP}/srec.zip
+	rm -r ${SREC_BUILD}
+	@echo You can now use "bin2srec", "srec2bin" and "binsplit" from your ~/.local/bin
 
 # gcc version to build
 GCC_VER := 5.4.0
@@ -51,7 +52,7 @@ MINIPRO_VER := 0.5
 MINIPRO_BUILD := ~/.local/minipro
 
 # Capture output from stderr from minipro to see whether the device is connected
-CONNECTED := "$(shell minipro-0.5/minipro --presence_check 2>&1)"
+# CONNECTED := "$(shell minipro-0.5/minipro --presence_check 2>&1)"
 
 minipro-install:
 	@wget https://gitlab.com/DavidGriffith/minipro/-/archive/${MINIPRO_VER}/minipro-${MINIPRO_VER}.tar.gz -O ${TMP}/minipro.tar.gz
