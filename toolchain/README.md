@@ -1,6 +1,6 @@
 # Toolchain
-This folder contains the recipes for installing the complete pipeline from compiling, assembling, disassembling, binary 
-manipulation and ROM flashing. The Makefile offers the following installation options:
+This folder contains the recipes for installing the complete toolchain from compiling, assembling, disassembling and binary 
+manipulation to ROM flashing. The Makefile offers the following installation options:
 
 ## Generic install configuration options
 All install recipes allow overriding the binary install directory, but often this requires root rights. By default,
@@ -53,4 +53,4 @@ By default, the installation script installs to your ~/.local/bin dir so that th
 root rights. Also: the entire install is now portable if your home folder is on a different partition. 
 
 ### Usage
-Once installed, you can call 
+Once installed, you can use `m68k-elf-gcc` to compile your own programs to run on m68k hardware!
