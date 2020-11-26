@@ -1,11 +1,9 @@
 # directory to save source files into
 TMP ?= /tmp
+BIN_DIR ?= ${HOME}/.local/bin
 
-SREC_VER := 151
-SREC_BUILD := ${HOME}/.srec
-SREC_FOUND := 		"You can now use bin2srec, srec2bin and binsplit from the command line."
-SREC_NOT_FOUND := 	"bin2srec, srec2bin and binsplit are in ~/.local/bin but this folder isn't in your PATH, please \
-					add it: see https://www.howtogeek.com/658904/how-to-add-a-directory-to-your-path-in-linux/."
+SREC_VER ?= 151
+SREC_BUILD ?= ${HOME}/.srec
 
 srec-install:
 	$(if $(shell which unzip), echo "unzip found", $(error "please install unzip"))
@@ -13,13 +11,13 @@ srec-install:
 	@mkdir -p ${SREC_BUILD}
 	@unzip ${TMP}/srec.zip -d ${SREC_BUILD}
 	${MAKE} -C ${SREC_BUILD}
-	@mkdir -p ~/.local/bin
-	mv ${SREC_BUILD}/bin2srec ~/.local/bin/
-	mv ${SREC_BUILD}/srec2bin ~/.local/bin/
-	mv ${SREC_BUILD}/binsplit ~/.local/bin/
+	@mkdir -p ${BIN_DIR}
+	mv ${SREC_BUILD}/bin2srec ${BIN_DIR}/
+	mv ${SREC_BUILD}/srec2bin ${BIN_DIR}/
+	mv ${SREC_BUILD}/binsplit ${BIN_DIR}/
 	rm ${TMP}/srec.zip
 	rm -r ${SREC_BUILD}
-	@echo You can now use "bin2srec", "srec2bin" and "binsplit" from your ~/.local/bin
+	@echo You can now use "bin2srec", "srec2bin" and "binsplit" if ${BIN_DIR}
 
 # gcc version to build
 GCC_VER ?= 5.4.0
@@ -71,5 +69,5 @@ vasm-install:
 	wget http://sun.hasenbraten.de/vasm/release/vasm.tar.gz -O ${VASM_DIR}/vasm.tar.gz
 	tar xvzf ${VASM_DIR}/vasm.tar.gz --directory ${VASM_DIR}/..
 	make -C ${VASM_DIR} CPU=m68k SYNTAX=mot
-	cp ~/.local/vasm/vasmm68k_mot ~/.local/bin/
+	cp ~/.local/vasm/vasmm68k_mot ${BIN_DIR}/
 	echo "Vasm m68k assembler successfully installed, you can call it using 'vasmm68k_mot'"
