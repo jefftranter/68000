@@ -268,9 +268,3 @@ fabric.properties
 
 # Add minipro ic list, it's copied here by the makefile for tutor/Makefile make minipro-install recipe
 /tutor/infoic.xml
-# Ignore source and compiled vasm
-/disasm/vasm.tar.gz
-/disasm/vasm/
-
-tutor/minipro-0.5
-tutor/minipro-0.5.tar.gz
