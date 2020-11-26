@@ -26,6 +26,7 @@ GCC_VER ?= 5.4.0
 GCC_SRC := ${TMP}/gcc-${GCC_VER}
 GCC_BUILD := ${HOME}/.gcc-build
 GCC_INSTALL_DIR ?= ${HOME}/.local
+GCC_LANGUAGES ?= "c"
 
 gcc-install:
 	wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VER}/gcc-${GCC_VER}.tar.gz -O ${TMP}/gcc.tar.gz
@@ -39,14 +40,14 @@ gcc-install:
 		-q \
 		--prefix=${GCC_INSTALL_DIR} \
 		--target=m68k-elf \
-		--enable-languages=c \
+		--enable-languages=${GCC_LANGUAGES} \
 		--disable-libssp \
 		--disable-nls \
 		--disable-multilib
 	@echo "*** Building gcc ***"
 	cd ${GCC_BUILD} && make all-gcc -s -j4
 	@echo "*** Installing gcc ***"
-	cd ${GCC_BUILD} && sudo make install-gcc
+	cd ${GCC_BUILD} && make install-gcc
 
 MINIPRO_VER ?= 0.5
 MINIPRO_DIR ?= ~/.local/minipro
