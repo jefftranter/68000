@@ -22,10 +22,10 @@ srec-install:
 	@echo You can now use "bin2srec", "srec2bin" and "binsplit" from your ~/.local/bin
 
 # gcc version to build
-GCC_VER := 5.4.0
+GCC_VER ?= 5.4.0
 GCC_SRC := ${TMP}/gcc-${GCC_VER}
 GCC_BUILD := ${HOME}/.gcc-build
-GCC_INSTALL := ${HOME}/.local
+GCC_INSTALL_DIR ?= ${HOME}/.local
 
 gcc-install:
 	wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VER}/gcc-${GCC_VER}.tar.gz -O ${TMP}/gcc.tar.gz
@@ -37,7 +37,7 @@ gcc-install:
 	mkdir -p ${GCC_BUILD}
 	cd ${GCC_BUILD} && ${GCC_SRC}/configure \
 		-q \
-		--prefix=${GCC_INSTALL} \
+		--prefix=${GCC_INSTALL_DIR} \
 		--target=m68k-elf \
 		--enable-languages=c \
 		--disable-libssp \
@@ -48,17 +48,14 @@ gcc-install:
 	@echo "*** Installing gcc ***"
 	cd ${GCC_BUILD} && sudo make install-gcc
 
-MINIPRO_VER := 0.5
-MINIPRO_BUILD := ~/.local/minipro
-
-# Capture output from stderr from minipro to see whether the device is connected
-# CONNECTED := "$(shell minipro-0.5/minipro --presence_check 2>&1)"
+MINIPRO_VER ?= 0.5
+MINIPRO_DIR ?= ~/.local/minipro
 
 minipro-install:
 	@wget https://gitlab.com/DavidGriffith/minipro/-/archive/${MINIPRO_VER}/minipro-${MINIPRO_VER}.tar.gz -O ${TMP}/minipro.tar.gz
-	@mkdir -p ${MINIPRO_BUILD}
-	@tar xvzf ${TMP}/minipro.tar.gz --directory ${MINIPRO_BUILD}
-	@cd ${MINIPRO_BUILD}/minipro-${MINIPRO_VER} && make && sudo make install
+	@mkdir -p ${MINIPRO_DIR}
+	@tar xvzf ${TMP}/minipro.tar.gz --directory ${MINIPRO_DIR}
+	@cd ${MINIPRO_DIR}/minipro-${MINIPRO_VER} && make && sudo make install
 	minipro --version
 	@sudo udevadm trigger
 	@sudo usermod -a -G plugdev ${USER}
