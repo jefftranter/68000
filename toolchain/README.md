@@ -54,8 +54,8 @@ From this directory, run:
 make gcc-install
 ```
 
-By default only C support is enabled in this install recipe, but you can override this setting by altering the 
-GCC_LANGUAGES environment:
+By default only C support (a 'front end' in GCC terms) is enabled in this install recipe, but you can override this 
+setting by using the GCC_LANGUAGES variable:
 ```shell script
 GCC_LANGUAGES=c,c++ make gcc-install
 ```
@@ -63,5 +63,13 @@ GCC_LANGUAGES=c,c++ make gcc-install
 By default, the installation script installs to your ~/.local/bin dir so that the entire installation can be run without
 root rights. You can install to a different bin dir by prepending the make command with BIN_DIR=/path/to/your/bin/dir.
 
+### Uninstall
+```shell script
+make gcc-uninstall
+```
+
+Note that you have to specify the same binary install dir if you specified a custom BIN_DIR during installation.
+
 ### Usage
-Once installed, you can use `m68k-elf-gcc` to compile your own programs to run on m68k hardware!
+Once installed, you can use `m68k-elf-gcc` to compile your own programs to run on m68k hardware! Compilation is done by
+specifying the target processor. See the [Makefile](../c_example/Makefile) in the c_example dir on how to use it.

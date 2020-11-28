@@ -54,11 +54,21 @@ gcc-install:
 	@make all-gcc -s -j4 -C ${GCC_BUILD}
 	@echo "*** Installing gcc ***"
 	@make install-gcc -C ${GCC_BUILD}
-	@echo "*** Removing temporary build directory ***"
+	@echo "*** Removing build directory ***"
 	@rm -r ${GCC_BUILD}
 	@echo "*** Run cross-compilation test ***"
 	@${MAKE} demo.s -C ../c_example
 	@${MAKE} clean -C ../c_example
+
+gcc-uninstall:
+	@$(if $(shell which m68k-elf-gcc), echo "Removing gcc cross compiler", $(error "gcc cross-compiler not found"))
+	rm ${GCC_INSTALL_DIR}/bin/m68k-elf-g*
+	rm ${GCC_INSTALL_DIR}/bin/m68k-elf-cpp
+	rm -r ${GCC_INSTALL_DIR}/lib/gcc
+	rm -r ${GCC_INSTALL_DIR}/libexec/gcc
+	rm ${GCC_INSTALL_DIR}/share/man/man1/m68-elf-cpp.1
+	rm ${GCC_INSTALL_DIR}/share/man/man1/m68-elf-gcc.1
+	rm ${GCC_INSTALL_DIR}/share/man/man1/m68-elf-gcov.1
 
 MINIPRO_VER ?= 0.5
 MINIPRO_DIR ?= ~/.local/minipro
