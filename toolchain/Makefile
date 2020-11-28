@@ -19,6 +19,12 @@ srec-install:
 	rm -r ${SREC_BUILD}
 	@echo You can now use "bin2srec", "srec2bin" and "binsplit" if ${BIN_DIR}
 
+srec-uninstall:
+	@$(if $(shell ls ${BIN_DIR} | grep bin2srec), echo "removing srec binaries", $(error "srec binaries not found in ${BIN_DIR}"))
+	rm ${BIN_DIR}/bin2srec
+	rm ${BIN_DIR}/srec2bin
+	rm ${BIN_DIR}/binsplit
+
 # gcc version to build
 GCC_VER ?= 5.4.0
 GCC_SRC := ${TMP}/gcc-${GCC_VER}
