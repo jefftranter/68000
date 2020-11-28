@@ -1,6 +1,7 @@
 # directory to save source files into
 TMP ?= /tmp
-BIN_DIR ?= ${HOME}/.local/bin
+INSTALL_DIR ?= ${HOME}/.local
+BIN_DIR ?= ${INSTALL_DIR}/bin
 
 SREC_VER ?= 151
 SREC_BUILD ?= ${HOME}/.srec
@@ -24,6 +25,26 @@ srec-uninstall:
 	rm ${BIN_DIR}/bin2srec
 	rm ${BIN_DIR}/srec2bin
 	rm ${BIN_DIR}/binsplit
+
+SRECORD_VER ?= "1.64"
+SRECORD_BUILD ?= ${HOME}/.srecord
+
+srecord-install:
+	@wget http://srecord.sourceforge.net/srecord-${SRECORD_VER}.tar.gz -O ${TMP}/srecord.tar.gz
+	@mkdir -p ${SRECORD_BUILD}
+	@tar xzf ${TMP}/srecord.tar.gz --directory ${SRECORD_BUILD}
+	@rm ${TMP}/srecord.tar.gz
+	@cd ${SRECORD_BUILD}/srecord-${SRECORD_VER} && \
+		./configure \
+			--prefix=${INSTALL_DIR} \
+			--without-gcrypt
+	${MAKE} -C ${SRECORD_BUILD}/srecord-${SRECORD_VER}
+	${MAKE} install -C ${SRECORD_BUILD}/srecord-${SRECORD_VER}
+
+srecord-uninstall:
+	@$(if $(shell ls ${BIN_DIR} | grep srec_cat), echo "removing SRecord", $(error "SRecord binaries not found in ${BIN_DIR}"))
+	${MAKE} uninstall -C ${SRECORD_BUILD}/srecord-${SRECORD_VER}
+	@rm -r ${SRECORD_BUILD}/srecord-${SRECORD_VER}
 
 # gcc version to build
 GCC_VER ?= 5.4.0

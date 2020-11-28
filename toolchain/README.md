@@ -31,6 +31,35 @@ make srec-uninstall
 
 Note that you have to specify the same binary install dir if you specified a custom BIN_DIR during installation.
 
+## SRecord
+SRecord is (somewhat confusingly) a very elaborate set of tools useful for working with ROM files.
+
+### Installation
+S-record need to install libboost and libtool for your OS. On Debian-like systems this amounts to 
+```shell script
+sudo apt-get install -y libboost-dev libtool-bin ghostscript
+```
+but on other distributions you will require, yum, dnf or whatever package manager is available on your system. Note that
+libtool-bin installs the required `libtool` executable, the one that the `configure` script for SRecord looks for. 
+Oddly enough, this is executable is not in the `libtool` package, but in `libtool-bin`, at least not in recent Debian or
+Debian-derivative distributions. The ghostscript package is required for building the documentation.
+
+From this directory, run:
+```shell script
+make srecord-install
+```
+
+By default, the installation script installs to your ~/.local/bin dir so that the entire installation can be run without
+root rights. You can install to a different bin dir by prepending the make command with BIN_DIR=/path/to/your/bin/dir.
+
+
+### Uninstall
+```shell script
+make srec-uninstall
+```
+
+Note that you have to specify the same binary install dir if you specified a custom BIN_DIR during installation.
+
 ### Usage
 Once installed, you can call: 
 - `srec2bin` to convert an S-record file to a binary file. See `srec2bin --help` for more detailed instructions.
