@@ -40,6 +40,8 @@ srecord-install:
 			--without-gcrypt
 	${MAKE} -C ${SRECORD_BUILD}/srecord-${SRECORD_VER}
 	${MAKE} install -C ${SRECORD_BUILD}/srecord-${SRECORD_VER}
+	@echo "Checking correct installation"
+	srec_cat --version
 
 srecord-uninstall:
 	@$(if $(shell ls ${BIN_DIR} | grep srec_cat), echo "removing SRecord", $(error "SRecord binaries not found in ${BIN_DIR}"))
@@ -50,7 +52,6 @@ srecord-uninstall:
 GCC_VER ?= 5.4.0
 GCC_SRC := ${TMP}/gcc-${GCC_VER}
 GCC_BUILD := ${HOME}/.gcc-build
-GCC_INSTALL_DIR ?= ${BIN_DIR}/..
 GCC_LANGUAGES ?= "c"
 
 gcc-install:
@@ -65,7 +66,7 @@ gcc-install:
 	mkdir -p ${GCC_BUILD}
 	cd ${GCC_BUILD} && ${GCC_SRC}/configure \
 		-q \
-		--prefix=${GCC_INSTALL_DIR} \
+		--prefix=${INSTALL_DIR} \
 		--target=m68k-elf \
 		--enable-languages=${GCC_LANGUAGES} \
 		--disable-libssp \
@@ -83,13 +84,13 @@ gcc-install:
 
 gcc-uninstall:
 	@$(if $(shell which m68k-elf-gcc), echo "Removing gcc cross compiler", $(error "gcc cross-compiler not found"))
-	rm ${GCC_INSTALL_DIR}/bin/m68k-elf-g*
-	rm ${GCC_INSTALL_DIR}/bin/m68k-elf-cpp
-	rm -r ${GCC_INSTALL_DIR}/lib/gcc
-	rm -r ${GCC_INSTALL_DIR}/libexec/gcc
-	rm ${GCC_INSTALL_DIR}/share/man/man1/m68-elf-cpp.1
-	rm ${GCC_INSTALL_DIR}/share/man/man1/m68-elf-gcc.1
-	rm ${GCC_INSTALL_DIR}/share/man/man1/m68-elf-gcov.1
+	rm ${INSTALL_DIR}/bin/m68k-elf-g*
+	rm ${INSTALL_DIR}/bin/m68k-elf-cpp
+	rm -r ${INSTALL_DIR}/lib/gcc
+	rm -r ${INSTALL_DIR}/libexec/gcc
+	rm ${INSTALL_DIR}/share/man/man1/m68-elf-cpp.1
+	rm ${INSTALL_DIR}/share/man/man1/m68-elf-gcc.1
+	rm ${INSTALL_DIR}/share/man/man1/m68-elf-gcov.1
 
 MINIPRO_VER ?= 0.5
 MINIPRO_DIR ?= ~/.local/minipro
