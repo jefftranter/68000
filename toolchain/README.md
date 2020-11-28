@@ -4,9 +4,9 @@ manipulation to ROM flashing. The Makefile offers the following installation opt
 
 ## Generic install configuration options
 All install recipes allow overriding the binary install directory, but often this requires root rights. By default,
-programs are installed to ~/.local/bin unless stated otherwise. This makes the installation now portable, for example if
+programs are installed to ~/.local/ unless stated otherwise. This makes the installation now portable, for example if
 your home folder is on a different partition. The install path can be configured to point somewhere else by 
-prepending all make instructions below with `BIN_DIR=/path/to/your/bin/dir`, unless stated otherwise.
+prepending all make instructions below with `INSTALL_DIR=/path/to/your/install/dir`, unless stated otherwise.
 
 Also, by default the make recipes use the TMP dir to store retrieved source code files. This can also be overridden by
 prepending install commands with `TMP=/path/to/your/tmp/dir`
@@ -20,8 +20,8 @@ From this directory, run:
 make srec-install
 ```
 
-By default, the installation script installs to your ~/.local/bin dir so that the entire installation can be run without
-root rights. You can install to a different bin dir by prepending the make command with BIN_DIR=/path/to/your/bin/dir.
+By default, the installation script installs to your ~/.local/ dir so that the entire installation can be run without
+root rights. You can install to a different dir by prepending the make command with INSTALL_DIR=/path/to/your/install/dir.
 
 
 ### Uninstall
@@ -29,7 +29,7 @@ root rights. You can install to a different bin dir by prepending the make comma
 make srec-uninstall
 ```
 
-Note that you have to specify the same binary install dir if you specified a custom BIN_DIR during installation.
+Note that you have to specify the same install dir if you specified a custom INSTALL_DIR during installation.
 
 ## SRecord
 SRecord is (somewhat confusingly) a very elaborate set of tools useful for working with ROM files.
@@ -49,16 +49,13 @@ From this directory, run:
 make srecord-install
 ```
 
-By default, the installation script installs to your ~/.local/bin dir so that the entire installation can be run without
-root rights. You can install to a different bin dir by prepending the make command with BIN_DIR=/path/to/your/bin/dir.
-
+By default, the installation script installs to your ~/.local/ dir so that the entire installation can be run without
+root rights. You can install to a different dir by prepending the make command with INSTALL_DIR=/path/to/your/install/dir.
 
 ### Uninstall
 ```shell script
-make srec-uninstall
+make srecord-uninstall
 ```
-
-Note that you have to specify the same binary install dir if you specified a custom BIN_DIR during installation.
 
 ### Usage
 Once installed, you can call: 
@@ -90,14 +87,14 @@ GCC_LANGUAGES=c,c++ make gcc-install
 ```
 
 By default, the installation script installs to your ~/.local/bin dir so that the entire installation can be run without
-root rights. You can install to a different bin dir by prepending the make command with BIN_DIR=/path/to/your/bin/dir.
+root rights. You can install to a different bin dir by prepending the make command with INSTALL_DIR=/path/to/your/bin/dir.
 
 ### Uninstall
 ```shell script
 make gcc-uninstall
 ```
 
-Note that you have to specify the same binary install dir if you specified a custom BIN_DIR during installation.
+Note that you have to specify the same install dir if you specified a custom INSTALL_DIR during installation.
 
 ### Usage
 Once installed, you can use `m68k-elf-gcc` to compile your own programs to run on m68k hardware! Compilation is done by
