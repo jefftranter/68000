@@ -4,8 +4,9 @@ manipulation to ROM flashing. The Makefile offers the following installation opt
 
 ## Generic install configuration options
 All install recipes allow overriding the binary install directory, but often this requires root rights. By default,
-programs are installed to ~/.local/bin unless stated otherwise. This path can be configured to somewhere else by 
-prepending all make instructions below with `BIN_DIR=/path/to/your/bin/dir`
+programs are installed to ~/.local/bin unless stated otherwise. This makes the installation now portable, for example if
+your home folder is on a different partition. The install path can be configured to point somewhere else by 
+prepending all make instructions below with `BIN_DIR=/path/to/your/bin/dir`, unless stated otherwise.
 
 Also, by default the make recipes use the TMP dir to store retrieved source code files. This can also be overridden by
 prepending install commands with `TMP=/path/to/your/tmp/dir`
@@ -20,7 +21,15 @@ make srec-install
 ```
 
 By default, the installation script installs to your ~/.local/bin dir so that the entire installation can be run without
-root rights. Also: the entire install is now portable if your home folder is on a different partition.
+root rights. You can install to a different bin dir by prepending the make command with BIN_DIR=/path/to/your/bin/dir.
+
+
+### Uninstall
+```shell script
+make srec-uninstall
+```
+
+Note that you have to specify the same binary install dir if you specified a custom BIN_DIR during installation.
 
 ### Usage
 Once installed, you can call: 
@@ -31,10 +40,13 @@ an even ROM file to flash to even and odd ROM chips.
 
 ## GCC cross-compiler
 This tool is incredibly useful to write your own programs for the Motorola 68000 in more familiar languages (more 
-familiar than Assembly, that is) such as C, C++, Objective-C or even Fortran or Go if you like. There's an 
+familiar than Assembly, that is) such as C, C++, Objective-C or even Fortran if you like. There's an 
 [overview of supported languages](https://en.wikipedia.org/wiki/GNU_Compiler_Collection#Languages) from which you can 
-choose your favorite. Note that most of these are untested for m68k targets though, but it would be very cool to see a
-Go program compiled for m68k target.
+choose your favorite. Note that most of these are untested for m68k targets though, and bear in mind that any 
+[garbage-collected language](https://en.wikipedia.org/wiki/Garbage_collection_(computer_science)) will come with a 
+runtime that is almost guaranteed to exceed the memory limitations of the TS2 board. Your safest bet is on languages
+that aren't garbage-collected, such as C and C++, and even then the ROM limitations of the TS2 are comparable with an
+[Arduino Uno](https://www.arduino.cc/en/Main/arduinoBoardUno&gt;#techspecs). 
 
 ### Installation
 From this directory, run:
@@ -45,12 +57,11 @@ make gcc-install
 By default only C support is enabled in this install recipe, but you can override this setting by altering the 
 GCC_LANGUAGES environment:
 ```shell script
-GCC_LANGUAGES=c,go make gcc-install
+GCC_LANGUAGES=c,c++ make gcc-install
 ```
-Note, however, that the usage of cross-compiled languages other than C hasn't been tested. 
 
 By default, the installation script installs to your ~/.local/bin dir so that the entire installation can be run without
-root rights. Also: the entire install is now portable if your home folder is on a different partition. 
+root rights. You can install to a different bin dir by prepending the make command with BIN_DIR=/path/to/your/bin/dir.
 
 ### Usage
 Once installed, you can use `m68k-elf-gcc` to compile your own programs to run on m68k hardware!

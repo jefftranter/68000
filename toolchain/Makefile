@@ -23,13 +23,15 @@ srec-install:
 GCC_VER ?= 5.4.0
 GCC_SRC := ${TMP}/gcc-${GCC_VER}
 GCC_BUILD := ${HOME}/.gcc-build
-GCC_INSTALL_DIR ?= ${HOME}/.local
+GCC_INSTALL_DIR ?= ${BIN_DIR}/..
 GCC_LANGUAGES ?= "c"
 
 gcc-install:
 	wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VER}/gcc-${GCC_VER}.tar.gz -O ${TMP}/gcc.tar.gz
 	@echo "*** Extracting gcc source ***"
-	cd ${TMP} && tar xzf gcc.tar.gz
+	@tar xzf ${TMP}/gcc.tar.gz --directory ${TMP}
+	@echo "*** Removing downloaded archive ***"
+	@rm -r ${TMP}/gcc.tar.gz
 	@echo "*** Downloading compile dependencies ***"
 	cd ${GCC_SRC} && contrib/download_prerequisites
 	@echo "*** Configuring gcc ***"
@@ -43,9 +45,14 @@ gcc-install:
 		--disable-nls \
 		--disable-multilib
 	@echo "*** Building gcc ***"
-	cd ${GCC_BUILD} && make all-gcc -s -j4
+	@make all-gcc -s -j4 -C ${GCC_BUILD}
 	@echo "*** Installing gcc ***"
-	cd ${GCC_BUILD} && make install-gcc
+	@make install-gcc -C ${GCC_BUILD}
+	@echo "*** Removing temporary build directory ***"
+	@rm -r ${GCC_BUILD}
+	@echo "*** Run cross-compilation test ***"
+	@${MAKE} demo.s -C ../c_example
+	@${MAKE} clean -C ../c_example
 
 MINIPRO_VER ?= 0.5
 MINIPRO_DIR ?= ~/.local/minipro
