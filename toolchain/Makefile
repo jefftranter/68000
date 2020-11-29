@@ -77,8 +77,6 @@ gcc-install:
 	wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VER}/gcc-${GCC_VER}.tar.gz -O ${TMP}/gcc.tar.gz
 	@echo "*** Extracting gcc source ***"
 	tar xzf ${TMP}/gcc.tar.gz --directory ${TMP}
-	@echo "*** Removing downloaded archive ***"
-	rm -r ${TMP}/gcc.tar.gz
 	@echo "*** Downloading compile dependencies ***"
 	cd ${GCC_SRC} && contrib/download_prerequisites
 	@echo "*** Configuring gcc ***"
@@ -86,6 +84,7 @@ gcc-install:
 	cd ${GCC_BUILD} && ${GCC_SRC}/configure \
 		-q \
 		--prefix=${INSTALL_DIR} \
+		--enable-libgcc-rebuild \
 		--target=m68k-elf \
 		--enable-languages=${GCC_LANGUAGES} \
 		--disable-libssp \
@@ -95,9 +94,15 @@ gcc-install:
 	${MAKE} all-gcc -s -j4 -C ${GCC_BUILD}
 	@echo "*** Installing gcc ***"
 	${MAKE} install-gcc -C ${GCC_BUILD}
+	@echo "*** Installing libgcc ***"
+	${MAKE} all-target-libgcc -C ${GCC_BUILD}
+	${MAKE} install-target-libgcc -C ${GCC_BUILD}
 	@echo "*** Run cross-compilation test ***"
 	${MAKE} demo.run -C ../c_example
 	${MAKE} clean -C ../c_example
+	@echo "*** Cleaning up source files ***"
+	rm -r ${GCC_SRC}
+	rm -r ${TMP}/gcc.tar.gz
 
 gcc-uninstall:
 	@$(if $(shell which m68k-elf-gcc), echo "Removing gcc cross compiler", $(error "gcc cross-compiler not found"))
