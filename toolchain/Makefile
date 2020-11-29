@@ -48,13 +48,32 @@ srecord-uninstall:
 	${MAKE} uninstall -C ${SRECORD_BUILD}/srecord-${SRECORD_VER}
 	@rm -r ${SRECORD_BUILD}/srecord-${SRECORD_VER}
 
-# gcc version to build
+
+BINUTILS_VER ?= 2.35
+BINUTILS_SRC := ${TMP}/binutils-${BINUTILS_VER}
 GCC_VER ?= 5.4.0
 GCC_SRC := ${TMP}/gcc-${GCC_VER}
 GCC_BUILD := ${HOME}/.gcc-build
 GCC_LANGUAGES ?= "c"
 
 gcc-install:
+	@echo "Installing cross-compiler binutils first, gcc is of little use without it"
+	wget https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VER}.tar.gz -O ${TMP}/binutils.tar.gz
+	@echo "*** Extracting binutils source ***"
+	tar xzf ${TMP}/binutils.tar.gz --directory ${TMP}
+	@echo "*** Removing downloaded archive ***"
+	rm -r ${TMP}/binutils.tar.gz
+	cd ${BINUTILS_SRC} && ./configure \
+		--prefix=${INSTALL_DIR} \
+		--target=m68k-elf \
+		--disable-plugins \
+		--disable-werror \
+		--enable-tui \
+		--disable-nls
+	${MAKE} -C ${BINUTILS_SRC}
+	${MAKE} install -C ${BINUTILS_SRC}
+	rm -rf ${BINUTILS_SRC}
+
 	wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VER}/gcc-${GCC_VER}.tar.gz -O ${TMP}/gcc.tar.gz
 	@echo "*** Extracting gcc source ***"
 	@tar xzf ${TMP}/gcc.tar.gz --directory ${TMP}
@@ -77,20 +96,25 @@ gcc-install:
 	@echo "*** Installing gcc ***"
 	@make install-gcc -C ${GCC_BUILD}
 	@echo "*** Removing build directory ***"
-	@rm -r ${GCC_BUILD}
+	@rm -rf ${GCC_BUILD}
 	@echo "*** Run cross-compilation test ***"
-	@${MAKE} demo.s -C ../c_example
+	@${MAKE} demo.run -C ../c_example
 	@${MAKE} clean -C ../c_example
 
 gcc-uninstall:
 	@$(if $(shell which m68k-elf-gcc), echo "Removing gcc cross compiler", $(error "gcc cross-compiler not found"))
+	@echo "Removing binutils"
+	rm -r ${INSTALL_DIR}/.binutils
+	rm -r ${INSTALL_DIR}/m68k-elf
+
+	@echo "Removing gcc"
 	rm ${INSTALL_DIR}/bin/m68k-elf-g*
 	rm ${INSTALL_DIR}/bin/m68k-elf-cpp
 	rm -r ${INSTALL_DIR}/lib/gcc
 	rm -r ${INSTALL_DIR}/libexec/gcc
-	rm ${INSTALL_DIR}/share/man/man1/m68-elf-cpp.1
-	rm ${INSTALL_DIR}/share/man/man1/m68-elf-gcc.1
-	rm ${INSTALL_DIR}/share/man/man1/m68-elf-gcov.1
+	rm ${INSTALL_DIR}/share/man/man1/m68k-elf-cpp.1
+	rm ${INSTALL_DIR}/share/man/man1/m68k-elf-gcc.1
+	rm ${INSTALL_DIR}/share/man/man1/m68k-elf-gcov.1
 
 MINIPRO_VER ?= 0.5
 MINIPRO_DIR ?= ~/.local/minipro
