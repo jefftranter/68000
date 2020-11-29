@@ -76,9 +76,9 @@ gcc-install:
 
 	wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VER}/gcc-${GCC_VER}.tar.gz -O ${TMP}/gcc.tar.gz
 	@echo "*** Extracting gcc source ***"
-	@tar xzf ${TMP}/gcc.tar.gz --directory ${TMP}
+	tar xzf ${TMP}/gcc.tar.gz --directory ${TMP}
 	@echo "*** Removing downloaded archive ***"
-	@rm -r ${TMP}/gcc.tar.gz
+	rm -r ${TMP}/gcc.tar.gz
 	@echo "*** Downloading compile dependencies ***"
 	cd ${GCC_SRC} && contrib/download_prerequisites
 	@echo "*** Configuring gcc ***"
@@ -92,24 +92,23 @@ gcc-install:
 		--disable-nls \
 		--disable-multilib
 	@echo "*** Building gcc ***"
-	@make all-gcc -s -j4 -C ${GCC_BUILD}
+	${MAKE} all-gcc -s -j4 -C ${GCC_BUILD}
 	@echo "*** Installing gcc ***"
-	@make install-gcc -C ${GCC_BUILD}
-	@echo "*** Removing build directory ***"
-	@rm -rf ${GCC_BUILD}
+	${MAKE} install-gcc -C ${GCC_BUILD}
 	@echo "*** Run cross-compilation test ***"
-	@${MAKE} demo.run -C ../c_example
-	@${MAKE} clean -C ../c_example
+	${MAKE} demo.run -C ../c_example
+	${MAKE} clean -C ../c_example
 
 gcc-uninstall:
 	@$(if $(shell which m68k-elf-gcc), echo "Removing gcc cross compiler", $(error "gcc cross-compiler not found"))
 	@echo "Removing binutils"
-	rm -r ${INSTALL_DIR}/.binutils
 	rm -r ${INSTALL_DIR}/m68k-elf
 
 	@echo "Removing gcc"
-	rm ${INSTALL_DIR}/bin/m68k-elf-g*
-	rm ${INSTALL_DIR}/bin/m68k-elf-cpp
+	@echo "*** Removing build directory ***"
+	rm -rf ${GCC_BUILD}
+	@echo "*** Removing binary executables ***"
+	rm ${INSTALL_DIR}/bin/m68k-elf-*
 	rm -r ${INSTALL_DIR}/lib/gcc
 	rm -r ${INSTALL_DIR}/libexec/gcc
 	rm ${INSTALL_DIR}/share/man/man1/m68k-elf-cpp.1
