@@ -120,22 +120,26 @@ MINIPRO_VER ?= 0.5
 MINIPRO_DIR ?= ~/.local/minipro
 
 minipro-install:
-	@wget https://gitlab.com/DavidGriffith/minipro/-/archive/${MINIPRO_VER}/minipro-${MINIPRO_VER}.tar.gz -O ${TMP}/minipro.tar.gz
-	@mkdir -p ${MINIPRO_DIR}
-	@tar xvzf ${TMP}/minipro.tar.gz --directory ${MINIPRO_DIR}
-	@cd ${MINIPRO_DIR}/minipro-${MINIPRO_VER} && make && sudo make install
+	wget https://gitlab.com/DavidGriffith/minipro/-/archive/${MINIPRO_VER}/minipro-${MINIPRO_VER}.tar.gz -O ${TMP}/minipro.tar.gz
+	mkdir -p ${MINIPRO_DIR}
+	tar xzf ${TMP}/minipro.tar.gz --directory ${MINIPRO_DIR}
+	${MAKE} -C ${MINIPRO_DIR}/minipro-${MINIPRO_VER}
+	@echo Minipro requires a priviledged install to have proper access to the USB ports and the supported chip list
+	sudo ${MAKE} install
 	minipro --version
-	@sudo udevadm trigger
-	@sudo usermod -a -G plugdev ${USER}
+	sudo udevadm trigger
+	sudo usermod -a -G plugdev ${USER}
 	@echo "You need to log out and in again for the rules for user access to the programmer over USB to take effect. \
 			Or: you can run the make recipes for burning the ROMs as root with sudo: e.g. sudo make rom-odd"
 
+# Minor versions are separated using underscores for downloads, so version 1.8i becomes 1_8i
+VASM_VER ?= 1_8i
 VASM_DIR ?= ~/.local/vasm
 
 vasm-install:
-	echo "Installing VASM into ${VASM_DIR}"
+	@echo "Installing VASM into ${VASM_DIR}"
 	mkdir -p ${VASM_DIR}
-	wget http://sun.hasenbraten.de/vasm/release/vasm.tar.gz -O ${VASM_DIR}/vasm.tar.gz
+	wget http://phoenix.owl.de/tags/vasm${VASM_VER}.tar.gz -O ${VASM_DIR}/vasm.tar.gz
 	tar xvzf ${VASM_DIR}/vasm.tar.gz --directory ${VASM_DIR}/..
 	make -C ${VASM_DIR} CPU=m68k SYNTAX=mot
 	cp ~/.local/vasm/vasmm68k_mot ${BIN_DIR}/
