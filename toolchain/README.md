@@ -4,11 +4,14 @@ manipulation to ROM flashing. The Makefile offers the following installation opt
 
 ## Generic install configuration options
 All install recipes allow overriding the binary install directory, but often this requires root rights. By default,
-programs are installed to ~/.local/ unless stated otherwise. This makes the installation now portable, for example if
-your home folder is on a different partition. The install path can be configured to point somewhere else by 
-prepending all make instructions below with `INSTALL_DIR=/path/to/your/install/dir`, unless stated otherwise.
+programs are installed to ~/.local/ unless stated otherwise. This assumes that ~/.local/bin is in your PATH variable.
+Please make sure that this is the case, or none of the installed toolchain programs will function. 
 
-Also, by default the make recipes use the TMP dir to store retrieved source code files. This can also be overridden by
+Using ~/.local makes the installation now portable: for example if your home folder is on a different partition. 
+The install path can be configured to point somewhere else by prepending all make instructions below with 
+`INSTALL_DIR=/path/to/your/install/dir`, unless stated otherwise.
+
+Also, the make recipes use the default TMP dir to temporarily store retrieved source code files. This can also be overridden by
 prepending install commands with `TMP=/path/to/your/tmp/dir`
 
 ## SREC
@@ -22,7 +25,6 @@ make srec-install
 
 By default, the installation script installs to your ~/.local/ dir so that the entire installation can be run without
 root rights. You can install to a different dir by prepending the make command with INSTALL_DIR=/path/to/your/install/dir.
-
 
 ### Uninstall
 ```shell script
@@ -99,3 +101,33 @@ Note that you have to specify the same install dir if you specified a custom INS
 ### Usage
 Once installed, you can use `m68k-elf-gcc` to compile your own programs to run on m68k hardware! Compilation is done by
 specifying the target processor. See the [Makefile](../c_example/Makefile) in the c_example dir on how to use it.
+
+## Newlib
+[Newlib](https://sourceware.org/newlib/) is a library that provides a C standard library where there is no operating 
+system present that can provide such a library. Normally, you would compile programs on an OS like Linux that provides
+libc out of the box. However, the TS2 Tutor environment is nowhere near fully-fledged operating system. Newlib therefore
+provides vital functionality in minimal environments, such as the TS2.
+
+### Installation
+```shell script
+make newlib-install
+```
+ 
+Note that `make newlib-install` requires a pre-installed gcc cross compiler (see [instructions](#gcc-cross-compiler)).
+By default, the installation script installs to your ~/.local/ dir so that the entire installation can be run without
+root rights. You can install to a different bin dir by prepending the make command with INSTALL_DIR=/path/to/your/install/dir.
+
+### Uninstall
+```shell script
+make newlib-uninstall
+```
+
+Note that you have to specify the same install dir if you specified a custom INSTALL_DIR during installation.
+
+### Usage
+Once installed, you can use libc-like standard library functions in your C programs:
+ - see [their standard library documentation](https://sourceware.org/newlib/libc.html) 
+ - see [their math library documentation](https://sourceware.org/newlib/libm.html)
+
+It's difficult to overstate the usefulness of these libraries. Now, you can do sines, cosines, powers, roots, quicksorts,
+ random numbers and all the other goodness that comes with libc.
