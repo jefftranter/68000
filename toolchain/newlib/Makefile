@@ -1,6 +1,6 @@
 TMP ?= /tmp
-INSTALL_DIR ?= ${HOME}/.local
 SRC_DIR ?= ${TMP}/newlib
+INSTALL_DIR ?= ${HOME}/.local
 BUILD_DIR ?= ${HOME}/.local/newlib
 BIN_DIR ?= ${INSTALL_DIR}/bin
 
@@ -32,14 +32,16 @@ build:
 	make -C ${BUILD_DIR}
 
 	echo "*** Clean up ***"
-	rm /tmp/newlib.tar.gz
-	rm -rf ${SRC_DIR}
+	rm ${TMP}/newlib.tar.gz
+
+	@echo "*** Done ***"
 
 install:
-	echo "*** Installing newlib ***"
-	sudo make -s install -C ${BUILD_DIR}
+	@echo "*** Installing newlib ***"
+	sudo ${MAKE} install -C ${BUILD_DIR}
 
-	# Uncomment if you want to remove downloaded files.
+	@echo "*** Removing temp files ***"
 	rm -rf ${BUILD_DIR}
+	rm -rf ${SRC_DIR}
 
 	@echo "*** Done ***"
