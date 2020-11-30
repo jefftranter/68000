@@ -106,6 +106,7 @@ gcc-install:
 	@echo "*** Cleaning up source files ***"
 	rm -r ${GCC_SRC}
 	rm -r ${TMP}/gcc.tar.gz
+	@echo "*** Done ***"
 
 gcc-uninstall:
 	@$(if $(shell which m68k-elf-gcc), echo "Removing gcc cross compiler", $(error "gcc cross-compiler not found"))
@@ -122,6 +123,12 @@ gcc-uninstall:
 	rm ${INSTALL_DIR}/share/man/man1/m68k-elf-cpp.1
 	rm ${INSTALL_DIR}/share/man/man1/m68k-elf-gcc.1
 	rm ${INSTALL_DIR}/share/man/man1/m68k-elf-gcov.1
+	@echo "*** Done ***"
+
+NEWLIB_VER ?= 2.5.0
+
+newlib-install:
+	NEWLIB_VER=${NEWLIB_VER} ${MAKE} -C newlib/ && ${MAKE} install -C newlib/
 
 MINIPRO_VER ?= 0.5
 MINIPRO_DIR ?= ~/.local/minipro
@@ -136,18 +143,20 @@ minipro-install:
 	minipro --version
 	sudo udevadm trigger
 	sudo usermod -a -G plugdev ${USER}
+	@echo "*** Done ***"
 	@echo "You need to log out and in again for the rules for user access to the programmer over USB to take effect. \
 			Or: you can run the make recipes for burning the ROMs as root with sudo: e.g. sudo make rom-odd"
 
 # Minor versions are separated using underscores for downloads, so version 1.8i becomes 1_8i
 VASM_VER ?= 1_8i
-VASM_DIR ?= ~/.local/vasm
+BUILD_DIR ?= ~/.local/vasm
 
 vasm-install:
-	@echo "Installing VASM into ${VASM_DIR}"
-	mkdir -p ${VASM_DIR}
-	wget http://phoenix.owl.de/tags/vasm${VASM_VER}.tar.gz -O ${VASM_DIR}/vasm.tar.gz
-	tar xvzf ${VASM_DIR}/vasm.tar.gz --directory ${VASM_DIR}/..
-	make -C ${VASM_DIR} CPU=m68k SYNTAX=mot
+	@echo " *** Installing VASM ***"
+	mkdir -p ${BUILD_DIR}
+	wget http://phoenix.owl.de/tags/vasm${VASM_VER}.tar.gz -O ${BUILD_DIR}/vasm.tar.gz
+	tar xzf ${BUILD_DIR}/vasm.tar.gz --directory ${BUILD_DIR}/..
+	make -C ${BUILD_DIR} CPU=m68k SYNTAX=mot
 	cp ~/.local/vasm/vasmm68k_mot ${BIN_DIR}/
-	echo "Vasm m68k assembler successfully installed, you can call it using 'vasmm68k_mot'"
+	@echo "*** Done ***"
+	@echo "Vasm m68k assembler successfully installed, you can call it using 'vasmm68k_mot'"

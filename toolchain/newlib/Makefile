@@ -38,7 +38,7 @@ build:
 
 install:
 	@echo "*** Installing newlib ***"
-	sudo ${MAKE} install -C ${BUILD_DIR}
+	${MAKE} install -C ${BUILD_DIR}
 
 	@echo "*** Removing temp files ***"
 	rm -rf ${BUILD_DIR}
