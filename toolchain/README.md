@@ -130,4 +130,5 @@ Once installed, you can use libc-like standard library functions in your C progr
  - see [their math library documentation](https://sourceware.org/newlib/libm.html)
 
 It's difficult to overstate the usefulness of these libraries. Now, you can do sines, cosines, powers, roots, quicksorts,
- random numbers and all the other goodness that comes with libc.
+ random numbers and all the other goodness that comes with libc. For more usage instructions, see the 
+ [newlib README](newlib/README.md)
