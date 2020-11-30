@@ -57,6 +57,7 @@ GCC_BUILD := ${HOME}/.gcc-build
 GCC_LANGUAGES ?= "c"
 
 gcc-install:
+	@# Cross-compiler binutils phase
 	@echo "Installing cross-compiler binutils first, gcc is of little use without it"
 	wget https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_VER}.tar.gz -O ${TMP}/binutils.tar.gz
 	@echo "*** Extracting binutils source ***"
@@ -66,6 +67,7 @@ gcc-install:
 	cd ${BINUTILS_SRC} && ./configure \
 		--prefix=${INSTALL_DIR} \
 		--target=m68k-elf \
+		--with-newlib \
 		--disable-plugins \
 		--disable-werror \
 		--enable-tui \
@@ -74,6 +76,7 @@ gcc-install:
 	${MAKE} install -C ${BINUTILS_SRC}
 	rm -rf ${BINUTILS_SRC}
 
+	@# GCC install phase
 	wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VER}/gcc-${GCC_VER}.tar.gz -O ${TMP}/gcc.tar.gz
 	@echo "*** Extracting gcc source ***"
 	tar xzf ${TMP}/gcc.tar.gz --directory ${TMP}
