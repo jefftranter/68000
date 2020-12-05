@@ -19,7 +19,7 @@ SREC is an easy to use tool useful for converting between assembled binaries and
 
 ### Installation
 From this directory, run:
-```shell script
+```shell
 make srec-install
 ```
 
@@ -27,7 +27,7 @@ By default, the installation script installs to your ~/.local/ dir so that the e
 root rights. You can install to a different dir by prepending the make command with INSTALL_DIR=/path/to/your/install/dir.
 
 ### Uninstall
-```shell script
+```shell
 make srec-uninstall
 ```
 
@@ -47,7 +47,7 @@ Oddly enough, this is executable is not in the `libtool` package, but in `libtoo
 Debian-derivative distributions. The ghostscript package is required for building the documentation.
 
 From this directory, run:
-```shell script
+```shell
 make srecord-install
 ```
 
@@ -55,7 +55,7 @@ By default, the installation script installs to your ~/.local/ dir so that the e
 root rights. You can install to a different dir by prepending the make command with INSTALL_DIR=/path/to/your/install/dir.
 
 ### Uninstall
-```shell script
+```shell
 make srecord-uninstall
 ```
 
@@ -78,13 +78,13 @@ that aren't garbage-collected, such as C and C++, and even then the ROM limitati
 
 ### Installation
 From this directory, run:
-```shell script
+```shell
 make gcc-install
 ```
 
 By default only C support (a 'front end' in GCC terms) is enabled in this install recipe, but you can override this 
 setting by using the GCC_LANGUAGES variable:
-```shell script
+```shell
 GCC_LANGUAGES=c,c++ make gcc-install
 ```
 
@@ -92,7 +92,7 @@ By default, the installation script installs to your ~/.local/bin dir so that th
 root rights. You can install to a different bin dir by prepending the make command with INSTALL_DIR=/path/to/your/bin/dir.
 
 ### Uninstall
-```shell script
+```shell
 make gcc-uninstall
 ```
 
@@ -109,7 +109,7 @@ libc out of the box. However, the TS2 Tutor environment is nowhere near fully-fl
 provides vital functionality in minimal environments, such as the TS2.
 
 ### Installation
-```shell script
+```shell
 make newlib-install
 ```
  
@@ -118,7 +118,7 @@ By default, the installation script installs to your ~/.local/ dir so that the e
 root rights. You can install to a different bin dir by prepending the make command with INSTALL_DIR=/path/to/your/install/dir.
 
 ### Uninstall
-```shell script
+```shell
 make newlib-uninstall
 ```
 
