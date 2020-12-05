@@ -132,3 +132,19 @@ Once installed, you can use libc-like standard library functions in your C progr
 It's difficult to overstate the usefulness of these libraries. Now, you can do sines, cosines, powers, roots, quicksorts,
  random numbers and all the other goodness that comes with libc. For more usage instructions, see the 
  [newlib README](newlib/README.md)
+
+## Disassembler
+The toolchain includes a disassembler written in Python.
+
+### Installation
+```shell
+make disasm-install
+```
+
+### Uninstall
+```shell
+make disasm-uninstall
+```
+
+### Usage
+See [instructions](disasm/README.md)
