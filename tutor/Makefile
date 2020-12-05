@@ -1,5 +1,19 @@
 all:	tutor13.run tutor13.bin tutor13.hex tutor13_even.bin tutor13_odd.bin
 
+rom-odd:
+ifeq ($(CONNECTED), "[No programmer found]")
+	@echo "No minipro device detected, please connect one"; exit 1
+else
+	minipro --write=tutor13_odd.bin --device=28C64B
+endif
+
+rom-even:
+ifeq ($(CONNECTED), "[No programmer found]")
+	@echo "No minipro device detected, please connect one"; exit 1
+else
+	minipro --write=tutor13_even.bin --device=28C64B
+endif
+
 tutor13.o: tutor13.s
 	m68k-elf-as -m68000 -alms -a=tutor13.lst -o tutor13.o tutor13.s
 
