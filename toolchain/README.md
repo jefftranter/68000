@@ -133,6 +133,22 @@ It's difficult to overstate the usefulness of these libraries. Now, you can do s
  random numbers and all the other goodness that comes with libc. For more usage instructions, see the 
  [newlib README](newlib/README.md)
 
+## Assembler
+Besides the GCC m68k-elf assembler `m68k-elf-as` there is also a stand-alone 68k assembler available in VASM. The 
+benefit of having this assembler is that it is extremely compact to download, build and install.
+
+### Installation
+```shell
+make vasm-install
+```
+
+### Uninstall
+```shell
+make vasm-uninstall
+```
+### Usage
+See [instructions](http://sun.hasenbraten.de/vasm/index.php?view=tutorial)
+
 ## Disassembler
 The toolchain includes a disassembler written in Python.
 

@@ -160,9 +160,14 @@ vasm-install:
 	wget http://phoenix.owl.de/tags/vasm${VASM_VER}.tar.gz -O ${BUILD_DIR}/vasm.tar.gz
 	tar xzf ${BUILD_DIR}/vasm.tar.gz --directory ${BUILD_DIR}/..
 	make -C ${BUILD_DIR} CPU=m68k SYNTAX=mot
-	cp ~/.local/vasm/vasmm68k_mot ${BIN_DIR}/
+	cp ${BUILD_DIR}/vasmm68k_mot ${BIN_DIR}/
 	@echo "*** Done ***"
 	@echo "Vasm m68k assembler successfully installed, you can call it using 'vasmm68k_mot'"
+
+vasm-uninstall:
+	@echo " *** Uninstalling VASM assembler ***"
+	rm -r ${BUILD_DIR}
+	rm ${BIN_DIR}/vasmm68k_mot
 
 disasm-install:
 	@echo " *** Installing Disassembler ***"
