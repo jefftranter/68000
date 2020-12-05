@@ -163,3 +163,13 @@ vasm-install:
 	cp ~/.local/vasm/vasmm68k_mot ${BIN_DIR}/
 	@echo "*** Done ***"
 	@echo "Vasm m68k assembler successfully installed, you can call it using 'vasmm68k_mot'"
+
+disasm-install:
+	@echo " *** Installing Disassembler ***"
+	${MAKE} install -C disasm/
+	@echo "*** Done ***"
+
+disasm-uninstall:
+	@echo " *** Uninstalling Disassembler ***"
+	${MAKE} uninstall -C disasm/
+	@echo "*** Done ***"

@@ -11,6 +11,9 @@ install:
 	pip3 install --user pipenv
 	~/.local/bin/pipenv --three install --dev
 
+uninstall:
+	~/.local/bin/pipenv --rm
+
 pep8:
 	~/.local/bin/pipenv run pycodestyle --max-line-length=150 disasm68k.py
 
