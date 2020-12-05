@@ -128,7 +128,10 @@ gcc-uninstall:
 NEWLIB_VER ?= 2.5.0
 
 newlib-install:
-	NEWLIB_VER=${NEWLIB_VER} ${MAKE} -C newlib/ && ${MAKE} install -C newlib/
+	${MAKE} -C newlib/ && ${MAKE} install -C newlib/
+
+newlib-uninstall:
+	${MAKE} uninstall -C newlib/
 
 MINIPRO_VER ?= 0.5
 MINIPRO_DIR ?= ~/.local/minipro
