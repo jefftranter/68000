@@ -287,7 +287,10 @@ becomes the ENABLE/LOAD* control input of a 74LS161 4-bit counter,
 U22. When MSEL=0 (i.e. on-board memory is not accessed), the counter
 is held in its load state and the data inputs on P0 to P3 are
 preloaded into the counter, by default 1100. The desired preload value
-can be set using DIP switches. The Q3 output from the counter is
+can be set using four jumpers. These can be used to adjust the timing
+of the DTACK signal to support different speeds of memory devices. It
+should not be critical and the suggested setting is to install jumpers
+P1 and P2 as shown on the schematic. The Q3 output from the counter is
 gated, uninverted, through U10B and U7B to form the processor's DTACK*
 input.
 
