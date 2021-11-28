@@ -1,4 +1,4 @@
-This is the source for "The Work Memory Test" by Jan Steinman from Dr.
+This is the source for "The Worm Memory Test" by Jan Steinman from Dr.
 Dobb's Toolbook of 68000 Programming.
 
 It has been modified slightly to compile with the VASM assembler.
