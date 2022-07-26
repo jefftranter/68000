@@ -7,7 +7,7 @@
  * Written in standard C but designed to run on the Apple Replica 1
  * or Apple II using the CC65 6502 assembler.
  *
- * Copyright 2012-2015 Jeff Tranter
+ * Copyright 2012-2022 Jeff Tranter
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@
  * 0.1      18 Mar 2012  First beta version
  * 0.9      19 Mar 2012  First public release
  * 1.0      06 Sep 2015  Lower case and other Apple II improvements.
+ * 1.1      26 Jul 2022  Added backup/restore commands.
  *
  */
 
@@ -39,6 +40,10 @@
 #ifdef __CC65__
 #include <conio.h>
 #endif
+
+/* Define this if you want game backup and restore commands. Requires
+   platform support for file i/o. */
+#define FILEIO 1
 
 /* CONSTANTS */
 
@@ -263,7 +268,11 @@ number gameOver;
 
 const char *introText = "     Abandoned Farmhouse Adventure\n           By Jeff Tranter\n\nYour three-year-old grandson has gone\nmissing and was last seen headed in the\ndirection of the abandoned family farm.\nIt's a dangerous place to play. You\nhave to find him before he gets hurt,\nand it will be getting dark soon...\n";
 
+#ifdef FILEIO
+const char *helpString = "Valid commands:\ngo east/west/north/south/up/down \nlook\nuse <object>\nexamine <object>\ntake <object>\ndrop <object>\ninventory\nb[ackup] <name>\nr[estore] <name>\nhelp\nquit\nYou can abbreviate commands and\ndirections to the first letter.\nType just the first letter of\na direction to move.\n";
+#else
 const char *helpString = "Valid commands:\ngo east/west/north/south/up/down \nlook\nuse <object>\nexamine <object>\ntake <object>\ndrop <object>\ninventory\nhelp\nquit\nYou can abbreviate commands and\ndirections to the first letter.\nType just the first letter of\na direction to move.\n";
+#endif /* FILEIO */
 
 /* Line of user input */
 char buffer[40];
@@ -381,7 +390,7 @@ void doDrop()
     char *sp;
     char *item;
 
-    /* Command line should be like "D[ROP] ITEM" Item name will be after after first space. */
+    /* Command line should be like "D[ROP] ITEM" Item name will be after first space. */
     sp = strchr(buffer, ' ');
     if (sp == NULL) {
         printf("Drop what?\n");
@@ -413,7 +422,7 @@ void doTake()
     char *sp;
     char *item;
 
-    /* Command line should be like "T[AKE] ITEM" Item name will be after after first space. */
+    /* Command line should be like "T[AKE] ITEM" Item name will be after first space. */
     sp = strchr(buffer, ' ');
     if (sp == NULL) {
         printf("Take what?\n");
@@ -508,7 +517,7 @@ void doExamine()
     char *sp;
     char *item;
 
-    /* Command line should be like "E[XAMINE] ITEM" Item name will be after after first space. */
+    /* Command line should be like "E[XAMINE] ITEM" Item name will be after first space. */
     sp = strchr(buffer, ' ');
     if (sp == NULL) {
         printf("Examine what?\n");
@@ -565,7 +574,7 @@ void doUse()
     char *sp;
     char *item;
 
-    /* Command line should be like "U[SE] ITEM" Item name will be after after first space. */
+    /* Command line should be like "U[SE] ITEM" Item name will be after first space. */
     sp = strchr(buffer, ' ');
     if (sp == NULL) {
         printf("Use what?\n");
@@ -660,6 +669,97 @@ void doUse()
     /* Default */
     printf("Nothing happens\n");
 }
+
+#ifdef FILEIO
+/* Backup command */
+void doBackup()
+{
+    char *sp;
+    char *name;
+    number i, j;
+    FILE *fp;
+
+    /* Command line should be like "B[ACKUP] NAME" */
+    /* Save file name will be after first space. */
+    sp = strchr(buffer, ' ');
+    if (sp == NULL) {
+        printf("Backup under what name?\n");
+        return;
+    }
+
+    name = sp + 1;
+
+    printf("Backing up game state under name '%s'.\n", name);
+
+    fp = fopen(name, "w");
+    printf("Here 0\n");
+    if (fp == NULL) {
+        printf("Unable to open save file '%s'.\n", name);
+        return;
+    }
+
+    printf("Here 1\n");
+    fprintf(fp, "%s\n", "#Adventure1 Save File");
+
+    printf("Here 2\n");
+    fprintf(fp, "Inventory:");
+    for (i = 0; i < MAXITEMS; i++) {
+        if (Inventory[i] != 0) {
+            fprintf(fp, " %d", Inventory[i]);
+        }
+    }
+    fprintf(fp, "\n");
+
+    printf("Here 3\n");
+    fprintf(fp, "Items:");
+    for (i = 0; i < LastItem; i++) {
+        fprintf(fp, " %d", locationOfItem[i]);
+    }
+    fprintf(fp, "\n");
+
+    printf("Here 4\n");
+    fprintf(fp, "Map:\n");
+    for (i = 0; i < NUMLOCATIONS; i++) {
+        for (j = 0; j < 6; j++) {
+            fprintf(fp, " %d", Move[i][j]);
+        }
+        fprintf(fp, "\n");
+    }
+
+    printf("Here 5\n");
+    fprintf(fp, "Variables: %d %d %d %d %d %d %d %d\n",
+           currentLocation,
+           turnsPlayed,
+           lampLit,
+           lampFilled,
+           ateFood,
+           drankWater,
+           ratAttack,
+           wolfState);
+
+    printf("Here 6\n");
+    fclose(fp);
+}
+
+/* Restore command */
+void doRestore()
+{
+    char *sp;
+    char *name;
+
+    /* Command line should be like "R[ESTORE] NAME" */
+    /* Save file name will be after first space. */
+    sp = strchr(buffer, ' ');
+    if (sp == NULL) {
+        printf("Restore from what name?\n");
+        return;
+    }
+
+    name = sp + 1;
+
+    printf("Restoring game state from name '%s'.\n", name);
+}
+#endif /* FILEIO */
 
 /* Prompt user and get a line of input */
 void prompt()
@@ -814,6 +914,12 @@ int main(void)
                 doDrop();
             } else if (tolower(buffer[0]) == 'q') {
                 doQuit();
+#ifdef FILEIO
+           } else if (tolower(buffer[0]) == 'b') {
+                doBackup();
+            } else if (tolower(buffer[0]) == 'r') {
+                doRestore();
+#endif /* FILEIO */
             } else if (!strcasecmp(buffer, "xyzzy")) {
                 printf("Nice try, but that won't work here.\n");
             } else {
