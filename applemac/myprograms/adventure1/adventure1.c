@@ -269,13 +269,13 @@ number gameOver;
 const char *introText = "     Abandoned Farmhouse Adventure\n           By Jeff Tranter\n\nYour three-year-old grandson has gone\nmissing and was last seen headed in the\ndirection of the abandoned family farm.\nIt's a dangerous place to play. You\nhave to find him before he gets hurt,\nand it will be getting dark soon...\n";
 
 #ifdef FILEIO
-const char *helpString = "Valid commands:\ngo east/west/north/south/up/down \nlook\nuse <object>\nexamine <object>\ntake <object>\ndrop <object>\ninventory\nb[ackup] <name>\nr[estore] <name>\nhelp\nquit\nYou can abbreviate commands and\ndirections to the first letter.\nType just the first letter of\na direction to move.\n";
+const char *helpString = "Valid commands:\ngo east/west/north/south/up/down \nlook\nuse <object>\nexamine <object>\ntake <object>\ndrop <object>\ninventory\nb[ackup] <file>\nr[estore] <filee>\nhelp\nquit\nYou can abbreviate commands and\ndirections to the first letter.\nType just the first letter of\na direction to move.\n";
 #else
 const char *helpString = "Valid commands:\ngo east/west/north/south/up/down \nlook\nuse <object>\nexamine <object>\ntake <object>\ndrop <object>\ninventory\nhelp\nquit\nYou can abbreviate commands and\ndirections to the first letter.\nType just the first letter of\na direction to move.\n";
 #endif /* FILEIO */
 
 /* Line of user input */
-char buffer[40];
+char buffer[80];
 
 /* Clear the screen */
 void clearScreen()
@@ -692,32 +692,25 @@ void doBackup()
     printf("Backing up game state under name '%s'.\n", name);
 
     fp = fopen(name, "w");
-    printf("Here 0\n");
     if (fp == NULL) {
-        printf("Unable to open save file '%s'.\n", name);
+        printf("Unable to open file '%s'.\n", name);
         return;
     }
 
-    printf("Here 1\n");
     fprintf(fp, "%s\n", "#Adventure1 Save File");
 
-    printf("Here 2\n");
     fprintf(fp, "Inventory:");
     for (i = 0; i < MAXITEMS; i++) {
-        if (Inventory[i] != 0) {
-            fprintf(fp, " %d", Inventory[i]);
-        }
+        fprintf(fp, " %d", Inventory[i]);
     }
     fprintf(fp, "\n");
 
-    printf("Here 3\n");
     fprintf(fp, "Items:");
-    for (i = 0; i < LastItem; i++) {
+    for (i = 0; i <= LastItem; i++) {
         fprintf(fp, " %d", locationOfItem[i]);
     }
     fprintf(fp, "\n");
 
-    printf("Here 4\n");
     fprintf(fp, "Map:\n");
     for (i = 0; i < NUMLOCATIONS; i++) {
         for (j = 0; j < 6; j++) {
@@ -726,7 +719,6 @@ void doBackup()
         fprintf(fp, "\n");
     }
 
-    printf("Here 5\n");
     fprintf(fp, "Variables: %d %d %d %d %d %d %d %d\n",
            currentLocation,
            turnsPlayed,
@@ -737,8 +729,10 @@ void doBackup()
            ratAttack,
            wolfState);
 
-    printf("Here 6\n");
-    fclose(fp);
+    i = fclose(fp);
+    if (i != 0) {
+        printf("Unable to close file '%s', error code %d.\n", name, i);
+    }
 }
 
 /* Restore command */
@@ -746,18 +740,136 @@ void doRestore()
 {
     char *sp;
     char *name;
+    number i, j;
+    FILE *fp;
 
     /* Command line should be like "R[ESTORE] NAME" */
     /* Save file name will be after first space. */
     sp = strchr(buffer, ' ');
     if (sp == NULL) {
-        printf("Restore from what name?\n");
+        printf("Restore from what file?\n");
         return;
     }
 
     name = sp + 1;
 
-    printf("Restoring game state from name '%s'.\n", name);
+    printf("Restoring game state from file '%s'.\n", name);
+
+    fp = fopen(name, "r");
+    if (fp == NULL) {
+        printf("Unable to open file '%s'.\n", name);
+        return;
+    }
+
+    /* Check for header line */
+    fgets(buffer, sizeof(buffer) - 1, fp);
+    if (strcmp(buffer, "#Adventure1 Save File\n")) {
+        printf("File '%s' is not a valid save file.\n", name);
+        fclose(fp);
+        return;
+    }
+
+    /* Inventory: 3 0 0 0 0 */
+    i = fscanf(fp, "Inventory: %d %d %d %d %d\n",
+           (int*) &Inventory[0],
+           (int*) &Inventory[1],
+           (int*) &Inventory[2],
+           (int*) &Inventory[3],
+           (int*)&Inventory[4]);
+    if (i != 5) {
+        printf("File '%s' is not a valid save file.\n", name);
+        fclose(fp);
+        return;
+    }
+
+    for (i = 0; i < MAXITEMS; i++) {
+        printf("Inventory[%d] = %d\n", i, Inventory[i]);
+    }
+
+    /* Items: 0 1 8 0 7 6 9 2 16 15 18 25 29 10 12 19 */
+    i = fscanf(fp, "Items: %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
+           (int*) &locationOfItem[0],
+           (int*) &locationOfItem[1],
+           (int*) &locationOfItem[2],
+           (int*) &locationOfItem[3],
+           (int*) &locationOfItem[4],
+           (int*) &locationOfItem[5],
+           (int*) &locationOfItem[6],
+           (int*) &locationOfItem[7],
+           (int*) &locationOfItem[8],
+           (int*) &locationOfItem[9],
+           (int*) &locationOfItem[10],
+           (int*) &locationOfItem[11],
+           (int*) &locationOfItem[12],
+           (int*) &locationOfItem[13],
+           (int*) &locationOfItem[14],
+           (int*) &locationOfItem[15],
+           (int*) &locationOfItem[16]);
+
+    if (i != 17) {
+        printf("File '%s' is not a valid save file.\n", name);
+        fclose(fp);
+        return;
+    }
+
+    for (i = 0; i <= LastItem; i++) {
+        printf("locationOfItem[%d] = %d\n", i, locationOfItem[i]);
+    }
+
+    fscanf(fp, "Map:\n");
+
+    for (i = 0; i < NUMLOCATIONS; i++) {
+        j = fscanf(fp, " %d %d %d %d %d %d\n",
+               (int*) &Move[i][0],
+               (int*) &Move[i][1],
+               (int*) &Move[i][2],
+               (int*) &Move[i][3],
+               (int*) &Move[i][4],
+               (int*) &Move[i][5]);
+        if (j != 6) {
+            printf("File '%s' is not a valid save file.\n", name);
+            fclose(fp);
+            return;
+        }
+    }
+
+    for (i = 0; i < NUMLOCATIONS; i++) {
+        for (j = 0; j < 6; j++) {
+            printf("Move[%d][%d] = %d\n", i, j, Move[i][j]);
+        }
+    }
+
+     /* Variables: 1 0 0 0 0 0 0 0 */
+    i = fscanf(fp, "Variables: %d %d %d %d %d %d %d %d\n",
+           &currentLocation,
+           &turnsPlayed,
+           &lampLit,
+           &lampFilled,
+           &ateFood,
+           &drankWater,
+           &ratAttack,
+           &wolfState);
+
+    if (i != 8) {
+        printf("File '%s' is not a valid save file.\n", name);
+        fclose(fp);
+        return;
+    }
+
+    printf("Variables: %d %d %d %d %d %d %d %d\n",
+           currentLocation,
+           turnsPlayed,
+           lampLit,
+           lampFilled,
+           ateFood,
+           drankWater,
+           ratAttack,
+           wolfState);
+
+    i = fclose(fp);
+    if (i != 0) {
+        printf("Unable to close file '%s', error code %d.\n", name, i);
+    }
 }
 #endif /* FILEIO */
 
