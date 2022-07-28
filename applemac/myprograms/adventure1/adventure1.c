@@ -731,7 +731,7 @@ void doBackup()
 
     i = fclose(fp);
     if (i != 0) {
-        printf("Unable to close file '%s', error code %d.\n", name, i);
+        printf("Unable to close file, error code %d.\n", i);
     }
 }
 
@@ -764,7 +764,7 @@ void doRestore()
     /* Check for header line */
     fgets(buffer, sizeof(buffer) - 1, fp);
     if (strcmp(buffer, "#Adventure1 Save File\n")) {
-        printf("File '%s' is not a valid save file.\n", name);
+        printf("File is not a valid game file.\n");
         fclose(fp);
         return;
     }
@@ -777,13 +777,9 @@ void doRestore()
            (int*) &Inventory[3],
            (int*)&Inventory[4]);
     if (i != 5) {
-        printf("File '%s' is not a valid save file.\n", name);
+        printf("File is not a valid game file.\n");
         fclose(fp);
         return;
-    }
-
-    for (i = 0; i < MAXITEMS; i++) {
-        printf("Inventory[%d] = %d\n", i, Inventory[i]);
     }
 
     /* Items: 0 1 8 0 7 6 9 2 16 15 18 25 29 10 12 19 */
@@ -807,13 +803,9 @@ void doRestore()
            (int*) &locationOfItem[16]);
 
     if (i != 17) {
-        printf("File '%s' is not a valid save file.\n", name);
+        printf("File is not a valid game file.\n");
         fclose(fp);
         return;
-    }
-
-    for (i = 0; i <= LastItem; i++) {
-        printf("locationOfItem[%d] = %d\n", i, locationOfItem[i]);
     }
 
     fscanf(fp, "Map:\n");
@@ -827,19 +819,13 @@ void doRestore()
                (int*) &Move[i][4],
                (int*) &Move[i][5]);
         if (j != 6) {
-            printf("File '%s' is not a valid save file.\n", name);
+            printf("File is not a valid game file.\n");
             fclose(fp);
             return;
         }
     }
 
-    for (i = 0; i < NUMLOCATIONS; i++) {
-        for (j = 0; j < 6; j++) {
-            printf("Move[%d][%d] = %d\n", i, j, Move[i][j]);
-        }
-    }
-
-     /* Variables: 1 0 0 0 0 0 0 0 */
+    /* Variables: 1 0 0 0 0 0 0 0 */
     i = fscanf(fp, "Variables: %d %d %d %d %d %d %d %d\n",
            &currentLocation,
            &turnsPlayed,
@@ -851,24 +837,14 @@ void doRestore()
            &wolfState);
 
     if (i != 8) {
-        printf("File '%s' is not a valid save file.\n", name);
+        printf("File is not a valid game file.\n");
         fclose(fp);
         return;
     }
 
-    printf("Variables: %d %d %d %d %d %d %d %d\n",
-           currentLocation,
-           turnsPlayed,
-           lampLit,
-           lampFilled,
-           ateFood,
-           drankWater,
-           ratAttack,
-           wolfState);
-
     i = fclose(fp);
     if (i != 0) {
-        printf("Unable to close file '%s', error code %d.\n", name, i);
+        printf("Unable to close file, error code %d.\n", i);
     }
 }
 #endif /* FILEIO */
@@ -961,7 +937,7 @@ void initialize()
     ratAttack = 0;
     wolfState = 0;
     turnsPlayed = 0;
-    gameOver= 0;
+    gameOver = 0;
 
     /* These doors can get changed during game and may need to be reset O*/
     Move[17][North] = 0;
