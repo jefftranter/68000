@@ -41,7 +41,8 @@
 #include <conio.h>
 #endif
 
-/* Define this if you want game backup and restore commands. Requires
+/* Uncomment the next line to define this if you want backup and
+   restore commands to use files. Otherwise uses memory. Requires
    platform support for file i/o. */
 //#define FILEIO 1
 
@@ -846,7 +847,7 @@ void doRestore()
            (int*) &Inventory[1],
            (int*) &Inventory[2],
            (int*) &Inventory[3],
-           (int*)&Inventory[4]);
+           (int*) &Inventory[4]);
     if (i != 5) {
         printf("File is not a valid game file.\n");
         fclose(fp);
