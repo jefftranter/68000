@@ -43,7 +43,7 @@
 
 /* Define this if you want game backup and restore commands. Requires
    platform support for file i/o. */
-#define FILEIO 1
+//#define FILEIO 1
 
 /* CONSTANTS */
 
@@ -52,6 +52,9 @@
 
 /* Number of locations */
 #define NUMLOCATIONS 32
+
+/* Number of (memory-resident) saved games */
+#define SAVEGAMES 10
 
 /* TYPES */
 
@@ -129,6 +132,22 @@ typedef enum {
     Woods30,
     Woods31,
 } Location_t;
+
+/* Structure to hold entire game state */
+typedef struct {
+    number valid;
+    Item_t Inventory[MAXITEMS];
+    Location_t locationOfItem[LastItem+1];
+    Direction_t Move[NUMLOCATIONS][6];
+    number currentLocation;
+    int turnsPlayed;
+    number lampLit;
+    number lampFilled;
+    number ateFood;
+    number drankWater;
+    number ratAttack;
+    number wolfState;
+} GameState_t;
 
 /* TABLES */
 
@@ -266,12 +285,17 @@ number wolfState;
 /* Set when game is over */
 number gameOver;
 
+#ifndef FILEIO
+/* Memory-resident saved games */
+GameState_t savedGame[SAVEGAMES];
+#endif
+
 const char *introText = "     Abandoned Farmhouse Adventure\n           By Jeff Tranter\n\nYour three-year-old grandson has gone\nmissing and was last seen headed in the\ndirection of the abandoned family farm.\nIt's a dangerous place to play. You\nhave to find him before he gets hurt,\nand it will be getting dark soon...\n";
 
 #ifdef FILEIO
-const char *helpString = "Valid commands:\ngo east/west/north/south/up/down \nlook\nuse <object>\nexamine <object>\ntake <object>\ndrop <object>\ninventory\nb[ackup] <file>\nr[estore] <filee>\nhelp\nquit\nYou can abbreviate commands and\ndirections to the first letter.\nType just the first letter of\na direction to move.\n";
+const char *helpString = "Valid commands:\ngo east/west/north/south/up/down \nlook\nuse <object>\nexamine <object>\ntake <object>\ndrop <object>\ninventory\nb[ackup] <file>\nr[estore] <file>\nhelp\nquit\nYou can abbreviate commands and\ndirections to the first letter.\nType just the first letter of\na direction to move.\n";
 #else
-const char *helpString = "Valid commands:\ngo east/west/north/south/up/down \nlook\nuse <object>\nexamine <object>\ntake <object>\ndrop <object>\ninventory\nhelp\nquit\nYou can abbreviate commands and\ndirections to the first letter.\nType just the first letter of\na direction to move.\n";
+const char *helpString = "Valid commands:\ngo east/west/north/south/up/down \nlook\nuse <object>\nexamine <object>\ntake <object>\ndrop <object>\ninventory\nb[ackup] <number>\nr[estore] <number>\nhelp\nquit\nYou can abbreviate commands and\ndirections to the first letter.\nType just the first letter of\na direction to move.\n";
 #endif /* FILEIO */
 
 /* Line of user input */
@@ -671,7 +695,7 @@ void doUse()
 }
 
 #ifdef FILEIO
-/* Backup command */
+/* Backup command - file version */
 void doBackup()
 {
     char *sp;
@@ -734,8 +758,55 @@ void doBackup()
         printf("Unable to close file, error code %d.\n", i);
     }
 }
+#else
+/* Backup command - memory-resident version */
+void doBackup()
+{
+    char *sp;
+    number i, j, n;
 
-/* Restore command */
+    /* Command line should be like "B[ACKUP] <NUMBER>" */
+    /* Number will be after first space. */
+    sp = strchr(buffer, ' ');
+    if (sp == NULL) {
+        printf("Backup under what number?\n");
+        return;
+    }
+
+    n = strtol(sp + 1, NULL, 10);
+    if  (n <= 0 || n > SAVEGAMES) {
+        printf("Invalid backup number. Specify %d through %d.\n", 1, SAVEGAMES);
+        return;
+    }
+
+    printf("Backing up game state under number %d.\n", n);
+
+    savedGame[n-1].valid = 1;
+    for (i = 0; i < MAXITEMS; i++) {
+        savedGame[n-1].Inventory[i] = Inventory[i];
+    }
+    for (i = 0; i < LastItem+1; i++) {
+        savedGame[n-1].locationOfItem[i] = locationOfItem[i];
+    }
+    for (i = 0; i < NUMLOCATIONS; i++) {
+        for (j = 0; j < 6; j++) {
+            savedGame[n-1].Move[i][j] = Move[i][j];
+        }
+    }
+    savedGame[n-1].currentLocation = currentLocation;
+    savedGame[n-1].turnsPlayed = turnsPlayed;
+    savedGame[n-1].lampLit = lampLit;
+    savedGame[n-1].lampFilled = lampFilled;
+    savedGame[n-1].ateFood = ateFood;
+    savedGame[n-1].drankWater = drankWater;
+    savedGame[n-1].ratAttack = ratAttack;
+    savedGame[n-1].wolfState = wolfState;
+}
+
+#endif /* FILEIO */
+
+#ifdef FILEIO
+/* Restore command - file version */
 void doRestore()
 {
     char *sp;
@@ -846,6 +917,62 @@ void doRestore()
     if (i != 0) {
         printf("Unable to close file, error code %d.\n", i);
     }
+}
+#else
+/* Restore command - memory-resident version */
+void doRestore()
+{
+    char *sp;
+    number i, j, n;
+
+    /* Command line should be like "R[ESTORE] <NUMBER>" */
+    /* Number will be after first space. */
+    sp = strchr(buffer, ' ');
+    if (sp == NULL) {
+        printf("Restore from what number?\n");
+        return;
+    }
+
+    n = strtol(sp + 1, NULL, 10);
+    if  (n <= 0 || n > SAVEGAMES) {
+        printf("Invalid restore number. Specify %d through %d.\n", 1, SAVEGAMES);
+        return;
+    }
+
+    if (savedGame[n-1].valid != 1) {
+        printf("No game has been stored for number %d.\n", n);
+        printf("Stored games:");
+        for (i = 0; i < SAVEGAMES; i++) {
+            if (savedGame[i].valid == 1) {
+                printf(" %d", i+1);
+            }
+        }
+        printf("\n");
+        return;
+    }
+
+    printf("Restoring game state from number %d.\n", n);
+
+    savedGame[n-1].valid = 1;
+    for (i = 0; i < MAXITEMS; i++) {
+        Inventory[i] = savedGame[n-1].Inventory[i];
+    }
+    for (i = 0; i < LastItem+1; i++) {
+        locationOfItem[i] = savedGame[n-1].locationOfItem[i];
+    }
+    for (i = 0; i < NUMLOCATIONS; i++) {
+        for (j = 0; j < 6; j++) {
+            Move[i][j] = savedGame[n-1].Move[i][j];
+        }
+    }
+    currentLocation = savedGame[n-1].currentLocation;
+    turnsPlayed = savedGame[n-1].turnsPlayed;
+    lampLit = savedGame[n-1].lampLit;
+    lampFilled = savedGame[n-1].lampFilled;
+    ateFood = savedGame[n-1].ateFood;
+    drankWater = savedGame[n-1].drankWater;
+    ratAttack = savedGame[n-1].ratAttack;
+    wolfState = savedGame[n-1].wolfState;
 }
 #endif /* FILEIO */
 
@@ -970,6 +1097,13 @@ void initialize()
 /* Main program (obviously) */
 int main(void)
 {
+#ifndef FILEIO
+    /* Mark all saved games as initially invalid */
+    for (int i = 0; i < SAVEGAMES; i++) {
+        savedGame[i].valid = 0;
+    }
+#endif
+
     while (1) {
         initialize();
         clearScreen();
@@ -1002,12 +1136,10 @@ int main(void)
                 doDrop();
             } else if (tolower(buffer[0]) == 'q') {
                 doQuit();
-#ifdef FILEIO
            } else if (tolower(buffer[0]) == 'b') {
                 doBackup();
             } else if (tolower(buffer[0]) == 'r') {
                 doRestore();
-#endif /* FILEIO */
             } else if (!strcasecmp(buffer, "xyzzy")) {
                 printf("Nice try, but that won't work here.\n");
             } else {
