@@ -8,7 +8,7 @@ assemble under the GNU assembler.
 The original versions can be found on the "original" folder.
 
 Minimon is a version designed to run under the simulator. Monitor is
-the version that runs on the the TS2 hardware.
+the version that runs on the TS2 hardware.
 
 Some hacks were needed in order to get the assembled output to exactly
 match the original. If you make any changes to the code it may break

@@ -41,7 +41,7 @@ SYM (_exit):
  * inbyte -- get a byte from the console serial port
  *	d0 - contains the byte read in
  *
- * Echoes the character the the console.
+ * Echoes the character the console.
  * Converts a carriage return character to newline.
  */
 	.text
