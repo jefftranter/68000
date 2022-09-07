@@ -13,7 +13,7 @@ Jeff Tranter <tranter@pobox.com>
 |$004000 - $007FFF | RAM2 (16K). U15 (odd), U17 (even).                |
 +------------------+---------------------------------------------------+
 |$008000 - $00BFFF | EPROM1 (16K). U12 (odd), U14 (even).              |
-|$00C000 - $00FFFF | EPROM1 (16K). U16 (odd), U18 (even).              |
+|$00C000 - $00FFFF | EPROM2 (16K). U16 (odd), U18 (even).              |
 +------------------+---------------------------------------------------+
 |$010040 - $010042 | 6850 Console/terminal ACIA U30 (even addresses).  |
 |$010040           | read=status register, write=control register.     |
