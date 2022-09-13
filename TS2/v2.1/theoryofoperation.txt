@@ -511,13 +511,16 @@ connected to the PCB using wires. Four mounting holes are provided.
 The front panel connections are as follows (left to right):
 
  STEP    STEP/RUN  RESET  HALT LED  POWER  POWER LED  ABORT
-NO/C/NC  NO/C/NC  NC/C/NO   -/+     S/S/X    +/-     NC/C/NO
+NC/C/NO  NC/C/NO  NC/C/NO   -/+     S/S/X    -/+     NC/C/NO
 
 Where the connections are indicated by:
 
 NO - normally open                  NC - normally closed
 C - common                          X - unused
 S - switch contact
+
+STEP, RESET, and ABORT are SPDT push buttons and STEP/RUN and POWER
+are SPDT switches.
 
 An alternative to a case is to simply cut a piece of plexiglass and
 mount it over the board using nylon standoffs. Use additional
