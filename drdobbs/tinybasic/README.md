@@ -4,6 +4,9 @@ This version has been modified slightly to assemble with the VASM
 assembler. The original files, documentation, and examples can be
 found in the "original" directory.
 
+It can be built to run out of RAM (start address $900) or ROM (start
+address $C000). See the comments in the source code and Makefile.
+
 ----
 
 The original articles mentioned in **./original/UPDATE.TXT** can be found as interactive scans on the Archive.Org website:

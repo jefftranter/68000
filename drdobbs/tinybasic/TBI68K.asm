@@ -34,7 +34,10 @@ CTRLX	EQU	$18
 
 BUFLEN	EQU	80		length of keyboard input buffer
 
+* Use the line below if building for RAM
 	ORG	$900		first free address using Tutor
+* Use the line below if building for ROM
+*	ORG	$C000		start of ROM
 *
 * Standard jump table. You can change these addresses if you are
 * customizing this interpreter for a different environment.
@@ -248,6 +251,9 @@ EXMAT	MOVEQ	#-1,D2		we've got a match so far
 	BPL	EXLP		if not, go back for more
 EXGO	LEA	0,A3		execute the appropriate routine
 	MOVE	(A2),A3
+        MOVE.L  A3,D0
+        AND.L   #$0000FFFF,D0   Fix possible sign extension (assumes code is in first 64K of memory)
+        MOVE.L  D0,A3
 	JMP	(A3)
 *
 *******************************************************************
@@ -1546,6 +1552,9 @@ SRYMSG	DC.B	'Sorry.'
 CLMSG	DC.B	CR,LF,0
 	DC.B	0	<- for aligning on a word boundary
 LSTROM	EQU	*		end of possible ROM area
+
+* Use the line below if building for ROM
+*	ORG	$900		first free address using Tutor
 *
 * Internal variables follow:
 *
@@ -1564,4 +1573,3 @@ STKLMT	DS.L	1		holds lower limit for stack growth
 BUFFER	DS.B	BUFLEN		Keyboard input buffer
 TXT	EQU	*		Beginning of program area
 	END
-
