@@ -1067,7 +1067,7 @@ void initialize()
     turnsPlayed = 0;
     gameOver = 0;
 
-    /* These doors can get changed during game and may need to be reset O*/
+    /* These doors can get changed during game and may need to be reset */
     Move[17][North] = 0;
     Move[21][North] = 0;
 
@@ -1137,7 +1137,7 @@ int main(void)
                 doDrop();
             } else if (tolower(buffer[0]) == 'q') {
                 doQuit();
-           } else if (tolower(buffer[0]) == 'b') {
+            } else if (tolower(buffer[0]) == 'b') {
                 doBackup();
             } else if (tolower(buffer[0]) == 'r') {
                 doRestore();
