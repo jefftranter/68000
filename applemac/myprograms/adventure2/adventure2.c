@@ -1380,7 +1380,7 @@ int main(void)
                 doUse();
             } else if (matchesCommand("drop", buffer)) {
                 doDrop();
-           } else if (tolower(buffer[0]) == 'b') {
+            } else if (tolower(buffer[0]) == 'b') {
                 doBackup();
             } else if (tolower(buffer[0]) == 'r') {
                 doRestore();
