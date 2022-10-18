@@ -1100,7 +1100,8 @@ int main(void)
 {
 #ifndef FILEIO
     /* Mark all saved games as initially invalid */
-    for (int i = 0; i < SAVEGAMES; i++) {
+    int i;
+    for (i = 0; i < SAVEGAMES; i++) {
         savedGame[i].valid = 0;
     }
 #endif
