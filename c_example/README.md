@@ -2,7 +2,7 @@ This is an example of a C program that runs on a standalone 68000-based
 computer like my TS2 or the Motorola Educational Computer Board (ECB).
 
 You will need a version of gcc built as a cross-compiler for the 68k
-platform. I used gcc version 5.4.0.
+platform. I used gcc version 12.2.0 and binutils 2.39.
 
 Build the code using the provided make file. It gets linked at address
 $2000. To load it into the Motorola ECB TUTOR monitor you can run the
