@@ -8,7 +8,7 @@
 ;
 ; It is written for the VASM cross-assembler.
 ;
-; Copyright (C) 2017-2022 Jeff Tranter <tranter@pobox.com>
+; Copyright (C) 2017 Jeff Tranter <tranter@pobox.com>
 
 ; Stack size (number of elements)
 STKSIZE EQU   5
@@ -248,11 +248,11 @@ hex:    lea.l   (base,pc),a1            Get address using position independent c
         bsr     printstring             Display it.
         bra     mainloop
 
-; d - set base to decimal
+; n - set base to decimal
 trydec:
-        cmp.b   #'d',(a0)               Is command 'd' ?
+        cmp.b   #'n',(a0)               Is command 'n' ?
         beq.s   dec
-        cmp.b   #'D',(a0)               Is command 'D' ?
+        cmp.b   #'N',(a0)               Is command 'N' ?
         bne.s   trydrop
 dec:    lea.l   (base,pc),a1            Get address using position independent code.
         move.b  #10,(a1)                Set base to 10.
@@ -1015,7 +1015,7 @@ HELP     dc.b   "Valid commands:",CR,LF
          dc.b   "DUP       Duplicate top of stack",CR,LF
          dc.b   "ROT       Rotate 3 numbers on stack",CR,LF
          dc.b   "h         Set base to hex",CR,LF
-         dc.b   "d         Set base to decimal",CR,LF
+         dc.b   "n         Set base to decimal",CR,LF
          dc.b   "q         Quit",CR,LF
          dc.b   "?         Help",CR,LF,0
 
