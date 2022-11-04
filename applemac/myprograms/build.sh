@@ -12,4 +12,3 @@ do
     ./build.sh
     cd ..
 done
-

@@ -22,7 +22,7 @@ It is written for the VASM cross-assembler.
     %                       Divide two numbers on stack, pop them, push remainder ( i j -- i%j )
     !                       2's complement ( n -- -n )
     ~                       1's complement ( n -- ~n )
-    &                       Bitwise AND ( i j -- i^j )
+    &                       Bitwise AND ( i j -- i&j )
     |                       Bitwise inclusive OR ( i j -- i|j )
     ^                       Bitwise exclusive OR ( i j -- i^j )
     <                       Shift left ( i j -- i<<j )
