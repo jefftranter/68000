@@ -29,7 +29,7 @@ It is written for the VASM cross-assembler.
     >                       Shift right ( i j -- i>>j )
     =                       Pop and compare two values on top of stack. Push 1 if they are same, otherwise 0 ( i j -- k )
     h                       Set input and output base to hexadecimal.
-    n                       Set input and output base to decimal.
+    d                       Set input and output base to decimal.
     q                       Quit to TUTOR monitor.
     ?                       Help (Show summary of commands)
 
@@ -43,7 +43,7 @@ The next four commands are inspired by the FORTH programming language:
 Example:
 
     RPN Calculator v1.0
-    00000000    
+    00000000
     00000000
     00000000
     00000000
@@ -72,7 +72,7 @@ Example:
     00000000
     00000000
     FFFFFFF4
-    ? n
+    ? d
     Base set to decimal
     0
     0
