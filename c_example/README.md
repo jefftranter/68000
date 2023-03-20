@@ -2,7 +2,8 @@ This is an example of a C program that runs on a standalone 68000-based
 computer like my TS2 or the Motorola Educational Computer Board (ECB).
 
 You will need a version of gcc built as a cross-compiler for the 68k
-platform. I used gcc version 12.2.0 and binutils 2.39.
+platform. See the "platform" folder for instructions on how to do
+this.
 
 Build the code using the provided make file. It gets linked at address
 $2000. To load it into the Motorola ECB TUTOR monitor you can run the
@@ -17,26 +18,23 @@ Or just do "make upload".
 You can now run the program from TUTOR using GO 2000. Output should
 look like the following:
 
+```
 TUTOR  1.3 > GO 2000
-
 PHYSICAL ADDRESS=00002000
-
 Start
-
 n  n^2  n^4  n!
-
 1 1 1 1
-
 2 4 8 2
-
 3 9 27 6
-
 4 16 64 24
-
 5 25 125 120
-
 6 36 216 720
-
 7 49 343 5040
-
+8 64 512 40320
+9 81 729 362880
+10 100 1000 3628800
+11 121 1331 39916800
 Done
+
+TUTOR  1.3 > 
+```
