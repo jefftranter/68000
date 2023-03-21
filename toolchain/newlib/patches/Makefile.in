@@ -249,10 +249,6 @@ ${TS2_BSP}: $(OBJS) ${TS2_OBJS}
 	${AR} ${ARFLAGS} $@ $(OBJS) ${TS2_OBJS}
 	${RANLIB} $@
 
-${TS2_BSP}: $(OBJS) ${TS2_OBJS}
-	${AR} ${ARFLAGS} $@ $(OBJS) ${TS2_OBJS}
-	${RANLIB} $@
-
 ${MVME162_BSP}: $(OBJS) ${MVME162_OBJS}
 	${AR} ${ARFLAGS} $@ $(OBJS) ${MVME162_OBJS}
 	${RANLIB} $@
