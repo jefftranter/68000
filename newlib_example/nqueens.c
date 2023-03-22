@@ -134,7 +134,7 @@ int main(void)
   int i;
   char buff[10];
 
-  printf("How many iterations? ");
+  printf("What size board? ");
   fgets(buff, sizeof(buff) - 1, stdin);
   n = atoi(buff);
 

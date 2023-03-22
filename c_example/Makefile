@@ -13,4 +13,6 @@ clean:
 upload: demo.run
 	/bin/echo -e "LO1\r\n" >/dev/ttyUSB0
 	sleep 1
-	ascii-xfr -s -l 100 demo.run >/dev/ttyUSB0
+	ascii-xfr -s -l 2 demo.run >/dev/ttyUSB0
+	sleep 1
+	/bin/echo -e "GO 2000\r\n" >/dev/ttyUSB0
