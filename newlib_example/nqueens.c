@@ -1,6 +1,7 @@
 /* Solve the n queens problem */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #define MAX_N 8
 
@@ -13,7 +14,7 @@ int  nsq        = 0;
 void print_board(int board[MAX_N*MAX_N])
 {
   int i;
-  
+
   printf("+");
   for (i = 0; i < n ; i++)
     printf("---");
@@ -45,7 +46,7 @@ int piece(int n, int board[MAX_N*MAX_N])
   /* first try the cache */
   if (board[cache[n]] == n)
     return cache[n];
-  
+
   for (i = 0 ; i < nsq ; i++)
     if (board[i] == n) {
       cache[n] = i; /* cache it for next time */
@@ -76,7 +77,7 @@ void check_board(int board[MAX_N*MAX_N])
       if (board[r*n+c] != 0 && board[r*n+c] != i)
 	return;
     }
-    
+
     /* not a solution if piece in same \ diagonal */
     for (j = -n ; j < n ; j++) {
       r = p / n + j;
@@ -131,9 +132,13 @@ int main(void)
 {
   int board[MAX_N*MAX_N];
   int i;
+  char buff[10];
+
+  printf("How many iterations? ");
+  fgets(buff, sizeof(buff) - 1, stdin);
+  n = atoi(buff);
 
   solutions = 0;
-  n = 5;
   nsq = n*n;           /* save n^2 to avoid calculating it again */
 
   printf("Solving n queens problem for n = %d\n", n);
@@ -150,8 +155,8 @@ int main(void)
     tries++;
     check_board(board);
   } while (next_board(board));
-  
+
   printf("Found %d solutions after %ld tries.\n", solutions, tries);
-        
+
   return 0;
 }
