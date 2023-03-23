@@ -17,7 +17,8 @@ int main()
     char buffer[80];
     fgets(buffer, sizeof(buffer)-1, stdin);
     printf("Length of entered text is %ld.\n", strlen(buffer));
-    printf("\nYou entered: '%s'\n", buffer);
+    printf("\nYou entered: ");
+    printf(buffer);
 
     return 0;
 }

@@ -23,6 +23,7 @@
 	.text
 	.global SYM (_exit)
 	.global SYM (outln)
+	.global SYM (outstr)
 	.global SYM (outbyte)
 	.global SYM (inbyte)
 	.global SYM (havebyte)
