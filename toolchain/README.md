@@ -62,6 +62,11 @@ you can do sines, cosines, powers, roots, quicksorts, random numbers
 and all the other goodness that comes with libc. For more usage
 instructions, see the [newlib README](newlib/README.md)
 
+## Newlib-nano
+
+This is an alternate version of newlib that may be smaller. It had
+similar results in my testing.
+
 ## Assembler
 
 Besides the GCC m68k-elf assembler m68k-elf-as there is also a

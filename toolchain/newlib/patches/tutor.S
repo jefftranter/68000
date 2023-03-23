@@ -2,7 +2,7 @@
  * tutor.S -- board support for the TUTOR monitor.
  *
  * Copyright (c) 1995, 1996 Cygnus Support
- * Copyright (c) 2017, Jeff Tranter <tranter@pobox.com>
+ * Copyright (c) 2017, 2023 Jeff Tranter <tranter@pobox.com>
  *
  * The authors hereby grant permission to use, copy, modify, distribute,
  * and license this software and its documentation for any purpose, provided
@@ -42,7 +42,7 @@ SYM (_exit):
  * inbyte -- get a byte from the console serial port
  *	d0 - contains the byte read in
  *
- * Echoes the character the console.
+ * Echoes the character to the console.
  * Converts a carriage return character to newline.
  */
 	.text
@@ -53,7 +53,7 @@ SYM (inbyte):
 	trap	#14			// Call TUTOR function
 	extw	d0			// Extend byte result to word
 	extl	d0			// ...and longword
-	cmp	#'\r',d0		// Is it newline?
+	cmp	#'\r',d0		// Is it return?
 	bne	notnl1			// Branch if not
 	move.b	#'\n',d0		// Convert to newline
 notnl1: bsr	outbyte			// Echo it
@@ -96,7 +96,6 @@ SYM (outln):
 	trap	#14			// Call TUTOR function
 	movem.l	(sp)+,d0/d1/a0/a5/a6	// Restore registers
 	rts
-
 
 /*
  * outstr -- sends a string of bytes out the serial port without a CR/LF

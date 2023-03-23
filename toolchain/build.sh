@@ -10,7 +10,11 @@ BUILD_VASM=1
 BUILD_MINIPRO=1
 BUILD_BINUTILS=1
 BUILD_GCC=1
-BUILD_NEWLIB=1
+BUILD_NEWLIB=0
+BUILD_NEWLIB_NANO=1
+
+# Enable to first remove any existing install
+UNINSTALL=0
 
 # Set versions to use here.
 SREC_VER=151
@@ -18,6 +22,21 @@ MINIPRO_VER=0.5
 NEWLIB_VER=4.1.0
 BINUTILS_VER=2.40
 GCC_VER=12.2.0
+
+if [ "${UNINSTALL}" = 1 ]
+then
+sudo rm -rf /usr/local/m68k/elf
+sudo rm -rf /usr/local/bin/m68k-elf*
+sudo rm -rf /usr/local/bin/minipro
+sudo rm -rf /usr/local/bin/miniprohex
+sudo rm -rf /usr/local/bin/vasmm68k_mot
+sudo rm -rf /usr/local/bin/vobjdump
+sudo rm -rf /usr/local/bin/disasm68k.py
+sudo rm -rf /usr/local/bin/bin2srec
+sudo rm -rf /usr/local/bin/binsplit
+sudo rm -rf /usr/local/bin/srec2bin
+sudo rm -rf /usr/local/lib/libcc1*
+fi
 
 # Build S record utilities
 if [ "${BUILD_SREC}" = 1 ]
@@ -133,6 +152,19 @@ sudo make install
 cd ..
 rm -rf newlib-${NEWLIB_VER}
 #rm newlib-${NEWLIB_VER}.tar.gz
+fi
+
+if [ "${BUILD_NEWLIB_NANO}" = 1 ]
+then
+  git clone https://github.com/32bitmicro/newlib-nano-1.0.git
+  cd newlib-nano-1.0
+  chmod a+x configure
+  cp ../newlib/patches/* libgloss/m68k
+  ./configure --with-cpu=68000 --target=m68k-elf --enable-newlib-nano-formatted-io --enable-newlib-nano-malloc --enable-lite-exit --disable-libssp --disable-nls --disable-multilib
+  make -s -j4
+  sudo make install
+  cd ..
+  rm -rf newlib-nano-1.0
 fi
 
 echo "Done"
