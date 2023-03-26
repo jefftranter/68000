@@ -29,6 +29,8 @@ monitor.hex: monitor.run
 	srec_cat monitor.run -Motorola -output monitor.hex -Intel
 
 clean:
+
+distclean:
 	$(RM) minimon.lst minimon.o minimon.run minimon.bin
 	$(RM) monitor.lst monitor.o monitor.run monitor.bin
 	$(RM) monitor_even.run monitor_odd.run monitor.hex minimon.hex

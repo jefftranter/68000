@@ -37,5 +37,7 @@ program_even: basic68k_even.bin
 	minipro -S --write=basic68k_even.bin --device=AT28HC64
 
 clean:
+
+distclean:
 	$(RM) basic68k.run basic68k_even.run basic68k_odd.run basic68k.lst basic68k.hex
 	$(RM) basic68k_even.bin basic68k_odd.bin

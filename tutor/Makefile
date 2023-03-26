@@ -37,6 +37,8 @@ tutor13_odd.bin: tutor13_odd.run
 	srec_cat tutor13_odd.run -Motorola --crop 0x8000 0xa000 --offset -0x8000 -output tutor13_odd.bin -Binary
 
 clean:
+
+distclean:
 	$(RM) tutor13.lst tutor13.o tutor13.run tutor13.bin tutor13.hex
 	$(RM) tutor13_even.run tutor13_odd.run
 	$(RM) tutor13_even.bin tutor13_odd.bin

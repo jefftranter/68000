@@ -1,4 +1,4 @@
-SUBDIRS = c_example drdobbs ehbasic figforth leventhal monitor newlib_example quelo rockpaperscissors rpncalc testprog tutor xlate09
+SUBDIRS = c_example drdobbs ehbasic figforth leventhal monitor newlib_example rockpaperscissors rpncalc testprog tutor xlate09
 
 all:
 	@for i in $(SUBDIRS); do \
