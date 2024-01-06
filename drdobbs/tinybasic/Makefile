@@ -1,10 +1,10 @@
 default: ram
 
-# BUild when running out of RAM
+# Build when running out of RAM
 ram:	TBI68K.asm
 	vasmm68k_mot -quiet -m68000 -opt-allbra -ldots -Fsrec -s19 -L TBI68K.lst -o TBI68K.run TBI68K.asm
 
-# BUild when running out of ROM
+# Build when running out of ROM
 rom: TBI68K.asm
 	vasmm68k_mot -quiet -m68000 -opt-allbra -ldots -Fsrec -s19 -L TBI68K.lst -o TBI68K.run TBI68K.asm
 	srec_cat TBI68K.run -fill 0x00 0xC000 0x10000 --crop 0xC000 0x10000 -o temp.run
