@@ -38,7 +38,7 @@ example,
 
 Will output "AB", whereas in many dialects of Basic it will be "A B".
 
-It appears that a RETURN statement is not valid in some sittationsa,
+It appears that a RETURN statement is not valid in some situations,
 such as when control flow leaves from inside a FOR/NEXT loop. The
 following program will display "RETURN without GOSUB Error in line
 210" when run:
