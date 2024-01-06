@@ -39,6 +39,7 @@ The next four commands are inspired by the FORTH programming language:
     SWAP                    Exchanges the top 2 numbers on the stack ( a b -- b a )
     DUP                     Duplicates the value on the top of stack ( a -- a a )
     ROT                     Rotates the top 3 numbers on the top of the stack ( a b c -- b c a )
+    SQRT                    Replace number on the top of stack with its square root.
 
 Example:
 

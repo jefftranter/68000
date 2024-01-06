@@ -2,7 +2,7 @@
 	$(AS) $(ASFLAGS) -L $*.lst -o $@ $<
 
 AS	= vasmm68k_mot
-ASFLAGS = -quiet -m68000 -no-opt -esc -Fsrec -s19
+ASFLAGS = -I../drdobbs/squareroot -quiet -m68000 -no-opt -esc -Fsrec -s19
 
 all:	calc.run
 

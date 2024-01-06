@@ -8,7 +8,7 @@
 ;
 ; It is written for the VASM cross-assembler.
 ;
-; Copyright (C) 2017 Jeff Tranter <tranter@pobox.com>
+; Copyright (C) 2017,2024 Jeff Tranter <tranter@pobox.com>
 
 ; Stack size (number of elements)
 STKSIZE EQU   5
@@ -29,6 +29,8 @@ INCHE   EQU     247                     Input single character from port 1.
 OUTCH   EQU     248                     Output single character to port 1.
 FIXDATA EQU     250                     Initialize A6 to BUFFER and append string.
 FIXBUF  EQU     251                     Initialize A5 and A6 to BUFFER.
+
+  INCLUDE squareroot.asm
 
 ; Start address
         ORG     $2000                   Located in RAM.
@@ -301,7 +303,7 @@ tryrot:
         cmp.l   #"ROT\0",(a0)            Is command "ROT" ?
         beq.s   rot
         cmp.l   #"rot\0",(a0)            Is command "rot" ?
-        bne.s   trydig
+        bne.s   trysqrt
 rot:    bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
@@ -313,6 +315,17 @@ rot:    bsr     stack_pop               Get TOS in D0.
         move.l  d1,d0                   Now get D1.
         bsr     stack_push              Push on stack.
         move.l  d3,d0                   Now get D3.
+        bsr     stack_push              Push on stack.
+        bra     mainloop
+
+; SQRT - Replace value on the top of stack with its square root.
+trysqrt:
+        cmp.l   #"SQRT",(a0)            Is command "SQRT" ?
+        beq.s   csqrt
+        cmp.l   #"sqrt",(a0)            Is command "sqrt" ?
+        bne.s   trydig
+csqrt:  bsr     stack_pop               Get TOS in D0.
+        bsr     lsqrt                   Calculate square root. Return in D0.
         bsr     stack_push              Push on stack.
         bra     mainloop
 
@@ -856,7 +869,7 @@ isgood: addq.l  #1,a0                   Advance pointer to next character.
 uppercase:
         movem.l a0,-(sp)                Preserve registers.
 scan2:  tst.b   (a0)                    Have we reached end of string?
-        beq.s   done                    If so, we're done.
+        beq.s   @done                   If so, we're done.
         cmp.b   #'a',(a0)               Is it 'A' ?
         blt.s   nochange                No change if less than.
         cmp.b   #'z',(a0)               Is it 'z' ?
@@ -866,7 +879,7 @@ nochange:
         addq.l  #1,a0                   Advance pointer to next character.
         bra.s   scan2                   And continue scanning.
 
-done:   movem.l (sp)+,a0                Restore registers.
+@done:  movem.l (sp)+,a0                Restore registers.
         rts
 
 
@@ -1014,6 +1027,7 @@ HELP     dc.b   "Valid commands:",CR,LF
          dc.b   "SWAP      Exchange top 2 numbers on stack",CR,LF
          dc.b   "DUP       Duplicate top of stack",CR,LF
          dc.b   "ROT       Rotate 3 numbers on stack",CR,LF
+         dc.b   "SQRT      Replace top of stack with square root",CR,LF
          dc.b   "h         Set base to hex",CR,LF
          dc.b   "n         Set base to decimal",CR,LF
          dc.b   "q         Quit",CR,LF
