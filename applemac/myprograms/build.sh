@@ -6,7 +6,7 @@ then
     exit 0
 fi
 
-for d in adventure1 adventure2 nqueens yum rpncalc
+for d in adventure1 adventure2 adventure3 nqueens yum rpncalc
 do
     cd $d
     ./build.sh
