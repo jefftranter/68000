@@ -10279,64 +10279,64 @@
  8271               	
  8272               	CT:
  8273               	*        FADDR   253,T700       | APPEND NEW TABLE
- 8274 bf1c FD00 BF00 	         DC.L    0xFD00BF00
+ 8274 bf1c FD00 BF08 	         DC.L    0xFD00BF08
  8275               	*        FADDR   252,FIXDADD    | APPEND DATA (A5) TO BUFFER (A6)+
  8276 bf20 FC00 80F6 	         DC.L    0xFC0080F6
  8277               	*        FADDR   251,FIXBUF     | SET A5 & A6 AS POINTERS TO BUFFER
- 8278 bf24 FB00 9C96 	         DC.L    0xFB009C96
+ 8278 bf24 FB00 9C9E 	         DC.L    0xFB009C9E
  8279               	*        FADDR   250,FIXDATA    | MOVE DATA (A5) TO BUFFER; A5=BUFFER A6
  8280 bf28 FA00 80F2 	         DC.L    0xFA0080F2
  8281               	*        FADDR   249,FIXDCRLF
  8282 bf2c F900 8106 	         DC.L    0xF9008106
  8283               	*        FADDR   248,F100       | OUTPUT CHAR PORT1  D0=CHAR
- 8284 bf30 F800 BF88 	         DC.L    0xF800BF88
+ 8284 bf30 F800 BF90 	         DC.L    0xF800BF90
  8285               	*        FADDR   247,F110       | INPUT CHAR PORT1  D0=CHAR
- 8286 bf34 F700 BF90 	         DC.L    0xF700BF90
+ 8286 bf34 F700 BF98 	         DC.L    0xF700BF98
  8287               	*        FADDR   244,CHRPRINT   | OUTPUT CHAR PORT3 D0=CHAR
- 8288 bf38 F400 9D7A 	         DC.L    0xF4009D7A
+ 8288 bf38 F400 9D82 	         DC.L    0xF4009D82
  8289               	*        FADDR   243,OUTPUT     | OUTPUT STRING PORT1 (A5) (A6)
- 8290 bf3c F300 9C0A 	         DC.L    0xF3009C0A
+ 8290 bf3c F300 9C12 	         DC.L    0xF3009C12
  8291               	*        FADDR   242,OUTPUT21   | OUTPUT STRING PORT2 (A5) (A6)
- 8292 bf40 F200 9C2A 	         DC.L    0xF2009C2A
+ 8292 bf40 F200 9C32 	         DC.L    0xF2009C32
  8293               	*        FADDR   241,PORTIN1    | INPUT STRING PORT1  (A5) (A6)
- 8294 bf44 F100 9C9E 	         DC.L    0xF1009C9E
+ 8294 bf44 F100 9CA6 	         DC.L    0xF1009CA6
  8295               	*        FADDR   240,PORTIN20   | INPUT STRING PORT2  (A5) (A6)
- 8296 bf48 F000 9FD4 	         DC.L    0xF0009FD4
+ 8296 bf48 F000 9FDC 	         DC.L    0xF0009FDC
  8297               	*        FADDR   239,TAPEOUT    | OUTPUT STRING TO PORT4 (A5) (A6)
- 8298 bf4c EF00 9E9C 	         DC.L    0xEF009E9C
+ 8298 bf4c EF00 9EA4 	         DC.L    0xEF009EA4
  8299               	*        FADDR   238,TAPEIN     | INPUT STRING FROM PORT4 (A5) (A6)
- 8300 bf50 EE00 A09C 	         DC.L    0xEE00A09C
+ 8300 bf50 EE00 A0A4 	         DC.L    0xEE00A0A4
  8301               	*        FADDR   237,PRCRLF     | OUTPUT STRING TO PORT3 (A5) (A6)
- 8302 bf54 ED00 9D66 	         DC.L    0xED009D66
+ 8302 bf54 ED00 9D6E 	         DC.L    0xED009D6E
  8303               	*        FADDR   236,HEX2DEC    | CONVERT HEX D0 TO DECIMAL (A6)+
  8304 bf58 EC00 8F5C 	         DC.L    0xEC008F5C
  8305               	*        FADDR   235,GETHEX     | GET HEX CHAR INTO D0 FROM (A5)+
- 8306 bf5c EB00 9BA6 	         DC.L    0xEB009BA6
+ 8306 bf5c EB00 9BAE 	         DC.L    0xEB009BAE
  8307               	*        FADDR   234,PUTHEX     | FORMAT HEX CHAR FROM D0 TO (A6)+
- 8308 bf60 EA00 99C0 	         DC.L    0xEA0099C0
+ 8308 bf60 EA00 99C8 	         DC.L    0xEA0099C8
  8309               	*        FADDR   233,PNT2HX     | FORMAT 2 HEX CHAR FROM D0 TO (A6)+
- 8310 bf64 E900 99B8 	         DC.L    0xE90099B8
+ 8310 bf64 E900 99C0 	         DC.L    0xE90099C0
  8311               	*        FADDR   232,PNT4HX     | FORMAT 4 HEX CHAR FROM D0 TO (A6)+
- 8312 bf68 E800 99B0 	         DC.L    0xE80099B0
+ 8312 bf68 E800 99B8 	         DC.L    0xE80099B8
 68K GAS  tutor13.s 			page 173
 
 
  8313               	*        FADDR   231,PNT6HX     | FORMAT 6 HEX CHAR FROM D0 TO (A6)+
- 8314 bf6c E700 99AA 	         DC.L    0xE70099AA
+ 8314 bf6c E700 99B2 	         DC.L    0xE70099B2
  8315               	*        FADDR   230,PNT8HX     | FORMAT 8 HEX CHAR FROM D0 TO (A6)+
- 8316 bf70 E600 99A2 	         DC.L    0xE60099A2
+ 8316 bf70 E600 99AA 	         DC.L    0xE60099AA
  8317               	*        FADDR   229,START      | RESTART TUTOR INITIALIZE EVERYTHING
  8318 bf74 E500 8146 	         DC.L    0xE5008146
  8319               	*        FADDR   228,MACSBUG    | GOTO TUTOR;   PRINT PROMPT
  8320 bf78 E400 8232 	         DC.L    0xE4008232
  8321               	*        FADDR   227,F120       | OUTPUT STRING,CR,LF PORT1 (A5) (A6)
- 8322 bf7c E300 BF98 	         DC.L    0xE300BF98
+ 8322 bf7c E300 BFA0 	         DC.L    0xE300BFA0
  8323               	*        FADDR   226,GETNUMA    | GET HEX NUMBER (A5)+ INTO D0
- 8324 bf80 E200 9AF6 	         DC.L    0xE2009AF6
+ 8324 bf80 E200 9AFE 	         DC.L    0xE2009AFE
  8325               	*        FADDR   225,GETNUMD    | GET DECIMAL NUMBER (A5)+ INTO D0
- 8326 bf84 E100 9AEE 	         DC.L    0xE1009AEE
+ 8326 bf84 E100 9AF6 	         DC.L    0xE1009AF6
  8327               	*        FADDR   224,PORTIN1N   | INPUT STRING PORT1 (NO AUTO LF)
- 8328 bf88 E000 9CB0 	         DC.L    0xE0009CB0
+ 8328 bf88 E000 9CB8 	         DC.L    0xE0009CB8
  8329               	*        FADDR   255,0xFFFFFF   | END KEY
  8330 bf8c FFFF FFFF 	         DC.L    0xFFFFFFFF
  8331               	
