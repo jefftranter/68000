@@ -20,8 +20,8 @@ UNINSTALL=0
 SREC_VER=151
 MINIPRO_VER=0.5
 NEWLIB_VER=4.1.0
-BINUTILS_VER=2.40
-GCC_VER=12.2.0
+BINUTILS_VER=2.41
+GCC_VER=13.2.0
 
 if [ "${UNINSTALL}" = 1 ]
 then
@@ -121,7 +121,7 @@ then
 echo "Building gcc"
 if [ ! -f gcc-${GCC_VER}.tar.gz ]
 then
-  wget wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VER}/gcc-${GCC_VER}.tar.gz
+  wget https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VER}/gcc-${GCC_VER}.tar.gz
 fi
 tar xf gcc-${GCC_VER}.tar.gz
 cd gcc-${GCC_VER}
