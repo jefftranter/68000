@@ -1,3 +1,5 @@
+all: basic68k.hex basic68k_even.bin basic68k_odd.bin
+
 basic68k.hex: basic68k.run
 	srec_cat basic68k.run -Motorola -output basic68k.hex -Intel
 
@@ -23,7 +25,7 @@ upload: basic68k.run
 	/bin/echo -e "GO 800\r\n" >/dev/ttyUSB0
 
 basic68k_odd.bin: basic68k_odd.run
-	srec2bin -o 0xC000 basic68k_odd.run basic68k_odd.bin
+	srec2bin -o 0xC001 basic68k_odd.run basic68k_odd.bin
 
 basic68k_even.bin: basic68k_even.run
 	srec2bin -o 0xC000 basic68k_even.run basic68k_even.bin
