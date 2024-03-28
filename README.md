@@ -34,7 +34,7 @@ Copyright (c) 2016-2023 by Jeff Tranter <tranter@pobox.com>
 The hardware design is Open Source Hardware, licensed under the The TAPR
 Open Hardware License. You are welcome to build the circuit and use my
 PCB layout.
-See https://web.tapr.org/TAPR_Open_Hardware_License_v1.0.txt
+See https://web.tapr.org/OHL/TAPR_Open_Hardware_License_v1.0.txt
 
 
 Some code here is entirely written by me and others are ports of
