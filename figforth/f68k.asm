@@ -250,8 +250,8 @@ XRSLW	RTS
 *
 *---------------------------------------------------
 *
-DP0	ORG	$2000	*START OF FORTH DICTIONARY 
-*
+	ORG	$2000
+DP0			*START OF FORTH DICTIONARY
 	DC.B	$83	* LIT
 	DC.B	'LI'
 	DC.B	$80+'T'
