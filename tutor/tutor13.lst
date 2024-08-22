@@ -23,7 +23,7 @@
   20               	
   21               	ADDR2MEM: .MACRO a1,a2
   22               	         PEA     \a1(%PC)         | MOVE ADDRESS TO MEMORY; POSITION
-  23               	         MOVE.L  (%A7)+,\a2       | INDEPENDANT = TO "MOVE.L #\1,\2"
+  23               	         MOVE.L  (%A7)+,\a2       | INDEPENDENT = TO "MOVE.L #\1,\2"
   24               	         .ENDM
   25               	
   26               	SAVEREGS: .MACRO
@@ -78,7 +78,7 @@
   72 0014 0000 0000 	         DS.L    1              | 5   $05  DIVIDE BY ZERO       "DIV0"
   73 0018 0000 0000 	         DS.L    1              | 6   $06  CHECK TRAP           "CHCK"
   74 001c 0000 0000 	         DS.L    1              | 7   $07  TRAP V               "TP V"
-  75 0020 0000 0000 	AV8:     DS.L    1              | 8   $08  PRIVILEDGE VIOLATION "PRIV"
+  75 0020 0000 0000 	AV8:     DS.L    1              | 8   $08  PRIVILEGE VIOLATION "PRIV"
   76 0024 0000 0000 	_AV9:    DS.L    1              | 9   $09  TRACE
   77 0028 0000 0000 	         DS.L    1              | 10  $0A  1010 LINE EMULATION  "1010"
   78 002c 0000 0000 	_AV11:   DS.L    1              | 11  $0B  1111 LINE EMULATION  "1111"
@@ -402,7 +402,7 @@
  356               	* THE FOLLOWING MUST REMAIN AS IS
  357               	*  User docomentation DEPENDS upon it!
  358               	*
- 359               	_OPTIONS: .align 2              | FORCE WORD BOUNDRY
+ 359               	_OPTIONS: .align 2              | FORCE WORD BOUNDARY
  360 04e6 00        	         DS.B    1              | X-ON CHARACTER
  361 04e7 00        	         DS.B    1              | X-OFF CHARACTER
  362 04e8 00        	         DS.B    1              | NO NO-AUTO LINEFEED
@@ -455,9 +455,9 @@
  394 0624 0000 0000 	_ALTSER1: DS.L   1              | ALTERNATE SERIAL PORT#1
  395 0628 0000 0000 	_ALTSER2: DS.L   1              | ALTERNATE SERIAL PORT#2
  396 062c 0000 0000 	_INPORT1: DS.L   1              | INPUT ROUTINE ADDRESS
- 397 0630 0000 0000 	_OUTPORT1:DS.L   1              | ADDRESS FOR OUPUT ROUTINE
+ 397 0630 0000 0000 	_OUTPORT1:DS.L   1              | ADDRESS FOR OUTPUT ROUTINE
  398 0634 0000 0000 	_INPORT2: DS.L   1              | ADDRESS FOR INPUT ROUTINE
- 399 0638 0000 0000 	_OUTPORT2:DS.L   1              | FOR OUTPURT ROUTINE
+ 399 0638 0000 0000 	_OUTPORT2:DS.L   1              | FOR OUTPUT ROUTINE
  400 063c 0000 0000 	_INPORT3: DS.L   1              | THIS MIGHT BE FOR TAPE
  401 0640 0000 0000 	_OUTPORT3:DS.L   1              | THIS MIGHT BE FOR PRINTER
  402 0644 0000 0000 	_INPORT4: DS.L   1              | CASSETTE
@@ -471,13 +471,13 @@
  410               	
  411 0656 0000 0000 	_CTLINK: DS.L    1              | POINTER TO FIRST TABLE
  412               	
- 413               	_ENDHRAM: .align 2              | MUST START ON WORD BOUNDRY
+ 413               	_ENDHRAM: .align 2              | MUST START ON WORD BOUNDARY
  414               	
  415               	*********************
  416               	* SYSTEM STACK AREA *
  417               	*********************
  418               	
- 419               	         .align  2              | FORCE ON WORD BOUNDRY
+ 419               	         .align  2              | FORCE ON WORD BOUNDARY
 68K GAS  tutor13.s 			page 9
 
 
@@ -509,7 +509,7 @@
  437               	PCOUNTER =       0x0000000E     | DS.L    1
  438               	PTROP    =       0x00000012     | DS.L    1              POINTER TO OPERAND
  439               	PENDOP   =       0x00000016     | DS.L    1              POINTER END OF OPERAND
- 440               	PTRBUFE  =       0x0000001A     | DS.L    1              POINTER TO END OF FORMATED SOURCE
+ 440               	PTRBUFE  =       0x0000001A     | DS.L    1              POINTER TO END OF FORMATTED SOURCE
  441               	LINK     =       0x0000001E     | DS.L    1              SAVE FOR UNLINK
  442               	ESKE     =       0x00000022     | DS.B    0
  443               	
@@ -650,7 +650,7 @@
  553 80c8 6128      	         BSR.S   FIXDATA
  554 80ca 2008      	         MOVE.L  %A0,%D0
  555 80cc 6100 18DC 	         BSR     PNT8HX         | FORMAT ADDR1
- 556 80d0 1CFC 0020 	         MOVE.B  #BLANK,(%A6)+  | SPACE FOR FORMATING
+ 556 80d0 1CFC 0020 	         MOVE.B  #BLANK,(%A6)+  | SPACE FOR FORMATTING
  557 80d4 2009      	         MOVE.L  %A1,%D0
  558 80d6 6100 18D2 	P2PHY2:  BSR     PNT8HX         | FORMAT ADDR2
  559 80da 6100 1B1C 	         BSR     OUT1CR         | DISPLAY IT
@@ -925,7 +925,7 @@
  770 828a 1015      	         MOVE.B  (%A5),%D0      | GRAB FIRST CHARACTER
  771 828c 0C00 002A 	         CMPI.B  #'*',%D0       | SEND LINE COMMAND
  772 8290 6608      	         BNE.S   DECODE10
- 773 8292 528D      	         ADDQ.L  #1,%A5         | GET PAST PHOENY PROMPT
+ 773 8292 528D      	         ADDQ.L  #1,%A5         | GET PAST PHONY PROMPT
  774 8294 6100 1986 	         BSR     OUTPUT2        | SEND LINE+CR (NO LF) TO PORT2
  775 8298 6098      	         BRA.S   MACSBUG        | REENTER COMMAND MODE
  776               	
@@ -949,7 +949,7 @@
  794 82bc 4A02      	         TST.B   %D2            | IS "NO" OPTION SUPPORTED THIS COMMAND?
  795 82be 6AF2      	         BPL.S   DECODE4        | NO...THEN RUN OUT OF COMMANDS
  796               	
- 797 82c0 0242 7F7F 	DECODE41:ANDI.W  #0x7F7F,%D2    | CLEAR "INVISABLE" & "NO" BITS
+ 797 82c0 0242 7F7F 	DECODE41:ANDI.W  #0x7F7F,%D2    | CLEAR "INVISIBLE" & "NO" BITS
  798 82c4 0C42 7F7F 	         CMPI.W  #0x7F7F,%D2    | END OF LIST?
  799 82c8 6700 FDD4 	         BEQ     WHAT           | Command not found
  800               	
@@ -1274,12 +1274,12 @@
  1065 84e4 41FA FBD0 	BFCMD:   LEA     SYNTAX(%PC),%A0
  1066 84e8 6100 1592 	         BSR     FNEXTF
  1067 84ec 6100 064C 	         BSR     GETA
- 1068 84f0 6100 15A8 	         BSR     CKWADR         | CHECK WORD BOUNDRY ADDRESS
+ 1068 84f0 6100 15A8 	         BSR     CKWADR         | CHECK WORD BOUNDARY ADDRESS
  1069 84f4 2C00      	         MOVE.L  %D0,%D6        | D6 = FROM BEGIN ADDRESS
  1070               	
  1071 84f6 6100 1584 	         BSR     FNEXTF
  1072 84fa 6100 063E 	         BSR     GETA
- 1073 84fe 6100 159A 	         BSR     CKWADR         | CHECK WORD BOUNDRY ADDRESS
+ 1073 84fe 6100 159A 	         BSR     CKWADR         | CHECK WORD BOUNDARY ADDRESS
  1074 8502 2240      	         MOVE.L  %D0,%A1          | A1 = FROM END ADDRESS
  1075               	
  1076 8504 6100 1576 	         BSR     FNEXTF         | FIND NEXT FIELD
@@ -1357,7 +1357,7 @@
  1144               	*   ***T***   TRACE COMMAND
  1145               	
  1146               	TCMD:    .align  2              | "T" Alias for "TR" command
- 1147 8588 41FA 0012 	TRCMD:   LEA     TCMDHOT(%PC),%A0 | IF NO PARAMTERS
+ 1147 8588 41FA 0012 	TRCMD:   LEA     TCMDHOT(%PC),%A0 | IF NO PARAMETERS
  1148 858c 6100 14EE 	         BSR     FNEXTF         | FIND NEXT FIELD
  1149 8590 6100 156C 	         BSR     GETNUMA        | FIND NUMBER OF INST TO TRACE
  1150 8594 6100 150A 	         BSR     CKADDR         | INSURE 24 BITS OR LESS
@@ -1377,7 +1377,7 @@
  1164 85a4 41FA FB10 	TTCMD:   LEA     SYNTAX(%PC),%A0
  1165 85a8 6100 14D2 	         BSR     FNEXTF         | FIND NEXT FIELD
  1166 85ac 6100 058C 	         BSR     GETA           | GET ADDRESS
- 1167 85b0 6100 14E8 	         BSR     CKWADR         | CHECK WORD BOUNDRY ADDRESS
+ 1167 85b0 6100 14E8 	         BSR     CKWADR         | CHECK WORD BOUNDARY ADDRESS
 68K GAS  tutor13.s 			page 24
 
 
@@ -1403,7 +1403,7 @@
  1185 85d8 41FA FADC 	GTCMD:   LEA     SYNTAX(%PC),%A0  | GET NUMBER ELSE PRINT "WHAT"
  1186 85dc 6100 149E 	         BSR     FNEXTF         | FIND NEXT FIELD
  1187 85e0 6100 0558 	         BSR     GETA           | GET ADDRESS
- 1188 85e4 6100 14B4 	         BSR     CKWADR         | CHECK WORD BOUNDRY ADDRESS
+ 1188 85e4 6100 14B4 	         BSR     CKWADR         | CHECK WORD BOUNDARY ADDRESS
  1189 85e8 2C00      	         MOVE.L  %D0,%D6        | D6 = UNTIL ADDRESS
  1190 85ea 6100 FAD0 	         BSR     PPHY           | PRINT PHYSICAL ADDRESS
  1191               	
@@ -1421,10 +1421,10 @@
  1203 8602 6116      	         BSR.S   GOCMD1A        | NORMAL STARTUP
  1204 8604 6020      	         BRA.S   GOCMD1
  1205               	
- 1206 8606 41FA 0012 	GOSET1:  LEA     GOCMD1A(%PC),%A0 | WHERE TO GO IF NO PARAMERS
+ 1206 8606 41FA 0012 	GOSET1:  LEA     GOCMD1A(%PC),%A0 | WHERE TO GO IF NO PARAMETERS
  1207 860a 6100 1470 	         BSR     FNEXTF         | FIND NEXT FIELD
  1208 860e 6100 052A 	         BSR     GETA           | GET ADDRESS
- 1209 8612 6100 1486 	         BSR     CKWADR         | CHECK WORD BOUNDRY ADDRESS
+ 1209 8612 6100 1486 	         BSR     CKWADR         | CHECK WORD BOUNDARY ADDRESS
  1210 8616 21C0 0400 	         MOVE.L  %D0,REGPC
  1211               	
  1212 861a 2038 0400 	GOCMD1A: MOVE.L  REGPC,%D0       | (ALSO SUBROUTINE ENTRY)
@@ -1470,7 +1470,7 @@
  1248 8652 41FA 004E 	BRCMD:   LEA     BCMD7(%PC),%A0 |   WHERE TO GO IF NO PARMS
  1249 8656 6100 1424 	BCMD0:   BSR     FNEXTF         | FIND NEXT FIELD
  1250 865a 6100 04DE 	         BSR     GETA           | GET ADDRESS
- 1251 865e 6100 143A 	         BSR     CKWADR         | CHECK WORD BOUNDRY ADDRESS
+ 1251 865e 6100 143A 	         BSR     CKWADR         | CHECK WORD BOUNDARY ADDRESS
  1252               	
  1253 8662 61DE      	         BSR.S   FIXBP          | SET UP COUNTER & ADDRESS
  1254 8664 B090      	BCMD00:  CMP.L   (%A0),%D0      |  SEE IF ALREADY IN TABLE
@@ -1523,7 +1523,7 @@
  1298 86c4 2006      	         MOVE.L  %D6,%D0
  1299 86c6 6708      	         BEQ.S   BCMD81         | DON'T PRINT ZERO COUNT
  1300 86c8 1CFC 003B 	         MOVE.B  #';',(%A6)+
- 1301 86cc 6100 1368 	         BSR     PNTZHX         | PRINT WITH ZERO SURPRESS
+ 1301 86cc 6100 1368 	         BSR     PNTZHX         | PRINT WITH ZERO SUPPRESS
  1302               	
  1303 86d0 6100 1526 	BCMD81:  BSR     OUT1CR
  1304 86d4 5888      	BCMD9:   ADDQ.L  #4,%A0
@@ -1543,7 +1543,7 @@
  1316 86f2 6100 0446 	         BSR     GETA           | GO DECODE NUMBER/ADDRESS
  1317 86f6 4A80      	         TST.L   %D0
  1318 86f8 679E      	         BEQ.S   BCMD55         | ZERO NOT VALID BREAKPOINT
- 1319 86fa 6100 139E 	         BSR     CKWADR         | CHECK WORD BOUNDRY ADDRESS
+ 1319 86fa 6100 139E 	         BSR     CKWADR         | CHECK WORD BOUNDARY ADDRESS
  1320               	
  1321 86fe 41F8 0470 	         LEA     BPADD,%A0      | SET UP TABLE POINTER
  1322 8702 7E08      	         MOVEQ   #8,%D7         | COUNTER
@@ -1636,7 +1636,7 @@
  1403 87a4 6734      	         BEQ.S   BS225          | BYTE SIZE
  1404               	
  1405 87a6 200B      	         MOVE.L  %A3,%D0
- 1406 87a8 6100 12F0 	         BSR     CKWADR         | INSURE WORD BOUNDRY
+ 1406 87a8 6100 12F0 	         BSR     CKWADR         | INSURE WORD BOUNDARY
  1407 87ac 4A85      	         TST.L   %D5
  1408 87ae 6A18      	         BPL.S   BS219          | WORD SIZE (2 BYTES)
  1409               	
@@ -1951,7 +1951,7 @@
  1690 8a24 2C38 061C 	         MOVE.L  OUTTO,%D6      | SAVE OUTTO FOR ACTUAL S-RECORD DUMP
  1691 8a28 42B8 061C 	         CLR.L   OUTTO          | OVERRIDE SCANPORT CALL
  1692               	
- 1693 8a2c 41FA F688 	         LEA     SYNTAX(%PC),%A0 | WHERE TO GO IF NO PARAMTERS
+ 1693 8a2c 41FA F688 	         LEA     SYNTAX(%PC),%A0 | WHERE TO GO IF NO PARAMETERS
  1694 8a30 6100 104A 	         BSR     FNEXTF         | FIND NEXT FIELD
  1695 8a34 6100 0104 	         BSR     GETA           | GET ADDRESS1
  1696 8a38 2640      	         MOVE.L  %D0,%A3        | A3 = BEGIN ADDRESS
@@ -2054,7 +2054,7 @@
  1782 8ae8 4284      	         CLR.L   %D4            | CLEAR THE CHECKSUM
  1783 8aea 2CFC 5339 	         MOVE.L  #0x53393f3f,(%A6)+ | "S9??" MOVE TO PRINT BUFFER
  1783      3F3F 
- 1784 8af0 2CFC 3030 	         MOVE.L  #0x30303030,(%A6)+ | MOVE "0000" TO PRIT BUFFER
+ 1784 8af0 2CFC 3030 	         MOVE.L  #0x30303030,(%A6)+ | MOVE "0000" TO PRINT BUFFER
  1784      3030 
  1785 8af6 7C02      	         MOVEQ   #2,%D6         | BYTE COUNT
  1786 8af8 611E      	         BSR.S   PNTSREC        | PRINT "S9" END-OF-FILE RECORD
@@ -2385,7 +2385,7 @@
  2089 8cca 60C0      	>  JRA SAVE
  2089               	> SV14:
  2090               	
- 2091               	* IF PC POINTS TO "TRACE"; DOUBLE EVENT OCCURED
+ 2091               	* IF PC POINTS TO "TRACE"; DOUBLE EVENT OCCURRED
  2092               	*  CLEAR LAST EVENT BY IGNORING
  2093               	
  2094 8ccc 0CB8 0000 	         CMPI.L  #0x8008,REGPC
@@ -2396,8 +2396,8 @@
  2098               	
  2099 8cd6 2A78 0444 	         MOVE.L  REGA7,%A5       | TRIM LAST EVENT FROM STACK
  2100 8cda 31DD 0406 	         MOVE.W  (%A5)+,REGSR+2  | MOVE VALUES FROM STACK TO
- 2101 8cde 21DD 0400 	         MOVE.L  (%A5)+,REGPC    | PSUEDO SR, PC,
- 2102 8ce2 21CD 0444 	         MOVE.L  %A5,REGA7       | REFLECT ADJUSTMENTS IN PSUEDO STACK
+ 2101 8cde 21DD 0400 	         MOVE.L  (%A5)+,REGPC    | PSEUDO SR, PC,
+ 2102 8ce2 21CD 0444 	         MOVE.L  %A5,REGA7       | REFLECT ADJUSTMENTS IN PSEUDO STACK
 68K GAS  tutor13.s 			page 41
 
 
@@ -2406,7 +2406,7 @@
  2104               	
  2105 8cec 2A38 04DA 	         MOVE.L  TRACECNT,%D5
  2106 8cf0 6B54      	         BMI.S   TRACE39        | EXECUTING ONE-INSTRUCTION
- 2107 8cf2 6700 0C5A 	         BEQ     ABORT335       | NOT TRACEING
+ 2107 8cf2 6700 0C5A 	         BEQ     ABORT335       | NOT TRACING
  2108               	
  2109               	*   MAKE SURE WE ARE NOT TRACING OURSELVES
  2110 8cf6 2238 0400 	         MOVE.L  REGPC,%D1      | GET PC
@@ -2422,7 +2422,7 @@
  2120               	
  2121 8d12 41F8 0470 	         LEA     BPADD,%A0
  2122 8d16 45F8 0494 	         LEA     BPCNT,%A2
- 2123 8d1a 7E09      	         MOVEQ   #9,%D7         | 9TH BP IS "UNTILL" FEATURE
+ 2123 8d1a 7E09      	         MOVEQ   #9,%D7         | 9TH BP IS "UNTIL" FEATURE
  2124               	
  2125 8d1c B290      	TRACE01: CMP.L   (%A0),%D1      | SEE IF PC MATCHES ADDRESS IN TABLE
  2126 8d1e 6610      	         BNE.S   TRACE08
@@ -2477,7 +2477,7 @@
  2169               	
  2170 8d74 21C9 04D6 	         MOVE.L  %A1,TEMP       | TEMP = TARGETS SS
  2171               	
- 2172 8d78 4FF8 0408 	         LEA     REGS,%A7       | A7 = POINTER TO PSUEDO REGISTERS
+ 2172 8d78 4FF8 0408 	         LEA     REGS,%A7       | A7 = POINTER TO PSEUDO REGISTERS
  2173 8d7c 4CDF 7FFF 	         MOVEM.L (%A7)+,%D0-%D7/%A0-%A6 | ARM MOST OF TARGET REGISTERS
  2174 8d80 2E78 04D6 	         MOVE.L  TEMP,%A7       | SS = TARGET'S
  2175               	
@@ -2486,7 +2486,7 @@
  2178 8d86 6114      	SWAPIN:  BSR.S   SWAPOUT        | MAKE SURE THEY ARE ALL OUT
  2179               	
  2180               	         SAVEAV4 = 0x04d2
- 2181 8d88 21F8 0010 	         MOVE.L  AV4,SAVEAV4    | SAVE VECTOR (WHOM EVER'S IT WAS)
+ 2181 8d88 21F8 0010 	         MOVE.L  AV4,SAVEAV4    | SAVE VECTOR (WHOMEVER'S IT WAS)
  2181      04D2 
  2182 8d8e 4DFA 0054 	         LEA     CHKBP(%PC),%A6
  2183 8d92 21CE 0010 	         MOVE.L  %A6,AV4        | REPLACE IT WITH THE "CHKBP" RTN
@@ -2704,7 +2704,7 @@
  2348 8f64 4487      	         NEG.L   %D7              | CHANGE TO POSITIVE
  2349 8f66 6B4E      	         BMI.S   HX2DC57          | SPECIAL CASE (-0)
  2350 8f68 1CFC 002D 	         MOVE.B  #'-',(%A6)+      | PUT IN NEG SIGN
- 2351 8f6c 4244      	HX2DC:   CLR.W   %D4              | FOR ZERO SURPRESS
+ 2351 8f6c 4244      	HX2DC:   CLR.W   %D4              | FOR ZERO SUPPRESS
  2352 8f6e 7C0A      	         MOVEQ   #10,%D6          | COUNTER
  2353 8f70 7401      	HX2DC0:  MOVEQ   #1,%D2           | VALUE TO SUB
  2354 8f72 2206      	         MOVE.L  %D6,%D1          | COUNTER
@@ -2729,11 +2729,11 @@
  2373 8f9c 60F6      	         BRA.S   HX2DC22          | DO MORE
  2374 8f9e 4A00      	HX2DC3:  TST.B   %D0              | ANY VALUE?
  2375 8fa0 6604      	         BNE.S   HX2DC4
- 2376 8fa2 4A44      	         TST.W   %D4              | ZERO SURPRESS
+ 2376 8fa2 4A44      	         TST.W   %D4              | ZERO SUPPRESS
  2377 8fa4 6708      	         BEQ.S   HX2DC5
  2378 8fa6 0600 0030 	HX2DC4:  ADDI.B  #0x30,%D0         | BINARY TO ASCII
  2379 8faa 1CC0      	         MOVE.B  %D0,(%A6)+       | PUT IN BUFFER
- 2380 8fac 1800      	         MOVE.B  %D0,%D4          | MARK AS NON ZERO SURPRESS
+ 2380 8fac 1800      	         MOVE.B  %D0,%D4          | MARK AS NON ZERO SUPPRESS
  2381 8fae 5386      	HX2DC5:  SUBQ.L  #1,%D6           | NEXT POWER
  2382 8fb0 66BE      	         BNE.S   HX2DC0
  2383 8fb2 4A44      	         TST.W   %D4              | SEE IF ANYTHING PRINTED
@@ -3103,7 +3103,7 @@
  2725 9234 6D04      	         BLT.S   PUTCHR         | NO... THEN PRINT IT, ELSE SUBSTITUTE "."
  2726 9236 103C 002E 	NOTCHR:  MOVE.B  #0x2E,%D0      | CHANGE UNPRINTABLE TO PERIOD
  2727               	
- 2728 923a 1CC0      	PUTCHR:  MOVE.B  %D0,(%A6)+     | MOVE "EDITTED" CHARACTER TO PRINT LINE
+ 2728 923a 1CC0      	PUTCHR:  MOVE.B  %D0,(%A6)+     | MOVE "EDITED" CHARACTER TO PRINT LINE
  2729 923c 5383      	         SUBQ.L  #1,%D3         | LOOP AROUND FOR NEXT CHAR
  2730 923e 66E4      	         BNE.S   NXTCHR         | ANY LEFT?
  2731 9240 6100 09B6 	         BSR     OUT1CR         | NO... THEN PRINT THE COMPLETE LINE
@@ -3265,7 +3265,7 @@
  2876 9334 0C00 0044 	         CMPI.B  #'D',%D0
  2877 9338 660A      	         BNE.S   MM045
  2878               	
- 2879 933a 0C1D 0049 	         CMPI.B  #'I',(%A5)+    | DISSAMBLY OPTION
+ 2879 933a 0C1D 0049 	         CMPI.B  #'I',(%A5)+    | DISASSEMBLY OPTION
  2880 933e 66E6      	         BNE.S   MM05
  2881 9340 6000 FF38 	         BRA     MMDI
  2882               	
@@ -3310,7 +3310,7 @@
  2918 9396 6708      	         BEQ.S   MM11           | "BYTE"
  2919 9398 4A05      	         TST.B   %D5
  2920 939a 6B04      	         BMI.S   MM11           | BYTE OVERRIDE
- 2921 939c 6100 06FC 	         BSR     CKWADR         | CHK ALLIGNMENT
+ 2921 939c 6100 06FC 	         BSR     CKWADR         | CHK ALIGNMENT
  2922 93a0 6100 06FE 	MM11:    BSR     CKADDR
  2923 93a4 6100 08F8 	         BSR     FIXBUF
  2924 93a8 6100 0632 	         BSR     FRELADDR       | FORM RELATIVE ADDRESS
@@ -3465,9 +3465,9 @@
  3067 94a4 6100 05FA 	         BSR     CKADDR         | CHECK VALID ADDRESS
  3068               	
  3069 94a8 2240      	         MOVE.L  %D0,%A1        | A1=START (OPEN) ADDRESS
- 3070 94aa 41FA ED86 	SETM1:   LEA     MACSBUG(%PC),%A0 | IF NO PARAMTER
+ 3070 94aa 41FA ED86 	SETM1:   LEA     MACSBUG(%PC),%A0 | IF NO PARAMETER
  3071 94ae 6100 05CC 	         BSR     FNEXTF         | FIND NEXT FIELD
- 3072 94b2 284D      	         MOVE.L  %A5,%A4        | SAVE ADDRESS OF PARAMTER
+ 3072 94b2 284D      	         MOVE.L  %A5,%A4        | SAVE ADDRESS OF PARAMETER
  3073 94b4 1015      	         MOVE.B  (%A5),%D0      | CHECK OUT NEXT CHARACTER
  3074 94b6 0C00 0027 	         CMPI.B  #0x27,%D0      | SEE IF IT IS QUOTE MARK
  3075 94ba 6730      	         BEQ.S   SETM5          | SPECIAL ROUTINE
@@ -3554,7 +3554,7 @@
  3145 9558 41FA EB5C 	         LEA     SYNTAX(%PC),%A0 | WHERE TO GO IF NO PARAMETERS
  3146 955c 6100 051E 	         BSR     FNEXTF          | FIND NEXT FIELD
  3147 9560 6100 F5D8 	         BSR     GETA            | GET ADDR1
- 3148 9564 6100 0534 	         BSR     CKWADR          | CHECK WORD BOUNDRY ADDRESS
+ 3148 9564 6100 0534 	         BSR     CKWADR          | CHECK WORD BOUNDARY ADDRESS
  3149 9568 2640      	         MOVE.L  %D0,%A3         | SAVE STARTING ADDRESS
  3150               	
  3151 956a 41FA EB4A 	         LEA     SYNTAX(%PC),%A0 | SET UP TO TRY "TO" ADDRESS
@@ -3584,7 +3584,7 @@
  3175 9598 3E18      	         MOVE.W  (%A0)+,%D7      | SAVE FIRST WORD FOR END OF TABLE TEST
  3176 959a 3018      	         MOVE.W  (%A0)+,%D0      | GET REAL REGISTER ID INTO D0
  3177 959c 0C47 FFFF 	         CMPI.W  #0xFFFF,%D7     | ARE WE AT THE END OF THE TABLE?
- 3178 95a0 6700 EAFC 	         BEQ     WHAT            | YES...THEN WE DIDNT FIND IT
+ 3178 95a0 6700 EAFC 	         BEQ     WHAT            | YES...THEN WE DIDN'T FIND IT
  3179               	
  3180 95a4 0C00 0040 	         CMPI.B  #'@',%D0
  3181 95a8 660E      	         BNE.S   PER3            | NOT @
@@ -3688,7 +3688,7 @@
  3273 9632 103C 003A 	         MOVE.B  #':',%D0       | SEE IF COLON IN COMMAND
  3274 9636 6154      	         BSR.S   SCAN
  3275 9638 671E      	         BEQ.S   SETR5
- 3276               	*SEE IF ANY PARAMER (HEX)
+ 3276               	*SEE IF ANY PARAMETER (HEX)
  3277 963a 41FA 0016 	         LEA     SETR4(%PC),%A0 | WHERE TO GO IF NO PARAMETERS
  3278 963e 6100 043C 	         BSR     FNEXTF         | FIND NEXT FIELD
  3279               	
@@ -3802,7 +3802,7 @@
  3380 970e 2006      	         MOVE.L  %D6,%D0        | COMPUTE ADDRESS OF REG
  3381 9710 E588      	         LSL.L   #2,%D0         | MULT BY FOUR
  3382 9712 D08B      	         ADD.L   %A3,%D0        | ADD IN OFFSET
- 3383 9714 2840      	         MOVE.L  %D0,%A4        | SET UP TO GET DEFFERED
+ 3383 9714 2840      	         MOVE.L  %D0,%A4        | SET UP TO GET DEFERRED
  3384 9716 B9FC 0000 	         CMPA.L  #REGA7,%A4     | SEE IF REG A7
  3384      0444 
  3385 971c 660E      	         BNE.S   PNTREG1
@@ -4232,9 +4232,9 @@
  3756               	
  3757               	*
  3758               	*
- 3759               	*   PRINT HEX (ZERO SURPRESS)
+ 3759               	*   PRINT HEX (ZERO SUPPRESS)
  3760               	*
- 3761 9a36 4284      	PNTZHX:  CLR.L   %D4            | IS ZERO WHEN SURPRESSING
+ 3761 9a36 4284      	PNTZHX:  CLR.L   %D4            | IS ZERO WHEN SUPPRESSING
  3762 9a38 2200      	         MOVE.L  %D0,%D1        | SAVE IN TEMP
  3763 9a3a 6738      	         BEQ.S   PNTZ81         | IF ZERO
  3764 9a3c 6A08      	         BPL.S   PNTZ0
@@ -4253,10 +4253,10 @@
  3776 9a5a 66F4      	         BNE.S   PNTZ2
  3777 9a5c 0200 000F 	PNTZ4:   ANDI.B  #0xF,%D0       | SAVE ONLY NIBBLE
  3778 9a60 6604      	         BNE.S   PNTZ3
- 3779 9a62 4A04      	         TST.B   %D4            | SEE IF STILL SURPRESSING
+ 3779 9a62 4A04      	         TST.B   %D4            | SEE IF STILL SUPPRESSING
  3780 9a64 6706      	         BEQ.S   PNTZ8
  3781 9a66 6100 FF60 	PNTZ3:   BSR     PUTHEX         | PUT A HEX CHAR IN BUFFER
- 3782 9a6a 1800      	         MOVE.B  %D0,%D4        | MARK AS NON-SURPRESSING MODE
+ 3782 9a6a 1800      	         MOVE.B  %D0,%D4        | MARK AS NON-SUPPRESSING MODE
  3783 9a6c 5382      	PNTZ8:   SUBQ.L  #1,%D2         | DO ANOTHER CHAR
 68K GAS  tutor13.s 			page 72
 
@@ -4272,7 +4272,7 @@
  3792               	*                   SAME SUBROUTINE LEVEL OR STACK GETS SCREWED UP
  3793               	*
  3794               	*  SKIP LEADING SPACES
- 3795               	*  TERMINATE NULL FIELD ON COMA ,SEMICOLEN OR A5=A6
+ 3795               	*  TERMINATE NULL FIELD ON COMA ,SEMICOLON OR A5=A6
  3796               	
  3797 9a7a 528D      	FNEXTF1: ADDQ.L  #1,%A5
  3798               	
@@ -4292,7 +4292,7 @@
  3812 9a98 4ED0      	         JMP     (%A0)          | NULL FIELD RETURN
  3813               	
  3814               	**************************************************************
- 3815               	* THIS ROUTINE MAKES SURE YOU ARE ON THE CORRECT BOUNDRY.    *
+ 3815               	* THIS ROUTINE MAKES SURE YOU ARE ON THE CORRECT BOUNDARY.    *
  3816               	*  %D0 = ARGUMENT...   CHECKS ADDRESS AND WORD ALIGNMENTS.   *
  3817               	**************************************************************
  3818               	
@@ -4605,7 +4605,7 @@
  4097               	
  4098               	*   INPUT A LINE FROM PORT1
  4099               	*
- 4100 9ca6 4AB8 0620 	PORTIN1: TST.L   INFROM         | SEE IF ALTERNAME ADDRESS
+ 4100 9ca6 4AB8 0620 	PORTIN1: TST.L   INFROM         | SEE IF ALTERNATE ADDRESS
  4101 9caa 6706      	         BEQ.S   PORTIN1X
  4102 9cac 2F38 0620 	         MOVE.L  INFROM,-(%A7)  | PUSH ON STACK
  4103 9cb0 4E75      	         RTS                    | GO DO IT
@@ -5117,7 +5117,7 @@
  4558 a06e 6D14      	         BLT.S   RES150
  4559 a070 1C81      	         MOVE.B  %D1,(%A6)     | SAVE CHAR IN BUFFER
  4560               	
- 4561 a072 263C 0001 	         MOVE.L  #LTIME/2,%D3  | D3 = 2 1/2 SEC @ 8MHZ (CHARATER  TIMER)
+ 4561 a072 263C 0001 	         MOVE.L  #LTIME/2,%D3  | D3 = 2 1/2 SEC @ 8MHZ (CHARACTER TIMER)
  4561      9064 
  4562               	
  4563 a078 220E      	         MOVE.L  %A6,%D1       | CHECK BUFFER FULL
@@ -5287,7 +5287,7 @@
  4703               	* THE HARD COPY PRINTER. -- TO TERMINATE, ENTER "NOPA"   *
  4704               	*                                                        *
  4705               	* THIS COMMAND MAKES USE OF THE "NO" OPTION.  THERE IS A *
- 4706               	* 4 BYTE HARD BRANCH INFRONT OF THE REGULAR ENTRY POINT. *
+ 4706               	* 4 BYTE HARD BRANCH IN FRONT OF THE REGULAR ENTRY POINT. *
  4707               	**********************************************************
  4708               	
  4709 a1c0 6000 0006 	         BRA     NOPACMD        | ENTRY FOR "NOPA"
@@ -5359,7 +5359,7 @@
  4772 a22a 6002      	         BRA.S   GETF314
  4773               	
  4774 a22c E188      	GETF313: LSL.L   #8,%D0
- 4775 a22e 51C9 FFFC 	GETF314: DBF     %D1,GETF313    | LEFT NORNALIZE
+ 4775 a22e 51C9 FFFC 	GETF314: DBF     %D1,GETF313    | LEFT NORMALIZE
  4776 a232 6006      	         BRA.S   GETF333
  4777               	
  4778 a234 6100 F8CC 	GETF325: BSR     GETDECNU       | GET DECIMAL NUMBER
@@ -5622,7 +5622,7 @@
  5022 a3c6 67CE      	         BEQ.S   ER3            | MODE NOT ALLOWED
  5023 a3c8 6010      	         BRA.S   EA4135         | SPECIAL CASE (JMP.L)
  5024               	
- 5025 a3ca 0046 0038 	EA4127:  ORI.W   #0x38,%D6      | EA = ABSOULTE SHORT
+ 5025 a3ca 0046 0038 	EA4127:  ORI.W   #0x38,%D6      | EA = ABSOLUTE SHORT
  5026 a3ce 3985 3000 	         MOVE.W  %D5,(%A4,%D3.W) | D5 = DATA
  5027 a3d2 5429 000A 	         ADDQ.B  #2,TNB(%A1)    | BYTE COUNT
  5028 a3d6 5483      	         ADDQ.L  #2,%D3
@@ -6876,7 +6876,7 @@
  5573 a9ba 45FA F880 	         LEA     XBASE(%PC),%A2   | A2 = BASE ADDRESS
  5574 a9be D5C0      	         ADD.L   %D0,%A2          | A2 = COMPUTED GO TO  ADDRESS
  5575               	
- 5576               	* FORMAT OPERAND IF REGUIRED
+ 5576               	* FORMAT OPERAND IF REQUIRED
  5577               	
  5578 a9c0 4A01      	         TST.B   %D1            | LOOK AT KEY
  5579 a9c2 6B22      	         BMI.S   M440           | OPERAND NOT REQUIRED
@@ -6884,7 +6884,7 @@
  5581 a9c4 204B      	         MOVE.L  %A3,%A0
  5582 a9c6 D1FC 0000 	         ADD.L   #FOP,%A0       | STORE POINTER
  5582      0027 
- 5583 a9cc 2348 0012 	         MOVE.L  %A0,PTROP(%A1) |  POINTER TO OPERAND (FORMATED)
+ 5583 a9cc 2348 0012 	         MOVE.L  %A0,PTROP(%A1) |  POINTER TO OPERAND (FORMATTED)
  5584 a9d0 6130      	M435:    BSR.S   GETCHARF       | D0 = CHAR
  5585 a9d2 0C00 0020 	         CMPI.B  #BLANK,%D0
  5586 a9d6 67F8      	         BEQ.S   M435           | SKIP SPACES
@@ -6893,7 +6893,7 @@
  5589 a9da 6126      	         BSR.S   GETCHARF       | D0 = CHAR
  5590 a9dc BDCD      	         CMP.L   %A5,%A6
  5591 a9de 6AF8      	         BPL.S   M437
- 5592 a9e0 2348 001A 	         MOVE.L  %A0,PTRBUFE(%A1) | POINTER TO END FORMATED SOURCE
+ 5592 a9e0 2348 001A 	         MOVE.L  %A0,PTRBUFE(%A1) | POINTER TO END FORMATTED SOURCE
  5593 a9e4 2C48      	         MOVE.L  %A0,%A6        | A6 = POINTER TO END OF SOURCE
  5594               	M440:
  5595               	
@@ -6951,11 +6951,11 @@
  5643               	
  5644 aa3c 2C69 001A 	         MOVE.L  PTRBUFE(%A1),%A6 | A6 = POINTER TO END OF BUFFER
  5645               	
- 5646 aa40 2869 000E 	         MOVE.L  PCOUNTER(%A1),%A4 | A4 = ORGINAL PC
+ 5646 aa40 2869 000E 	         MOVE.L  PCOUNTER(%A1),%A4 | A4 = ORIGINAL PC
  5647               	
  5648 aa44 2269 001E 	         MOVE.L  LINK(%A1),%A1
  5649 aa48 4E59      	         UNLK    %A1
- 5650 aa4a 4E75      	         RTS                    | RETURN TO REQUESTOR
+ 5650 aa4a 4E75      	         RTS                    | RETURN TO REQUESTER
  5651               	*                               | A3 = POINTER TO START OF BUFFER
  5652               	*                               | D6 = NUMBER OF BYTES ASSEMBLED
 68K GAS  tutor13.s 			page 117
@@ -7670,7 +7670,7 @@
  6317 afa6 1005      	         MOVE.B  %D5,%D0        | D5 = LAST REG
  6318 afa8 B300      	         EOR.B   %D1,%D0
  6319 afaa 0200 0038 	         ANDI.B  #0x38,%D0
- 6320 afae 6600 FA5C 	         BNE     ER             | NOT MATCED SET
+ 6320 afae 6600 FA5C 	         BNE     ER             | NOT MATCHED SET
  6321 afb2 BA01      	         CMP.B   %D1,%D5
  6322 afb4 6A00 FA56 	         BPL     ER
  6323               	
@@ -8214,7 +8214,7 @@
  6825               	ILINK:   .align  2
  6826 b3a4 615E      	         BSR.S   FORMREGA
  6827               	
- 6828 b3a6 1CC5      	         MOVE.B  %D5,(%A6)+     | COMMA SERARATOR
+ 6828 b3a6 1CC5      	         MOVE.B  %D5,(%A6)+     | COMMA SEPARATOR
  6829               	
  6830 b3a8 1CFC 0023 	         MOVE.B  #'#',(%A6)+
  6831 b3ac 302C 0002 	         MOVE.W  2(%A4),%D0
@@ -8438,7 +8438,7 @@
  7036 b4ba 0000      	         .align  4
  7037               	
  7038               	*                               PEA     (JMP  JSR)
- 7039 b4bc 3E3C 07E4 	FORM11:  MOVE.W  #0x7E4,%D7     | CONTROL ADDERSSING
+ 7039 b4bc 3E3C 07E4 	FORM11:  MOVE.W  #0x7E4,%D7     | CONTROL ADDRESSING
  7040 b4c0 6100 FF7C 	         BSR     EEA10
  7041 b4c4 60F0      	         BRA.S   CS12           | COMMON
  7042               	
@@ -8702,7 +8702,7 @@
 
 
  7279               	*        ........DDDDDDD0       DISPLACEMENT
- 7280               	*        ...............1       ERROR (ODD BOUNDRY DISPLACEMENT)
+ 7280               	*        ...............1       ERROR (ODD BOUNDARY DISPLACEMENT)
  7281               	*
  7282 b63e 0000      	         .align  4
  7283               	
@@ -8724,7 +8724,7 @@
  7299 b65e 2004      	         MOVE.L  %D4,%D0
  7300               	
  7301 b660 E284      	         ASR.L   #1,%D4
- 7302 b662 6500 04DE 	         BCS     FERROR         | ODD BOUNDRY DISPLACEMENT
+ 7302 b662 6500 04DE 	         BCS     FERROR         | ODD BOUNDARY DISPLACEMENT
  7303               	
  7304 b666 6100 E34A 	         BSR     PNT6HX
  7305 b66a 60B0      	         BRA.S   SCOMMON
@@ -9143,7 +9143,7 @@
  7696               	*        ........XXXXXXXX       DISPLACEMENT INTEGER
  7697               	*
  7698 b93a 0807 000A 	         BTST    #10,%D7
- 7699 b93e 67CE      	         BEQ.S   FE11           | FERROR  THIS MODE NOT ASLLOWED
+ 7699 b93e 67CE      	         BEQ.S   FE11           | FERROR  THIS MODE NOT ALLOWED
  7700               	
  7701 b940 3234 3000 	         MOVE.W  (%A4,%D3.W),%D1
  7702 b944 0241 0700 	         ANDI.W  #0x0700,%D1
