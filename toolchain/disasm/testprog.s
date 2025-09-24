@@ -236,8 +236,8 @@
         asr.b   #2,d7
         asr.b   d1,d2
         asr.l   #8,d2
-        asr.w   #4,d1
         asr.l   d5,d6
+        asr.w   #4,d1
         asr.w   d3,d4
         bchg    #1,d2
         bchg    #2,(a2)
@@ -640,6 +640,7 @@
         move.l  #$12345678,d7
         move.l  #$AA551122,($4321,a2)
         move.l  #3,($1234,a1)
+        move.l  $12(a1,d0),$3456(a6)
         move.l  $12(a6,a7),d0
         move.l  $12(a6,d7),d1
         move.l  $1234(a5),d6
@@ -662,6 +663,7 @@
         move.w  #$1234,d7
         move.w  #$AA55,($4321,a2)
         move.w  #2,($1234,a1)
+        move.w  $12(a4,d0),$3456(a5)
         move.w  $12(a6,a7),d0
         move.w  $12(a6,d7),d1
         move.w  $1234(a5),d6
@@ -1191,63 +1193,3 @@
         tst.w   d1
         unlk    a1
         unlk    a6
-back:
-;        bcc.s   back
-;        bcc.w   fwd
-;        bcs.s   fwd
-;        bcs.s   fwd
-;        bcs.w   fwd
-;        bcs.w   fwd
-;        beq.s   back
-;        beq.s   fwd
-;        beq.s   fwd
-;        beq.w   back
-;        beq.w   fwd
-;        beq.w   fwd
-;        bge.s   fwd
-;        bge.w   fwd
-;        bgt.s   fwd
-;        bgt.w   fwd
-;        bhi.s   fwd
-;        bhi.w   fwd
-;        ble.s   fwd
-;        ble.w   fwd
-;        bls.s   fwd
-;        bls.w   fwd
-;        blt.s   fwd
-;        blt.w   fwd
-;        bmi.s   fwd
-;        bmi.w   fwd
-;        bne.s   fwd
-;        bne.w   fwd
-;        bpl.s   fwd
-;        bpl.w   fwd
-;        bra.s   back
-;        bra.s   fwd
-;        bra.w   back
-;        bsr.s   back
-;        bsr.s   fwd
-;        bsr.w   back
-;        bsr.w   fwd
-;        bvc.s   fwd
-;        bvc.w   fwd
-fwd:
-loop1:
-;        dbcc    d4,loop1
-;        dbcs    d5,loop2
-;        dbeq    d7,loop2
-;        dbf     d1,loop2
-;        dbge    d4,loop1
-;        dbgt    d6,loop1
-;        dbhi    d2,loop1
-;        dble    d7,loop2
-;        dbls    d3,loop2
-;        dblt    d5,loop2
-;        dbmi    d4,loop2
-;        dbne    d6,loop1
-;        dbpl    d2,loop1
-;        dbt     d0,loop1
-;        dbvc    d0,loop1
-;        dbvs    d1,loop2
-loop2:
-

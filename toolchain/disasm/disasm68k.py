@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # Motorola 68000 Disassembler
-# Copyright (c) 2019-2020 by Jeff Tranter <tranter@pobox.com>
+# Copyright (c) 2019-2025 by Jeff Tranter <tranter@pobox.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -198,7 +198,7 @@ def EffectiveAddress(s, m, xn):
             if data[length-2] & 0x08:  # Dn.l
                 operand = "${0:02X}(A{1:n},D{2:n}.l)".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
             else:  # Dn.w (default)
-                operand = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
+                operand = "${0:02X}(A{1:n},D{2:n})".format(data[length-3], xn, (data[length-4] & 0x70) >> 4)
     elif m == 7 and xn == 0:  # abs.W
         operand = "${0:02X}{1:02X}.w".format(data[length-2], data[length-1])
     elif m == 7 and xn == 1:  # abs.L
