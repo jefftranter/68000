@@ -2,13 +2,10 @@
         abcd    -(a6),-(a7)
         abcd    d1,d2
         abcd    d3,d4
-        add.b   #$12,d4
+        add.b   #$0012,d4
         add.b   $12(a6,a7),d5
         add.b   $12(a6,d7),d6
-        add.b   $12(pc,a1),d2
-        add.b   $12(pc,d2),d3
         add.b   $1234(a5),d4
-        add.b   $1234(pc),d1
         add.b   $1234.w,d7
         add.b   $12345678,d0
         add.b   ($20,a0,a0),d0
@@ -24,10 +21,7 @@
         add.l   #$12345678,d4
         add.l   $12(a6,a7),d5
         add.l   $12(a6,d7),d6
-        add.l   $12(pc,a1),d2
-        add.l   $12(pc,d2),d3
         add.l   $1234(a5),d4
-        add.l   $1234(pc),d1
         add.l   $1234.w,d7
         add.l   $12345678,d0
         add.l   (a1),d1
@@ -46,7 +40,6 @@
         add.w   $12(a6,a7),d5
         add.w   $12(a6,d7),d6
         add.w   $1234(a5),d4
-        add.w   $1234(pc),d1
         add.w   $1234.w,d7
         add.w   $12345678,d0
         add.w   (a1),d1
@@ -57,7 +50,6 @@
         adda.l  $12(a6,a7),a1
         adda.l  $12(a6,d7),a2
         adda.l  $1234(a5),a6
-        adda.l  $1234(pc),a5
         adda.l  $1234.w,a3
         adda.l  $12345678,a4
         adda.l  (a2),a3
@@ -69,7 +61,6 @@
         adda.w  $12(a6,a7),a1
         adda.w  $12(a6,d7),a2
         adda.w  $1234(a5),a6
-        adda.w  $1234(pc),a5
         adda.w  $1234.w,a3
         adda.w  $12345678,a4
         adda.w  (a2),a3
@@ -151,7 +142,6 @@
         and.b   $12(a6,a7),d5
         and.b   $12(a6,d7),d6
         and.b   $1234(a5),d4
-        and.b   $1234(pc),d1
         and.b   $1234.w,d7
         and.b   $12345678,d0
         and.b   (a1),d1
@@ -162,7 +152,6 @@
         and.l   $12(a6,a7),d5
         and.l   $12(a6,d7),d6
         and.l   $1234(a5),d4
-        and.l   $1234(pc),d1
         and.l   $1234.w,d7
         and.l   $12345678,d0
         and.l   (a1),d1
@@ -173,7 +162,6 @@
         and.w   $12(a6,a7),d5
         and.w   $12(a6,d7),d6
         and.w   $1234(a5),d4
-        and.w   $1234(pc),d1
         and.w   $1234.w,d7
         and.w   $12345678,d0
         and.w   (a1),d1
@@ -297,7 +285,6 @@
         bset    d6,$12(a6,d7)
         bset    d7,$1234.w
         btst    #1,d2
-        btst    #10,$1234(pc)
         btst    #2,(a2)
         btst    #3,(a3)+
         btst    #31,d3
@@ -309,7 +296,6 @@
         btst    #9,$12345678
         btst    d0,$12345678
         btst    d0,d2
-        btst    d1,$1234(pc)
         btst    d1,(a2)
         btst    d2,(a3)+
         btst    d3,-(a4)
@@ -321,7 +307,6 @@
         chk     $12(a6,a7),d5
         chk     $12(a6,d7),d6
         chk     $1234(a5),d4
-        chk     $1234(pc),d1
         chk     $1234.w,d7
         chk     $12345678,d0
         chk     (a1),d1
@@ -359,7 +344,6 @@
         cmp.b   $12(a6,a7),d5
         cmp.b   $12(a6,d7),d6
         cmp.b   $1234(a5),d4
-        cmp.b   $1234(pc),d1
         cmp.b   $1234.w,d7
         cmp.b   $12345678,d0
         cmp.b   (a1),d1
@@ -370,7 +354,6 @@
         cmp.l   $12(a6,a7),d5
         cmp.l   $12(a6,d7),d6
         cmp.l   $1234(a5),d4
-        cmp.l   $1234(pc),d1
         cmp.l   $1234.w,d7
         cmp.l   $12345678,d0
         cmp.l   (a1),d1
@@ -382,7 +365,6 @@
         cmp.w   $12(a6,a7),d5
         cmp.w   $12(a6,d7),d6
         cmp.w   $1234(a5),d4
-        cmp.w   $1234(pc),d1
         cmp.w   $1234.w,d7
         cmp.w   $12345678,d0
         cmp.w   (a1),d1
@@ -394,7 +376,6 @@
         cmpa.l  $12(a6,a7),a1
         cmpa.l  $12(a6,d7),a2
         cmpa.l  $1234(a5),a6
-        cmpa.l  $1234(pc),a5
         cmpa.l  $1234.w,a3
         cmpa.l  $12345678,a4
         cmpa.l  (a2),a3
@@ -406,7 +387,6 @@
         cmpa.w  $12(a6,a7),a1
         cmpa.w  $12(a6,d7),a2
         cmpa.w  $1234(a5),a6
-        cmpa.w  $1234(pc),a5
         cmpa.w  $1234.w,a3
         cmpa.w  $12345678,a4
         cmpa.w  (a2),a3
@@ -455,7 +435,6 @@
         divs    $12(a6,a7),d5
         divs    $12(a6,d7),d6
         divs    $1234(a5),d4
-        divs    $1234(pc),d1
         divs    $1234.w,d7
         divs    $12345678,d0
         divs    (a1),d1
@@ -466,7 +445,6 @@
         divu    $12(a6,a7),d5
         divu    $12(a6,d7),d6
         divu    $1234(a5),d4
-        divu    $1234(pc),d1
         divu    $1234.w,d7
         divu    $12345678,d0
         divu    (a1),d1
@@ -520,14 +498,12 @@
         illegal
         jmp     $12(a3,d1)
         jmp     $1234(a2)
-        jmp     $1234(pc)
         jmp     $1234.w
         jmp     $12345678
         jmp     $34(a4,a2)
         jmp     (a1)
         jsr     $12(a3,d1)
         jsr     $1234(a2)
-        jsr     $1234(pc)
         jsr     $1234.w
         jsr     $12345678
         jsr     $34(a3,a2)
@@ -535,7 +511,6 @@
         lea     $12(a6,a7),a4
         lea     $12(a6,d7),a5
         lea     $1234(a2),a3
-        lea     $1234(pc),a1
         lea     $1234.w,a6
         lea     $12345678,a7
         lea     (a1),a2
@@ -577,8 +552,6 @@
         move    $12(a6,d7),sr
         move    $1234(a5),ccr
         move    $1234(a5),sr
-        move    $1234(pc),ccr
-        move    $1234(pc),sr
         move    $1234.w,ccr
         move    $1234.w,sr
         move    $12345678,ccr
@@ -608,16 +581,6 @@
         move.b  $12(a6,a7),d0
         move.b  $12(a6,d7),d1
         move.b  $1234(a5),d6
-        move.b  $1234(pc),($18,a0,a0.w)
-        move.b  $1234(pc),($18,a0,a1.l)
-        move.b  $1234(pc),($18,a0,d0.w)
-        move.b  $1234(pc),($18,a0,d2.l)
-        move.b  $1234(pc),($2345,a0)
-        move.b  $1234(pc),(a0)
-        move.b  $1234(pc),(a0)+
-        move.b  $1234(pc),-(a0)
-        move.b  $1234(pc),d0
-        move.b  $1234(pc),d4
         move.b  $1234.w,d2
         move.b  $12345678,$87654321
         move.b  $12345678,d3
@@ -644,7 +607,6 @@
         move.l  $12(a6,a7),d0
         move.l  $12(a6,d7),d1
         move.l  $1234(a5),d6
-        move.l  $1234(pc),d4
         move.l  $1234.w,d2
         move.l  $12345678,$87654321
         move.l  $12345678,d3
@@ -667,7 +629,6 @@
         move.w  $12(a6,a7),d0
         move.w  $12(a6,d7),d1
         move.w  $1234(a5),d6
-        move.w  $1234(pc),d4
         move.w  $1234.w,d2
         move.w  $12345678,$87654321
         move.w  $12345678,d3
@@ -688,7 +649,6 @@
         movea.l $12(a6,a7),a7
         movea.l $12(a6,d7),a1
         movea.l $1234(a5),a6
-        movea.l $1234(pc),a4
         movea.l $1234.w,a2
         movea.l $12345678,a3
         movea.l (a2),a3
@@ -700,7 +660,6 @@
         movea.w $12(a6,a7),a7
         movea.w $12(a6,d7),a1
         movea.w $1234(a5),a6
-        movea.w $1234(pc),a4
         movea.w $1234.w,a2
         movea.w $12345678,a3
         movea.w (a2),a3
@@ -711,7 +670,6 @@
         movem.l $12(a6,a7),d1/d3/d5/d7/a0/a2/a4/a6
         movem.l $12(a6,d7),d1/d3/d5/d7/a0/a2/a4/a6
         movem.l $1234(a5),d1/d3/d5/d7/a0/a2/a4/a6
-        movem.l $1234(pc),d1/d3/d5/d7/a0/a2/a4/a6
         movem.l $1234.w,d1/d3/d5/d7/a0/a2/a4/a6
         movem.l $12345678,d1/d3/d5/d7/a0/a2/a4/a6
         movem.l (a1),d0-d7/a0-a7
@@ -730,7 +688,6 @@
         movem.w $12(a6,a7),d1/d3/d5/d7/a0/a2/a4/a6
         movem.w $12(a6,d7),d1/d3/d5/d7/a0/a2/a4/a6
         movem.w $1234(a5),d1/d3/d5/d7/a0/a2/a4/a6
-        movem.w $1234(pc),d1/d3/d5/d7/a0/a2/a4/a6
         movem.w $1234.w,d1/d3/d5/d7/a0/a2/a4/a6
         movem.w $12345678,d1/d3/d5/d7/a0/a2/a4/a6
         movem.w (a1),d1/d3/d5/d7/a0/a2/a4/a6
@@ -754,7 +711,6 @@
         muls    $12(a6,a7),d5
         muls    $12(a6,d7),d6
         muls    $1234(a5),d4
-        muls    $1234(pc),d1
         muls    $1234.w,d7
         muls    $12345678,d0
         muls    (a1),d1
@@ -765,7 +721,6 @@
         mulu    $12(a6,a7),d5
         mulu    $12(a6,d7),d6
         mulu    $1234(a5),d4
-        mulu    $1234(pc),d1
         mulu    $1234.w,d7
         mulu    $12345678,d0
         mulu    (a1),d1
@@ -867,7 +822,6 @@
         or.b    $12(a6,a7),d5
         or.b    $12(a6,d7),d6
         or.b    $1234(a5),d4
-        or.b    $1234(pc),d1
         or.b    $1234.w,d7
         or.b    $12345678,d0
         or.b    (a1),d1
@@ -878,7 +832,6 @@
         or.l    $12(a6,a7),d5
         or.l    $12(a6,d7),d6
         or.l    $1234(a5),d4
-        or.l    $1234(pc),d1
         or.l    $1234.w,d7
         or.l    $12345678,d0
         or.l    (a1),d1
@@ -889,7 +842,6 @@
         or.w    $12(a6,a7),d5
         or.w    $12(a6,d7),d6
         or.w    $1234(a5),d4
-        or.w    $1234(pc),d1
         or.w    $1234.w,d7
         or.w    $12345678,d0
         or.w    (a1),d1
@@ -937,7 +889,6 @@
         pea     $12(a6,a7)
         pea     $12(a6,d7)
         pea     $1234(a5)
-        pea     $1234(pc)
         pea     $1234.w
         pea     $12345678
         pea     (a2)
@@ -1025,7 +976,6 @@
         sub.b   $12(a6,a7),d5
         sub.b   $12(a6,d7),d6
         sub.b   $1234(a5),d4
-        sub.b   $1234(pc),d1
         sub.b   $1234.w,d7
         sub.b   $12345678,d0
         sub.b   (a1),d1
@@ -1036,7 +986,6 @@
         sub.l   $12(a6,a7),d5
         sub.l   $12(a6,d7),d6
         sub.l   $1234(a5),d4
-        sub.l   $1234(pc),d1
         sub.l   $1234.w,d7
         sub.l   $12345678,d0
         sub.l   (a1),d1
@@ -1047,7 +996,6 @@
         sub.w   $12(a6,a7),d5
         sub.w   $12(a6,d7),d6
         sub.w   $1234(a5),d4
-        sub.w   $1234(pc),d1
         sub.w   $1234.w,d7
         sub.w   $12345678,d0
         sub.w   (a1),d1
@@ -1058,7 +1006,6 @@
         suba.l  $12(a6,a7),a1
         suba.l  $12(a6,d7),a2
         suba.l  $1234(a5),a6
-        suba.l  $1234(pc),a5
         suba.l  $1234.w,a3
         suba.l  $12345678,a4
         suba.l  (a2),a3
@@ -1070,7 +1017,6 @@
         suba.w  $12(a6,a7),a1
         suba.w  $12(a6,d7),a2
         suba.w  $1234(a5),a6
-        suba.w  $1234(pc),a5
         suba.w  $1234.w,a3
         suba.w  $12345678,a4
         suba.w  (a2),a3
