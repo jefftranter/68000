@@ -198,7 +198,7 @@ def EffectiveAddress(s, m, xn):
             if data[length-2] & 0x08:  # Dn.l
                 operand = "${0:02X}(A{1:n},D{2:n}.l)".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
             else:  # Dn.w (default)
-                operand = "${0:02X}(A{1:n},D{2:n})".format(data[length-3], xn, (data[length-4] & 0x70) >> 4)
+                operand = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
     elif m == 7 and xn == 0:  # abs.W
         operand = "${0:02X}{1:02X}.w".format(data[length-2], data[length-1])
     elif m == 7 and xn == 1:  # abs.L
@@ -206,10 +206,24 @@ def EffectiveAddress(s, m, xn):
     elif m == 7 and xn == 2:  # d16(PC)
         operand = "${0:02X}{1:02X}(PC)".format(data[length-2], data[length-1])
     elif m == 7 and xn == 3:  # d8(PC,Xn)
-        if data[length-2] & 0x80:
-            operand = "${0:02X}(PC,A{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
+        # brief extension word: index in high byte, signed 8-bit displacement in low byte
+        # data[length-2] is the extension high byte, data[length-1] is the displacement (signed 8-bit)
+        ext = data[length-2]
+        disp = data[length-1]
+        # sign-extend 8-bit displacement
+        if disp & 0x80:
+            sdisp = disp - 0x100
         else:
-            operand = "${0:02X}(PC,D{1:d})".format(data[length-1], (data[length-2] & 0x70) >> 4)
+            sdisp = disp
+        # format displacement as signed hex (e.g. $12 or -$04)
+        if sdisp < 0:
+            disp_str = "-${:02X}".format(-sdisp)
+        else:
+            disp_str = "${:02X}".format(sdisp)
+        if ext & 0x80:
+            operand = "{0}(PC,A{1:d})".format(disp_str, (ext & 0x70) >> 4)
+        else:
+            operand = "{0}(PC,D{1:d})".format(disp_str, (ext & 0x70) >> 4)
     elif m == 7 and xn == 4:  # #imm
         if s == "b" or s == "w":
             operand = "#${0:02X}{1:02X}".format(data[length-2], data[length-1])
@@ -906,27 +920,25 @@ while True:
 
     elif mnemonic == "MOVE":
         s = (data[0] & 0x30) >> 4
-        dxn = (data[0] & 0xe) >> 1
-        dm = ((data[1] & 0xc0) >> 6) + ((data[0] & 0x01) << 2)
-        sxn = data[1] & 0x07
-        sm = (data[1] & 0x38) >> 3
+        dxn = (data[0] & 0x0e) >> 1                     # destination register (bits 11–9)                     # destination mode (bits 11–9)
+        dm = ((data[0] & 0x01) << 2) + ((data[1] & 0xc0) >> 6)  # destination mode (bits 8–6)  # destination reg (bits 8–6)
+        sm = (data[1] & 0x38) >> 3                     # source mode
+        sxn = data[1] & 0x07                           # source reg
 
         # Handle size
         mnemonic += "." + SLength2(s)
 
-        # Get length based on source addressing mode
+        # Base length from source EA
         length = InstructionLength(SLength2(s), sm, sxn)
 
-        # Adjust instruction length based on destination addressing mode
-        if dm == 2 and SLength2(s) != "l" and dm == 7 and dxn == 1:  # (An) and byte or word size -> subtract two if source mode is abs.L
-            length -= 2
-        elif dm == 5:  # d16(An) -> add 2
+        # Adjust length for destination EA
+        if dm == 5:        # d16(An)
             length += 2
-        elif dm == 6:  # d8(An,Xn) -> add 2
+        elif dm == 6:      # d8(An,Xn)
             length += 2
-        elif dm == 7 and dxn == 0:  # abs.W -> add 2
+        elif dm == 7 and dxn == 0:  # abs.W
             length += 2
-        elif dm == 7 and dxn == 1:  # abs.L -> add 4
+        elif dm == 7 and dxn == 1:  # abs.L
             length += 4
 
         readData(length)
