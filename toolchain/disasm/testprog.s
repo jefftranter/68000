@@ -603,6 +603,8 @@
         move.l  #$12345678,d7
         move.l  #$AA551122,($4321,a2)
         move.l  #3,($1234,a1)
+        move.l  $00(a1,d0),$000c(a6)
+        move.l  $0c(a1,d0),$000c(a6)
         move.l  $12(a1,d0),$3456(a6)
         move.l  $12(a6,a7),d0
         move.l  $12(a6,d7),d1
@@ -625,6 +627,7 @@
         move.w  #$1234,d7
         move.w  #$AA55,($4321,a2)
         move.w  #2,($1234,a1)
+        move.w  $00(a4,d0),$0028(a5)
         move.w  $12(a4,d0),$3456(a5)
         move.w  $12(a6,a7),d0
         move.w  $12(a6,d7),d1
@@ -632,6 +635,7 @@
         move.w  $1234.w,d2
         move.w  $12345678,$87654321
         move.w  $12345678,d3
+        move.w  $28(a4,d0),$0028(a5)
         move.w  (a3),d3
         move.w  (a4)+,d4
         move.w  -(a5),d5

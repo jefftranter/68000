@@ -175,7 +175,42 @@ def registerList(aFirst, mask):
 # Given M and Xn bits.
 # Parameter s should be the character "b", "w", or "l".
 # Also uses global variables data and length.
-def EffectiveAddress(s, m, xn):
+def EffectiveAddress(s, m, xn, base=None):
+    # Determine how many extension bytes this addressing mode uses
+    def ext_bytes_needed(s, m, xn):
+        if m in (0, 1, 2, 3, 4):
+            return 0
+        if m == 5:  # d16(An)
+            return 2
+        if m == 6:  # d8(An,Xn)
+            return 2
+        if m == 7:
+            if xn == 0:  # abs.W
+                return 2
+            if xn == 1:  # abs.L
+                return 4
+            if xn == 2:  # d16(PC)
+                return 2
+            if xn == 3:  # d8(PC,Xn)
+                return 2
+            if xn == 4:  # #imm
+                if s == "b" or s == "w":
+                    return 2
+                elif s == "l":
+                    return 4
+                else:
+                    return 2
+        return 0
+
+    esz = ext_bytes_needed(s, m, xn)
+    # If no explicit base given, default to using the last esz bytes of the data[] array (backwards-compatible)
+    if base is None:
+        base_index = length - esz
+    else:
+        base_index = base
+
+    operand = ""
+
     if m == 0:  # Dn
         operand = "D{0:n}".format(xn)
     elif m == 1:  # An
@@ -187,48 +222,38 @@ def EffectiveAddress(s, m, xn):
     elif m == 4:  # -(An)
         operand = "-(A{0:n})".format(xn)
     elif m == 5:  # d16(An)
-        operand = "${0:02X}{1:02X}(A{2:n})".format(data[length-2], data[length-1], xn)
+        operand = "${0:02X}{1:02X}(A{2:n})".format(data[base_index], data[base_index+1], xn)
     elif m == 6:  # d8(An,Xn)
-        if data[length-2] & 0x80:  # An
-            if data[length-2] & 0x08:  # An.l
-                operand = "${0:02X}(A{1:n},A{2:n}.l)".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
+        ext = data[base_index]
+        disp = data[base_index+1]
+        if ext & 0x80:  # An
+            if ext & 0x08:  # An.l
+                operand = "${0:02X}(A{1:n},A{2:n}.l)".format(disp, xn, (ext & 0x70) >> 4)
             else:  # An.w (default)
-                operand = "${0:02X}(A{1:n},A{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
+                operand = "${0:02X}(A{1:n},A{2:n})".format(disp, xn, (ext & 0x70) >> 4)
         else:  # Dn
-            if data[length-2] & 0x08:  # Dn.l
-                operand = "${0:02X}(A{1:n},D{2:n}.l)".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
+            if ext & 0x08:  # Dn.l
+                operand = "${0:02X}(A{1:n},D{2:n}.l)".format(disp, xn, (ext & 0x70) >> 4)
             else:  # Dn.w (default)
-                operand = "${0:02X}(A{1:n},D{2:n})".format(data[length-1], xn, (data[length-2] & 0x70) >> 4)
+                operand = "${0:02X}(A{1:n},D{2:n})".format(disp, xn, (ext & 0x70) >> 4)
     elif m == 7 and xn == 0:  # abs.W
-        operand = "${0:02X}{1:02X}.w".format(data[length-2], data[length-1])
+        operand = "${0:02X}{1:02X}.w".format(data[base_index], data[base_index+1])
     elif m == 7 and xn == 1:  # abs.L
-        operand = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+        operand = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[base_index], data[base_index+1], data[base_index+2], data[base_index+3])
     elif m == 7 and xn == 2:  # d16(PC)
-        operand = "${0:02X}{1:02X}(PC)".format(data[length-2], data[length-1])
+        operand = "${0:02X}{1:02X}(PC)".format(data[base_index], data[base_index+1])
     elif m == 7 and xn == 3:  # d8(PC,Xn)
-        # brief extension word: index in high byte, signed 8-bit displacement in low byte
-        # data[length-2] is the extension high byte, data[length-1] is the displacement (signed 8-bit)
-        ext = data[length-2]
-        disp = data[length-1]
-        # sign-extend 8-bit displacement
-        if disp & 0x80:
-            sdisp = disp - 0x100
-        else:
-            sdisp = disp
-        # format displacement as signed hex (e.g. $12 or -$04)
-        if sdisp < 0:
-            disp_str = "-${:02X}".format(-sdisp)
-        else:
-            disp_str = "${:02X}".format(sdisp)
+        ext = data[base_index]
+        disp = data[base_index+1]
         if ext & 0x80:
-            operand = "{0}(PC,A{1:d})".format(disp_str, (ext & 0x70) >> 4)
+            operand = "${0:02X}(PC,A{1:d})".format(disp, (ext & 0x70) >> 4)
         else:
-            operand = "{0}(PC,D{1:d})".format(disp_str, (ext & 0x70) >> 4)
+            operand = "${0:02X}(PC,D{1:d})".format(disp, (ext & 0x70) >> 4)
     elif m == 7 and xn == 4:  # #imm
         if s == "b" or s == "w":
-            operand = "#${0:02X}{1:02X}".format(data[length-2], data[length-1])
+            operand = "#${0:02X}{1:02X}".format(data[base_index], data[base_index+1])
         elif s == "l":
-            operand = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[length-4], data[length-3], data[length-2], data[length-1])
+            operand = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[base_index], data[base_index+1], data[base_index+2], data[base_index+3])
         else:
             print("Error: Invalid S value passed to EffectiveAddress().")
             sys.exit(1)
@@ -237,7 +262,6 @@ def EffectiveAddress(s, m, xn):
         operand = ""
 
     return operand
-
 
 # Return instruction length based on S bits, type 1
 def SLength1(s):
@@ -943,23 +967,13 @@ while True:
 
         readData(length)
 
-        # Handle some special cases.
-        if sm == 7 and sxn == 1:  # Source is abs.L
-            src = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[2], data[3], data[4], data[5])
-        elif sm == 7 and sxn == 2:  # Source is d16(PC)
-            src = "${0:02X}{1:02X}(PC)".format(data[2], data[3])
-        elif sm == 7 and sxn == 4 and SLength2(s) == "b":  # Source is #imm byte
-            src = "#${0:02X}".format(data[3])
-        elif sm == 7 and sxn == 4 and SLength2(s) == "w":  # Source is #imm word
-            src = "#${0:02X}{1:02X}".format(data[2], data[3])
-        elif sm == 7 and sxn == 4 and SLength2(s) == "l":  # Source is #imm long
-            src = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[2], data[3], data[4], data[5])
-        elif sm == 5:  # Source is (d16,An)
-            src = "(${0:02X}{1:02X},a{2:n})".format(data[2], data[3], sxn)
-        else:
-            src = EffectiveAddress(SLength2(s), sm, sxn)
 
-        dest = EffectiveAddress(SLength2(s), dm, dxn)
+        # For MOVE there are two EAs in the instruction.  Compute base offsets for each EA
+        src_base = 2
+        src_len = InstructionLength(SLength2(s), sm, sxn)
+        # src starts at data[src_base], dest starts at data[src_len]
+        src = EffectiveAddress(SLength2(s), sm, sxn, base=src_base)
+        dest = EffectiveAddress(SLength2(s), dm, dxn, base=src_len)
 
         operand = src + "," + dest
         printInstruction(address, length, mnemonic, data, operand)
