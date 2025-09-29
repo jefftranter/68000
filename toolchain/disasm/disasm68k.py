@@ -250,10 +250,15 @@ def EffectiveAddress(s, m, xn, base=None):
         else:
             operand = "${0:02X}(PC,D{1:d})".format(disp, (ext & 0x70) >> 4)
     elif m == 7 and xn == 4:  # #imm
-        if s == "b" or s == "w":
+        if s == "b":
+            # use only the low byte for byte-sized immediates
+            operand = "#${0:02X}".format(data[base_index+1])
+        elif s == "w":
             operand = "#${0:02X}{1:02X}".format(data[base_index], data[base_index+1])
         elif s == "l":
-            operand = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[base_index], data[base_index+1], data[base_index+2], data[base_index+3])
+            operand = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(
+                data[base_index], data[base_index+1], data[base_index+2], data[base_index+3]
+            )
         else:
             print("Error: Invalid S value passed to EffectiveAddress().")
             sys.exit(1)
@@ -845,7 +850,7 @@ while True:
         length = InstructionLength("b", m, xn)
         readData(length)
 
-        dest = EffectiveAddress("b", m, xn)
+        dest = EffectiveAddress("w", m, xn)
 
         if mnemonic == "MOVE from SR":
             mnemonic = "MOVE"
