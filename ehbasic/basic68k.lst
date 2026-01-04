@@ -1,6 +1,6 @@
 Sections:
-00: "seg0" (0-5EC)
-01: "segc000" (C000-F514)
+00: "org0001:0" (0-5EC)
+01: "org0002:c000" (C000-F514)
 
 
 Source: "basic68k.asm"
@@ -1500,7 +1500,7 @@ Source: "basic68k.asm"
                             	  1274: LAB_14E2
 01:0000C4C2 48E700C0        	  1275: 	MOVEM.l	a0-a1,-(sp)			* save registers
 01:0000C4C6 61001800        	  1276: 	BSR		LAB_295E			* print d0 as unsigned integer
-01:0000C4CA 4CDF0300        	  1277: 	MOVEM.l	(sp)+,a0-a1			* restore registers
+01:0000C4CA 205F225F        	  1277: 	MOVEM.l	(sp)+,a0-a1			* restore registers
 01:0000C4CE 7020            	  1278: 	MOVEQ		#$20,d0			* space is the next character
                             	  1279: LAB_150C
 01:0000C4D0 6100053A        	  1280: 	BSR		LAB_PRNA			* go print the character
