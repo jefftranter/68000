@@ -357,7 +357,7 @@ length = 0             # Length of instruction in bytes
 mnemonic = ""          # Mnemonic string
 sourceAddressMode = 0  # Addressing mode for source operand
 destAddressMode = 0    # Addressing mode for destination operand
-data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # Instruction bytes
+data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # Instruction bytes
 
 # Parse command line options
 parser = argparse.ArgumentParser()
