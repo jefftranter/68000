@@ -545,7 +545,7 @@ while True:
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types - BRA, BSR, Bcc
-    elif mnemonic in ("BRA", "BSR", "BCC"):
+    elif mnemonic in ("BRA", "BSR", "Bcc"):
         if (data[1]) != 0:  # Byte offset
             length = 2
             disp = data[1]
@@ -564,7 +564,7 @@ while True:
                 dest = address - (disp ^ 0xffff) + 1
         operand = "${0:08X}".format(dest)
 
-        if mnemonic == "BCC":
+        if mnemonic == "Bcc":
             cond = data[0] & 0x0f
             mnemonic = "B" + conditions[cond]
 
@@ -608,7 +608,7 @@ while True:
             operand = "A{0:d},USP".format(data[1] & 0x07)
         printInstruction(address, length, "MOVE", data, operand)
 
-    elif mnemonic == "DBCC":
+    elif mnemonic == "DBcc":
         length = 4
         data[2] = ord(f.read(1))
         data[3] = ord(f.read(1))
@@ -678,7 +678,7 @@ while True:
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types: ASd, LSd, ROXd, ROd
-    elif mnemonic in ("ASD", "LSD", "ROXD", "ROD") and ((data[1] & 0xc0) >> 6) != 3:
+    elif mnemonic in ("ASd", "LSd", "ROXd", "ROd") and ((data[1] & 0xc0) >> 6) != 3:
         length = 2
         cr = (data[0] & 0x0e) >> 1
         dr = data[0] & 0x01
@@ -876,7 +876,7 @@ while True:
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types: ASd, LSd, ROXd, ROd
-    elif mnemonic in ("ASD", "LSD", "ROXD", "ROD") and ((data[1] & 0xc0) >> 6) == 3:
+    elif mnemonic in ("ASd", "LSd", "ROXd", "ROd") and ((data[1] & 0xc0) >> 6) == 3:
         d = data[0] & 0x01
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
@@ -1025,7 +1025,7 @@ while True:
 
         printInstruction(address, length, mnemonic, data, operand)
 
-    elif mnemonic == "SCC":
+    elif mnemonic == "Scc":
         cond = data[0] & 0x0f
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
