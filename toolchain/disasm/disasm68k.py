@@ -177,32 +177,8 @@ def registerList(aFirst, mask):
 # Also uses global variables data and length.
 def EffectiveAddress(s, m, xn, base=None):
     # Determine how many extension bytes this addressing mode uses
-    def ext_bytes_needed(s, m, xn):
-        if m in (0, 1, 2, 3, 4):
-            return 0
-        if m == 5:  # d16(An)
-            return 2
-        if m == 6:  # d8(An,Xn)
-            return 2
-        if m == 7:
-            if xn == 0:  # abs.W
-                return 2
-            if xn == 1:  # abs.L
-                return 4
-            if xn == 2:  # d16(PC)
-                return 2
-            if xn == 3:  # d8(PC,Xn)
-                return 2
-            if xn == 4:  # #imm
-                if s == "b" or s == "w":
-                    return 2
-                elif s == "l":
-                    return 4
-                else:
-                    return 2
-        return 0
-
-    esz = ext_bytes_needed(s, m, xn)
+    esz = InstructionLength(s, m, xn) - 2
+    
     # If no explicit base given, default to using the last esz bytes of the data[] array (backwards-compatible)
     if base is None:
         base_index = length - esz
