@@ -5,18 +5,21 @@ format. If you want to read S record or other formats, you will need to convert 
 Thanks to GoldenCrystal for the helpful table of 68000 opcodes at http://goldencrystal.free.fr/M68kOpcodes-v2.3.pdf
 
 ## Usage
-Install the dependencies using
-```bash
-make install
-```
 
-Now, you can disassemble a binary file, for example the sample file in this directory using
+You can directly run the program disasm68k.py using the Python
+interpreter. It uses Python 3 and requires some Python modules.
+
+You can disassemble a binary file, for example the sample file in this
+directory, using:
 ```bash
-make testprog.bin  # This will create testprog.s
+make testprog.bin
+./disasm68k.py testprog.bin
 ```
 
 ### Testing
-Test the toolchain using
+
+A regression test for the disassembler output can be run using:
 ```bash
-make test
+make compare
 ```
+This requires the VASM 68K assembler and some other external programs.
