@@ -177,32 +177,8 @@ def registerList(aFirst, mask):
 # Also uses global variables data and length.
 def EffectiveAddress(s, m, xn, base=None):
     # Determine how many extension bytes this addressing mode uses
-    def ext_bytes_needed(s, m, xn):
-        if m in (0, 1, 2, 3, 4):
-            return 0
-        if m == 5:  # d16(An)
-            return 2
-        if m == 6:  # d8(An,Xn)
-            return 2
-        if m == 7:
-            if xn == 0:  # abs.W
-                return 2
-            if xn == 1:  # abs.L
-                return 4
-            if xn == 2:  # d16(PC)
-                return 2
-            if xn == 3:  # d8(PC,Xn)
-                return 2
-            if xn == 4:  # #imm
-                if s == "b" or s == "w":
-                    return 2
-                elif s == "l":
-                    return 4
-                else:
-                    return 2
-        return 0
-
-    esz = ext_bytes_needed(s, m, xn)
+    esz = InstructionLength(s, m, xn) - 2
+    
     # If no explicit base given, default to using the last esz bytes of the data[] array (backwards-compatible)
     if base is None:
         base_index = length - esz
@@ -545,7 +521,7 @@ while True:
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types - BRA, BSR, Bcc
-    elif mnemonic in ("BRA", "BSR", "BCC"):
+    elif mnemonic in ("BRA", "BSR", "Bcc"):
         if (data[1]) != 0:  # Byte offset
             length = 2
             disp = data[1]
@@ -564,7 +540,7 @@ while True:
                 dest = address - (disp ^ 0xffff) + 1
         operand = "${0:08X}".format(dest)
 
-        if mnemonic == "BCC":
+        if mnemonic == "Bcc":
             cond = data[0] & 0x0f
             mnemonic = "B" + conditions[cond]
 
@@ -608,7 +584,7 @@ while True:
             operand = "A{0:d},USP".format(data[1] & 0x07)
         printInstruction(address, length, "MOVE", data, operand)
 
-    elif mnemonic == "DBCC":
+    elif mnemonic == "DBcc":
         length = 4
         data[2] = ord(f.read(1))
         data[3] = ord(f.read(1))
@@ -678,7 +654,7 @@ while True:
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types: ASd, LSd, ROXd, ROd
-    elif mnemonic in ("ASD", "LSD", "ROXD", "ROD") and ((data[1] & 0xc0) >> 6) != 3:
+    elif mnemonic in ("ASd", "LSd", "ROXd", "ROd") and ((data[1] & 0xc0) >> 6) != 3:
         length = 2
         cr = (data[0] & 0x0e) >> 1
         dr = data[0] & 0x01
@@ -876,7 +852,7 @@ while True:
         printInstruction(address, length, mnemonic, data, operand)
 
     # Handle instruction types: ASd, LSd, ROXd, ROd
-    elif mnemonic in ("ASD", "LSD", "ROXD", "ROD") and ((data[1] & 0xc0) >> 6) == 3:
+    elif mnemonic in ("ASd", "LSd", "ROXd", "ROd") and ((data[1] & 0xc0) >> 6) == 3:
         d = data[0] & 0x01
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
@@ -1025,7 +1001,7 @@ while True:
 
         printInstruction(address, length, mnemonic, data, operand)
 
-    elif mnemonic == "SCC":
+    elif mnemonic == "Scc":
         cond = data[0] & 0x0f
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
