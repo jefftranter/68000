@@ -178,7 +178,7 @@ def registerList(aFirst, mask):
 def EffectiveAddress(s, m, xn, base=None):
     # Determine how many extension bytes this addressing mode uses
     esz = InstructionLength(s, m, xn) - 2
-    
+
     # If no explicit base given, default to using the last esz bytes of the data[] array (backwards-compatible)
     if base is None:
         base_index = length - esz
@@ -243,6 +243,7 @@ def EffectiveAddress(s, m, xn, base=None):
         operand = ""
 
     return operand
+
 
 # Return instruction length based on S bits, type 1
 def SLength1(s):
@@ -947,7 +948,6 @@ while True:
             length += 4
 
         readData(length)
-
 
         # For MOVE there are two EAs in the instruction.  Compute base offsets for each EA
         src_base = 2
