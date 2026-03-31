@@ -80,12 +80,6 @@ conditions = ("T", "F", "HI", "LS", "CC", "CS", "NE", "EQ", "VC", "VS", "PL", "M
 
 # Print a disassembled line of output
 def printInstruction(address, length, mnemonic, data, operand):
-    global illegal
-
-    if illegal:
-        mnemonic = "ILLEGAL"
-        operand = ""
-
     if args.nolist:
         line = " {0:8s}  {1:s}".format(mnemonic, operand)
 
@@ -182,8 +176,6 @@ def registerList(aFirst, mask):
 # Parameter s should be the character "b", "w", or "l".
 # Also uses global variables data and length.
 def EffectiveAddress(s, m, xn, base=None):
-    global illegal
-
     # Determine how many extension bytes this addressing mode uses
     esz = InstructionLength(s, m, xn) - 2
 
@@ -247,9 +239,7 @@ def EffectiveAddress(s, m, xn, base=None):
             print("Error: Invalid S value passed to EffectiveAddress().")
             sys.exit(1)
     else:
-        if args.warning:
-            print("Warning: Invalid addressing mode in instruction (M={0:02X} Xn={1:02X}).".format(m, xn))
-        illegal = 1
+        print("Warning: Invalid addressing mode in instruction (M={0:02X} Xn={1:02X}).".format(m, xn))
         operand = ""
 
     return operand
@@ -257,8 +247,6 @@ def EffectiveAddress(s, m, xn, base=None):
 
 # Return instruction length based on S bits, type 1
 def SLength1(s):
-    global illegal
-
     if s == 0:
         return "b"
     elif s == 1:
@@ -266,16 +254,12 @@ def SLength1(s):
     elif s == 2:
         return "l"
     else:
-        if args.warning:
-            print("Warning: Invalid S bits in instruction ({0:02b}), assuming word size.".format(s))
-        illegal = 1
+        print("Warning: Invalid S bits in instruction ({0:02b}), assuming word size.".format(s))
         return "w"
 
 
 # Return instruction length based on S bits, type 2
 def SLength2(s):
-    global illegal
-
     if s == 1:
         return "b"
     elif s == 3:
@@ -283,32 +267,24 @@ def SLength2(s):
     elif s == 2:
         return "l"
     else:
-        if args.warning:
-            print("Warning: Invalid S bits in instruction ({0:02b}), assuming word size.".format(s))
-        illegal = 1
+        print("Warning: Invalid S bits in instruction ({0:02b}), assuming word size.".format(s))
         return "w"
 
 
 # Return instruction length based on S bit, type 3
 def SLength3(s):
-    global illegal
-
     if s == 0:
         return "w"
     elif s == 1:
         return "l"
     else:
-        if args.warning:
-            print("Warning: Invalid S bit in instruction ({0:d}), assuming word size.".format(s))
-        illegal = 1
+        print("Warning: Invalid S bit in instruction ({0:d}), assuming word size.".format(s))
         return "w"
 
 
 # Return length of standard instruction based on S, M, and Xn bits
 # Parameter s should be the character "b", "w", or "l".
 def InstructionLength(s, m, xn):
-    global illegal
-
     if m == 0:  # Dn
         return 2
     elif m == 1:  # An
@@ -342,9 +318,7 @@ def InstructionLength(s, m, xn):
             print("Invalid s value passed to InstructionLength().")
             return 6
     else:
-        if args.warning:
-            print("Warning: Invalid addressing mode in instruction (M={0:02X} Xn={1:02X}).".format(m, xn))
-        illegal = 1
+        print("Warning: Invalid addressing mode in instruction (M={0:02X} Xn={1:02X}).".format(m, xn))
         return 2
 
 
@@ -357,7 +331,6 @@ def readData(length):
 # Initialize variables
 address = 0            # Start address if instruction
 length = 0             # Length of instruction in bytes
-illegal = 0            # Set if instruction is invalid/illegal
 mnemonic = ""          # Mnemonic string
 sourceAddressMode = 0  # Addressing mode for source operand
 destAddressMode = 0    # Addressing mode for destination operand
@@ -367,7 +340,6 @@ data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  # Instruction bytes
 parser = argparse.ArgumentParser()
 parser.add_argument("filename", help="Binary file to disassemble")
 parser.add_argument("-n", "--nolist", help="Don't list instruction bytes (make output suitable for assembler)", action="store_true")
-parser.add_argument("-w", "--warning", help="Display warnings for invalid/illegal instructions", action="store_true")
 parser.add_argument("-a", "--address", help="Specify decimal starting address (defaults to 0)", default=0, type=int)
 args = parser.parse_args()
 address = args.address
@@ -505,9 +477,7 @@ while True:
         data[2] = ord(f.read(1))
         data[3] = ord(f.read(1))
         if data[2] != 0:
-            if args.warning:
-                print("Warning: MSB of operand should be zero, but is {0:02X}".format(data[2]))
-            illegal = 1
+            print("Warning: MSB of operand should be zero, but is {0:02X}".format(data[2]))
         operand = "#${0:02X},CCR".format(data[3])
         if mnemonic == "ORI to CCR":
             printInstruction(address, length, "ORI", data, operand)
@@ -531,9 +501,7 @@ while True:
         data[2] = ord(f.read(1))
         data[3] = ord(f.read(1))
         if data[2] != 0:
-            if args.warning:
-                print("Warning: MSB of operand should be zero, but is {0:02X}".format(data[2]))
-            illegal = 1
+            print("Warning: MSB of operand should be zero, but is {0:02X}".format(data[2]))
         operand = "#${0:02X},CCR".format(data[3])
         printInstruction(address, length, "ANDI", data, operand)
 
@@ -682,9 +650,7 @@ while True:
         elif m == 0x11:
             operand = "D{0:d},A{1:d}".format((data[0] & 0x0e) >> 1, data[1] & 0x07)
         else:
-            if args.warning:
-                print("Warning: Invalid EXG instruction operation field (${0:02X}).".format(m))
-            illegal = 1
+            print("Warning: Invalid EXG instruction operation field (${0:02X}).".format(m))
 
         printInstruction(address, length, mnemonic, data, operand)
 
@@ -780,12 +746,9 @@ while True:
             data[5] = ord(f.read(1))
             operand = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[2], data[3], data[4], data[5])
         else:
-            if args.warning:
-                print("Warning: Invalid addressing mode in instruction (M={0:02X} Xn={1:02X}).".format(m, xn))
-            illegal = 1
+            print("Warning: Invalid addressing mode in instruction (M={0:02X} Xn={1:02X}).".format(m, xn))
             length = 2
             operand = ""
-
         printInstruction(address, length, mnemonic, data, operand)
 
     elif mnemonic in ("ORI", "ANDI", "SUBI", "ADDI", "EORI", "CMPI"):
@@ -810,9 +773,7 @@ while True:
             mnemonic += ".l"
             src = "#${0:02X}{1:02X}{2:02X}{3:02X}".format(data[2], data[3], data[4], data[5])
         else:
-            if args.warning:
-                print("Warning: Invalid S bits in instruction ({0:02b}), assuming word size.".format(s))
-            illegal = 1
+            print("Warning: Invalid S bits in instruction ({0:02b}), assuming word size.".format(s))
             mnemonic += ".w"
             src = "#${0:02X}{1:02X}".format(data[2], data[3])
 
@@ -884,6 +845,7 @@ while True:
     elif mnemonic in ("NBCD", "PEA", "TAS"):
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
+        s = 0
 
         length = InstructionLength(SLength1(s), m, xn)
         readData(length)
@@ -896,6 +858,7 @@ while True:
         d = data[0] & 0x01
         m = (data[1] & 0x38) >> 3
         xn = data[1] & 0x07
+        s = 0
 
         # Handle direction
         if d == 1:
@@ -1117,7 +1080,6 @@ while True:
     address = (address + length) % 0x100000000
     length = 0
     opcode = 0
-    illegal = 0
     mnemonic = ""
     operand = ""
     src = ""
