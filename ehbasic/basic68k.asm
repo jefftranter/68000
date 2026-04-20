@@ -401,7 +401,7 @@ LAB_COLD
 	CMP.l		#$4000,d0			* compare size with 16k
 	BGE.s		LAB_sizok			* branch if >= 16k
 
-	MOVEQ		#5,d0				* error 5 - not enough RAM
+							* Fatal error - not enough RAM
         move.b          #228,D7                         * Go to TUTOR function
         trap            #14                             * Call TRAP14 handler
 
