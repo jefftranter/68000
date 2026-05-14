@@ -61,7 +61,7 @@
 
 # To Do:
 # - Option for relative branches to use *+$xx
-# - Move CSV file into table in code, remove unused fields
+# - Remove unused fields in opcode tables
 # - Refactor more common code into functions
 # - Add support for 68020 (and later) instructions
 
@@ -70,6 +70,8 @@ import csv
 import os
 import re
 import sys
+from tables import table_header
+from tables import table_opcodes
 
 # Data/Tables
 
@@ -325,7 +327,10 @@ def InstructionLength(s, m, xn):
 # Read length bytes of data into data() array, starting after 2 byte opcode.
 def readData(length):
     for i in range(2, length):
-        data[i] = ord(f.read(1))
+        char = f.read(1)
+        if not char:  # Checks for empty string or EOF
+            sys.exit(1)
+        data[i] = ord(char)
 
 
 # Initialize variables
@@ -349,70 +354,52 @@ if address % 2:
     print("Error: Start address must be even.")
     sys.exit(1)
 
-# Open CSV file of opcodes and read into table.
-# Look for file in same directory as this program.
-file = os.path.dirname(os.path.realpath(__file__)) + os.sep + "opcodetable.csv"
-with open(file, newline='') as csvfile:
-    table = list(csv.DictReader(csvfile))
+# Build an index for our data from the opcodes header table
+index_Mnemonic = table_header[0].index("Mnemonic")
+index_B        = table_header[0].index("B")
+index_W        = table_header[0].index("W")
+index_L        = table_header[0].index("L")
+index_Mask     = table_header[0].index("Mask")
+index_Value    = table_header[0].index("Value")
+index_DataSize = table_header[0].index("DataSize")
+index_DataType = table_header[0].index("DataType")
 
-    # Do validity check on table entries and calculate bitmask and value
-    # for each opcode so we can quicky test opcode for matches in the
-    # table.
+# Check the opcode data table for validity
+for row in table_opcodes:
 
-    for row in table:
+    # Validity check: Mnemonic is not empty.
+    if row[index_Mnemonic] == "":
+        print("Error: Empty mnemonic entry in opcode table:", row)
+        sys.exit(1)
 
-        # Validity check: Mnemonic is not empty.
-        if row["Mnemonic"] == "":
-            print("Error: Empty mnemonic entry in opcode table:", row)
-            sys.exit(1)
+    # Validity check: B W and L are empty or the corresponding letter
+    if not row[index_B] in ("B", ""):
+        print("Error: Bad B entry in opcode table:", row)
+        sys.exit(1)
+    if not row[index_W] in ("W", ""):
+        print("Error: Bad W entry in opcode table:", row)
+        sys.exit(1)
+    if not row[index_L] in ("L", ""):
+        print("Error: Bad L entry in opcode table:", row)
+        sys.exit(1)
 
-        # Validity check: B W and L are empty or the corresponding letter
-        if not row["B"] in ("B", ""):
-            print("Error: Bad B entry in opcode table:", row)
-            sys.exit(1)
-        if not row["W"] in ("W", ""):
-            print("Error: Bad W entry in opcode table:", row)
-            sys.exit(1)
-        if not row["L"] in ("L", ""):
-            print("Error: Bad L entry in opcode table:", row)
-            sys.exit(1)
+    # Validity check: Mask and Value integers are within expected range
+    if not ((row[index_Mask] >= 0x0000) and (row[index_Mask] < 0x10000)) :
+        print("Error: Bad Mask entry in opcode table:", row)
+        sys.exit(1)
+    if not ((row[index_Value] >= 0x0000) and (row[index_Value] < 0x10000)) :
+        print("Error: Bad Value entry in opcode table:", row)
+        sys.exit(1)
 
-        # Pattern  has length 16 and each character is 0, 1, or X.
-        if not re.match(r"^[01X]...............$", row["Pattern"]):
-            print("Error: Bad pattern entry in opcode table:", row)
-            sys.exit(1)
+    # Validity check: DataSize is B, W, L, A, or empty.
+    if not row[index_DataSize] in ("B", "W", "L", "A", ""):
+        print("Error: Bad DataSize entry in opcode table:", row)
+        sys.exit(1)
 
-        # Validity check: DataSize is B, W, L, A, or empty.
-        if not row["DataSize"] in ("B", "W", "L", "A", ""):
-            print("Error: Bad DataSize entry in opcode table:", row)
-            sys.exit(1)
-
-        # Validity check: DataType is is I, N, D, M or empty.
-        if not row["DataType"] in ("I", "N", "D", "M", ""):
-            print("Error: Bad DataType entry in opcode table:", row)
-            sys.exit(1)
-
-        # Convert bit pattern to 16-bit value and bitmask, e.g.
-        # pattern: 1101XXX110001XXX
-        #   value: 1101000110001000
-        #    mask: 1111000111111000
-        # Opcode matches pattern if opcode AND mask equals value
-
-        pattern = row["Pattern"]
-        value = ""
-        mask = ""
-
-        for pos in range(16):
-            if pattern[pos] in ("0", "1"):
-                value += pattern[pos]
-                mask += "1"
-            else:
-                value += "0"
-                mask += "0"
-
-        # Convert value and mask to numbers and store in table.
-        row["Value"] = int(value, 2)
-        row["Mask"] = int(mask, 2)
+    # Validity check: DataType is is I, N, D, M or empty.
+    if not row[index_DataType] in ("I", "N", "D", "M", ""):
+        print("Error: Bad DataType entry in opcode table:", row)
+        sys.exit(1)
 
 # Open input file
 filename = args.filename
@@ -440,10 +427,10 @@ while True:
     opcode = data[0]*256 + data[1]
 
     # Find matching mnemonic in table
-    for row in table:
-        value = row["Value"]
-        mask = row["Mask"]
-        mnemonic = row["Mnemonic"]
+    for row in table_opcodes:
+        value    = row[index_Value]
+        mask     = row[index_Mask]
+        mnemonic = row[index_Mnemonic]
 
         if (opcode & mask) == value:
             break
