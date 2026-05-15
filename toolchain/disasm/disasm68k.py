@@ -461,8 +461,7 @@ while True:
     # Handle instruction types: ORI to CCR
     elif mnemonic in ("ORI to CCR", "EORI to CCR"):
         length = 4
-        data[2] = ord(f.read(1))
-        data[3] = ord(f.read(1))
+        readData(length)
         if data[2] != 0:
             print("Warning: MSB of operand should be zero, but is {0:02X}".format(data[2]))
         operand = "#${0:02X},CCR".format(data[3])
@@ -474,8 +473,7 @@ while True:
     # Handle instruction types: ORI to SR
     elif mnemonic in ("ORI to SR", "EORI to SR"):
         length = 4
-        data[2] = ord(f.read(1))
-        data[3] = ord(f.read(1))
+        readData(length)
         operand = "#${0:02X}{1:02X},SR".format(data[2], data[3])
         if mnemonic == "ORI to SR":
             printInstruction(address, length, "ORI", data, operand)
@@ -485,8 +483,7 @@ while True:
     # Handle instruction types: ANDI to CCR
     elif mnemonic == "ANDI to CCR":
         length = 4
-        data[2] = ord(f.read(1))
-        data[3] = ord(f.read(1))
+        readData(length)
         if data[2] != 0:
             print("Warning: MSB of operand should be zero, but is {0:02X}".format(data[2]))
         operand = "#${0:02X},CCR".format(data[3])
@@ -495,16 +492,14 @@ while True:
     # Handle instruction types: ANDI to SR
     elif mnemonic == "ANDI to SR":
         length = 4
-        data[2] = ord(f.read(1))
-        data[3] = ord(f.read(1))
+        readData(length)
         operand = "#${0:02X}{1:02X},SR".format(data[2], data[3])
         printInstruction(address, length, "ANDI", data, operand)
 
     # Handle instruction types: STOP
     elif mnemonic == "STOP":
         length = 4
-        data[2] = ord(f.read(1))
-        data[3] = ord(f.read(1))
+        readData(length)
         operand = "#${0:02X}{1:02X}".format(data[2], data[3])
         printInstruction(address, length, mnemonic, data, operand)
 
@@ -519,8 +514,7 @@ while True:
                 dest = address - (disp ^ 0xff) + 1
         else:  # Word offset
             length = 4
-            data[2] = ord(f.read(1))
-            data[3] = ord(f.read(1))
+            readData(length)
             disp = data[2]*256 + data[3]
             if disp < 32768:  # Positive offset
                 dest = address + disp + 2
@@ -543,8 +537,7 @@ while True:
     # Handle instruction types - LINK
     elif mnemonic == "LINK":
         length = 4
-        data[2] = ord(f.read(1))
-        data[3] = ord(f.read(1))
+        readData(length)
         operand = "A{0:d},#${1:02X}{2:02X}".format(data[1] & 0x07, data[2], data[3])
         printInstruction(address, length, mnemonic, data, operand)
 
@@ -574,8 +567,7 @@ while True:
 
     elif mnemonic == "DBcc":
         length = 4
-        data[2] = ord(f.read(1))
-        data[3] = ord(f.read(1))
+        readData(length)
         disp = data[2]*256 + data[3]
         if disp < 32768:  # Positive offset
             dest = address + disp + 2
@@ -590,8 +582,7 @@ while True:
 
     elif mnemonic == "MOVEP":
         length = 4
-        data[2] = ord(f.read(1))
-        data[3] = ord(f.read(1))
+        readData(length)
         disp = data[2]*256 + data[3]
         op = (data[1] & 0xc0) >> 6
         if op == 0:
@@ -696,41 +687,33 @@ while True:
             operand = "(A{0:d})".format(xn)
         elif m == 5:  # d16(An)
             length = 4
-            data[2] = ord(f.read(1))
-            data[3] = ord(f.read(1))
+            readData(length)
             operand = "${0:02X}{1:02X}(A{2:d})".format(data[2], data[3], xn)
         elif m == 6:  # d8(An,Xn)
             length = 4
-            data[2] = ord(f.read(1))
-            data[3] = ord(f.read(1))
+            readData(length)
             if data[2] & 0x80:
                 operand = "${0:02X}(A{1:d},A{2:d})".format(data[3], xn, (data[2] & 0x70) >> 4)
             else:
                 operand = "${0:02X}(A{1:d},D{2:d})".format(data[3], xn, (data[2] & 0x70) >> 4)
         elif m == 7 and xn == 2:  # d16(pc)
             length = 4
-            data[2] = ord(f.read(1))
-            data[3] = ord(f.read(1))
+            readData(length)
             operand = "${0:02X}{1:02X}(PC)".format(data[2], data[3])
         elif m == 7 and xn == 3:  # d8(PC,Xn)
             length = 4
-            data[2] = ord(f.read(1))
-            data[3] = ord(f.read(1))
+            readData(length)
             if data[2] & 0x80:
                 operand = "${0:02X}(PC,A{1:d})".format(data[3], (data[2] & 0x70) >> 4)
             else:
                 operand = "${0:02X}(PC,D{1:d})".format(data[3], (data[2] & 0x70) >> 4)
         elif m == 7 and xn == 0:  # XXX.W
             length = 4
-            data[2] = ord(f.read(1))
-            data[3] = ord(f.read(1))
+            readData(length)
             operand = "${0:02X}{1:02X}.w".format(data[2], data[3])
         elif m == 7 and xn == 1:  # XXX.L
             length = 6
-            data[2] = ord(f.read(1))
-            data[3] = ord(f.read(1))
-            data[4] = ord(f.read(1))
-            data[5] = ord(f.read(1))
+            readData(length)
             operand = "${0:02X}{1:02X}{2:02X}{3:02X}".format(data[2], data[3], data[4], data[5])
         else:
             print("Warning: Invalid addressing mode in instruction (M={0:02X} Xn={1:02X}).".format(m, xn))
