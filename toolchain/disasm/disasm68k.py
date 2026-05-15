@@ -384,10 +384,10 @@ for row in table_opcodes:
         sys.exit(1)
 
     # Validity check: Mask and Value integers are within expected range
-    if not ((row[index_Mask] >= 0x0000) and (row[index_Mask] < 0x10000)) :
+    if not ((row[index_Mask] >= 0x0000) and (row[index_Mask] < 0x10000)):
         print("Error: Bad Mask entry in opcode table:", row)
         sys.exit(1)
-    if not ((row[index_Value] >= 0x0000) and (row[index_Value] < 0x10000)) :
+    if not ((row[index_Value] >= 0x0000) and (row[index_Value] < 0x10000)):
         print("Error: Bad Value entry in opcode table:", row)
         sys.exit(1)
 
