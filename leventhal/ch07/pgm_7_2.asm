@@ -4,7 +4,7 @@ PROGRAM  EQU     $4000
          ORG     DATA
 
 DIGIT    DS.B    1               DIGIT
-CODE     DS.B    1               BCD CODE
+LCODE    DS.B    1               BCD CODE
 SSEG     DC.B    $3F, $06, $5B, $4F, $66, $6D, $7D, $07, $7F, $6F  CONVERSION TABLE
 
          ORG     PROGRAM
@@ -18,7 +18,7 @@ PGM_7_2  MOVEA.L #SSEG,A0        POINTER TO CONVERSION TABLE
          EXT.W   D0              MAKE INDEX BYTE LOOK LIKE A WORD
          MOVE.B  0(A0,D0),D1     GET SEVEN-SEGMENT CODE FROM TABLE
 
-DONE     MOVE.B  D1,CODE         SAVR BCD CODE
+DONE     MOVE.B  D1,LCODE        SAVE BCD CODE
 
          RTS
 

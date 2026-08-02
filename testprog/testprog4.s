@@ -46,7 +46,7 @@ TUTOR   EQU     228                     Go to TUTOR; print prompt.
 ; Pass values to be added in D0 and D1. Returns result in D2.
 ; Does not change D0 or D1.
 
-add    move.l d1,-(sp)                  Save original D1 value.
+ladd   move.l d1,-(sp)                  Save original D1 value.
        add.l  d0,d1                     Add values
        move.l d1,d2                     Store result in D2.
        move.l (sp)+,d1                  Restore original D1 value.
@@ -56,7 +56,7 @@ add    move.l d1,-(sp)                  Save original D1 value.
 ; Pass values to be added in D0 and D1. Returns result in D2.
 ; Does not change D0 or D1.
 
-sub    move.l d1,-(sp)                  Save original D1 value.
+lsub   move.l d1,-(sp)                  Save original D1 value.
        sub.l  d0,d1                     Subtract values
        move.l d1,d2                     Store result in D2.
        move.l (sp)+,d1                  Restore original D1 value.
@@ -67,6 +67,6 @@ sub    move.l d1,-(sp)                  Save original D1 value.
 ; of the routine.
 
         align 1                         Align on word boundary
-NEWTBL  DC.L    ADD<<24+add             Table entry for ADD.
-        DC.L    SUB<<24+sub             Table entry for SUB
+NEWTBL  DC.L    ADD<<24+ladd            Table entry for ADD.
+        DC.L    SUB<<24+lsub            Table entry for SUB
 ENDTBL  DS.L    1                       Link to old table will be stored here.

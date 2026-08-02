@@ -275,10 +275,10 @@ drop:   bsr     stack_pop
 ; SWAP - Exchanges the top 2 numbers on the stack ( a b -- b a )
 tryswap:
         cmp.l   #"SWAP",(a0)            Is command "SWAP" ?
-        beq.s   swap
+        beq.s   lswap
         cmp.l   #"swap",(a0)            Is command "swap" ?
         bne.s   trydup
-swap:   bsr     stack_pop               Get TOS in D0.
+lswap:  bsr     stack_pop               Get TOS in D0.
         move.l  d0,d1                   Put in D1.
         bsr     stack_pop               Get TOS in D0.
         exg.l   d0,d1                   Swap values.
