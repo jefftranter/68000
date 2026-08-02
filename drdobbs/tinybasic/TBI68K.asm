@@ -186,29 +186,29 @@ TAB8	DC.B	'>',('='+$80)           Relational operators
 	DC.B	0	<- for aligning on a word boundary
 
 * Execution address tables:
-TAB1.1	DC.W	LIST			Direct commands
-	DC.W	LOAD
+TAB1.1	DC.W	LLIST			Direct commands
+	DC.W	LLOAD
 	DC.W	NEW
 	DC.W	RUN
 	DC.W	SAVE
 TAB2.1	DC.W	NEXT			Direct / statement
 	DC.W	LET
-	DC.W	IF
+	DC.W	LIF
 	DC.W	GOTO
 	DC.W	GOSUB
 	DC.W	RETURN
-	DC.W	REM
+	DC.W	LREM
 	DC.W	FOR
 	DC.W	INPUT
 	DC.W	PRINT
 	DC.W	POKE
-	DC.W	STOP
+	DC.W	LSTOP
 	DC.W	GOBYE
 	DC.W	CALL
 	DC.W	DEFLT
 TAB4.1	DC.W	PEEK			Functions
 	DC.W	RND
-	DC.W	ABS
+	DC.W	LABS
 	DC.W	SIZE
 	DC.W	XP40
 TAB5.1	DC.W	FR1			"TO" in "FOR"
@@ -295,7 +295,7 @@ EXGO	LEA	0,A3		execute the appropriate routine
 NEW	BSR.W	ENDCHK
 	MOVE.L	TXTBGN,TXTUNF	set the end pointer
 
-STOP	BSR.W	ENDCHK
+LSTOP	BSR.W	ENDCHK
 	BRA	WSTART
 
 RUN	BSR.W	ENDCHK
@@ -354,7 +354,7 @@ GOTO	BSR.W	EXPR		evaluate the following expression
 * however, no <CR LF> is generated.
 *
 
-LIST	BSR.W	TSTNUM		see if there's a line no.
+LLIST	BSR.W	TSTNUM		see if there's a line no.
 	BSR.W	ENDCHK		if not, we get a zero
 	BSR.W	FNDLN		find this or next line
 LS1	BCS	WSTART		warm start if we passed the end
@@ -570,12 +570,12 @@ NX2	BSR.W	POPA		purge this loop
 * the variable to that value.  The interpreter will also handle
 * 'LET' commands without the word 'LET'.  This is done by 'DEFLT'.
 *
-REM	BRA	IF2		skip the rest of the line
+LREM	BRA	LIF2		skip the rest of the line
 
-IF	BSR.W	EXPR		evaluate the expression
-IF1	TST.L	D0		is it zero?
+LIF	BSR.W	EXPR		evaluate the expression
+LIF1	TST.L	D0		is it zero?
 	BNE	RUNSML		if not, continue
-IF2	MOVE.L	A0,A1
+LIF2	MOVE.L	A0,A1
 	CLR.L	D1
 	BSR.W	FNDSKP		if so, skip the rest of the line
 	BCC	RUNTSL		and run the next line
@@ -644,7 +644,7 @@ LT1	BRA	FINISH		until we are finished.
 * format can be read back with a minimum of processing time by
 * the 68000.
 *
-LOAD	MOVE.L	TXTBGN,A0	set pointer to start of prog. area
+LLOAD	MOVE.L	TXTBGN,A0	set pointer to start of prog. area
 	MOVE.B	#CR,D0		For a CP/M host, tell it we're ready...
 	BSR	GOAUXO		by sending a CR to finish PIP command.
 LOD1	BSR	GOAUXI		look for start of line
@@ -1015,7 +1015,7 @@ RA1	MOVE.L	(A1)+,D0	get the slightly random number
 *
 * ===== The ABS function returns an absolute value in D0.
 *
-ABS	BSR	PARN		get the following expr.'s value
+LABS	BSR	PARN		get the following expr.'s value
 	TST.L	D0
 	BPL	ABSRT
 	NEG.L	D0		if negative, complement it
